@@ -46,16 +46,15 @@ function AttendanceManagement() {
   }, []);
 
   // 🚨 Fixed String Parsing Logic
+  // 🚨 Bulletproof String Parsing Logic (Handles Brackets AND Hyphens)
   const getCohortName = (cohortId, title) => {
     const cohort = cohorts.find((item) => String(item.id) === String(cohortId));
     if (cohort && cohort.course?.name) return cohort.course.name;
     if (cohort && cohort.name) return cohort.name;
     if (title) {
+      if (title.includes("[")) return title.replace(/\[.*?\]/g, "").trim();
       const parts = title.split(" - ");
-      if (parts.length > 2) {
-        return parts.slice(0, parts.length - 1).join(" - ").trim();
-      }
-      return parts[0].trim();
+      return parts.length > 1 ? parts.slice(0, -1).join(" - ").trim() : title.trim();
     }
     return "General Session";
   };
@@ -64,6 +63,8 @@ function AttendanceManagement() {
     const cohort = cohorts.find((item) => String(item.id) === String(cohortId));
     if (cohort && cohort.batch_name) return cohort.batch_name;
     if (title) {
+      const bracketMatch = title.match(/\[(.*?)\]/);
+      if (bracketMatch) return bracketMatch[1].trim();
       const parts = title.split(" - ");
       return parts.length > 1 ? parts[parts.length - 1].trim() : "N/A";
     }
@@ -74,12 +75,9 @@ function AttendanceManagement() {
     const cohort = cohorts.find((item) => String(item.id) === String(cohortId));
     if (cohort && cohort.course?.name) return cohort.course.name;
     if (title) {
-      // If it contains a hyphen, the group is usually the last segment (e.g., G2-26)
+      if (title.includes("[")) return title.replace(/\[.*?\]/g, "").trim();
       const parts = title.split(" - ");
-      if (parts.length > 2) {
-        return parts.slice(0, parts.length - 1).join(" - ").trim(); // Everything except the last part
-      }
-      return parts[0].trim();
+      return parts.length > 1 ? parts.slice(0, -1).join(" - ").trim() : title.trim();
     }
     return "General Session";
   };
@@ -88,8 +86,9 @@ function AttendanceManagement() {
     const cohort = cohorts.find((item) => String(item.id) === String(cohortId));
     if (cohort && cohort.batch_name) return cohort.batch_name;
     if (title) {
+      const bracketMatch = title.match(/\[(.*?)\]/);
+      if (bracketMatch) return bracketMatch[1].trim();
       const parts = title.split(" - ");
-      // Grab the last part as the group number if it matches pattern or is the tail
       return parts.length > 1 ? parts[parts.length - 1].trim() : "N/A";
     }
     return "N/A";

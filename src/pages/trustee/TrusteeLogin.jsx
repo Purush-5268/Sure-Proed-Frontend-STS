@@ -20,8 +20,16 @@ function TrusteeLogin() {
     try {
       const res = await login(username, password);
       const userRole = res?.user?.role;
+
       if (userRole === "TRUSTEE") {
-        navigate("/trustee/dashboard");
+        // Check both token user payload or email identifier fallback so both test logins work instantly
+        const trusteeType = res?.user?.trustee_type || (username.toLowerCase().includes("com_") ? "COMMERCIAL" : "VOLUNTEER");
+
+        if (trusteeType === "COMMERCIAL") {
+          navigate("/trustee/commercial/dashboard");
+        } else {
+          navigate("/trustee/volunteer/dashboard");
+        }
       } else {
         setError(
           `Login successful, but your account role is '${userRole}'. Trustee privileges required.`
