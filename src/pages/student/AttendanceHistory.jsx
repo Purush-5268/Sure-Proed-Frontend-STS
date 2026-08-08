@@ -40,7 +40,7 @@ function AttendanceHistory() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h1>Attendance History</h1>
 
         <p className={styles.subtitle}>
@@ -48,12 +48,12 @@ function AttendanceHistory() {
         </p>
 
         {loading ? (
-          <p>Loading attendance records from the database...</p>
+          <SkeletonLoader variant="table" rows={6} />
         ) : attendance.length === 0 ? (
           <p>No attendance records are available yet.</p>
         ) : (
-          <div className={styles.tableWrapper}>
-            <table className={styles.table}>
+          <div className="premium-table-container">
+            <table className="premium-table">
               <thead>
                 <tr>
                   <th>Date</th>
@@ -81,7 +81,7 @@ function AttendanceHistory() {
           </div>
         )}
 
-        <div className={styles.actions}>
+        <div className="actions" style={{display: "flex", gap: "8px"}}>
           <Link to="/student/assignments" className={styles.button}>
             Continue to Assignments →
           </Link>

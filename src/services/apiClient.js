@@ -92,6 +92,7 @@ apiClient.interceptors.response.use(
       if (!refreshToken) {
         clearAuthStorage();
         isRefreshing = false;
+        window.dispatchEvent(new CustomEvent('sure_session_expired'));
         return Promise.reject(error);
       }
 
@@ -108,6 +109,8 @@ apiClient.interceptors.response.use(
       } catch (refreshErr) {
         processQueue(refreshErr, null);
         clearAuthStorage();
+        // Dispatch event for UI to show notification gracefully
+        window.dispatchEvent(new CustomEvent('sure_session_expired'));
         return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;

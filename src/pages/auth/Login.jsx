@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaLinkedin } from "react-icons/fa";
+import { FaLinkedin, FaEye, FaEyeSlash, FaLaptopCode, FaGraduationCap, FaMicrochip, FaBrain } from "react-icons/fa";
+import { motion } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { authService } from "../../services/authService";
 import { setAccessToken, setRefreshToken, setUserInfo, parseJwt } from "../../utils/tokenStorage";
@@ -13,8 +14,11 @@ function Login() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [rememberMe, setRememberMeState] = useState(true);
 
   // Check for LinkedIn OAuth redirect tokens in URL query params
   useEffect(() => {
@@ -49,16 +53,26 @@ function Login() {
     e.preventDefault();
     setError("");
     setLoading(true);
+    setSuccess(false);
+    
     try {
-      const res = await login(username, password);
+      const res = await login(username, password, rememberMe);
       const userRole = res?.user?.role;
-      if (userRole === "ADMIN") {
-        navigate("/admin/dashboard");
-      } else if (userRole === "MENTOR") {
-        navigate("/mentor/dashboard");
-      } else {
-        navigate("/student/profile");
-      }
+      setSuccess(true);
+      
+      // Delay navigation slightly for success animation
+      setTimeout(() => {
+        if (userRole === "ADMIN") {
+          navigate("/admin/dashboard");
+        } else if (userRole === "MENTOR") {
+          navigate("/mentor/dashboard");
+        } else if (userRole === "TRUSTEE") {
+          navigate("/trustee/dashboard");
+        } else {
+          navigate("/student/profile");
+        }
+      }, 800);
+      
     } catch (err) {
       console.error("Login error:", err);
       const resData = err.response?.data;
@@ -81,7 +95,6 @@ function Login() {
         msg = err.message;
       }
       setError(msg);
-    } finally {
       setLoading(false);
     }
   };
@@ -105,87 +118,141 @@ function Login() {
   return (
     <div className={styles.container}>
       <div className={styles.loginWrapper}>
-        {/* Left Side */}
         <div className={styles.leftSide}>
-          <img src={heroImage} alt="Student Login" className={styles.image} />
+          <motion.div 
+            className={styles.heroContent}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2>Welcome back to Sure ProEd</h2>
+            <p>Access your dashboard to manage your learning journey, internships, and schedules.</p>
+            <div style={{ position: "relative", width: "100%", maxWidth: "420px", margin: "0 auto" }}>
+              <motion.div animate={{ y: [0, -10, 0], x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }} style={{ position: "absolute", top: "10%", left: "-10%", color: "var(--accent-color)", fontSize: "2.5rem", opacity: 0.7, zIndex: 0 }}>
+                <FaGraduationCap />
+              </motion.div>
+              <motion.div animate={{ y: [0, 15, 0], x: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }} style={{ position: "absolute", top: "20%", right: "-5%", color: "#3b82f6", fontSize: "2rem", opacity: 0.6, zIndex: 0 }}>
+                <FaMicrochip />
+              </motion.div>
+              <motion.div animate={{ y: [0, -20, 0] }} transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 2 }} style={{ position: "absolute", bottom: "15%", left: "-5%", color: "#10b981", fontSize: "2.2rem", opacity: 0.7, zIndex: 0 }}>
+                <FaLaptopCode />
+              </motion.div>
+              <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 0.5 }} style={{ position: "absolute", bottom: "25%", right: "-10%", color: "#8b5cf6", fontSize: "2.5rem", opacity: 0.6, zIndex: 0 }}>
+                <FaBrain />
+              </motion.div>
+              <motion.img 
+                src={heroImage} 
+                alt="Platform Login" 
+                className={styles.image} 
+                animate={{ y: [0, -15, 0] }}
+                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                whileHover={{ scale: 1.05, rotate: 2 }}
+                style={{ position: "relative", zIndex: 1 }}
+              />
+            </div>
+          </motion.div>
         </div>
 
-        {/* Right Side */}
         <div className={styles.card}>
-          <h1>Student Login</h1>
+          <div className={styles.cardHeader}>
+            <h1>Sign In</h1>
+            <p className={styles.subtitle}>Enter your credentials to access your account.</p>
+          </div>
 
-          <p className={styles.subtitle}>
-            Access is available for registered students, mentors, and administrators.
-          </p>
+          <div className={`${styles.errorToast} ${error ? styles.showError : ''}`}>
+            {error}
+          </div>
 
-          {error && <div style={{ color: "#dc2626", marginBottom: "1rem", fontSize: "14px", backgroundColor: "#fef2f2", padding: "0.5rem", borderRadius: "4px" }}>❌ {error}</div>}
-
-          {/* Email & Password Form */}
-          <form onSubmit={handleSubmit}>
-            <div className={styles.formGroup}>
-              <label>Email / Username</label>
-              <input
-                type="text"
-                className={styles.input}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter Email or Username (e.g. student@sureproed.com)"
-                required
-              />
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <div className={styles.inputGroup}>
+              <div className={styles.floatingInput}>
+                <input
+                  type="text"
+                  id="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder=" "
+                  required
+                  disabled={loading || success}
+                />
+                <label htmlFor="username">Email address</label>
+              </div>
             </div>
 
-            <div className={styles.formGroup}>
-              <label>Password</label>
-              <input
-                type="password"
-                className={styles.input}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter Password"
-                required
-              />
+            <div className={styles.inputGroup}>
+              <div className={styles.floatingInput}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder=" "
+                  required
+                  disabled={loading || success}
+                />
+                <label htmlFor="password">Password</label>
+                <button 
+                  type="button" 
+                  className={styles.passwordToggle} 
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex="-1"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
             </div>
 
-            <div className={styles.forgotPassword}>
-              <Link to="/forgot-password">Forgot Password?</Link>
+            <div className={styles.rememberRow}>
+              <label className={styles.checkboxLabel}>
+                <input 
+                  type="checkbox" 
+                  checked={rememberMe} 
+                  onChange={(e) => setRememberMeState(e.target.checked)} 
+                  disabled={loading || success}
+                />
+                Remember Me
+              </label>
+              <div className={styles.forgotPassword}>
+                <Link to="/forgot-password" tabIndex="-1">Forgot password?</Link>
+              </div>
             </div>
 
             <button
               type="submit"
-              className={styles.loginBtn}
-              disabled={loading}
+              className={`${styles.loginBtn} ${loading ? styles.loadingBtn : ''} ${success ? styles.successBtn : ''}`}
+              disabled={loading || success}
             >
-              {loading ? "Logging in..." : "Login to Account"}
+              <span className={styles.btnText}>
+                {success ? "Success!" : loading ? "Authenticating" : "Sign In"}
+              </span>
+              {loading && !success && (
+                <div className={styles.loadingDots}>
+                  <span></span><span></span><span></span>
+                </div>
+              )}
             </button>
           </form>
 
           <div className={styles.divider}>
-            <span>OR</span>
+            <span>Or continue with</span>
           </div>
 
-          <button className={styles.linkedinBtn} onClick={handleLinkedInAuth} type="button">
-            <FaLinkedin />
-            <span>Sign in with LinkedIn</span>
+          <button className={styles.linkedinBtn} onClick={handleLinkedInAuth} type="button" disabled={loading || success}>
+            <FaLinkedin className={styles.linkedinIcon} />
+            <span>LinkedIn</span>
           </button>
 
-          <div className={styles.infoBox}>
-            <h3>Portal Access</h3>
-            <ul>
-              <li>Students: Use Student Login or Sign in with LinkedIn</li>
-              <li>Mentors: Use Email Login or <Link to="/mentor/login">Mentor Portal</Link></li>
-              <li>Admins: Use Email Login or <Link to="/admin/login">Admin Portal</Link></li>
-            </ul>
+          <div className={styles.footerInfo}>
+            <p>
+              Don't have an account?{" "}
+              <Link to="/signup" className={styles.signupLink}>
+                Register here
+              </Link>
+            </p>
+            <Link to="/" className={styles.homeLink}>
+              Return to Home
+            </Link>
           </div>
-
-          <p className={styles.note}>New student?</p>
-
-          <Link to="/signup" className={styles.signupLink}>
-            Create Student Account
-          </Link>
-
-          <Link to="/" className={styles.homeLink}>
-            ← Back to Home
-          </Link>
         </div>
       </div>
     </div>

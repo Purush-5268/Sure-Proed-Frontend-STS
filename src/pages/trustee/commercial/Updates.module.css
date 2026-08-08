@@ -2,15 +2,15 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  max-width: 900px;
-  margin: 0 auto;
+  max-width: 100%;
+  
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
+  background: var(--bg-surface);
   padding: 2rem;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
@@ -60,13 +60,13 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: white;
+  background: var(--bg-surface);
   border: 3px solid #3b82f6;
   box-shadow: 0 0 0 4px #eff6ff;
 }
 
 .timelineContent {
-  background: white;
+  background: var(--bg-surface);
   padding: 2rem;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
@@ -167,9 +167,9 @@
 }
 
 .modal {
-  background: white;
+  background: var(--bg-surface);
   width: 100%;
-  max-width: 600px;
+  max-width: 100%;
   border-radius: var(--radius-xl);
   padding: 2.5rem;
   box-shadow: var(--shadow-lg);

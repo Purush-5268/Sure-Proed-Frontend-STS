@@ -61,12 +61,11 @@ function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/signup" onClick={closeMenu} className={styles.signupBtn}>
-                Sign Up
-              </Link>
-
               <Link to="/login" onClick={closeMenu} className={styles.loginBtn}>
-                Student Login
+                Login
+              </Link>
+              <Link to="/signup" onClick={closeMenu} className={styles.signupBtn}>
+                Register
               </Link>
             </>
           )}

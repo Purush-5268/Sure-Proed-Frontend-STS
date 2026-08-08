@@ -4,7 +4,7 @@ import styles from "./AssignmentFeedback.module.css";
 function AssignmentFeedback() {
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
 
         <h1>Assignment Feedback</h1>
 

@@ -8,8 +8,10 @@ import {
   getUserInfo,
   setUserInfo,
   setAccessToken,
+  setRefreshToken,
   clearAuthStorage,
   parseJwt,
+  setRememberMe
 } from "../utils/tokenStorage";
 
 const AuthContext = createContext(null);
@@ -57,21 +59,15 @@ export function AuthProvider({ children }) {
     }
   };
 
-  /**
-   * Login flow (Backend-First):
-   *  1. Always attempt real backend JWT authentication first
-   *  2. On success → store real JWT tokens & user info
-   *  3. On network failure → fall back to demo accounts for offline testing
-   *  4. On auth failure (401/400) → throw error (wrong credentials)
-   */
-  const login = async (identifier, password) => {
+  const login = async (identifier, password, rememberMe = true) => {
     setLoading(true);
     const cleanId = (identifier || "").trim().toLowerCase();
+    
+    // Save remember me preference before saving any tokens
+    setRememberMe(rememberMe);
 
-    // ── 1. Attempt Live Backend JWT Login ──────────────────────
     try {
       const data = await authService.login(cleanId, password);
-      // data = { access, refresh, user } — tokens stored by authService.login()
 
       let userObj;
       if (data?.user) {
@@ -86,6 +82,8 @@ export function AuthProvider({ children }) {
           phoneNumber: data.user.phone_number || "",
           role: data.user.role || "STUDENT",
           is_active: data.user.is_active,
+          trusteeType: data.user.trustee_type || null,
+          permissions: data.user.permissions || [],
         };
       } else {
         const profile = await fetchUserProfile();
@@ -101,6 +99,8 @@ export function AuthProvider({ children }) {
             phoneNumber: profile.phone_number || "",
             role: profile.role || "STUDENT",
             is_active: profile.is_active,
+            trusteeType: profile.trustee_type || null,
+            permissions: profile.permissions || [],
           };
         } else {
           const decoded = parseJwt(data.access) || {};
@@ -114,56 +114,14 @@ export function AuthProvider({ children }) {
 
       setUser(userObj);
       setUserInfo(userObj);
+      setAccessToken(data.access);
+      setRefreshToken(data.refresh);
       setLoading(false);
       return { ...data, user: userObj };
     } catch (err) {
-      if (err.response) {
-        setLoading(false);
-        throw err;
-      }
-
-      console.warn("Backend unreachable, falling back to demo accounts:", err.message);
-    }
-
-    // ── 2. Demo / Offline Fallback ──────────────────────────────
-    const demoAccounts = {
-      "admin@sureproed.com": { role: "ADMIN", first_name: "Admin", last_name: "User" },
-      "admin": { role: "ADMIN", first_name: "Admin", last_name: "User", password: "admin123" },
-      "mentor@sureproed.com": { role: "MENTOR", first_name: "Demo", last_name: "Mentor" },
-      "mentor": { role: "MENTOR", first_name: "Demo", last_name: "Mentor", password: "mentor123" },
-      "student@sureproed.com": { role: "STUDENT", first_name: "Demo", last_name: "Student" },
-      "student": { role: "STUDENT", first_name: "Demo", last_name: "Student", password: "student123" },
-      "trustee-vol@sureproed.com": { role: "TRUSTEE", trusteeType: "VOLUNTEER", first_name: "Volunteer", last_name: "Trustee" },
-      "trustee-vol": { role: "TRUSTEE", trusteeType: "VOLUNTEER", first_name: "Volunteer", last_name: "Trustee", password: "trustee123" },
-      "trustee-com@sureproed.com": { role: "TRUSTEE", trusteeType: "COMMERCIAL", first_name: "Commercial", last_name: "Trustee" },
-      "trustee-com": { role: "TRUSTEE", trusteeType: "COMMERCIAL", first_name: "Commercial", last_name: "Trustee", password: "trustee123" },
-    };
-
-    const demo = demoAccounts[cleanId];
-    if (demo) {
-      const requiredPw = demo.password || (cleanId.includes("admin") ? "admin123" : cleanId.includes("mentor") ? "mentor123" : cleanId.includes("trustee") ? "trustee123" : "student123");
-      if (password !== requiredPw) {
-        setLoading(false);
-        throw new Error("Invalid credentials (demo mode)");
-      }
-      const demoUser = {
-        email: cleanId.includes("@") ? cleanId : `${cleanId}@sureproed.com`,
-        first_name: demo.first_name,
-        last_name: demo.last_name,
-        firstName: demo.first_name,
-        lastName: demo.last_name,
-        role: demo.role,
-        trusteeType: demo.trusteeType,
-      };
-      setUser(demoUser);
-      setUserInfo(demoUser);
-      setAccessToken("demo_session_token");
       setLoading(false);
-      return { access: "demo_session_token", user: demoUser };
+      throw err;
     }
-
-    setLoading(false);
-    throw new Error("Backend is not running and no demo account matches this login. Please start the Django server.");
   };
 
   const logout = () => {

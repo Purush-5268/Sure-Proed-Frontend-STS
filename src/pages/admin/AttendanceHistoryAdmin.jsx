@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./AttendanceHistoryAdmin.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function AttendanceHistoryAdmin() {
   const [history, setHistory] = useState([]);
@@ -71,12 +72,12 @@ function AttendanceHistoryAdmin() {
       </div>
 
       {loading ? (
-        <p>Loading attendance history from the database...</p>
+        <SkeletonLoader variant="table" rows={5} />
       ) : history.length === 0 ? (
         <p>No attendance history is available yet.</p>
       ) : (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
+        <div className="premium-table-container">
+          <table className="premium-table">
             <thead>
               <tr>
                 <th>Date</th>

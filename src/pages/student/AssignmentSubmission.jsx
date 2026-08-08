@@ -14,7 +14,7 @@ function AssignmentSubmission() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
 
         <h1>Assignment Submission</h1>
 

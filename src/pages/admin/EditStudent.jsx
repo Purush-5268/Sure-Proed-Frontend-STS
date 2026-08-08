@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./EditStudent.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function EditStudent() {
   const navigate = useNavigate();
@@ -87,13 +88,13 @@ function EditStudent() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h1>Edit Student</h1>
 
         {error ? <p style={{ color: "#b91c1c" }}>{error}</p> : null}
 
         {loadingData ? (
-          <p>Loading student details...</p>
+          <SkeletonLoader variant="form" rows={5} />
         ) : (
           <form className={styles.form} onSubmit={handleSubmit}>
             <input type="text" name="first_name" value={form.first_name} onChange={handleChange} placeholder="First Name" />

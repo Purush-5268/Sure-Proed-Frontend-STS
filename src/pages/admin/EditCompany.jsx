@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./EditCompany.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function EditCompany() {
   const navigate = useNavigate();
@@ -101,14 +102,14 @@ function EditCompany() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h1>Edit Company</h1>
 
         {error ? <p style={{ color: "#b91c1c" }}>{error}</p> : null}
         {success ? <p style={{ color: "#166534" }}>{success}</p> : null}
 
         {loadingData ? (
-          <p>Loading company details...</p>
+          <SkeletonLoader variant="form" rows={5} />
         ) : (
           <form onSubmit={handleSubmit}>
             <div className={styles.grid}>

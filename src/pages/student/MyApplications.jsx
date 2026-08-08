@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./MyApplications.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function MyApplications() {
   const [applications, setApplications] = useState([]);
@@ -48,12 +49,12 @@ function MyApplications() {
         </div>
 
         {loading ? (
-          <p>Loading applications from the database...</p>
+          <SkeletonLoader variant="table" rows={4} />
         ) : applications.length === 0 ? (
           <p>No applications have been submitted yet.</p>
         ) : (
           applications.map((app) => (
-            <div key={app.id} className={styles.card}>
+            <div key={app.id} className="premium-card">
               <div className={styles.row}>
                 <strong>Application Number</strong>
                 <span>{app.application_number || app.id}</span>

@@ -152,7 +152,7 @@ function VolunteerAttendance() {
         )}
 
         {loading ? (
-          <div className={styles.loadingState}>Loading attendance data...</div>
+          <SkeletonLoader variant="table" rows={5} />
         ) : (
           <>
             {!selectedDomain && (

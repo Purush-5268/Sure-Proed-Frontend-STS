@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import styles from "./AssignmentAdminDetails.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function AssignmentAdminDetails() {
   const assignment = {
@@ -16,7 +17,7 @@ function AssignmentAdminDetails() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
 
         <div className={styles.header}>
           <h1>Assignment Details</h1>
@@ -61,7 +62,7 @@ function AssignmentAdminDetails() {
           <div>
             <label>Status</label>
 
-            <span className={styles.active}>
+            <span className="premium-badge premium-badge-active">
               {assignment.status}
             </span>
           </div>

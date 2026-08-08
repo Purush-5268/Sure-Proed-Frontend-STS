@@ -1,98 +1,58 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { studentService } from "../../services/studentService";
-import apiClient from "../../services/apiClient"; // <-- Added for dynamic fetching
-import { API_ENDPOINTS } from "../../constants/apiEndpoints"; // <-- Added for dynamic fetching
+import apiClient from "../../services/apiClient";
+import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import PageHeader from "../../components/ui/PageHeader";
+import GlassCard from "../../components/common/GlassCard";
+import StatusBadge from "../../components/common/StatusBadge";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./Profile.module.css";
+import { FiUser, FiBook, FiShield, FiUploadCloud, FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi";
 
 function Profile() {
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
-
+  const [activeTab, setActiveTab] = useState("personal");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  
+  const [profileStatus, setProfileStatus] = useState("AVAILABLE");
   const [isExistingStudent, setIsExistingStudent] = useState(false);
-  const [isVerificationLocked, setIsVerificationLocked] = useState(false);
   const [availableDomains, setAvailableDomains] = useState([]);
-
+  
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
-    collegeName: "",
-    degree: "",
-    branch: "",
-    graduationYear: "",
-    address: "",
-    city: "",
-    state: "",
-    technicalSkills: "",
-    // Existing Student Fields
-    domain: "",
-    courseBatch: "", 
-    offerLetter: null,
+    firstName: "", lastName: "", email: "", phoneNumber: "",
+    collegeName: "", degree: "", branch: "", graduationYear: "",
+    address: "", city: "", state: "", technicalSkills: "",
+    domain: "", courseBatch: "", offerLetter: null,
   });
-
-  const calculateProgress = () => {
-    const baseFields = ["firstName", "lastName", "email", "phoneNumber", "collegeName", "degree", "branch", "graduationYear", "address", "city", "state", "technicalSkills"];
-    let filled = baseFields.filter(f => formData[f] && String(formData[f]).trim() !== "").length;
-    let total = baseFields.length;
-
-    if (isExistingStudent) {
-      total += 3; // Accounts for domain, batch, and offer letter
-      if (formData.domain) filled++;
-      if (formData.courseBatch) filled++;
-      if (formData.offerLetter) filled++;
-    }
-    return Math.round((filled / total) * 100);
-  };
 
   useEffect(() => {
     let isMounted = true;
     async function loadData() {
       try {
-        // 1. Fetch ALL courses by looping through Django's pagination pages
-        let allCourses = [];
-        let currentPage = 1;
-        let hasNextPage = true;
-
-        while (hasNextPage) {
-          const courseRes = await apiClient.get(API_ENDPOINTS.COURSES?.BASE || "/courses/", {
-            params: { page: currentPage }
-          });
-          
-          // Grab the courses from the current page
-          const results = courseRes.data?.results || courseRes.data || [];
-          allCourses = [...allCourses, ...results];
-          
-          // Check if Django says there is another page
-          if (courseRes.data?.next) {
-            currentPage++; // Flip to the next page and loop again
-          } else {
-            hasNextPage = false; // Stop looping when we hit the end
-          }
-        }
-
-        // Extract unique domains from ALL fetched courses
-        const uniqueDomains = [...new Set(allCourses.map(c => c.domain || c.streamName || c.name).filter(Boolean))];
+        const courseRes = await apiClient.get(API_ENDPOINTS.COURSES?.BASE || "/courses/");
+        const results = courseRes.data?.results || courseRes.data || [];
+        const uniqueDomains = [...new Set(results.map(c => c.domain || c.streamName || c.name).filter(Boolean))];
         if (isMounted) setAvailableDomains(uniqueDomains.sort());
-
       } catch (err) {
-        console.error("Failed to load domains from backend:", err);
+        console.warn("Could not fetch domains");
       }
 
-      // 2. Load Student Profile
       if (!user?.email) return;
       try {
         const profile = await studentService.getProfile(user.email);
         if (profile && isMounted) {
           setIsExistingStudent(profile.isExistingStudent === "yes" || profile.isExistingStudent === true);
-          if (profile.domain || profile.courseBatch) setIsVerificationLocked(true);
+          setProfileStatus(profile.status || "AVAILABLE");
           setFormData({
-            firstName: profile?.firstName || user?.firstName || user?.first_name || "",
-            lastName: profile?.lastName || user?.lastName || user?.last_name || "",
+            firstName: profile?.firstName || user?.first_name || "",
+            lastName: profile?.lastName || user?.last_name || "",
             email: profile?.email || user?.email || "",
-            phoneNumber: profile?.phoneNumber || user?.phoneNumber || user?.phone_number || "",
+            phoneNumber: profile?.phoneNumber || user?.phone_number || "",
             collegeName: profile?.collegeName || "",
             degree: profile?.degree || "",
             branch: profile?.branch || "",
@@ -103,11 +63,13 @@ function Profile() {
             technicalSkills: profile?.technicalSkills || "",
             domain: profile?.domain || "",
             courseBatch: profile?.courseBatch || "",
-            offerLetter: profile?.offerLetter || null,
+            offerLetter: null,
           });
         }
       } catch (err) {
-        console.error("Failed to load student profile:", err);
+        console.error(err);
+      } finally {
+        if (isMounted) setLoading(false);
       }
     }
     loadData();
@@ -116,320 +78,254 @@ function Profile() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setFormData((prev) => ({
-      ...prev,
-      offerLetter: file,
-    }));
+    setFormData(prev => ({ ...prev, offerLetter: e.target.files[0] }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const userEmail = formData.email || user?.email;
-    if (!userEmail) return;
-
+    if (!user?.email) return;
+    setSaving(true);
+    
     try {
-      const payload = {
-        ...formData,
-        isExistingStudent: isExistingStudent ? "yes" : "no", // Convert boolean to string for the service
-      };
-
-      // 🚨 CRITICAL FIX: If submitting verification for the first time, force account into PENDING lock!
-      if (isExistingStudent && !isVerificationLocked) {
-        payload.status = "NOT_AVAILABLE";
+      const payload = { ...formData, isExistingStudent: isExistingStudent ? "yes" : "no" };
+      if (isExistingStudent && profileStatus === "AVAILABLE") {
+         payload.status = "NOT_AVAILABLE";
       }
 
-      const savedProfile = await studentService.saveProfile(userEmail, payload);
+      const savedProfile = await studentService.saveProfile(user?.email, payload);
       const isComplete = studentService.isProfileComplete(savedProfile);
-
+      
       if (updateUser) {
         updateUser({
-          firstName: savedProfile.firstName,
-          lastName: savedProfile.lastName,
           first_name: savedProfile.firstName,
           last_name: savedProfile.lastName,
-          phoneNumber: savedProfile.phoneNumber,
           phone_number: savedProfile.phoneNumber,
         });
       }
 
-      if (isExistingStudent) {
-        alert("✅ Verification data submitted! Please wait for Admin approval.");
-        // Do NOT navigate away. The calculateProgress() will hit 100% and lock the screen automatically.
+      if (formData.offerLetter) {
+        setProfileStatus("NOT_AVAILABLE");
       } else {
-        alert("Profile saved successfully.");
-        navigate("/student/apply-course", {
-          state: { profileCompleted: isComplete },
-        });
+        setProfileStatus(savedProfile.status || "AVAILABLE");
+      }
+
+      alert("Profile updated successfully");
+      if (!isExistingStudent) {
+        navigate("/student/apply-course", { state: { profileCompleted: isComplete } });
       }
     } catch (err) {
-      console.error("Error saving profile:", err);
-      alert("Profile save failed. Please try again.");
+      alert("Save failed");
+    } finally {
+      setSaving(false);
     }
   };
 
-  return (
-    <div className={styles.profilePage}>
-      <div className={styles.profileCard}>
-        <div className={styles.headerRow}>
-          <div>
-            <h1>Student Profile</h1>
-            <p>
-              {isExistingStudent && calculateProgress() === 100 
-                ? "Your profile is locked while Admin verifies your enrollment." 
-                : "Complete your profile before accessing courses or verification."}
-            </p>
-          </div>
-          <div className={styles.progressContainer}>
-            <div className={styles.progressRing} style={{ background: `conic-gradient(#2563eb ${calculateProgress()}%, #e5e7eb ${calculateProgress()}%)` }}>
-              <div className={styles.progressInner}>
-                {calculateProgress()}%
-              </div>
-            </div>
-            <span className={styles.progressLabel}>Completed</span>
-          </div>
-        </div>
-
-        {calculateProgress() === 100 && isExistingStudent && (
-          <div className={styles.lockedBanner}>
-            <span className={styles.lockedIcon}>🔒</span>
-            <div>
-              <div className={styles.lockedTitle}>Verification Submitted</div>
-              <div className={styles.lockedSub}>Please wait for Admin approval. You cannot edit your profile at this time.</div>
-            </div>
-          </div>
-        )}
-
-        {/* Existing Student Toggle Banner */}
-        {isVerificationLocked ? (
-          <div className={styles.lockedBanner}>
-             <span className={styles.lockedIcon}>✅</span>
-             <div>
-               <div className={styles.lockedTitle}>Verification Under Review</div>
-               <div className={styles.lockedSub}>Admin is verifying your enrollment. You can safely complete the rest of your profile below.</div>
-             </div>
-          </div>
-        ) : (
-          <div className={styles.toggleBanner}>
-            <label className={styles.toggleLabel}>
-              <input
-                type="checkbox"
-                className={styles.toggleCheckbox}
-                checked={isExistingStudent}
-                onChange={(e) => setIsExistingStudent(e.target.checked)}
-              />
-              Are you already an enrolled Sure ProEd Student?
-            </label>
-          </div>
-        )}
-
-        <form className={styles.form} onSubmit={handleSubmit}>
-          {/* Personal Information */}
-          <div className={styles.section}>
-            <h2>Personal Information</h2>
-            <div className={styles.row}>
-              <div className={styles.inputGroup}>
-                <label>First Name</label>
-                <input
-                  type="text"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  placeholder="Enter First Name"
-                  required
-                />
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label>Last Name</label>
-                <input
-                  type="text"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  placeholder="Enter Last Name"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className={styles.row}>
-              <div className={styles.inputGroup}>
-                <label>Email Address</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter Email Address"
-                  required
-                />
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label>Phone Number</label>
-                <input
-                  type="text"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  placeholder="Enter Phone Number"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Conditional Existing Student Verification Section */}
-          {isExistingStudent && (
-            <div className={styles.section} style={{ borderLeft: "4px solid #2563eb", paddingLeft: "12px", opacity: isVerificationLocked ? 0.7 : 1 }}>
-              <h2>Sure ProEd Verification Details</h2>
-              
-              <div className={styles.row}>
-                <div className={styles.inputGroup}>
-                  <label>Enrolled Domain</label>
-                  <select name="domain" value={formData.domain} onChange={handleChange} required disabled={isVerificationLocked}>
-                    <option value="">Select Domain</option>
-                    {availableDomains.map((domainName, index) => (
-                      <option key={index} value={domainName}>
-                        {domainName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className={styles.inputGroup}>
-                  <label>Group Number</label>
-                  <input
-                    type="text"
-                    name="courseBatch"
-                    value={formData.courseBatch}
-                    onChange={handleChange}
-                    placeholder="e.g. G2-26"
-                    required
-                    disabled={isVerificationLocked}
-                    style={{ textTransform: "uppercase" }}
-                  />
-                </div>
-              </div>
-
-              <div className={styles.row}>
-                <div className={styles.inputGroup}>
-                  <label>Upload Offer Letter (PDF/Image)</label>
-                  <input
-                    type="file"
-                    accept=".pdf,.png,.jpg,.jpeg"
-                    onChange={handleFileChange}
-                    required={!formData.offerLetter}
-                    disabled={isVerificationLocked}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Academic Information */}
-          <div className={styles.section}>
-            <h2>Academic Information</h2>
-
-            <div className={styles.inputGroup}>
-              <label>College Name</label>
-              <input
-                type="text"
-                name="collegeName"
-                value={formData.collegeName}
-                onChange={handleChange}
-                placeholder="Enter College Name"
-              />
-            </div>
-
-            <div className={styles.row}>
-              <div className={styles.inputGroup}>
-                <label>Degree</label>
-                <select name="degree" value={formData.degree} onChange={handleChange}>
-                  <option value="">Select Degree</option>
-                  <option value="B.Tech">B.Tech</option>
-                  <option value="B.E">B.E</option>
-                  <option value="B.Sc">B.Sc</option>
-                  <option value="BCA">BCA</option>
-                  <option value="MCA">MCA</option>
-                  <option value="M.Tech">M.Tech</option>
-                </select>
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label>Branch</label>
-                <input
-                  type="text"
-                  name="branch"
-                  value={formData.branch}
-                  onChange={handleChange}
-                  placeholder="CSE / ECE / IT..."
-                />
-              </div>
-            </div>
-
-            <div className={styles.inputGroup}>
-              <label>Graduation Year</label>
-              <input
-                type="number"
-                name="graduationYear"
-                value={formData.graduationYear}
-                onChange={handleChange}
-                placeholder="2027"
-              />
-            </div>
-          </div>
-
-          {/* Address & Skills */}
-          <div className={styles.section}>
-            <h2>Address & Skills</h2>
-            <div className={styles.inputGroup}>
-              <label>Address</label>
-              <textarea
-                name="address"
-                rows="3"
-                value={formData.address}
-                onChange={handleChange}
-                placeholder="Enter Complete Address"
-              />
-            </div>
-
-            <div className={styles.row}>
-              <div className={styles.inputGroup}>
-                <label>City</label>
-                <input type="text" name="city" value={formData.city} onChange={handleChange} placeholder="City" />
-              </div>
-              <div className={styles.inputGroup}>
-                <label>State</label>
-                <input type="text" name="state" value={formData.state} onChange={handleChange} placeholder="State" />
-              </div>
-            </div>
-
-            <div className={styles.inputGroup} style={{ marginTop: "12px" }}>
-              <label>Technical Skills</label>
-              <textarea
-                name="technicalSkills"
-                rows="2"
-                value={formData.technicalSkills}
-                onChange={handleChange}
-                placeholder="Java, React, Verilog, C++..."
-              />
-            </div>
-          </div>
-
-          <button type="submit" className={styles.saveButton}>
-            {isVerificationLocked ? "Save Profile Updates" : (isExistingStudent ? "Submit for Verification" : "Save & Continue")}
-          </button>
-        </form>
+  if (loading) {
+    return (
+      <div className="premium-page-container">
+        <PageHeader title="Profile Settings" />
+        <SkeletonLoader variant="detail" />
       </div>
+    );
+  }
+
+  const tabs = [
+    { id: "personal", label: "Personal Info", icon: <FiUser /> },
+    { id: "academic", label: "Academic Details", icon: <FiBook /> },
+    { id: "verification", label: "Verification", icon: <FiShield /> },
+  ];
+
+  return (
+    <div className="premium-page-container">
+      <PageHeader 
+        title="Profile Settings" 
+        description="Manage your account details and verification status."
+      />
+      
+      <div className={styles.tabContainer}>
+        <div className={styles.tabList}>
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`${styles.tabBtn} ${activeTab === tab.id ? styles.activeTab : ""}`}
+            >
+              {tab.icon} {tab.label}
+              {activeTab === tab.id && (
+                <motion.div layoutId="activeTabIndicator" className={styles.tabIndicator} />
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <GlassCard>
+        <form onSubmit={handleSubmit} className="premium-form">
+          <AnimatePresence mode="wait">
+            {activeTab === "personal" && (
+              <motion.div key="personal" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
+                <div className="premium-section">
+                  <h3 style={{marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px'}}><FiUser /> Personal Information</h3>
+                  <div className="premium-grid-2">
+                    <div className="premium-form-group">
+                      <label className="premium-label">First Name</label>
+                      <input className="premium-input" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                    </div>
+                    <div className="premium-form-group">
+                      <label className="premium-label">Last Name</label>
+                      <input className="premium-input" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                    </div>
+                    <div className="premium-form-group">
+                      <label className="premium-label">Email</label>
+                      <input className="premium-input" name="email" value={formData.email} onChange={handleChange} required disabled />
+                    </div>
+                    <div className="premium-form-group">
+                      <label className="premium-label">Phone</label>
+                      <input className="premium-input" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
+                    </div>
+                  </div>
+                  
+                  <div className="premium-form-group" style={{marginTop: "16px"}}>
+                    <label className="premium-label">Address</label>
+                    <textarea className="premium-input" name="address" value={formData.address} onChange={handleChange} rows="2" />
+                  </div>
+                  <div className="premium-grid-2">
+                    <div className="premium-form-group">
+                      <label className="premium-label">City</label>
+                      <input className="premium-input" name="city" value={formData.city} onChange={handleChange} />
+                    </div>
+                    <div className="premium-form-group">
+                      <label className="premium-label">State</label>
+                      <input className="premium-input" name="state" value={formData.state} onChange={handleChange} />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === "academic" && (
+              <motion.div key="academic" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
+                <div className="premium-section">
+                  <h3 style={{marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px'}}><FiBook /> Academic Details</h3>
+                  <div className="premium-grid-2">
+                    <div className="premium-form-group" style={{ gridColumn: 'span 2' }}>
+                      <label className="premium-label">College Name</label>
+                      <input className="premium-input" name="collegeName" value={formData.collegeName} onChange={handleChange} />
+                    </div>
+                    <div className="premium-form-group">
+                      <label className="premium-label">Degree</label>
+                      <select className="premium-input" name="degree" value={formData.degree} onChange={handleChange}>
+                        <option value="">Select Degree</option>
+                        <option value="B.Tech">B.Tech</option>
+                        <option value="B.Sc">B.Sc</option>
+                        <option value="MCA">MCA</option>
+                      </select>
+                    </div>
+                    <div className="premium-form-group">
+                      <label className="premium-label">Branch</label>
+                      <input className="premium-input" name="branch" value={formData.branch} onChange={handleChange} />
+                    </div>
+                    <div className="premium-form-group">
+                      <label className="premium-label">Graduation Year</label>
+                      <input className="premium-input" type="number" name="graduationYear" value={formData.graduationYear} onChange={handleChange} />
+                    </div>
+                    <div className="premium-form-group">
+                      <label className="premium-label">Technical Skills</label>
+                      <input className="premium-input" name="technicalSkills" value={formData.technicalSkills} onChange={handleChange} placeholder="e.g. React, Python" />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === "verification" && (
+              <motion.div key="verification" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
+                <div className="premium-section">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}><FiShield /> Verification Status</h3>
+                    <StatusBadge status={profileStatus} />
+                  </div>
+
+                  <div className="premium-form-group" style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-card)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                    <input 
+                      type="checkbox" 
+                      id="existingStudent" 
+                      checked={isExistingStudent} 
+                      onChange={(e) => setIsExistingStudent(e.target.checked)} 
+                      style={{ width: '18px', height: '18px' }}
+                    />
+                    <label htmlFor="existingStudent" style={{ fontWeight: 'bold', cursor: 'pointer', margin: 0 }}>
+                      I am an enrolled SURE ProEd Student
+                    </label>
+                  </div>
+
+                  <AnimatePresence>
+                    {isExistingStudent && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
+                        
+                        {profileStatus === 'AVAILABLE' ? (
+                          <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '16px', borderRadius: '8px', marginTop: '16px', display: 'flex', gap: '12px', alignItems: 'center', color: '#047857' }}>
+                            <FiCheckCircle size={24} />
+                            <div>
+                              <strong>Verification Complete</strong>
+                              <p style={{ margin: 0, fontSize: '14px', color: '#065f46' }}>Your offer letter has been processed successfully.</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ marginTop: '16px' }}>
+                            {profileStatus === 'NOT_AVAILABLE' && !formData.offerLetter && (
+                              <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '16px', borderRadius: '8px', marginBottom: '16px', display: 'flex', gap: '12px', alignItems: 'center', color: '#b45309' }}>
+                                <FiClock size={24} />
+                                <div>
+                                  <strong>Verification Pending</strong>
+                                  <p style={{ margin: 0, fontSize: '14px', color: '#92400e' }}>Your uploaded document is being reviewed. This usually takes a few minutes.</p>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="premium-grid-2">
+                              <div className="premium-form-group">
+                                <label className="premium-label">Domain</label>
+                                <select className="premium-input" name="domain" value={formData.domain} onChange={handleChange} required>
+                                  <option value="">Select Domain</option>
+                                  {availableDomains.map(d => <option key={d} value={d}>{d}</option>)}
+                                </select>
+                              </div>
+                              <div className="premium-form-group">
+                                <label className="premium-label">Group Batch</label>
+                                <input className="premium-input" name="courseBatch" value={formData.courseBatch} onChange={handleChange} required placeholder="e.g. G2-26" />
+                              </div>
+                            </div>
+                            
+                            <div className="premium-form-group">
+                              <label className="premium-label">Upload Offer Letter (PDF)</label>
+                              <div style={{ border: '2px dashed var(--border-color)', padding: '24px', textAlign: 'center', borderRadius: '8px', background: 'var(--bg-card)' }}>
+                                <FiUploadCloud size={32} color="var(--primary-color)" style={{ marginBottom: '8px' }} />
+                                <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '12px' }}>Drag and drop or click to upload</p>
+                                <input type="file" accept=".pdf" onChange={handleFileChange} className="premium-input" style={{ width: '100%', maxWidth: '300px' }} />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
+            <button type="submit" className="premium-btn premium-btn-primary" disabled={saving}>
+              {saving ? "Saving..." : "Save Profile Updates"}
+            </button>
+          </div>
+        </form>
+      </GlassCard>
     </div>
   );
 }

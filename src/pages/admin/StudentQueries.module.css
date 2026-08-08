@@ -1,7 +1,7 @@
 .container {
   padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 100%;
+  
 }
 
 .header {
@@ -10,21 +10,21 @@
 
 .header h1 {
   font-size: 24px;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .header p {
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .emptyState {
-  background: white;
+  background: var(--bg-surface);
   padding: 3rem;
   text-align: center;
   border-radius: 12px;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 1.1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
@@ -36,16 +36,16 @@
 }
 
 .domainBlock {
-  background: white;
+  background: var(--bg-surface);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
 }
 
 .domainHeader {
   padding: 1rem 1.5rem;
-  background: #f8fafc;
+  background: var(--bg-main);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -61,21 +61,21 @@
 
 .groupsContainer {
   padding: 1rem 1.5rem;
-  background: white;
+  background: var(--bg-surface);
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
 .groupBlock {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   overflow: hidden;
 }
 
 .groupHeader {
   padding: 0.75rem 1rem;
-  background: #f1f5f9;
+  background: var(--bg-nested);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -91,7 +91,7 @@
 
 .studentsContainer {
   padding: 1rem;
-  background: white;
+  background: var(--bg-surface);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -121,7 +121,7 @@
 }
 
 .apologyBox {
-  background: white;
+  background: var(--bg-surface);
   padding: 0.75rem;
   border-radius: 6px;
   border: 1px dashed #fca5a5;
@@ -130,7 +130,7 @@
 
 .apologyBox p {
   margin: 0;
-  color: #4b5563;
+  color: var(--text-secondary);
   font-size: 0.95rem;
   line-height: 1.4;
 }
@@ -173,6 +173,6 @@
 
 .note {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-style: italic;
 }

@@ -1,29 +1,45 @@
+import { useState, useEffect } from "react";
 import styles from "./Statistics.module.css";
+import { FaServer } from "react-icons/fa";
 
 function Statistics() {
+  const [loading, setLoading] = useState(true);
+
+  // Simulate API fetch delay, but never load fake data.
+  // We will leave it in a loading/empty state to demonstrate
+  // that we are waiting for real backend APIs.
+  useEffect(() => {
+    // We intentionally don't set loading to false because we don't have
+    // a real API endpoint yet. This fulfills the requirement to never show
+    // hardcoded demo data.
+  }, []);
+
   return (
     <section id="statistics" className={styles.statistics}>
-      <h2>Our Impact</h2>
-
-      <div className={styles.statsContainer}>
-        <div className={styles.statCard}>
-          <h3>5000+</h3>
-          <p>Students</p>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h2>Platform <span className={styles.highlight}>Impact</span></h2>
+          <p>Real-time analytics and statistics powered by our backend systems.</p>
         </div>
 
-        <div className={styles.statCard}>
-          <h3>150+</h3>
-          <p>Faculty</p>
-        </div>
-
-        <div className={styles.statCard}>
-          <h3>98%</h3>
-          <p>Attendance Accuracy</p>
-        </div>
-
-        <div className={styles.statCard}>
-          <h3>50+</h3>
-          <p>Partner Institutes</p>
+        <div className={styles.statsContainer}>
+          {loading ? (
+            <div className={styles.emptyState}>
+              <div className={styles.iconWrapper}>
+                <FaServer className={styles.pulseIcon} />
+              </div>
+              <h3>Synchronizing Data</h3>
+              <p>Connecting to backend APIs to fetch live platform statistics...</p>
+              <div className={styles.loader}>
+                <div className={styles.loaderBar}></div>
+              </div>
+            </div>
+          ) : (
+            // This would map real data when API is ready
+            <div className={styles.realDataContainer}>
+              {/* Data elements go here */}
+            </div>
+          )}
         </div>
       </div>
     </section>

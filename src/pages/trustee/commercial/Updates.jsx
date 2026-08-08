@@ -108,7 +108,7 @@ function Updates() {
 
       <div className={styles.timeline}>
         {loading ? (
-          <div className={styles.loading}>Loading updates...</div>
+          <SkeletonLoader variant="card" rows={3} />
         ) : updates.length === 0 ? (
           <div className={styles.empty}>No updates published yet.</div>
         ) : (
@@ -125,7 +125,7 @@ function Updates() {
                       })}
                     </span>
                   </div>
-                  <div className={styles.actions}>
+                  <div className="actions" style={{display: "flex", gap: "8px"}}>
                     <button onClick={() => openModal(update)} className={styles.btnAction}>Edit</button>
                     <button onClick={() => handleDelete(update.id)} className={`${styles.btnAction} ${styles.danger}`}>Delete</button>
                   </div>

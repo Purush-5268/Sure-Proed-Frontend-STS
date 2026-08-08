@@ -1,63 +1,100 @@
 .features {
-  padding: 64px 5%;
-  background: var(--bg-subtle);
+  padding: 100px 20px;
+  background: var(--bg-surface);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
   text-align: center;
+  margin-bottom: 60px;
 }
 
-.features h2 {
-  font-size: 2rem;
-  color: var(--primary-dark);
-  margin-bottom: 40px;
+.header h2 {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
 }
 
-.cards {
+.highlight {
+  background: linear-gradient(90deg, #2563eb, #10b981);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header p {
+  font-size: 18px;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 32px;
 }
 
 .card {
-  background: var(--bg-card);
-  padding: 28px 20px;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  background: transparent;
+  padding: 40px 30px;
+  border-radius: 20px;
+  border: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+  background: var(--bg-surface);
+  border-color: var(--border-color);
+}
+
+.iconWrapper {
+  width: 56px;
+  height: 56px;
+  background: #eff6ff;
+  color: #3b82f6;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 24px;
+  transition: all 0.3s ease;
+}
+
+.card:hover .iconWrapper {
+  background: #3b82f6;
+  color: var(--text-inverse);
 }
 
 .card h3 {
-  color: var(--primary-color);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
   margin-bottom: 12px;
-  font-size: 1.2rem;
 }
 
 .card p {
+  font-size: 15px;
   color: var(--text-secondary);
   line-height: 1.6;
-  font-size: 0.95rem;
 }
 
-@media (max-width: 992px) {
-  .cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
-  .cards {
-    grid-template-columns: 1fr;
-  }
-
+@media (max-width: 768px) {
   .features {
-    padding: 40px 20px;
+    padding: 60px 20px;
   }
-
-  .features h2 {
-    font-size: 1.75rem;
+  
+  .header h2 {
+    font-size: 28px;
   }
 }

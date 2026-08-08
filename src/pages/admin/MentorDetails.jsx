@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./MentorDetails.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function MentorDetails() {
   const { id } = useParams();
@@ -31,9 +32,9 @@ function MentorDetails() {
   if (loading) {
     return (
       <div className={styles.page}>
-        <div className={styles.card}>
+        <div className="premium-card">
           <h1>Mentor Details</h1>
-          <p>Loading mentor details...</p>
+          <SkeletonLoader variant="detail" />
         </div>
       </div>
     );
@@ -42,7 +43,7 @@ function MentorDetails() {
   if (error) {
     return (
       <div className={styles.page}>
-        <div className={styles.card}>
+        <div className="premium-card">
           <h1>Mentor Details</h1>
           <p style={{ color: "#b91c1c" }}>{error}</p>
         </div>
@@ -53,7 +54,7 @@ function MentorDetails() {
   if (!mentor) {
     return (
       <div className={styles.page}>
-        <div className={styles.card}>
+        <div className="premium-card">
           <h1>Mentor Details</h1>
           <p>No mentor found.</p>
         </div>
@@ -65,7 +66,7 @@ function MentorDetails() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <div className={styles.header}>
           <h1>Mentor Details</h1>
           <Link to="/admin/mentors" className={styles.backBtn}>← Back</Link>

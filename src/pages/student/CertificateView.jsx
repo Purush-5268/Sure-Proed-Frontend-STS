@@ -1,5 +1,6 @@
 import { useLocation } from "react-router-dom";
 import styles from "./CertificateVerify.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function CertificateView() {
   const location = useLocation();
@@ -16,7 +17,7 @@ function CertificateView() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h1>Certificate Details</h1>
 
         <p className={styles.subtitle}>
@@ -47,7 +48,7 @@ function CertificateView() {
 
               <div className={styles.row}>
                 <strong>Status</strong>
-                <span className={styles.active}>{certificate.status || "ACTIVE"}</span>
+                <span className="premium-badge premium-badge-active">{certificate.status || "ACTIVE"}</span>
               </div>
             </div>
           </div>

@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import styles from "./SecuritySettings.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function SecuritySettings() {
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
 
         <div className={styles.header}>
           <h1>Security Settings</h1>

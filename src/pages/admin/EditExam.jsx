@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./EditExam.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function EditExam() {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ function EditExam() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
 
         <h1>Edit Exam</h1>
 

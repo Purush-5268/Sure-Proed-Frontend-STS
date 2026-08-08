@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./ApplicationDetails.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function ApplicationDetails() {
   const { id } = useParams();
@@ -28,16 +29,16 @@ function ApplicationDetails() {
     }
   }, [id]);
 
-  if (loading) return <div className={styles.container}><div className={styles.card}><h1>Application Details</h1><p>Loading application details...</p></div></div>;
-  if (error) return <div className={styles.container}><div className={styles.card}><h1>Application Details</h1><p style={{ color: "#b91c1c" }}>{error}</p></div></div>;
-  if (!application) return <div className={styles.container}><div className={styles.card}><h1>Application Details</h1><p>No application found.</p></div></div>;
+  if (loading) return <div className={styles.container}><div className="premium-card"><h1>Application Details</h1><SkeletonLoader variant="detail" /></div></div>;
+  if (error) return <div className={styles.container}><div className="premium-card"><h1>Application Details</h1><p style={{ color: "#b91c1c" }}>{error}</p></div></div>;
+  if (!application) return <div className={styles.container}><div className="premium-card"><h1>Application Details</h1><p>No application found.</p></div></div>;
 
   const user = application.student?.user || {};
   const fullName = `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "Unknown";
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <div className={styles.header}>
           <h1>Application Details</h1>
           <Link to="/admin/applications">Back</Link>

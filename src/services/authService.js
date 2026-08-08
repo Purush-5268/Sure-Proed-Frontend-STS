@@ -63,4 +63,32 @@ export const authService = {
   logout() {
     clearAuthStorage();
   },
+
+  // Register
+  async register(payload) {
+    const response = await apiClient.post(`${API_ENDPOINTS.USERS.BASE}/register/`, payload);
+    return response.data;
+  },
+
+  // Forgot Password
+  async forgotPassword(email) {
+    const response = await apiClient.post(`${API_ENDPOINTS.USERS.BASE}/forgot_password/`, { email });
+    return response.data;
+  },
+
+  // Verify OTP
+  async verifyOtp(email, otp) {
+    const response = await apiClient.post(`${API_ENDPOINTS.USERS.BASE}/verify_otp/`, { email, otp });
+    return response.data;
+  },
+
+  // Reset Password OTP
+  async resetPasswordOtp(email, otp, newPassword) {
+    const response = await apiClient.post(`${API_ENDPOINTS.USERS.BASE}/reset_password_otp/`, {
+      email,
+      otp,
+      new_password: newPassword,
+    });
+    return response.data;
+  },
 };

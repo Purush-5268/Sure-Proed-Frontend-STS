@@ -4,6 +4,7 @@ import apiClient, { normalizeListResponse } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { cohortService } from "../../services/cohortService";
 import styles from "./Cohorts.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function Cohorts() {
   const [cohorts, setCohorts] = useState([]);
@@ -30,7 +31,7 @@ function Cohorts() {
   const handleStop = async (id) => {
     if (!window.confirm("Are you sure you want to stop applications? This cohort will no longer be visible to students.")) return;
     try {
-      await cohortService.patchCohort(id, { status: "CLOSED" }); 
+      await cohortService.patchCohort(id, { status: "CLOSED" });
       setCohorts(prev => prev.map(c => c.id === id ? { ...c, status: "CLOSED" } : c));
     } catch (err) {
       alert("❌ Failed to stop applications.");
@@ -86,12 +87,12 @@ function Cohorts() {
       </div>
 
       {loading ? (
-        <p>Loading cohorts from the database...</p>
+        <SkeletonLoader variant="table" rows={5} />
       ) : cohorts.length === 0 ? (
         <p>No cohorts have been created yet. Create one from the button above.</p>
       ) : (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
+        <div className="premium-table-container">
+          <table className="premium-table">
             <thead>
               <tr>
                 <th>Cohort</th>
@@ -104,7 +105,7 @@ function Cohorts() {
 
             <tbody>
               {cohorts.map((cohort) => (
-                <tr key={cohort.id} style={{ borderBottom: "1px solid #e5e7eb" }}>
+                <tr key={cohort.id} style={{ borderBottom: "1px solid var(--border-color)" }}>
                   <td style={{ padding: "12px" }}>{cohort.name || cohort.code || "N/A"}</td>
                   {/* Safely map the UUID to the Course Name */}
                   <td style={{ padding: "12px", fontWeight: "500", color: "#4338ca" }}>
@@ -114,7 +115,7 @@ function Cohorts() {
                   <td style={{ padding: "12px" }} className={cohort.status === "ACTIVE" ? styles.active : cohort.status === "OPEN" ? styles.upcoming : styles.completed}>
                     <div style={{ fontWeight: 'bold' }}>{cohort.status || "DRAFT"}</div>
                     {cohort.status === "OPEN" && cohort.end_date && (
-                      <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
+                      <div style={{ fontSize: '11px', color: "var(--text-muted)", marginTop: '4px' }}>
                         Closes: {cohort.end_date}
                       </div>
                     )}
@@ -125,20 +126,20 @@ function Cohorts() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <Link to={`/admin/cohort-details/${cohort.id}`} style={{ padding: '6px 12px', backgroundColor: '#3b82f6', color: 'white', textDecoration: 'none', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>View</Link>
                       <Link to={`/admin/edit-cohort/${cohort.id}`} style={{ padding: '6px 12px', backgroundColor: '#fbbf24', color: '#92400e', textDecoration: 'none', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>Edit</Link>
-                      
+
                       {/* Status Management Controls */}
                       {cohort.status !== "OPEN" && cohort.status !== "ACTIVE" ? (
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                           {publishCohortId === cohort.id ? (
                             <>
-                              <input 
-                                type="date" 
-                                value={publishDate} 
-                                onChange={(e) => setPublishDate(e.target.value)} 
-                                style={{ padding: '4px', fontSize: '12px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                              <input
+                                type="date"
+                                value={publishDate}
+                                onChange={(e) => setPublishDate(e.target.value)}
+                                style={{ padding: '4px', fontSize: '12px', borderRadius: '4px', border: "1px solid var(--border-color)" }}
                               />
                               <button onClick={() => handlePublish(cohort.id)} style={{ backgroundColor: '#10b981', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>Save</button>
-                              <button onClick={() => setPublishCohortId(null)} style={{ backgroundColor: '#6b7280', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>Cancel</button>
+                              <button onClick={() => setPublishCohortId(null)} style={{ backgroundcolor: "var(--text-muted)", color: 'white', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>Cancel</button>
                             </>
                           ) : (
                             <button onClick={() => setPublishCohortId(cohort.id)} style={{ backgroundColor: '#3b82f6', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>Publish</button>

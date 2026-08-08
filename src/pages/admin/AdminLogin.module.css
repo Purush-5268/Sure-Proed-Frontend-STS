@@ -9,8 +9,8 @@
 
 .card {
   width: 100%;
-  max-width: 450px;
-  background: #fff;
+  max-width: 100%;
+  background: var(--bg-surface);
   padding: 40px;
   border-radius: 15px;
   box-shadow: 0 15px 35px rgba(0,0,0,0.2);
@@ -24,7 +24,7 @@
 
 .card p {
   text-align: center;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 30px;
 }
 
@@ -37,12 +37,12 @@
 .group label {
   font-weight: 600;
   margin-bottom: 8px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .group input {
   padding: 12px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 15px;
   outline: none;

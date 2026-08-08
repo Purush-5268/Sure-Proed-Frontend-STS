@@ -69,7 +69,7 @@ function VolunteerUsers() {
 
       <div className="tableContainer">
         {loading ? (
-          <div className={styles.emptyState}>Loading directory...</div>
+          <SkeletonLoader variant="table" rows={5} />
         ) : (
           <table className="table">
             <thead>

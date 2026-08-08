@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import styles from "./CertificateAdminDetails.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function CertificateAdminDetails() {
   const certificate = {
@@ -15,7 +16,7 @@ function CertificateAdminDetails() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
 
         <div className={styles.header}>
           <h1>Certificate Details</h1>

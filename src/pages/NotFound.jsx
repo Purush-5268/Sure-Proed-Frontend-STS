@@ -10,7 +10,7 @@ function NotFound() {
         <p className={styles.description}>
           Sorry, the page you are looking for does not exist or has been moved.
         </p>
-        <div className={styles.actions}>
+        <div className="actions" style={{display: "flex", gap: "8px"}}>
           <Link to="/" className={styles.homeBtn}>
             Go to Home
           </Link>

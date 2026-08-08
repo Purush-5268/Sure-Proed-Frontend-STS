@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./EditMentor.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function EditMentor() {
   const navigate = useNavigate();
@@ -74,14 +75,14 @@ function EditMentor() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h1>Edit Mentor</h1>
         <p className={styles.subtitle}>Update mentor information.</p>
 
         {error ? <p style={{ color: "#b91c1c" }}>{error}</p> : null}
 
         {loadingData ? (
-          <p>Loading mentor details...</p>
+          <SkeletonLoader variant="form" rows={4} />
         ) : (
           <form className={styles.form} onSubmit={handleSubmit}>
             <div className={styles.group}>

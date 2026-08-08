@@ -40,6 +40,18 @@ export const API_ENDPOINTS = {
   COHORTS: {
     BASE: "/api/cohorts/",
     BY_ID: (id) => `/api/cohorts/${id}/`,
+    // Mentor-scoped: returns ONLY active cohorts assigned to the authenticated mentor
+    MY_COHORTS: "/api/cohorts/my-cohorts/",
+    // Students enrolled in a specific cohort (via approved applications)
+    STUDENTS: (id) => `/api/cohorts/${id}/students/`,
+    // Mentor requests cohort assignment from admin
+    REQUEST_ASSIGNMENT: "/api/cohorts/request-assignment/",
+  },
+
+  // Mentor Profile (authenticated mentor's own profile)
+  MENTORS: {
+    PROFILE_ME: "/api/mentor-profile/me/",
+    PROFILE_BY_ID: (id) => `/api/mentor-profile/${id}/`,
   },
 
   // Exams & Questions

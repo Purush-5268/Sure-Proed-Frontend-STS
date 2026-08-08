@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import styles from "./AddAssignment.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function AddAssignment() {
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
 
         <div className={styles.header}>
           <h1>Add Assignment</h1>
@@ -19,8 +20,7 @@ function AddAssignment() {
           <div className={styles.group}>
             <label>Assignment Title</label>
             <input
-              type="text"
-              placeholder="Enter assignment title"
+              type="text" className="premium-input" placeholder="Enter assignment title"
             />
           </div>
 

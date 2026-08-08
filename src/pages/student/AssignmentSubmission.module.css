@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  background: #f4f7fb;
+  background: transparent;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -9,8 +9,8 @@
 
 .card {
   width: 100%;
-  max-width: 800px;
-  background: #ffffff;
+  max-width: 100%;
+  background: var(--bg-surface);
   padding: 40px;
   border-radius: 18px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -24,7 +24,7 @@
 
 .subtitle {
   text-align: center;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 35px;
 }
 
@@ -48,7 +48,7 @@
 .group input,
 .group textarea {
   padding: 14px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   font-size: 15px;
   outline: none;

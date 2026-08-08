@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./AssignmentsAdmin.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function AssignmentsAdmin() {
   const [assignments, setAssignments] = useState([]);
@@ -42,12 +43,12 @@ function AssignmentsAdmin() {
       </div>
 
       {loading ? (
-        <p>Loading assignments from the database...</p>
+        <SkeletonLoader variant="table" rows={5} />
       ) : assignments.length === 0 ? (
         <p>No assignments have been created yet.</p>
       ) : (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
+        <div className="premium-table-container">
+          <table className="premium-table">
             <thead>
               <tr>
                 <th>Assignment</th>
@@ -67,7 +68,7 @@ function AssignmentsAdmin() {
                   <td className={assignment.status === "ACTIVE" ? styles.active : assignment.status === "UPCOMING" ? styles.upcoming : styles.completed}>
                     {assignment.status || "DRAFT"}
                   </td>
-                  <td className={styles.actions}>
+                  <td className="actions" style={{ display: "flex", gap: "8px" }}>
                     <Link to="/admin/assignment-admin-details">View</Link>
                     <Link to="/admin/edit-assignment">Edit</Link>
                   </td>

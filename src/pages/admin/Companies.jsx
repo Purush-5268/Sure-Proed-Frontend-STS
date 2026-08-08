@@ -1,8 +1,9 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import apiClient, { normalizeListResponse } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./Companies.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function Companies() {
   const [companies, setCompanies] = useState([]);
@@ -29,25 +30,30 @@ function Companies() {
   }, []);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
+    <div className="premium-card" style={{ padding: "var(--space-2xl)" }}>
+      <div className={styles.header} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-lg)" }}>
         <div>
-          <h1>Companies</h1>
-          <p>Manage hiring companies.</p>
+          <h1 style={{ fontSize: "var(--font-2xl)", color: "var(--text-primary)", margin: 0 }}>Companies</h1>
+          <p style={{ color: "var(--text-secondary)", margin: 0 }}>Manage hiring companies.</p>
         </div>
 
-        <Link to="/admin/add-company" className={styles.addBtn}>
+        <Link to="/admin/add-company" className="premium-btn premium-btn-primary">
           + Add Company
         </Link>
       </div>
 
       {loading ? (
-        <p>Loading companies from the database...</p>
+        <div className="skeleton-shimmer" style={{ height: "200px", borderRadius: "8px", width: "100%" }}></div>
       ) : companies.length === 0 ? (
-        <p>No companies have been added yet.</p>
+        <div className="premium-empty-state">
+          <div className="premium-empty-state-icon">🏢</div>
+          <h3>No companies found</h3>
+          <p>No companies have been added yet.</p>
+          <Link to="/admin/add-company" className="premium-btn premium-btn-primary">Add Company</Link>
+        </div>
       ) : (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
+        <div className="premium-table-container">
+          <table className="premium-table">
             <thead>
               <tr>
                 <th>Name</th>
@@ -65,14 +71,14 @@ function Companies() {
                   <td>{company.location || "N/A"}</td>
                   <td>{company.industry || "N/A"}</td>
                   <td>
-                    <span className={company.is_verified ? styles.active : styles.inactive}>
+                    <span className={company.is_verified ? "premium-badge premium-badge-active" : "premium-badge premium-badge-pending"}>
                       {company.is_verified ? "Verified" : "Pending"}
                     </span>
                   </td>
 
-                  <td className={styles.actions}>
-                    <Link to={`/admin/company-details/${company.id}`}>View</Link>
-                    <Link to={`/admin/edit-company/${company.id}`}>Edit</Link>
+                  <td className="actions" style={{ display: "flex", gap: "8px" }}>
+                    <Link to={`/admin/company-details/${company.id}`} className="premium-btn premium-btn-secondary" style={{ height: "32px", padding: "0 12px" }}>View</Link>
+                    <Link to={`/admin/edit-company/${company.id}`} className="premium-btn premium-btn-secondary" style={{ height: "32px", padding: "0 12px" }}>Edit</Link>
                   </td>
                 </tr>
               ))}

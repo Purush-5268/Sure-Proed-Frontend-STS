@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  background: #f4f7fb;
+  background: transparent;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -9,8 +9,8 @@
 
 .card {
   width: 100%;
-  max-width: 950px;
-  background: #ffffff;
+  max-width: 100%;
+  background: var(--bg-surface);
   padding: 40px;
   border-radius: 18px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -27,7 +27,7 @@
   border-radius: 15px;
   padding: 40px;
   text-align: center;
-  background: #f8fafc;
+  background: var(--bg-main);
 }
 
 .certificate h2 {
@@ -42,13 +42,13 @@
 }
 
 .certificate h4 {
-  color: #374151;
+  color: var(--text-primary);
   font-size: 24px;
   margin: 20px 0;
 }
 
 .certificate p {
-  color: #4b5563;
+  color: var(--text-secondary);
   line-height: 1.8;
 }
 
@@ -60,8 +60,8 @@
 }
 
 .details div {
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 18px;
   flex: 1;
@@ -79,7 +79,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: bold;
   border-radius: 10px;
 }

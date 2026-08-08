@@ -33,10 +33,6 @@ function VolunteerDashboard() {
 
   useEffect(() => {
     fetchLiveSessions();
-    const interval = setInterval(() => {
-      fetchLiveSessions();
-    }, 10000);
-    return () => clearInterval(interval);
   }, []);
 
   const handleToggleLateInput = (sessionId) => {
@@ -139,34 +135,33 @@ function VolunteerDashboard() {
 
         <div className={styles.radarCard}>
           {loading ? (
-            <div className={styles.emptyState}>Scanning radar...</div>
+            <div className="skeleton-shimmer" style={{height: "200px", width: "100%", borderRadius: "8px"}}></div>
           ) : activeSessions.length === 0 ? (
-            <div className={styles.emptyState}>
-              <span className={styles.emptyIcon}>📡</span>
+            <div className="premium-empty-state">
+              <div className="premium-empty-state-icon">📡</div>
               <h3>No active classes</h3>
               <p>The radar is clear. No sessions are currently live.</p>
             </div>
           ) : (
-            <div className="tableContainer">
-              <table className="table">
+            <div className="premium-table-container">
+              <table className="premium-table">
                 <thead>
                   <tr>
-                    <th>Class / Domain</th>
-                    <th>Schedule</th>
-                    <th>Status</th>
-                    <th style={{ textAlign: "right" }}>Action</th>
+                    <th>Class Details</th>
+                    <th>Date / Time</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {activeSessions.map((cls) => (
-                    <tr key={cls.id}>
+                  {activeSessions.map((session) => (
+                    <tr key={session.id}>
                       <td>
-                        <p className={styles.className}>{cls.sessionType}</p>
+                        <h4 className={styles.className}>{session.sessionType}</h4>
                         <p className={styles.classDetails}>
-                          {cls.streamName || "Global / Life Skills"}
-                          {cls.groupName && (
+                          {session.streamName || "Global / Life Skills"}
+                          {session.groupName && (
                             <span className={styles.groupBadge}>
-                              | Group: {cls.groupName}
+                              | Group: {session.groupName}
                             </span>
                           )}
                         </p>

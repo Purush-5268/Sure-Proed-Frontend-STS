@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./CourseDetails.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function CourseDetails() {
   const { id } = useParams();
@@ -28,13 +29,13 @@ function CourseDetails() {
     }
   }, [id]);
 
-  if (loading) return <div className={styles.page}><div className={styles.card}><h1>Course Details</h1><p>Loading course details...</p></div></div>;
-  if (error) return <div className={styles.page}><div className={styles.card}><h1>Course Details</h1><p style={{ color: "#b91c1c" }}>{error}</p></div></div>;
-  if (!course) return <div className={styles.page}><div className={styles.card}><h1>Course Details</h1><p>No course found.</p></div></div>;
+  if (loading) return <div className={styles.page}><div className="premium-card"><h1>Course Details</h1><SkeletonLoader variant="detail" /></div></div>;
+  if (error) return <div className={styles.page}><div className="premium-card"><h1>Course Details</h1><p style={{ color: "#b91c1c" }}>{error}</p></div></div>;
+  if (!course) return <div className={styles.page}><div className="premium-card"><h1>Course Details</h1><p>No course found.</p></div></div>;
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <div className={styles.header}>
           <h1>Course Details</h1>
           <Link to="/admin/courses" className={styles.backBtn}>← Back</Link>
@@ -68,7 +69,7 @@ function CourseDetails() {
 
           <div className={styles.item}>
             <h3>Status</h3>
-            <p className={styles.active}>{course.status || "DRAFT"}</p>
+            <p className="premium-badge premium-badge-active">{course.status || "DRAFT"}</p>
           </div>
         </div>
 

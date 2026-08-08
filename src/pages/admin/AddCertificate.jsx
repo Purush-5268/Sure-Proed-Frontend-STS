@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./AddCertificate.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function AddCertificate() {
   const navigate = useNavigate();
@@ -86,7 +87,7 @@ function AddCertificate() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <div className={styles.header}>
           <h1>Add Certificate</h1>
           <Link to="/admin/certificates">Back</Link>

@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./EditCourse.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function EditCourse() {
   const navigate = useNavigate();
@@ -86,14 +87,14 @@ function EditCourse() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h1>Edit Course</h1>
         <p className={styles.subtitle}>Update the course information.</p>
 
         {error ? <p style={{ color: "#b91c1c" }}>{error}</p> : null}
 
         {loadingData ? (
-          <p>Loading course details...</p>
+          <SkeletonLoader variant="form" rows={5} />
         ) : (
           <form className={styles.form} onSubmit={handleSubmit}>
             <div className={styles.group}>

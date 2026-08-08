@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
 import styles from "./SystemSettings.module.css";
+import ThemeToggle from "../../components/common/ThemeToggle";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function SystemSettings() {
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
 
         <div className={styles.header}>
           <h1>System Settings</h1>
@@ -41,6 +43,10 @@ function SystemSettings() {
               <option>Asia/Kolkata</option>
               <option>UTC</option>
             </select>
+          </div>
+
+          <div className={styles.group}>
+            <ThemeToggle />
           </div>
 
           <div className={styles.group}>

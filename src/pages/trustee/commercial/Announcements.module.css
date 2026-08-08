@@ -2,15 +2,15 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  max-width: 1000px;
-  margin: 0 auto;
+  max-width: 100%;
+  
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
+  background: var(--bg-surface);
   padding: 2rem;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
@@ -39,7 +39,7 @@
 }
 
 .card {
-  background: white;
+  background: var(--bg-surface);
   border-radius: var(--radius-lg);
   display: flex;
   overflow: hidden;
@@ -100,7 +100,7 @@
 }
 
 .statusInactive {
-  background: #f1f5f9;
+  background: var(--bg-nested);
   color: #64748b;
   padding: 0.25rem 0.75rem;
   border-radius: 50px;
@@ -145,7 +145,7 @@
 }
 
 .btnEdit:hover {
-  background: #f1f5f9;
+  background: var(--bg-nested);
   border-color: #94a3b8;
 }
 
@@ -170,7 +170,7 @@
   text-align: center;
   padding: 4rem;
   color: var(--text-muted);
-  background: white;
+  background: var(--bg-surface);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
 }
@@ -192,9 +192,9 @@
 }
 
 .modal {
-  background: white;
+  background: var(--bg-surface);
   width: 100%;
-  max-width: 600px;
+  max-width: 100%;
   border-radius: var(--radius-xl);
   padding: 2.5rem;
   box-shadow: var(--shadow-lg);

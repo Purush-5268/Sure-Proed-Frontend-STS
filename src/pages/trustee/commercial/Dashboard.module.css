@@ -2,8 +2,8 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 100%;
+  
 }
 
 .heroBanner {
@@ -26,7 +26,7 @@
   right: 0;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent);
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.2), transparent);
   border-radius: 50%;
   transform: translate(30%, -30%);
   pointer-events: none;
@@ -34,16 +34,20 @@
 
 .heroContent {
   flex: 1;
-  max-width: 600px;
+  max-width: 100%;
   position: relative;
   z-index: 10;
 }
 
 .heroContent h1 {
-  color: white;
+  color: #fff;
   font-size: 2.5rem;
   font-weight: 800;
   margin-bottom: 1rem;
+  background: linear-gradient(135deg, #fff, #fbbf24);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .heroContent p {
@@ -60,11 +64,11 @@
 }
 
 .statBox {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
   padding: 1.5rem;
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(251, 191, 36, 0.3);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -74,7 +78,7 @@
 .statNumber {
   font-size: 2.5rem;
   font-weight: 900;
-  color: white;
+  color: #fbbf24;
   line-height: 1;
   margin-bottom: 0.5rem;
 }
@@ -95,7 +99,7 @@
 }
 
 .card {
-  background: white;
+  background: var(--bg-surface);
   border-radius: var(--radius-xl);
   padding: 2.5rem 2rem;
   border: 1px solid var(--border-color);
@@ -110,7 +114,7 @@
 .card:hover {
   transform: translateY(-5px);
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
-  border-color: #cbd5e1;
+  border-color: #fbbf24;
 }
 
 .cardIconWrapper {

@@ -1,77 +1,315 @@
 .container {
-  min-height: 100vh;
-  background: #f4f7fb;
-  padding: 40px;
+  padding: 1.5rem;
 }
 
-.header {
+.skeletonWrapper {
+  margin-top: 1rem;
+}
+
+/* ── Cohort Select ─────────────────────────── */
+.cohortSelect {
+  padding: 0.5rem 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.cohortSelect:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+/* ── Two Column Layout ───────────────────── */
+.twoCol {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* ── Attendance Card ─────────────────────── */
+.attendanceCard {
+  padding: 0;
+}
+
+.cardHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
+  align-items: flex-start;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-nested);
 }
 
-.header h1 {
+.cardTitle {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem;
+}
+
+.cardSubtitle {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
   margin: 0;
-  color: #1f2937;
 }
 
-.header a {
-  text-decoration: none;
-  background: #2563eb;
-  color: white;
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-weight: 600;
+.summaryRow {
+  display: flex;
+  gap: 0.75rem;
 }
 
-.header a:hover {
-  background: #1d4ed8;
+.presentCount {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--status-active-text);
+  background: var(--status-active-bg);
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-full);
 }
 
-.table {
-  width: 100%;
-  background: white;
-  border-collapse: collapse;
-  border-radius: 12px;
+.absentCount {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--status-inactive-text);
+  background: var(--status-inactive-bg);
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-full);
+}
+
+/* ── Student List ────────────────────────── */
+.studentSkeletons {
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.skeletonRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.studentList {
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.studentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.studentRow:last-child {
+  border-bottom: none;
+}
+
+.studentInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.studentName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0,0,0,.08);
+  text-overflow: ellipsis;
 }
 
-.table th {
-  background: #2563eb;
-  color: white;
-  padding: 16px;
-  text-align: left;
+/* ── Toggle Group ─────────────────────────── */
+.toggleGroup {
+  display: inline-flex;
+  background: var(--bg-nested);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
-.table td {
-  padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.table tr:hover {
-  background: #f9fafb;
-}
-
-.table select {
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-}
-
-.button {
-  margin-top: 25px;
-  padding: 12px 24px;
+.toggleBtn {
+  padding: 0.375rem 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 600;
   border: none;
-  border-radius: 8px;
-  background: #2563eb;
-  color: white;
-  font-size: 15px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  border-right: 1px solid var(--border-color);
+}
+
+.toggleBtn:last-child {
+  border-right: none;
+}
+
+.toggleBtn:hover:not(.active) {
+  color: var(--text-primary);
+  background: var(--bg-subtle);
+}
+
+.toggleBtn.present.active { background: #10b981; color: var(--text-inverse); }
+.toggleBtn.absent.active  { background: #f87171; color: var(--text-inverse); }
+.toggleBtn.late.active    { background: #f59e0b; color: var(--text-inverse); }
+
+/* ── Save Row ────────────────────────────── */
+.saveRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-nested);
+}
+
+.savedBadge {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--status-active-text);
+}
+
+.saveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.375rem;
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── History Card ────────────────────────── */
+.historyCard {
+  /* Uses bg-surface from card */
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.dateGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dateHeader {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.375rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sessionRecord {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: var(--bg-nested);
+  border-radius: var(--radius-md);
+  gap: 0.75rem;
+}
+
+.sessionRecordInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.sessionRecordTitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sessionRecordTime {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.downloadBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--primary-color);
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.button:hover {
-  background: #1d4ed8;
+.downloadBtn:hover {
+  background: var(--primary-light);
+  border-color: var(--primary-color);
+}
+
+@media (max-width: 1024px) {
+  .twoCol { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .container { padding: 1rem; }
+  .toggleBtn { padding: 0.375rem 0.625rem; }
+  .cardHeader { flex-direction: column; gap: 0.75rem; }
 }

@@ -78,21 +78,21 @@
 //     <div style={{ padding: "2rem", width: "100%" }}>
 //       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
 //         <div>
-//           <h1 style={{ margin: 0, color: "#111827", fontSize: "2rem" }}>Add New Exam</h1>
-//           <p style={{ color: "#6b7280", margin: "4px 0 0 0" }}>Create an evaluation exam for an application.</p>
+//           <h1 style={{ margin: 0, color: "var(--text-primary)", fontSize: "2rem" }}>Add New Exam</h1>
+//           <p style={{ color: "var(--text-muted)", margin: "4px 0 0 0" }}>Create an evaluation exam for an application.</p>
 //         </div>
-//         <Link to="/admin/exams" style={{ padding: "10px 20px", backgroundColor: "#f3f4f6", color: "#374151", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>← Back to Exams</Link>
+//         <Link to="/admin/exams" style={{ padding: "10px 20px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>← Back to Exams</Link>
 //       </div>
 
-//       <div style={{ backgroundColor: "white", padding: "2.5rem", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
+//       <div style={{ backgroundColor: "var(--bg-surface)", padding: "2.5rem", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
 //         {error ? <div style={{ color: "#b91c1c", backgroundColor: "#fee2e2", padding: "12px", borderRadius: "8px", marginBottom: "1.5rem", fontWeight: "bold" }}>{error}</div> : null}
-//         {success ? <div style={{ color: "#166534", backgroundColor: "#dcfce7", padding: "12px", borderRadius: "8px", marginBottom: "1.5rem", fontWeight: "bold" }}>{success}</div> : null}
+//         {success ? <div style={{ color: "#166534", backgroundColor: "var(--bg-nested)", padding: "12px", borderRadius: "8px", marginBottom: "1.5rem", fontWeight: "bold" }}>{success}</div> : null}
 
 //         <form onSubmit={handleSubmit} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-          
+
 //           <div style={{ display: "flex", flexDirection: "column", gap: "6px", gridColumn: "1 / -1" }}>
-//             <label style={{ fontWeight: "bold", color: "#374151", fontSize: "14px" }}>Select Application *</label>
-//             <select name="application" value={form.application} onChange={handleChange} required style={{ padding: "12px", borderRadius: "8px", border: "1px solid #d1d5db", backgroundColor: "white" }}>
+//             <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Select Application *</label>
+//             <select name="application" value={form.application} onChange={handleChange} required style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
 //               <option value="">-- Choose Application --</option>
 //               {applications.map((application) => (
 //                 <option key={application.id} value={application.id}>
@@ -103,8 +103,8 @@
 //           </div>
 
 //           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-//             <label style={{ fontWeight: "bold", color: "#374151", fontSize: "14px" }}>Difficulty Level</label>
-//             <select name="level" value={form.level} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid #d1d5db", backgroundColor: "white" }}>
+//             <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Difficulty Level</label>
+//             <select name="level" value={form.level} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
 //               <option value="EASY">Easy</option>
 //               <option value="MEDIUM">Medium</option>
 //               <option value="HARD">Hard</option>
@@ -113,23 +113,23 @@
 //           </div>
 
 //           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-//             <label style={{ fontWeight: "bold", color: "#374151", fontSize: "14px" }}>Duration (Minutes) *</label>
-//             <input type="number" name="duration_minutes" value={form.duration_minutes} onChange={handleChange} min="1" required style={{ padding: "12px", borderRadius: "8px", border: "1px solid #d1d5db" }} />
+//             <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Duration (Minutes) *</label>
+//             <input type="number" name="duration_minutes" value={form.duration_minutes} onChange={handleChange} min="1" required style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
 //           </div>
 
 //           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-//             <label style={{ fontWeight: "bold", color: "#374151", fontSize: "14px" }}>Pass Percentage *</label>
-//             <input type="number" name="pass_percentage" value={form.pass_percentage} onChange={handleChange} min="0" max="100" required style={{ padding: "12px", borderRadius: "8px", border: "1px solid #d1d5db" }} />
+//             <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Pass Percentage *</label>
+//             <input type="number" name="pass_percentage" value={form.pass_percentage} onChange={handleChange} min="0" max="100" required style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
 //           </div>
 
 //           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-//             <label style={{ fontWeight: "bold", color: "#374151", fontSize: "14px" }}>Total Marks *</label>
-//             <input type="number" name="total_marks" value={form.total_marks} onChange={handleChange} min="1" required style={{ padding: "12px", borderRadius: "8px", border: "1px solid #d1d5db" }} />
+//             <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Total Marks *</label>
+//             <input type="number" name="total_marks" value={form.total_marks} onChange={handleChange} min="1" required style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
 //           </div>
 
 //           <div style={{ display: "flex", flexDirection: "column", gap: "6px", gridColumn: "1 / -1" }}>
-//             <label style={{ fontWeight: "bold", color: "#374151", fontSize: "14px" }}>Exam Status</label>
-//             <select name="status" value={form.status} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid #d1d5db", backgroundColor: "white" }}>
+//             <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Exam Status</label>
+//             <select name="status" value={form.status} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
 //               <option value="PENDING">Pending</option>
 //               <option value="IN_PROGRESS">In Progress</option>
 //               <option value="SUBMITTED">Submitted</option>
@@ -141,7 +141,7 @@
 //             <button type="submit" disabled={loading} style={{ padding: "12px 24px", backgroundColor: "#2563eb", color: "white", borderRadius: "8px", border: "none", fontWeight: "bold", cursor: loading ? "not-allowed" : "pointer" }}>
 //               {loading ? "Saving..." : "Add Exam"}
 //             </button>
-//             <Link to="/admin/exams" style={{ padding: "12px 24px", backgroundColor: "#f3f4f6", color: "#374151", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>Cancel</Link>
+//             <Link to="/admin/exams" style={{ padding: "12px 24px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>Cancel</Link>
 //           </div>
 //         </form>
 //       </div>
@@ -155,6 +155,7 @@ import { Link, useNavigate } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./AddExam.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function AddExam() {
   const navigate = useNavigate();
@@ -235,7 +236,7 @@ function AddExam() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <div className={styles.header}>
           <h1>Add New Exam</h1>
           <Link to="/admin/exams">Back</Link>
@@ -296,7 +297,7 @@ function AddExam() {
             <button type="submit" disabled={loading} style={{ cursor: loading ? "not-allowed" : "pointer" }}>
               {loading ? "Saving..." : "Add Exam"}
             </button>
-            <Link to="/admin/exams" style={{ padding: "12px 24px", backgroundColor: "#f3f4f6", color: "#374151", borderRadius: "8px", textDecoration: "none", fontWeight: "bold", display: "flex", alignItems: "center" }}>
+            <Link to="/admin/exams" style={{ padding: "12px 24px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold", display: "flex", alignItems: "center" }}>
               Cancel
             </Link>
           </div>

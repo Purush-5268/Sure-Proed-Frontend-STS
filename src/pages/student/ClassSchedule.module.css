@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  background: #f4f7fb;
+  background: transparent;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -9,8 +9,8 @@
 
 .card {
   width: 100%;
-  max-width: 1000px;
-  background: #ffffff;
+  max-width: 100%;
+  background: var(--bg-surface);
   border-radius: 18px;
   padding: 40px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -24,7 +24,7 @@
 
 .subtitle {
   text-align: center;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 35px;
 }
 
@@ -42,11 +42,11 @@
 .table td {
   padding: 16px;
   text-align: center;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
 }
 
 .table tbody tr:nth-child(even) {
-  background: #f8fafc;
+  background: var(--bg-main);
 }
 
 .table tbody tr:hover {

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import styles from "./ExamDetails.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function ExamDetails() {
   const exam = {
@@ -17,7 +18,7 @@ function ExamDetails() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
 
         <div className={styles.header}>
           <h1>Exam Details</h1>
@@ -61,7 +62,7 @@ function ExamDetails() {
 
           <div>
             <label>Status</label>
-            <span className={styles.active}>
+            <span className="premium-badge premium-badge-active">
               {exam.status}
             </span>
           </div>

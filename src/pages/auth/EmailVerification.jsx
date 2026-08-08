@@ -11,7 +11,7 @@ function EmailVerification() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h2>Email Verification</h2>
         <p className={styles.subtitle}>Confirm your email address to complete your registration.</p>
 

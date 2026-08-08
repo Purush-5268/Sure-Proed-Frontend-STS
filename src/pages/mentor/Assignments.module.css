@@ -1,76 +1,123 @@
 .container {
-  min-height: 100vh;
-  background: var(--bg-main);
-  padding: 40px;
+  padding: 1rem;
 }
 
-.header {
-  margin-bottom: 30px;
-}
-
-.header h1 {
-  margin: 0;
-  color: var(--primary-dark);
-  font-size: 34px;
-}
-
-.header p {
-  margin-top: 8px;
-  color: var(--text-muted);
-}
-
-.tableWrapper {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.table {
-  width: 100%;
-  background: white;
-  border-collapse: collapse;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-md);
-  min-width: 600px;
-}
-
-.table th {
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
   background: var(--primary-color);
-  color: white;
-  padding: 14px 16px;
-  text-align: left;
-  font-size: 14px;
-}
-
-.table td {
-  padding: 14px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  font-size: 14px;
-}
-
-.table tr:hover {
-  background: var(--bg-subtle);
-}
-
-.table a {
-  text-decoration: none;
-  background: var(--primary-color);
-  color: white;
-  padding: 6px 14px;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
+  color: var(--text-inverse);
+  border-radius: var(--radius-md, 0.375rem);
   font-weight: 500;
-  display: inline-block;
-  transition: 0.2s;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
 }
 
-.table a:hover {
+.primaryButton:hover {
   background: var(--primary-hover);
 }
 
-@media (max-width: 768px) {
-  .container {
-    padding: 20px 15px;
-  }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.assignmentCard {
+  display: flex;
+  flex-direction: column;
+}
+
+.cardHeader {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.cohortTag {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.statInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.icon {
+  color: var(--text-muted);
+}
+
+.cardFooter {
+  display: flex;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.actionLink {
+  flex: 2;
+  text-align: center;
+  padding: 0.5rem;
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--primary-color);
+  border-radius: var(--radius-sm, 0.25rem);
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.actionLink:hover {
+  background: var(--primary-color);
+  color: var(--text-inverse);
+}
+
+.secondaryLink {
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm, 0.25rem);
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.secondaryLink:hover {
+  background: var(--bg-nested);
+  color: var(--text-primary);
 }

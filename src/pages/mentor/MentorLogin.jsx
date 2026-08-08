@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./MentorLogin.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function MentorLogin() {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ function MentorLogin() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
 
         <h1>Mentor Login</h1>
 
@@ -58,7 +59,7 @@ function MentorLogin() {
           Login to access the Sure ProEd Mentor Portal.
         </p>
 
-        {error && <div style={{ color: "#dc2626", marginBottom: "1rem", fontSize: "14px", backgroundColor: "#fef2f2", padding: "0.5rem", borderRadius: "4px" }}>❌ {error}</div>}
+        {error && <div style={{ color: "#dc2626", marginBottom: "1rem", fontSize: "14px", backgroundColor: "var(--bg-nested)", padding: "0.5rem", borderRadius: "4px" }}>❌ {error}</div>}
 
         <form onSubmit={handleLogin}>
 
@@ -66,8 +67,7 @@ function MentorLogin() {
             <label>Username / Email</label>
 
             <input
-              type="text"
-              placeholder="Enter Mentor Email or 'mentor'"
+              type="text" className="premium-input" placeholder="Enter Mentor Email or 'mentor'"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required

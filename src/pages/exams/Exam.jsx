@@ -55,7 +55,7 @@ function Exam() {
   };
 
   if (loading) {
-    return <div className={styles.examPage}><div className={styles.examCard}><p>Loading exam questions from the database...</p></div></div>;
+    return <div className={styles.examPage}><div className={styles.examCard}><SkeletonLoader variant="form" rows={4} /></div></div>;
   }
 
   if (questions.length === 0) {

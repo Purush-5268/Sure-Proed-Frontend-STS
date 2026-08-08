@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import apiClient, { normalizeListResponse } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./EditCohort.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function EditCohort() {
   const navigate = useNavigate();
@@ -89,7 +90,7 @@ function EditCohort() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <div className={styles.header}>
           <h1>Edit Cohort</h1>
           <Link to="/admin/cohorts">Back</Link>
@@ -98,7 +99,7 @@ function EditCohort() {
         {error ? <p style={{ color: "#b91c1c" }}>{error}</p> : null}
 
         {loadingData ? (
-          <p>Loading cohort details...</p>
+          <SkeletonLoader variant="form" rows={4} />
         ) : (
           <form className={styles.form} onSubmit={handleSubmit}>
             <div className={styles.group}>

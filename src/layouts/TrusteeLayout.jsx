@@ -1,5 +1,10 @@
 import { Outlet, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { 
+  FaTachometerAlt, FaExclamationTriangle, FaCalendarAlt, 
+  FaUserClock, FaUserShield, FaBullhorn, 
+  FaTrophy, FaBriefcase 
+} from "react-icons/fa";
 
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
@@ -15,18 +20,18 @@ function TrusteeLayout() {
   const trusteeType = user?.trusteeType || "VOLUNTEER";
 
   const volunteerLinks = [
-    { label: "Command Center", path: "/trustee/volunteer/dashboard" },
-    { label: "System Alerts", path: "/trustee/volunteer/alerts" },
-    { label: "Schedule Classes", path: "/trustee/volunteer/schedule" },
-    { label: "Attendance & CSV", path: "/trustee/volunteer/attendance" },
-    { label: "User Moderation", path: "/trustee/volunteer/users" },
+    { label: "Command Center", path: "/trustee/volunteer/dashboard", icon: <FaTachometerAlt /> },
+    { label: "System Alerts", path: "/trustee/volunteer/alerts", icon: <FaExclamationTriangle /> },
+    { label: "Schedule Classes", path: "/trustee/volunteer/schedule", icon: <FaCalendarAlt /> },
+    { label: "Attendance & CSV", path: "/trustee/volunteer/attendance", icon: <FaUserClock /> },
+    { label: "User Moderation", path: "/trustee/volunteer/users", icon: <FaUserShield /> },
   ];
 
   const commercialLinks = [
-    { label: "Dashboard Overview", path: "/trustee/commercial/dashboard" },
-    { label: "Announcements", path: "/trustee/commercial/announcements" },
-    { label: "Achievements", path: "/trustee/commercial/achievements" },
-    { label: "Commercial Updates", path: "/trustee/commercial/updates" },
+    { label: "Dashboard Overview", path: "/trustee/commercial/dashboard", icon: <FaTachometerAlt /> },
+    { label: "Announcements", path: "/trustee/commercial/announcements", icon: <FaBullhorn /> },
+    { label: "Achievements", path: "/trustee/commercial/achievements", icon: <FaTrophy /> },
+    { label: "Commercial Updates", path: "/trustee/commercial/updates", icon: <FaBriefcase /> },
   ];
 
   const activeLinks = trusteeType === "COMMERCIAL" ? commercialLinks : volunteerLinks;

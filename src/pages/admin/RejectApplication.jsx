@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./RejectApplication.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function RejectApplication() {
   const navigate = useNavigate();
@@ -46,16 +47,16 @@ function RejectApplication() {
     }
   };
 
-  if (loading) return <div className={styles.container}><div className={styles.card}><h1>Reject Application</h1><p>Loading application...</p></div></div>;
-  if (error) return <div className={styles.container}><div className={styles.card}><h1>Reject Application</h1><p style={{ color: "#b91c1c" }}>{error}</p></div></div>;
-  if (!application) return <div className={styles.container}><div className={styles.card}><h1>Reject Application</h1><p>No application found.</p></div></div>;
+  if (loading) return <div className={styles.container}><div className="premium-card"><h1>Reject Application</h1><SkeletonLoader variant="form" rows={4} /></div></div>;
+  if (error) return <div className={styles.container}><div className="premium-card"><h1>Reject Application</h1><p style={{ color: "#b91c1c" }}>{error}</p></div></div>;
+  if (!application) return <div className={styles.container}><div className="premium-card"><h1>Reject Application</h1><p>No application found.</p></div></div>;
 
   const user = application.student?.user || {};
   const fullName = `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "Unknown";
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h1>Reject Application</h1>
 
         <form onSubmit={handleSubmit}>

@@ -1,13 +1,13 @@
 .page {
   min-height: 100vh;
-  background: #f4f7fb;
+  background: transparent;
   padding: 40px 20px;
 }
 
 .card {
-  max-width: 1000px;
+  max-width: 100%;
   margin: auto;
-  background: #ffffff;
+  background: var(--bg-surface);
   border-radius: 18px;
   padding: 40px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -46,8 +46,8 @@
 }
 
 .item {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 18px;
 }
@@ -59,7 +59,7 @@
 }
 
 .item p {
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .active {
@@ -78,7 +78,7 @@
 
 .section p,
 .section li {
-  color: #4b5563;
+  color: var(--text-secondary);
   line-height: 1.8;
 }
 
@@ -112,7 +112,7 @@
 
 .cancelBtn {
   background: #e5e7eb;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .cancelBtn:hover {

@@ -1,6 +1,6 @@
 .container {
   min-height: 100vh;
-  background: #f4f7fb;
+  background: transparent;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -9,7 +9,7 @@
 
 .card {
   width: 900px;
-  background: #ffffff;
+  background: var(--bg-surface);
   border-radius: 12px;
   padding: 35px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
@@ -17,7 +17,7 @@
 
 .card h1 {
   margin-bottom: 30px;
-  color: #1f2937;
+  color: var(--text-primary);
   font-size: 30px;
 }
 
@@ -28,21 +28,21 @@
 }
 
 .info div {
-  background: #f9fafb;
+  background: var(--bg-main);
   padding: 18px;
   border-radius: 10px;
 }
 
 .info span {
   display: block;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 14px;
   margin-bottom: 8px;
 }
 
 .info h3 {
   margin: 0;
-  color: #111827;
+  color: var(--text-primary);
   font-size: 18px;
 }
 
@@ -77,7 +77,7 @@
 
 .back {
   background: #e5e7eb;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .back:hover {

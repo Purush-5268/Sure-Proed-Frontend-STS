@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./Notifications.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function Notifications() {
   const [notifications, setNotifications] = useState([]);
@@ -42,12 +43,12 @@ function Notifications() {
       </div>
 
       {loading ? (
-        <p>Loading notifications from the database...</p>
+        <SkeletonLoader variant="table" rows={5} />
       ) : notifications.length === 0 ? (
         <p>No notifications are available yet.</p>
       ) : (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
+        <div className="premium-table-container">
+          <table className="premium-table">
             <thead>
               <tr>
                 <th>Student</th>
@@ -63,7 +64,7 @@ function Notifications() {
                   <td>{item.student?.user?.first_name || item.student?.user?.email || "Unknown"}</td>
                   <td>{item.course?.name || item.course || "N/A"}</td>
                   <td className={item.status === "APPROVED" ? styles.published : styles.draft}>{item.status || "PENDING"}</td>
-                  <td className={styles.actions}>
+                  <td className="actions" style={{ display: "flex", gap: "8px" }}>
                     <Link to="/admin/notification-details">View</Link>
                     <Link to="/admin/edit-notification">Edit</Link>
                   </td>

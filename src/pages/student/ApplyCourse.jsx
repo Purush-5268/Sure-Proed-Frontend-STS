@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { studentService } from "../../services/studentService";
 import { courseService } from "../../services/courseService";
 import styles from "./ApplyCourse.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function ApplyCourse() {
   const location = useLocation();
@@ -45,72 +46,72 @@ function ApplyCourse() {
         </div>
 
         {loading ? (
-          <p>Loading courses from the database...</p>
+          <SkeletonLoader variant="card" rows={4} />
         ) : (
-        <div className={styles.courseGrid}>
+          <div className={styles.courseGrid}>
 
-          {courses.map((course) => (
-            <div
-              key={course.id}
-              className={styles.courseCard}
-            >
+            {courses.map((course) => (
+              <div
+                key={course.id}
+                className={styles.courseCard}
+              >
 
-              <span className={styles.badge}>
-                Published
-              </span>
+                <span className={styles.badge}>
+                  Published
+                </span>
 
-              <h2>{course.name}</h2>
+                <h2>{course.name}</h2>
 
-              <p>{course.description}</p>
+                <p>{course.description}</p>
 
-              <div className={styles.info}>
+                <div className={styles.info}>
 
-                <div>
-                  <strong>Course Code</strong>
-                  <span>{course.code}</span>
+                  <div>
+                    <strong>Course Code</strong>
+                    <span>{course.code}</span>
+                  </div>
+
+                  <div>
+                    <strong>Domain</strong>
+                    <span>{course.domain}</span>
+                  </div>
+
+                  <div>
+                    <strong>Duration</strong>
+                    <span>{course.duration_weeks ? `${course.duration_weeks} Weeks` : "N/A"}</span>
+                  </div>
+
+                  <div>
+                    <strong>Difficulty</strong>
+                    <span>{course.difficulty}</span>
+                  </div>
+
                 </div>
 
-                <div>
-                  <strong>Domain</strong>
-                  <span>{course.domain}</span>
-                </div>
+                <div className={styles.buttons}>
 
-                <div>
-                  <strong>Duration</strong>
-                  <span>{course.duration_weeks ? `${course.duration_weeks} Weeks` : "N/A"}</span>
-                </div>
+                  {profileCompleted ? (
+                    <Link
+                      to={`/student/course/${course.id}`}
+                      className={styles.detailsBtn}
+                    >
+                      View Details
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/student/profile"
+                      className={styles.detailsBtn}
+                    >
+                      Complete Profile First
+                    </Link>
+                  )}
 
-                <div>
-                  <strong>Difficulty</strong>
-                  <span>{course.difficulty}</span>
                 </div>
 
               </div>
+            ))}
 
-              <div className={styles.buttons}>
-
-                {profileCompleted ? (
-                  <Link
-                    to={`/student/course/${course.id}`}
-                    className={styles.detailsBtn}
-                  >
-                    View Details
-                  </Link>
-                ) : (
-                  <Link
-                    to="/student/profile"
-                    className={styles.detailsBtn}
-                  >
-                    Complete Profile First
-                  </Link>
-                )}
-
-              </div>
-
-            </div>
-          ))}
-
-        </div>
+          </div>
         )}
 
       </div>

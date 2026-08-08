@@ -1,0 +1,234 @@
+/* src/pages/student/Settings.module.css */
+
+.settingsPage {
+    padding: 40px 48px;
+    max-width: 1400px;
+    /* 🚨 Expanded to full-page enterprise width */
+    width: 100%;
+    margin: 0 auto;
+    animation: slideUpFade 0.4s ease-out forwards;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+@keyframes slideUpFade {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.header {
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 24px;
+}
+
+.header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
+}
+
+.header p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 16px;
+}
+
+.settingsGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.settingsCard {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    /* 🚨 Sharper, modern enterprise corners */
+    padding: 32px 40px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    /* 🚨 Subtle, professional shadow */
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.icon {
+    font-size: 22px;
+    background: var(--bg-nested);
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+}
+
+.cardHeader h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.description {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin: 0 0 32px 0;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.settingRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border-color);
+    /* Solid lines for clean separation */
+}
+
+.settingRow:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.settingInfo h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 6px 0;
+}
+
+.settingInfo p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin: 0;
+    max-width: 600px;
+}
+
+.badge {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Password Form */
+.passwordForm {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* 🚨 Two-column professional layout */
+    gap: 24px;
+    max-width: 800px;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.inputGroup:last-of-type {
+    grid-column: 1 / -1;
+    /* Make the confirm password span full width */
+}
+
+.inputGroup label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.inputGroup input {
+    padding: 14px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-main);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 15px;
+    transition: all 0.2s ease;
+}
+
+.inputGroup input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.saveBtn {
+    grid-column: 1 / -1;
+    background: var(--primary-color);
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: 0.2s;
+    width: max-content;
+}
+
+.saveBtn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+/* Custom CSS Toggle Switches */
+.toggleWrapper {
+    position: relative;
+}
+
+.toggle {
+    display: none;
+}
+
+.toggleLabel {
+    display: block;
+    width: 48px;
+    height: 26px;
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: 100px;
+    cursor: pointer;
+    position: relative;
+    transition: 0.3s;
+}
+
+.toggleLabel::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.toggle:checked+.toggleLabel {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.toggle:checked+.toggleLabel::after {
+    transform: translateX(22px);
+    background: #fff;
+}

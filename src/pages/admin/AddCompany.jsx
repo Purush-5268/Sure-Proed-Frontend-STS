@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./AddCompany.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function AddCompany() {
   const navigate = useNavigate();
@@ -83,14 +84,14 @@ function AddCompany() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h1>Add Company</h1>
 
         {error ? <p style={{ color: "#b91c1c" }}>{error}</p> : null}
         {success ? <p style={{ color: "#166534" }}>{success}</p> : null}
 
         {loadingUsers ? (
-          <p>Loading user options...</p>
+          <SkeletonLoader variant="form" rows={3} />
         ) : (
           <form onSubmit={handleSubmit}>
             <div className={styles.grid}>
@@ -140,7 +141,7 @@ function AddCompany() {
             </div>
 
             <div className={styles.buttons}>
-              <button type="button" onClick={() => navigate("/admin/companies")} style={{ backgroundColor: "#f3f4f6", color: "#374151", marginRight: "1rem" }}>
+              <button type="button" onClick={() => navigate("/admin/companies")} style={{ backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", marginRight: "1rem" }}>
                 Cancel
               </button>
               <button type="submit" disabled={loading}>

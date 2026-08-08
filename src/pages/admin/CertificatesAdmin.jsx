@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./CertificatesAdmin.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function CertificatesAdmin() {
   const [certificates, setCertificates] = useState([]);
@@ -77,12 +78,12 @@ function CertificatesAdmin() {
       </div>
 
       {loading ? (
-        <p>Loading certificates from the database...</p>
+        <SkeletonLoader variant="table" rows={5} />
       ) : certificates.length === 0 ? (
         <p>No certificates have been issued yet.</p>
       ) : (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
+        <div className="premium-table-container">
+          <table className="premium-table">
             <thead>
               <tr>
                 <th>Student</th>
@@ -104,7 +105,7 @@ function CertificatesAdmin() {
                     {certificate.status || "ACTIVE"}
                   </td>
 
-                  <td className={styles.actions}>
+                  <td className="actions" style={{ display: "flex", gap: "8px" }}>
                     <Link to="/admin/certificate-admin-details">View</Link>
                     <Link to="/admin/edit-certificate">Edit</Link>
                   </td>

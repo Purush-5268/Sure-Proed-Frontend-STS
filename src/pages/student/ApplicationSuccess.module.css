@@ -8,9 +8,9 @@
 }
 
 .successCard {
-  max-width: 700px;
+  max-width: 100%;
   width: 100%;
-  background: #ffffff;
+  background: var(--bg-surface);
   border-radius: 20px;
   padding: 50px;
   text-align: center;
@@ -29,14 +29,14 @@
 }
 
 .successCard p {
-  color: #6b7280;
+  color: var(--text-secondary);
   line-height: 1.8;
   margin-bottom: 30px;
 }
 
 .infoBox {
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 25px;
   text-align: left;
@@ -51,7 +51,7 @@
 .infoBox ul {
   padding-left: 20px;
   line-height: 2;
-  color: #4b5563;
+  color: var(--text-secondary);
 }
 
 .button {

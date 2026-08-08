@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import styles from "./CourseReport.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function CourseReport() {
   const report = {
@@ -10,35 +11,34 @@ function CourseReport() {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h1>Course Report</h1>
-
-        <Link to="/admin/reports">
+    <div className="premium-page-container">
+      <div className="premium-page-header">
+        <h1 className="premium-title">Course Report</h1>
+        <Link to="/admin/reports" className="premium-btn premium-btn-secondary">
           Back
         </Link>
       </div>
 
-      <div className={styles.cards}>
+      <div className="premium-grid-2">
 
-        <div className={styles.card}>
-          <h2>Total Courses</h2>
-          <span>{report.totalCourses}</span>
+        <div className="premium-card">
+          <h2 className="premium-subtitle">Total Courses</h2>
+          <span className="premium-title">{report.totalCourses}</span>
         </div>
 
-        <div className={styles.card}>
-          <h2>Active Courses</h2>
-          <span>{report.activeCourses}</span>
+        <div className="premium-card">
+          <h2 className="premium-subtitle">Active Courses</h2>
+          <span className="premium-title">{report.activeCourses}</span>
         </div>
 
-        <div className={styles.card}>
-          <h2>Enrolled Students</h2>
-          <span>{report.enrolledStudents}</span>
+        <div className="premium-card">
+          <h2 className="premium-subtitle">Enrolled Students</h2>
+          <span className="premium-title">{report.enrolledStudents}</span>
         </div>
 
-        <div className={styles.card}>
-          <h2>Course Completions</h2>
-          <span>{report.completedCourses}</span>
+        <div className="premium-card">
+          <h2 className="premium-subtitle">Course Completions</h2>
+          <span className="premium-title">{report.completedCourses}</span>
         </div>
 
       </div>

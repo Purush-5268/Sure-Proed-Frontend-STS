@@ -1,6 +1,6 @@
 .container {
   min-height: 100vh;
-  background: #f4f7fb;
+  background: transparent;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -9,7 +9,7 @@
 
 .card {
   width: 900px;
-  background: #ffffff;
+  background: var(--bg-surface);
   border-radius: 12px;
   padding: 35px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
@@ -24,7 +24,7 @@
 
 .header h1 {
   margin: 0;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .header a {
@@ -55,14 +55,14 @@
 .full label {
   margin-bottom: 8px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .group input,
 .group select,
 .full textarea {
   padding: 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   outline: none;
   font-size: 15px;

@@ -4,6 +4,7 @@ import { studentService } from "../../services/studentService";
 import { courseService } from "../../services/courseService";
 import { cohortService } from "../../services/cohortService";
 import { normalizeListResponse } from "../../services/apiClient";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./Students.module.css"; // Ensure your CSS handles basic flex layouts
 
 function Students() {
@@ -79,28 +80,28 @@ function Students() {
   });
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+    <div className="premium-page-container">
+      <div className="premium-page-header">
         <div>
-          <h1 style={{ margin: 0, color: "#111827", fontSize: "2rem" }}>Student Management</h1>
-          <p style={{ color: "#6b7280", margin: "4px 0 0 0" }}>Manage, filter, and control access for all registered students.</p>
+          <h1 className="premium-title">Student Management</h1>
+          <p className="premium-subtitle">Manage, filter, and control access for all registered students.</p>
         </div>
-        <Link to="/admin/add-student" style={{ padding: "10px 20px", backgroundColor: "#2563eb", color: "white", textDecoration: "none", borderRadius: "8px", fontWeight: "bold" }}>+ Add Student</Link>
+        <Link to="/admin/add-student" className="premium-btn premium-btn-primary">+ Add Student</Link>
       </div>
 
       {/* Filters & Search Hierarchy */}
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", backgroundColor: "white", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+      <div className="premium-card premium-flex-row" style={{ marginBottom: "2rem" }}>
         <input
-          type="text"
-          placeholder="Search by name or student code..."
+          type="text" className="premium-input" placeholder="Search by name or student code..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ flex: 2, padding: "10px", borderRadius: "8px", border: "1px solid #d1d5db" }}
+          style={{ flex: 2 }}
         />
         <select
           value={selectedCourse}
           onChange={(e) => { setSelectedCourse(e.target.value); setSelectedCohort(""); }}
-          style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "1px solid #d1d5db" }}
+          className="premium-input"
+          style={{ flex: 1 }}
         >
           <option value="">All Courses / Domains</option>
           {courses.map(c => <option key={c.id} value={c.name || c.id}>{c.name}</option>)}
@@ -109,7 +110,8 @@ function Students() {
           value={selectedCohort}
           onChange={(e) => setSelectedCohort(e.target.value)}
           disabled={!selectedCourse}
-          style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "1px solid #d1d5db", backgroundColor: !selectedCourse ? "#f3f4f6" : "white" }}
+          className="premium-input"
+          style={{ flex: 1, backgroundColor: !selectedCourse ? "var(--bg-nested)" : "var(--bg-surface)" }}
         >
           <option value="">All Batches</option>
           {/* Only show cohorts for the selected course */}
@@ -120,33 +122,42 @@ function Students() {
       </div>
 
       {/* Table */}
-      <div style={{ backgroundColor: "white", borderRadius: "12px", overflow: "hidden", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
-        <table style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
-          <thead style={{ backgroundColor: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
+      <div className="premium-table-container">
+        <table className="premium-table">
+          <thead>
             <tr>
-              <th style={{ padding: "1rem", color: "#374151" }}>Student Name & Code</th>
-              <th style={{ padding: "1rem", color: "#374151" }}>Domain & Batch</th>
-              <th style={{ padding: "1rem", color: "#374151" }}>College</th>
-              <th style={{ padding: "1rem", color: "#374151" }}>Actions</th>
+              <th>Student Name & Code</th>
+              <th>Domain & Batch</th>
+              <th>College</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="4" style={{ padding: "2rem", textAlign: "center" }}>Loading students...</td></tr>
+              <tr><td colSpan="4" style={{ padding: "2rem", textAlign: "center" }}><div className="skeleton-shimmer" style={{ height: "40px", borderRadius: "8px", width: "100%" }}></div></td></tr>
             ) : filteredStudents.length === 0 ? (
-              <tr><td colSpan="4" style={{ padding: "2rem", textAlign: "center", color: "#6b7280" }}>No students match these filters.</td></tr>
+              <tr>
+                <td colSpan="4" style={{ padding: 0 }}>
+                  <div className="premium-empty-state" style={{ border: "none" }}>
+                    <div className="premium-empty-state-icon">📚</div>
+                    <h3>No students found</h3>
+                    <p>Try changing the filters or add a new student.</p>
+                    <Link to="/admin/add-student" className="premium-btn premium-btn-primary">Add Student</Link>
+                  </div>
+                </td>
+              </tr>
             ) : (
               filteredStudents.map(student => {
                 const isRemoved = student.status === "NOT_AVAILABLE";
                 return (
-                  <tr key={student.id} onClick={() => setSelectedStudent(student)} style={{ borderBottom: "1px solid #e5e7eb", backgroundColor: isRemoved ? "#fef2f2" : "white", cursor: "pointer" }}>
-                    <td style={{ padding: "1rem" }}>
-                      <strong>{student.user?.first_name} {student.user?.last_name}</strong>
-                      <div style={{ fontSize: "12px", color: "#6b7280" }}>{student.student_code}</div>
+                  <tr key={student.id} onClick={() => setSelectedStudent(student)} style={{ borderBottom: "1px solid var(--border-color)", backgroundColor: isRemoved ? "var(--status-inactive-bg)" : "transparent", cursor: "pointer", transition: "background-color 0.2s" }} className="premium-table-row">
+                    <td style={{ padding: "1.25rem 1rem" }}>
+                      <strong style={{ fontSize: "15px", color: "var(--text-primary)" }}>{student.user?.first_name} {student.user?.last_name}</strong>
+                      <div style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "4px" }}>{student.student_code}</div>
                     </td>
-                    <td style={{ padding: "1rem" }}>
-                      <span style={{ display: "block", fontWeight: "bold", color: "#4338ca" }}>{student.domain || "N/A"}</span>
-                      <span style={{ fontSize: "12px", color: "#047857", fontWeight: "bold" }}>{student.course_batch || "N/A"}</span>
+                    <td style={{ padding: "1.25rem 1rem" }}>
+                      <span style={{ display: "inline-block", fontWeight: "600", color: "var(--accent-color)", backgroundColor: "var(--bg-nested)", padding: "4px 8px", borderRadius: "6px", fontSize: "13px", marginBottom: "4px" }}>{student.domain || "N/A"}</span>
+                      <span style={{ display: "block", fontSize: "12px", color: "var(--status-active-text)", fontWeight: "600" }}>{student.course_batch || "N/A"}</span>
                       {student.offer_letter && (
                         <div style={{ marginTop: "8px" }}>
                           <a href={student.offer_letter.startsWith('http') ? student.offer_letter : `http://0.0.0.0:8001${student.offer_letter}`} target="_blank" rel="noopener noreferrer" style={{ color: "#2563eb", fontSize: "13px", fontWeight: "bold", textDecoration: "underline" }}>
@@ -155,14 +166,14 @@ function Students() {
                         </div>
                       )}
                     </td>
-                    <td style={{ padding: "1rem", fontSize: "14px", color: "#4b5563" }}>{student.college || "N/A"}</td>
-                    <td style={{ padding: "1rem" }} onClick={(e) => e.stopPropagation()}>
+                    <td style={{ padding: "1.25rem 1rem", fontSize: "14px", color: "var(--text-secondary)", fontWeight: "500" }}>{student.college || "N/A"}</td>
+                    <td style={{ padding: "1.25rem 1rem" }} onClick={(e) => e.stopPropagation()}>
                       {isRemoved ? (
-                        <button onClick={() => handleToggleAccess(student.id, true)} style={{ padding: "8px 16px", backgroundColor: "#10b981", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "bold", boxShadow: "0 2px 4px rgba(16, 185, 129, 0.2)" }}>
+                        <button onClick={() => handleToggleAccess(student.id, true)} className="premium-btn" style={{ backgroundColor: "#10b981", color: "#fff", padding: "8px 16px", height: "auto", fontSize: "13px" }}>
                           ✅ Approve Access
                         </button>
                       ) : (
-                        <button onClick={() => { if (window.confirm("Are you sure you want to revoke this student's access to live classes? Their data will NOT be deleted.")) handleToggleAccess(student.id, false); }} style={{ padding: "8px 16px", backgroundColor: "#ef4444", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "bold", boxShadow: "0 2px 4px rgba(239, 68, 68, 0.2)" }}>
+                        <button onClick={() => { if (window.confirm("Are you sure you want to revoke this student's access to live classes? Their data will NOT be deleted.")) handleToggleAccess(student.id, false); }} className="premium-btn" style={{ backgroundColor: "#ef4444", color: "#fff", padding: "8px 16px", height: "auto", fontSize: "13px" }}>
                           ❌ Revoke Access
                         </button>
                       )}
@@ -178,10 +189,10 @@ function Students() {
       {/* 🚨 FULL STUDENT PROFILE MODAL 🚨 */}
       {selectedStudent && (
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
-          <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "12px", width: "90%", maxWidth: "600px", maxHeight: "90vh", overflowY: "auto", position: "relative" }}>
+          <div style={{ backgroundColor: "var(--bg-surface)", padding: "2rem", borderRadius: "12px", width: "90%", maxWidth: "600px", maxHeight: "90vh", overflowY: "auto", position: "relative" }}>
             <button onClick={() => setSelectedStudent(null)} style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.5rem", cursor: "pointer" }}>✖</button>
             <h2 style={{ marginTop: 0, marginBottom: "0.5rem" }}>{selectedStudent.user?.first_name} {selectedStudent.user?.last_name}</h2>
-            <p style={{ color: "#6b7280", margin: "0 0 1.5rem 0" }}>{selectedStudent.user?.email} | {selectedStudent.student_code}</p>
+            <p style={{ color: "var(--text-muted)", margin: "0 0 1.5rem 0" }}>{selectedStudent.user?.email} | {selectedStudent.student_code}</p>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
               <div><strong>Domain:</strong> {selectedStudent.domain || "N/A"}</div>
@@ -193,30 +204,30 @@ function Students() {
             </div>
 
             {/* 🚨 LST BATCH ASSIGNMENT UI 🚨 */}
-            <div style={{ marginBottom: "1.5rem", padding: "1rem", backgroundColor: "#f0fdf4", borderRadius: "8px", border: "1px solid #bbf7d0" }}>
-              <strong style={{ display: "block", marginBottom: "8px", color: "#166534" }}>Assign LST Batch:</strong>
+            <div style={{ marginBottom: "1.5rem", padding: "1rem", backgroundColor: "var(--bg-nested)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+              <strong style={{ display: "block", marginBottom: "8px", color: "var(--text-primary)" }}>Assign LST Batch:</strong>
               <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                <span style={{ fontSize: "14px", fontWeight: "bold", color: "#374151", marginRight: "auto" }}>
+                <span style={{ fontSize: "14px", fontWeight: "bold", color: "var(--text-secondary)", marginRight: "auto" }}>
                   Current: {selectedStudent.lst_batch || "Not Assigned"}
                 </span>
-                <button onClick={() => handleUpdateLSTBatch(selectedStudent.id, "Batch 1")} style={{ padding: "6px 12px", backgroundColor: selectedStudent.lst_batch === "Batch 1" ? "#15803d" : "#e5e7eb", color: selectedStudent.lst_batch === "Batch 1" ? "white" : "black", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}>Batch 1</button>
-                <button onClick={() => handleUpdateLSTBatch(selectedStudent.id, "Batch 2")} style={{ padding: "6px 12px", backgroundColor: selectedStudent.lst_batch === "Batch 2" ? "#15803d" : "#e5e7eb", color: selectedStudent.lst_batch === "Batch 2" ? "white" : "black", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}>Batch 2</button>
-                <button onClick={() => handleUpdateLSTBatch(selectedStudent.id, "")} style={{ padding: "6px 12px", backgroundColor: "#ef4444", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}>Clear</button>
+                <button onClick={() => handleUpdateLSTBatch(selectedStudent.id, "Batch 1")} className="premium-btn" style={{ padding: "6px 12px", height: "auto", fontSize: "13px", backgroundColor: selectedStudent.lst_batch === "Batch 1" ? "#15803d" : "var(--bg-surface)", color: selectedStudent.lst_batch === "Batch 1" ? "#fff" : "var(--text-primary)", border: "1px solid var(--border-color)" }}>Batch 1</button>
+                <button onClick={() => handleUpdateLSTBatch(selectedStudent.id, "Batch 2")} className="premium-btn" style={{ padding: "6px 12px", height: "auto", fontSize: "13px", backgroundColor: selectedStudent.lst_batch === "Batch 2" ? "#15803d" : "var(--bg-surface)", color: selectedStudent.lst_batch === "Batch 2" ? "#fff" : "var(--text-primary)", border: "1px solid var(--border-color)" }}>Batch 2</button>
+                <button onClick={() => handleUpdateLSTBatch(selectedStudent.id, "")} className="premium-btn" style={{ padding: "6px 12px", height: "auto", fontSize: "13px", backgroundColor: "#ef4444", color: "#fff" }}>Clear</button>
               </div>
             </div>
 
             <div style={{ marginBottom: "1.5rem" }}>
               <strong>Bio:</strong>
-              <p style={{ backgroundColor: "#f3f4f6", padding: "10px", borderRadius: "8px", margin: "8px 0 0 0" }}>{selectedStudent.bio || "No bio provided."}</p>
+              <p style={{ backgroundColor: "var(--bg-nested)", padding: "10px", borderRadius: "8px", margin: "8px 0 0 0" }}>{selectedStudent.bio || "No bio provided."}</p>
             </div>
 
             <div style={{ marginBottom: "1.5rem" }}>
               <strong>Skills:</strong>
               <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "8px" }}>
                 {(selectedStudent.skills || []).map((skill, idx) => (
-                  <span key={idx} style={{ backgroundColor: "#e0e7ff", color: "#4338ca", padding: "4px 8px", borderRadius: "4px", fontSize: "12px", fontWeight: "bold" }}>{skill}</span>
+                  <span key={idx} style={{ backgroundColor: "var(--bg-nested)", color: "#4338ca", padding: "4px 8px", borderRadius: "4px", fontSize: "12px", fontWeight: "bold" }}>{skill}</span>
                 ))}
-                {(!selectedStudent.skills || selectedStudent.skills.length === 0) && <span style={{ color: "#6b7280" }}>No skills listed.</span>}
+                {(!selectedStudent.skills || selectedStudent.skills.length === 0) && <span style={{ color: "var(--text-muted)" }}>No skills listed.</span>}
               </div>
             </div>
 

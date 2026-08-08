@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  background: #f4f7fb;
+  background: transparent;
   display: flex;
   justify-content: center;
   padding: 40px 20px;
@@ -8,8 +8,8 @@
 
 .card {
   width: 100%;
-  max-width: 900px;
-  background: #ffffff;
+  max-width: 100%;
+  background: var(--bg-surface);
   padding: 40px;
   border-radius: 18px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -42,12 +42,12 @@
 }
 
 .profile h2 {
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 6px;
 }
 
 .profile p {
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .info {
@@ -57,8 +57,8 @@
 }
 
 .info div {
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
   padding: 18px;
   border-radius: 10px;
 }
@@ -70,7 +70,7 @@
 }
 
 .info p {
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .active {

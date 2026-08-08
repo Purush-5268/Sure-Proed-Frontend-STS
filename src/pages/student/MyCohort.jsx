@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./MyCohort.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function MyCohort() {
   const [cohort, setCohort] = useState(null);
@@ -31,7 +32,7 @@ function MyCohort() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h1>My Internship Cohort</h1>
 
         <p className={styles.subtitle}>
@@ -39,7 +40,7 @@ function MyCohort() {
         </p>
 
         {loading ? (
-          <p>Loading cohort information from the database...</p>
+          <SkeletonLoader variant="detail" />
         ) : !cohort ? (
           <p>No cohort has been assigned to you yet. An admin or mentor will create one soon.</p>
         ) : (
@@ -52,7 +53,7 @@ function MyCohort() {
 
               <div className={styles.infoBox}>
                 <h3>Status</h3>
-                <span className={styles.active}>{cohort.status || "DRAFT"}</span>
+                <span className="premium-badge premium-badge-active">{cohort.status || "DRAFT"}</span>
               </div>
 
               <div className={styles.infoBox}>

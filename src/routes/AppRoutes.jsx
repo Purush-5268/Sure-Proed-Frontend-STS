@@ -1,5 +1,8 @@
+import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
+import SessionExpiredModal from "../components/common/SessionExpiredModal";
+import GlobalLoader from "../components/common/GlobalLoader";
 
 /* Layouts */
 import PublicLayout from "../layouts/PublicLayout";
@@ -15,32 +18,30 @@ import Login from "../pages/auth/Login";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 import EmailVerification from "../pages/auth/EmailVerification";
-import AdminLogin from "../pages/admin/AdminLogin";
-import MentorLogin from "../pages/mentor/MentorLogin";
-import TrusteeLogin from "../pages/trustee/TrusteeLogin";
-import NotFound from "../pages/NotFound";
+import NotFound from "../pages/errors/Error404";
 
 /* Volunteer Trustee */
-import VolunteerDashboard from "../pages/trustee/volunteer/Dashboard";
+const VolunteerDashboard = lazy(() => import("../pages/trustee/volunteer/Dashboard"));
 import VolunteerAlerts from "../pages/trustee/volunteer/Alerts";
 import VolunteerSchedule from "../pages/trustee/volunteer/Schedule";
 import VolunteerAttendance from "../pages/trustee/volunteer/Attendance";
 import VolunteerUsers from "../pages/trustee/volunteer/Users";
 
 /* Commercial Trustee */
-import CommercialDashboard from "../pages/trustee/commercial/Dashboard";
+const CommercialDashboard = lazy(() => import("../pages/trustee/commercial/Dashboard"));
 import Announcements from "../pages/trustee/commercial/Announcements";
 import Achievements from "../pages/trustee/commercial/Achievements";
 import Updates from "../pages/trustee/commercial/Updates";
 
 /* Student */
-import StudentDashboard from "../pages/student/Dashboard";
+const StudentDashboard = lazy(() => import("../pages/student/Dashboard"));
 import Profile from "../pages/student/Profile";
 import ApplyCourse from "../pages/student/ApplyCourse";
 import CourseDetails from "../pages/student/CourseDetails";
 import ApplicationSuccess from "../pages/student/ApplicationSuccess";
 import MyApplications from "../pages/student/MyApplications";
 import ApplicationStatus from "../pages/student/ApplicationStatus";
+import StudentSettings from "../pages/student/Settings";
 
 import MyCohort from "../pages/student/MyCohort";
 import ClassSchedule from "../pages/student/ClassSchedule";
@@ -64,7 +65,7 @@ import Exam from "../pages/exams/Exam";
 import ExamResult from "../pages/exams/ExamResult";
 
 /* Admin */
-import Dashboard from "../pages/admin/Dashboard";
+const Dashboard = lazy(() => import("../pages/admin/Dashboard"));
 
 /* Student Management */
 import Students from "../pages/admin/Students";
@@ -129,6 +130,7 @@ import AssignmentsAdmin from "../pages/admin/AssignmentsAdmin";
 import AssignmentAdminDetails from "../pages/admin/AssignmentAdminDetails";
 import AddAssignment from "../pages/admin/AddAssignment";
 import EditAssignment from "../pages/admin/EditAssignment";
+import AdminMentorAssignments from "../pages/admin/MentorAssignments";
 
 /* Certificate Management */
 import CertificatesAdmin from "../pages/admin/CertificatesAdmin";
@@ -149,7 +151,7 @@ import SecuritySettings from "../pages/admin/SecuritySettings";
 import SystemSettings from "../pages/admin/SystemSettings";
 
 /* Mentor */
-import MentorDashboard from "../pages/mentor/MentorDashboard";
+const MentorDashboard = lazy(() => import("../pages/mentor/MentorDashboard"));
 import MyCohorts from "../pages/mentor/MyCohorts";
 import MentorCohortDetails from "../pages/mentor/CohortDetails";
 import MentorClassSchedule from "../pages/mentor/ClassSchedule";
@@ -162,208 +164,214 @@ import MentorAttendance from "../pages/mentor/Attendance";
 import MentorAttendanceHistory from "../pages/mentor/AttendanceHistory";
 import MentorAssignments from "../pages/mentor/Assignments";
 import MentorAssignmentFeedback from "../pages/mentor/AssignmentFeedback";
+import CreateAssignment from "../pages/mentor/Assignments/CreateAssignment";
 import MentorProfile from "../pages/mentor/Profile";
 import MentorSettings from "../pages/mentor/Settings";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* ================= PUBLIC MODULE ================= */}
-        <Route element={<PublicLayout />}>
-          <Route path="/" element={<Landing />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/email-verification" element={<EmailVerification />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/mentor/login" element={<MentorLogin />} />
-          <Route path="/trustee/login" element={<TrusteeLogin />} />
-        </Route>
-
-        {/* ================= STUDENT MODULE (PROTECTED) ================= */}
-        <Route element={<ProtectedRoute allowedRoles={["STUDENT"]} redirectTo="/login" />}>
-          <Route path="/student" element={<StudentLayout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<StudentDashboard />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="public-profile" element={<Profile />} />
-
-            <Route path="courses" element={<ApplyCourse />} />
-            <Route path="apply-course" element={<ApplyCourse />} />
-            <Route path="course/:id" element={<CourseDetails />} />
-
-            <Route path="applications" element={<MyApplications />} />
-            <Route path="application-success" element={<ApplicationSuccess />} />
-            <Route path="application-status" element={<ApplicationStatus />} />
-
-            <Route path="exam-instructions" element={<ExamInstructions />} />
-            <Route path="exam" element={<Exam />} />
-            <Route path="exam-result" element={<ExamResult />} />
-
-            <Route path="cohort" element={<MyCohort />} />
-            <Route path="cohorts" element={<MyCohort />} />
-            <Route path="class-schedule" element={<ClassSchedule />} />
-            <Route path="mentor-details" element={<MentorDetails />} />
-            <Route path="course/:id" element={<CourseDetails />} />
-
-            <Route path="attendance" element={<Attendance />} />
-            <Route path="attendance-history" element={<AttendanceHistory />} />
-
-            <Route path="assignments" element={<AssignmentList />} />
-            <Route path="assignment-details" element={<AssignmentDetails />} />
-            <Route path="assignment-submission" element={<AssignmentSubmission />} />
-            <Route path="assignment-feedback" element={<AssignmentFeedback />} />
-
-            <Route path="certificates" element={<CertificateList />} />
-            <Route path="certificate-view" element={<CertificateView />} />
-            <Route path="certificate-verify" element={<CertificateVerify />} />
+      <SessionExpiredModal />
+      <Suspense fallback={<GlobalLoader message="Loading module..." />}>
+        <Routes>
+          {/* ================= PUBLIC MODULE ================= */}
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<Landing />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/email-verification" element={<EmailVerification />} />
           </Route>
-        </Route>
 
-        {/* ================= ADMIN MODULE (PROTECTED) ================= */}
-        <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} redirectTo="/admin/login" />}>
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
+          {/* ================= STUDENT MODULE (PROTECTED) ================= */}
+          <Route element={<ProtectedRoute allowedRoles={["STUDENT"]} redirectTo="/login" />}>
+            <Route path="/student" element={<StudentLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<StudentDashboard />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="public-profile" element={<Profile />} />
 
-            {/* Students */}
-            <Route path="students" element={<Students />} />
-            <Route path="student-details/:id" element={<StudentDetails />} />
-            <Route path="add-student" element={<AddStudent />} />
-            <Route path="edit-student/:id" element={<EditStudent />} />
+              <Route path="courses" element={<ApplyCourse />} />
+              <Route path="apply-course" element={<ApplyCourse />} />
+              <Route path="course/:id" element={<CourseDetails />} />
 
-            {/* Mentors */}
-            <Route path="mentors" element={<Mentors />} />
-            <Route path="mentor-details/:id" element={<AdminMentorDetails />} />
-            <Route path="add-mentor" element={<AddMentor />} />
-            <Route path="edit-mentor/:id" element={<EditMentor />} />
+              <Route path="applications" element={<MyApplications />} />
+              <Route path="application-success" element={<ApplicationSuccess />} />
+              <Route path="application-status" element={<ApplicationStatus />} />
 
-            {/* Companies */}
-            <Route path="companies" element={<Companies />} />
-            <Route path="company-details/:id" element={<CompanyDetails />} />
-            <Route path="add-company" element={<AddCompany />} />
-            <Route path="edit-company/:id" element={<EditCompany />} />
+              <Route path="exam-instructions" element={<ExamInstructions />} />
+              <Route path="exam" element={<Exam />} />
+              <Route path="exam-result" element={<ExamResult />} />
 
-            {/* Courses */}
-            <Route path="courses" element={<Courses />} />
-            <Route path="course-details" element={<AdminCourseDetails />} />
-            <Route path="course-details/:id" element={<AdminCourseDetails />} />
-            <Route path="add-course" element={<AddCourse />} />
-            <Route path="edit-course" element={<EditCourse />} />
-            <Route path="edit-course/:id" element={<EditCourse />} />
+              <Route path="cohort" element={<MyCohort />} />
+              <Route path="cohorts" element={<MyCohort />} />
+              <Route path="class-schedule" element={<ClassSchedule />} />
+              <Route path="mentor-details" element={<MentorDetails />} />
+              <Route path="course/:id" element={<CourseDetails />} />
 
-            {/* Applications */}
-            <Route path="applications" element={<Applications />} />
-            <Route path="application-details/:id" element={<ApplicationDetails />} />
-            <Route path="approve-application/:id" element={<ApproveApplication />} />
-            <Route path="reject-application/:id" element={<RejectApplication />} />
+              <Route path="attendance" element={<Attendance />} />
+              <Route path="attendance-history" element={<AttendanceHistory />} />
 
-            {/* Exams */}
-            <Route path="exams" element={<Exams />} />
-            <Route path="exam-details" element={<ExamDetails />} />
-            <Route path="add-exam" element={<AddExam />} />
-            <Route path="edit-exam" element={<EditExam />} />
+              <Route path="assignments" element={<AssignmentList />} />
+              <Route path="assignment-details" element={<AssignmentDetails />} />
+              <Route path="assignment-submission" element={<AssignmentSubmission />} />
+              <Route path="assignment-feedback" element={<AssignmentFeedback />} />
 
-            {/* Cohorts */}
-            <Route path="cohorts" element={<Cohorts />} />
-            <Route path="cohort-details" element={<CohortDetails />} />
-            <Route path="cohort-details/:id" element={<CohortDetails />} />
-            <Route path="add-cohort" element={<AddCohort />} />
-            <Route path="edit-cohort" element={<EditCohort />} />
-            <Route path="edit-cohort/:id" element={<EditCohort />} />
-
-            {/* Session Scheduling */}
-            <Route path="schedule" element={<ScheduleClass />} />
-
-            {/* Attendance */}
-            <Route path="attendance" element={<AttendanceManagement />} />
-            <Route path="attendance-management" element={<AttendanceManagement />} />
-            <Route path="attendance-details" element={<AttendanceDetails />} />
-            <Route path="update-attendance" element={<UpdateAttendance />} />
-            <Route path="attendance-history-admin" element={<AttendanceHistoryAdmin />} />
-
-            {/* Assignments */}
-            <Route path="assignments" element={<AssignmentsAdmin />} />
-            <Route path="assignments-admin" element={<AssignmentsAdmin />} />
-            <Route path="assignment-admin-details" element={<AssignmentAdminDetails />} />
-            <Route path="add-assignment" element={<AddAssignment />} />
-            <Route path="edit-assignment" element={<EditAssignment />} />
-
-            {/* Certificates */}
-            <Route path="certificates" element={<CertificatesAdmin />} />
-            <Route path="certificates-admin" element={<CertificatesAdmin />} />
-            <Route path="certificate-admin-details" element={<CertificateAdminDetails />} />
-            <Route path="add-certificate" element={<AddCertificate />} />
-            <Route path="edit-certificate" element={<EditCertificate />} />
-
-            {/* Notifications */}
-            <Route path="notifications" element={<Notifications />} />
-            <Route path="notification-details" element={<NotificationDetails />} />
-            <Route path="add-notification" element={<AddNotification />} />
-            <Route path="edit-notification" element={<EditNotification />} />
-
-            {/* Reports */}
-            <Route path="reports" element={<Reports />} />
-            <Route path="student-report" element={<StudentReport />} />
-            <Route path="course-report" element={<CourseReport />} />
-            <Route path="exam-report" element={<ExamReport />} />
-            <Route path="student-queries" element={<StudentQueries />} />
-
-            {/* Settings */}
-            <Route path="settings" element={<Settings />} />
-            <Route path="profile-settings" element={<ProfileSettings />} />
-            <Route path="security-settings" element={<SecuritySettings />} />
-            <Route path="system-settings" element={<SystemSettings />} />
+              <Route path="certificates" element={<CertificateList />} />
+              <Route path="certificate-view" element={<CertificateView />} />
+              <Route path="certificate-verify" element={<CertificateVerify />} />
+              {/* 🚨 FIX: Placed directly in the student block WITHOUT nesting /student inside /student */}
+              <Route path="settings" element={<StudentSettings />} />
+            </Route>
           </Route>
-        </Route>
 
-        {/* ================= MENTOR MODULE (PROTECTED) ================= */}
-        <Route element={<ProtectedRoute allowedRoles={["MENTOR"]} redirectTo="/mentor/login" />}>
-          <Route path="/mentor" element={<MentorLayout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<MentorDashboard />} />
-            <Route path="cohorts" element={<MyCohorts />} />
-            <Route path="cohort-details" element={<MentorCohortDetails />} />
-            <Route path="class-schedule" element={<MentorClassSchedule />} />
-            <Route path="meeting-links" element={<MeetingLinks />} />
-            <Route path="edit-meeting-link" element={<EditMeetingLink />} />
-            <Route path="students" element={<MyStudents />} />
-            <Route path="student-details" element={<MentorStudentDetails />} />
-            <Route path="attendance" element={<MentorAttendance />} />
-            <Route path="attendance-history" element={<MentorAttendanceHistory />} />
-            <Route path="assignments" element={<MentorAssignments />} />
-            <Route path="assignment-feedback" element={<MentorAssignmentFeedback />} />
-            <Route path="profile" element={<MentorProfile />} />
-            <Route path="settings" element={<MentorSettings />} />
+          {/* ================= ADMIN MODULE (PROTECTED) ================= */}
+          <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} redirectTo="/login" />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+
+              {/* Students */}
+              <Route path="students" element={<Students />} />
+              <Route path="student-details/:id" element={<StudentDetails />} />
+              <Route path="add-student" element={<AddStudent />} />
+              <Route path="edit-student/:id" element={<EditStudent />} />
+
+              {/* Mentors */}
+              <Route path="mentors" element={<Mentors />} />
+              <Route path="mentor-details/:id" element={<AdminMentorDetails />} />
+              <Route path="add-mentor" element={<AddMentor />} />
+              <Route path="edit-mentor/:id" element={<EditMentor />} />
+
+              {/* Companies */}
+              <Route path="companies" element={<Companies />} />
+              <Route path="company-details/:id" element={<CompanyDetails />} />
+              <Route path="add-company" element={<AddCompany />} />
+              <Route path="edit-company/:id" element={<EditCompany />} />
+
+              {/* Courses */}
+              <Route path="courses" element={<Courses />} />
+              <Route path="course-details" element={<AdminCourseDetails />} />
+              <Route path="course-details/:id" element={<AdminCourseDetails />} />
+              <Route path="add-course" element={<AddCourse />} />
+              <Route path="edit-course" element={<EditCourse />} />
+              <Route path="edit-course/:id" element={<EditCourse />} />
+
+              {/* Applications */}
+              <Route path="applications" element={<Applications />} />
+              <Route path="application-details/:id" element={<ApplicationDetails />} />
+              <Route path="approve-application/:id" element={<ApproveApplication />} />
+              <Route path="reject-application/:id" element={<RejectApplication />} />
+
+              {/* Exams */}
+              <Route path="exams" element={<Exams />} />
+              <Route path="exam-details" element={<ExamDetails />} />
+              <Route path="add-exam" element={<AddExam />} />
+              <Route path="edit-exam" element={<EditExam />} />
+
+              {/* Cohorts */}
+              <Route path="cohorts" element={<Cohorts />} />
+              <Route path="cohort-details" element={<CohortDetails />} />
+              <Route path="cohort-details/:id" element={<CohortDetails />} />
+              <Route path="add-cohort" element={<AddCohort />} />
+              <Route path="edit-cohort" element={<EditCohort />} />
+              <Route path="edit-cohort/:id" element={<EditCohort />} />
+
+              {/* Session Scheduling */}
+              <Route path="schedule" element={<ScheduleClass />} />
+
+              {/* Attendance */}
+              <Route path="attendance" element={<AttendanceManagement />} />
+              <Route path="attendance-management" element={<AttendanceManagement />} />
+              <Route path="attendance-details" element={<AttendanceDetails />} />
+              <Route path="update-attendance" element={<UpdateAttendance />} />
+              <Route path="attendance-history-admin" element={<AttendanceHistoryAdmin />} />
+
+              {/* Assignments */}
+              <Route path="assignments" element={<AssignmentsAdmin />} />
+              <Route path="assignments-admin" element={<AssignmentsAdmin />} />
+              <Route path="assignment-admin-details" element={<AssignmentAdminDetails />} />
+              <Route path="add-assignment" element={<AddAssignment />} />
+              <Route path="edit-assignment" element={<EditAssignment />} />
+              <Route path="mentor-assignments" element={<AdminMentorAssignments />} />
+
+              {/* Certificates */}
+              <Route path="certificates" element={<CertificatesAdmin />} />
+              <Route path="certificates-admin" element={<CertificatesAdmin />} />
+              <Route path="certificate-admin-details" element={<CertificateAdminDetails />} />
+              <Route path="add-certificate" element={<AddCertificate />} />
+              <Route path="edit-certificate" element={<EditCertificate />} />
+
+              {/* Notifications */}
+              <Route path="notifications" element={<Notifications />} />
+              <Route path="notification-details" element={<NotificationDetails />} />
+              <Route path="add-notification" element={<AddNotification />} />
+              <Route path="edit-notification" element={<EditNotification />} />
+
+              {/* Reports */}
+              <Route path="reports" element={<Reports />} />
+              <Route path="student-report" element={<StudentReport />} />
+              <Route path="course-report" element={<CourseReport />} />
+              <Route path="exam-report" element={<ExamReport />} />
+              <Route path="student-queries" element={<StudentQueries />} />
+
+              {/* Settings */}
+              <Route path="settings" element={<Settings />} />
+              <Route path="profile-settings" element={<ProfileSettings />} />
+              <Route path="security-settings" element={<SecuritySettings />} />
+              <Route path="system-settings" element={<SystemSettings />} />
+            </Route>
           </Route>
-        </Route>
 
-        {/* ================= TRUSTEE MODULE (PROTECTED) ================= */}
-        <Route element={<ProtectedRoute allowedRoles={["TRUSTEE"]} redirectTo="/trustee/login" />}>
-          <Route path="/trustee" element={<TrusteeLayout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<Navigate to="volunteer/dashboard" replace />} />
-            
-            {/* Volunteer Trustee */}
-            <Route path="volunteer/dashboard" element={<VolunteerDashboard />} />
-            <Route path="volunteer/alerts" element={<VolunteerAlerts />} />
-            <Route path="volunteer/schedule" element={<VolunteerSchedule />} />
-            <Route path="volunteer/attendance" element={<VolunteerAttendance />} />
-            <Route path="volunteer/users" element={<VolunteerUsers />} />
-            
-            {/* Commercial Trustee */}
-            <Route path="commercial/dashboard" element={<CommercialDashboard />} />
-            <Route path="commercial/announcements" element={<Announcements />} />
-            <Route path="commercial/achievements" element={<Achievements />} />
-            <Route path="commercial/updates" element={<Updates />} />
+          {/* ================= MENTOR MODULE (PROTECTED) ================= */}
+          <Route element={<ProtectedRoute allowedRoles={["MENTOR"]} redirectTo="/login" />}>
+            <Route path="/mentor" element={<MentorLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<MentorDashboard />} />
+              <Route path="cohorts" element={<MyCohorts />} />
+              <Route path="cohort-details" element={<MentorCohortDetails />} />
+              <Route path="class-schedule" element={<MentorClassSchedule />} />
+              <Route path="meeting-links" element={<MeetingLinks />} />
+              <Route path="edit-meeting-link" element={<EditMeetingLink />} />
+              <Route path="students" element={<MyStudents />} />
+              <Route path="student-details" element={<MentorStudentDetails />} />
+              <Route path="attendance" element={<MentorAttendance />} />
+              <Route path="attendance-history" element={<MentorAttendanceHistory />} />
+              <Route path="assignments" element={<MentorAssignments />} />
+              <Route path="create-assignment" element={<CreateAssignment />} />
+              <Route path="assignment-submissions/:id" element={<MentorAssignmentFeedback />} />
+              <Route path="assignment-feedback" element={<MentorAssignmentFeedback />} />
+              <Route path="profile" element={<MentorProfile />} />
+              <Route path="settings" element={<MentorSettings />} />
+            </Route>
           </Route>
-        </Route>
 
-        {/* ================= 404 NOT FOUND ================= */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          {/* ================= TRUSTEE MODULE (PROTECTED) ================= */}
+          <Route element={<ProtectedRoute allowedRoles={["TRUSTEE"]} redirectTo="/login" />}>
+            <Route path="/trustee" element={<TrusteeLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<Navigate to="volunteer/dashboard" replace />} />
+
+              {/* Volunteer Trustee */}
+              <Route path="volunteer/dashboard" element={<VolunteerDashboard />} />
+              <Route path="volunteer/alerts" element={<VolunteerAlerts />} />
+              <Route path="volunteer/schedule" element={<VolunteerSchedule />} />
+              <Route path="volunteer/attendance" element={<VolunteerAttendance />} />
+              <Route path="volunteer/users" element={<VolunteerUsers />} />
+
+              {/* Commercial Trustee */}
+              <Route path="commercial/dashboard" element={<CommercialDashboard />} />
+              <Route path="commercial/announcements" element={<Announcements />} />
+              <Route path="commercial/achievements" element={<Achievements />} />
+              <Route path="commercial/updates" element={<Updates />} />
+            </Route>
+          </Route>
+
+          {/* ================= 404 NOT FOUND ================= */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import { motion } from "framer-motion";
+import PageHeader from "../../components/ui/PageHeader";
+import EmptyState from "../../components/ui/EmptyState";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./AssignmentList.module.css";
 
 function AssignmentList() {
@@ -41,52 +45,74 @@ function AssignmentList() {
   };
 
   return (
-    <div className={styles.page}>
-      <div className={styles.card}>
-        <h1>Assignments</h1>
+    <div className="premium-page-container">
+      <PageHeader 
+        title="Assignments" 
+        description="Complete and submit your internship assignments before the deadline."
+      />
 
-        <p className={styles.subtitle}>
-          Complete and submit your internship assignments before the deadline.
-        </p>
-
+      <div className="premium-card" style={{ maxWidth: '900px', margin: '0 auto', padding: '1.75rem' }}>
         {loading ? (
-          <p>Loading assignments from the database...</p>
+          <SkeletonLoader variant="table" rows={4} />
         ) : assignments.length === 0 ? (
-          <p>No assignments are available yet.</p>
+          <EmptyState 
+            icon={<span style={{ fontSize: '2rem' }}>📝</span>}
+            title="No Assignments Found" 
+            description="You don't have any pending assignments at the moment."
+          />
         ) : (
-          <div className={styles.list}>
-            {assignments.map((assignment) => (
-              <div key={assignment.id} className={styles.assignmentCard}>
-                <h3>{assignment.title}</h3>
-
-                <p>
-                  <strong>Type:</strong> {assignment.assignment_type || "Assignment"}
-                </p>
-
-                <p>
-                  <strong>Due Date:</strong> {formatDate(assignment.deadline)}
-                </p>
-
-                <span
-                  className={assignment.status === "SUBMITTED" ? styles.submitted : styles.pending}
-                >
-                  {assignment.status || "PENDING"}
-                </span>
-
-                <Link
-                  to="/student/assignment-details"
-                  state={{ assignment }}
-                  className={styles.button}
-                >
-                  View Details
-                </Link>
-              </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {assignments.map((assignment, idx) => (
+              <motion.div 
+                key={assignment.id} 
+                className={styles.assignmentCard}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                whileHover={{ scale: 1.01 }}
+                style={{ 
+                  background: 'var(--bg-nested)', 
+                  border: '1px solid var(--border-color)', 
+                  borderRadius: '10px', 
+                  padding: '1.25rem',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '1rem'
+                }}
+              >
+                <div style={{ flex: 1, minWidth: '220px' }}>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                    <span className="premium-badge premium-badge-info">
+                      {assignment.assignment_type || "Assignment"}
+                    </span>
+                    <span className={`premium-badge ${assignment.status === "SUBMITTED" ? "premium-badge-active" : "premium-badge-pending"}`}>
+                      {assignment.status || "PENDING"}
+                    </span>
+                  </div>
+                  <h3 style={{ fontSize: '1.1rem', margin: '0 0 4px 0', color: 'var(--text-primary)' }}>{assignment.title}</h3>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    📅 <strong>Due Date:</strong> {formatDate(assignment.deadline)}
+                  </p>
+                </div>
+                
+                <div>
+                  <Link
+                    to="/student/assignment-details"
+                    state={{ assignment }}
+                    className="premium-btn premium-btn-primary"
+                  >
+                    View Details
+                  </Link>
+                </div>
+              </motion.div>
             ))}
           </div>
         )}
 
-        <div className={styles.actions}>
-          <Link to="/student/certificates" className={styles.nextBtn}>
+        <div className="actions" style={{ display: "flex", gap: "8px", marginTop: "1.5rem" }}>
+          <Link to="/student/certificates" className="premium-btn premium-btn-secondary">
             Continue to Certificates →
           </Link>
         </div>

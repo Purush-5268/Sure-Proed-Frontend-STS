@@ -4,7 +4,7 @@ import styles from "./MentorDetails.module.css";
 function MentorDetails() {
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
 
         <div className={styles.profile}>
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { courseService } from "../../services/courseService";
 import styles from "./CourseDetails.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function CourseDetails() {
   const navigate = useNavigate();
@@ -38,14 +39,14 @@ function CourseDetails() {
   const renderList = (value) => {
     if (!value) return [];
     if (Array.isArray(value)) return value;
-    return String(value).split(/\n|,/) .filter(Boolean);
+    return String(value).split(/\n|,/).filter(Boolean);
   };
 
   return (
     <div className={styles.courseDetailsPage}>
       <div className={styles.container}>
         {loading ? (
-          <p>Loading course details from the database...</p>
+          <SkeletonLoader variant="detail" />
         ) : !course ? (
           <p>No course details are available for this selection.</p>
         ) : (

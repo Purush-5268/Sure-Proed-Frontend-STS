@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./StudentDetails.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function StudentDetails() {
   const { id } = useParams();
@@ -28,16 +29,16 @@ function StudentDetails() {
     }
   }, [id]);
 
-  if (loading) return <div className={styles.page}><div className={styles.card}><h1>Student Details</h1><p>Loading student details...</p></div></div>;
-  if (error) return <div className={styles.page}><div className={styles.card}><h1>Student Details</h1><p style={{ color: "#b91c1c" }}>{error}</p></div></div>;
-  if (!student) return <div className={styles.page}><div className={styles.card}><h1>Student Details</h1><p>No student found.</p></div></div>;
+  if (loading) return <div className={styles.page}><div className="premium-card"><h1>Student Details</h1><SkeletonLoader variant="detail" /></div></div>;
+  if (error) return <div className={styles.page}><div className="premium-card"><h1>Student Details</h1><p style={{ color: "#b91c1c" }}>{error}</p></div></div>;
+  if (!student) return <div className={styles.page}><div className="premium-card"><h1>Student Details</h1><p>No student found.</p></div></div>;
 
   const user = student.user || {};
   const fullName = `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "Unknown";
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h1>Student Details</h1>
         <div className={styles.profile}>
           <div className={styles.avatar}>{fullName.charAt(0).toUpperCase()}</div>
@@ -51,7 +52,7 @@ function StudentDetails() {
           <div><strong>Phone</strong><p>{user.phone_number || "N/A"}</p></div>
           <div><strong>College</strong><p>{student.college || "N/A"}</p></div>
           <div><strong>Degree</strong><p>{student.degree || "N/A"}</p></div>
-          <div><strong>Status</strong><p className={styles.active}>{student.status || "AVAILABLE"}</p></div>
+          <div><strong>Status</strong><p className="premium-badge premium-badge-active">{student.status || "AVAILABLE"}</p></div>
         </div>
         <div className={styles.buttons}>
           <Link to={`/admin/edit-student/${student.id}`} className={styles.edit}>Edit Student</Link>

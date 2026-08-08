@@ -115,13 +115,13 @@ function Achievements() {
       </div>
 
       {loading ? (
-        <div className={styles.loading}>Loading achievements...</div>
+        <SkeletonLoader variant="card" rows={3} />
       ) : achievements.length === 0 ? (
         <div className={styles.empty}>No achievements added yet.</div>
       ) : (
         <div className={styles.grid}>
           {achievements.map((ach) => (
-            <div key={ach.id} className={styles.card}>
+            <div key={ach.id} className="premium-card">
               <div className={styles.cardHeader}>
                 <div className={styles.iconWrapper}>{ach.icon}</div>
                 {ach.category && <span className={styles.categoryBadge}>{ach.category}</span>}
@@ -132,7 +132,7 @@ function Achievements() {
                 <span className={styles.date}>
                   {new Date(ach.date_achieved).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
                 </span>
-                <div className={styles.actions}>
+                <div className="actions" style={{display: "flex", gap: "8px"}}>
                   <button onClick={() => openModal(ach)} className={styles.btnIcon}>✏️</button>
                   <button onClick={() => handleDelete(ach.id)} className={styles.btnIconDelete}>🗑️</button>
                 </div>

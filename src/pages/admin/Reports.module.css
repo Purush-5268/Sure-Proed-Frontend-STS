@@ -1,6 +1,6 @@
 .container {
   min-height: 100vh;
-  background: #f4f7fb;
+  background: transparent;
   padding: 40px;
 }
 
@@ -12,12 +12,12 @@
 .header h1 {
   margin: 0;
   font-size: 34px;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .header p {
   margin-top: 10px;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 16px;
 }
 
@@ -28,7 +28,7 @@
 }
 
 .card {
-  background: white;
+  background: var(--bg-surface);
   border-radius: 12px;
   padding: 30px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
@@ -41,11 +41,11 @@
 
 .card h2 {
   margin-bottom: 15px;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .card p {
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 25px;
   line-height: 1.7;
 }

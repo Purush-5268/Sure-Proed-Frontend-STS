@@ -7,11 +7,18 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 5%;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all var(--transition-normal);
+}
+
+:global([data-theme='dark']) .navbar {
+  background: rgba(10, 10, 10, 0.85);
+  border-bottom: 1px solid rgba(251, 191, 36, 0.3); /* Premium gold accent border */
+  box-shadow: 0 4px 25px rgba(251, 191, 36, 0.05), 0 10px 30px rgba(0, 0, 0, 0.5); /* Subtle gold glow */
 }
 
 .logo {
@@ -93,7 +100,7 @@
   border-radius: var(--radius-md);
   text-decoration: none;
   background: var(--primary-color);
-  color: #ffffff;
+  color: var(--text-inverse);
   font-weight: 600;
   font-size: 14px;
   transition: all var(--transition-fast);
@@ -122,7 +129,7 @@
     top: var(--navbar-height);
     left: 0;
     width: 100%;
-    background: #ffffff;
+    background: var(--bg-surface);
     flex-direction: column;
     padding: 20px;
     gap: 20px;

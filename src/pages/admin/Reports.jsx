@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./Reports.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function Reports() {
   const [reports, setReports] = useState([]);
@@ -57,23 +58,29 @@ function Reports() {
   }, []);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h1>Reports & Analytics</h1>
-        <p>View system reports and analytics.</p>
+    <div className="premium-page-container">
+      <div className="premium-page-header">
+        <div>
+          <h1 className="premium-title">Reports & Analytics</h1>
+          <p className="premium-subtitle">View system reports and analytics.</p>
+        </div>
       </div>
 
       {loading ? (
-        <p>Loading report data from the database...</p>
+        <div className="premium-card premium-card-large skeleton-shimmer" style={{ height: "400px" }}></div>
       ) : reports.length === 0 ? (
-        <p>No report data is available yet.</p>
+        <div className="premium-empty-state">
+          <span className="premium-empty-state-icon">📊</span>
+          <h3>No Reports Available</h3>
+          <p>There is no report data to display at this time.</p>
+        </div>
       ) : (
-        <div className={styles.cards}>
+        <div className="premium-grid-2">
           {reports.map((report, index) => (
-            <div key={index} className={styles.card}>
-              <h2>{report.title}</h2>
-              <p>{report.description}</p>
-              <Link to={report.link}>View Report</Link>
+            <div key={index} className="premium-card">
+              <h2 className="premium-title" style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>{report.title}</h2>
+              <p className="premium-subtitle" style={{ marginBottom: "1.5rem" }}>{report.description}</p>
+              <Link to={report.link} className="premium-btn premium-btn-primary">View Report</Link>
             </div>
           ))}
         </div>

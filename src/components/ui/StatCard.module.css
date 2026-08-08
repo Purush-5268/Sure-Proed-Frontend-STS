@@ -1,0 +1,63 @@
+.statCard {
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.iconWrapper {
+  color: var(--brand-primary);
+  background: rgba(59, 130, 246, 0.1);
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.valueSection {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.value {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+}
+
+.trend {
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.trendUp {
+  color: var(--status-success);
+}
+
+.trendDown {
+  color: var(--status-error);
+}
+
+.trendLabel {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin: 0.5rem 0 0 0;
+}

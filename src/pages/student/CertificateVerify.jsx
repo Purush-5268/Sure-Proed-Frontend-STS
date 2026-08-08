@@ -30,7 +30,7 @@ function CertificateVerify() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h1>Certificate Verification</h1>
 
         <p className={styles.subtitle}>
@@ -39,8 +39,7 @@ function CertificateVerify() {
 
         <div className={styles.form}>
           <input
-            type="text"
-            placeholder="Enter Certificate Number or Code"
+            type="text" className="premium-input" placeholder="Enter Certificate Number or Code"
             value={certId}
             onChange={(e) => setCertId(e.target.value)}
           />
@@ -74,7 +73,7 @@ function CertificateVerify() {
 
               <div className={styles.row}>
                 <strong>Status</strong>
-                <span className={styles.active}>{certResult.verified ? "Valid" : "Invalid"}</span>
+                <span className="premium-badge premium-badge-active">{certResult.verified ? "Valid" : "Invalid"}</span>
               </div>
             </div>
           </div>

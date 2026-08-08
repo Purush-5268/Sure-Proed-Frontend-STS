@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import styles from "./ApplicationSuccess.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function ApplicationSuccess() {
   return (

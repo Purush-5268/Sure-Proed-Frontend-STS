@@ -1,98 +1,432 @@
 .container {
-  width: 100%;
+  padding: 1.5rem;
+  min-height: 100vh;
 }
 
-.header {
-  margin-bottom: 24px;
-}
-
-.header h1 {
-  font-size: 1.75rem;
-  color: var(--primary-dark);
-}
-
-.header p {
-  margin-top: 6px;
-  color: var(--text-muted);
-  font-size: 0.95rem;
-}
-
-.cards {
+/* ── Stat Row ─────────────────────────────── */
+.statsRow {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.card {
-  text-decoration: none;
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
+.statBox {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--bg-surface);
   border: 1px solid var(--border-color);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  cursor: pointer;
 }
 
-.card:hover {
+.statBox:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-layer-1);
+  border-color: var(--primary-color);
 }
 
-.card h2 {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.card span {
-  display: block;
-  margin-top: 8px;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--primary-color);
-}
-
-.quickLinks {
-  margin-top: 32px;
+.statIcon {
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.quickLinks a {
-  display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: var(--button-height);
-  padding: 0 20px;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: var(--radius-md);
-  text-decoration: none;
-  background: var(--primary-color);
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 14px;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  font-size: 1.25rem;
+  flex-shrink: 0;
 }
 
-.quickLinks a:hover {
+.statContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+/* ── Skeleton ─────────────────────────────── */
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.skeletonCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ── Dashboard Grid ───────────────────────── */
+.dashboardGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.mainContent {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.leftCol, .rightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Cards ────────────────────────────────── */
+.sectionCard {
+  /* Inherits background from Card.module.css via --bg-surface */
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.viewAll {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+.viewAll:hover {
+  opacity: 0.75;
+  text-decoration: underline;
+}
+
+/* ── Session List ─────────────────────────── */
+.sessionList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sessionItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  background: var(--bg-nested);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  transition: background var(--transition-fast);
+}
+
+.sessionItem:hover {
+  background: var(--bg-subtle);
+}
+
+.sessionDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 15%, transparent);
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 15%, transparent); }
+  50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.05); }
+}
+
+.sessionDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sessionTitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sessionTime {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.joinBtn {
+  padding: 0.375rem 0.875rem;
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.joinBtn:hover {
+  background: var(--primary-hover);
+  transform: scale(1.03);
+}
+
+/* ── Submission List ──────────────────────── */
+.submissionList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.submissionItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.submissionItem:hover {
+  background: var(--bg-nested);
+}
+
+.submissionAvatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  flex-shrink: 0;
+}
+
+.submissionDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.submissionName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.submissionAssignment {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reviewBtn {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--primary-color);
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.reviewBtn:hover { opacity: 0.75; }
+
+/* ── Cohort List ──────────────────────────── */
+.cohortList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cohortItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  border: 1px solid var(--border-color);
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.cohortItem:hover {
+  background: var(--bg-nested);
+  border-color: var(--primary-color);
+  transform: translateX(2px);
+}
+
+.cohortColor {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.cohortDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cohortName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cohortMeta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.cohortArrow {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+/* ── Quick Actions ────────────────────────── */
+.quickActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.quickActionBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.quickActionBtn:hover {
+  background: var(--bg-nested);
+  border-color: var(--primary-color);
+  transform: translateX(2px);
+}
+
+.qaIcon {
+  display: flex;
+  align-items: center;
+  color: var(--primary-color);
+  font-size: 1rem;
+}
+
+.qaArrow {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  transition: transform var(--transition-fast);
+}
+
+.quickActionBtn:hover .qaArrow {
+  transform: translateX(3px);
+}
+
+/* ── Buttons ──────────────────────────────── */
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.primaryButton:hover {
   background: var(--primary-hover);
   transform: translateY(-1px);
 }
 
-@media (max-width: 768px) {
-  .cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-nested);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 
-@media (max-width: 480px) {
-  .cards {
-    grid-template-columns: 1fr;
-  }
+.secondaryButton:hover {
+  background: var(--bg-subtle);
+  border-color: var(--primary-color);
+}
+
+/* ── Responsive ───────────────────────────── */
+@media (max-width: 1200px) {
+  .statsRow { grid-template-columns: repeat(2, 1fr); }
+  .skeletonGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .mainContent { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .statsRow { grid-template-columns: 1fr 1fr; }
+  .container { padding: 1rem; }
 }

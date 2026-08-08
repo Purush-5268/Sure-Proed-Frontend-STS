@@ -4,8 +4,8 @@
 
 .card {
   width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 100%;
+
   background: var(--bg-card);
   padding: 32px;
   border-radius: var(--radius-md);
@@ -72,11 +72,9 @@
 }
 
 .policy {
-  background: #fffbeeb0;
+  background: var(--bg-surface);
   border-left: 4px solid #f59e0b;
   padding: 20px;
-  border-radius: var(--radius-sm);
-  margin-bottom: 28px;
 }
 
 .policy h2 {

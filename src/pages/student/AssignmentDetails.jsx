@@ -16,7 +16,7 @@ function AssignmentDetails() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h1>{assignment?.title || "Assignment Details"}</h1>
 
         <p className={styles.subtitle}>

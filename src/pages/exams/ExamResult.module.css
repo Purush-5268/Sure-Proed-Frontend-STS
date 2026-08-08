@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  background: #f4f7fb;
+  background: transparent;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -10,7 +10,7 @@
 .card {
   width: 100%;
   max-width: 700px;
-  background: #ffffff;
+  background: var(--bg-surface);
   border-radius: 18px;
   padding: 40px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.08);
@@ -23,7 +23,7 @@
 }
 
 .resultBox {
-  background: #f8fafc;
+  background: transparent;
   border-radius: 16px;
   padding: 30px;
 }
@@ -42,7 +42,7 @@
 .percentage {
   font-size: 26px;
   font-weight: 700;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .qualified {
@@ -66,7 +66,7 @@
 .note {
   margin: 30px 0;
   line-height: 1.8;
-  color: #4b5563;
+  color: var(--text-secondary);
 }
 
 .button {

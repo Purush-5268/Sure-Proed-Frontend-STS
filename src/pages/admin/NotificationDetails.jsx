@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import styles from "./NotificationDetails.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function NotificationDetails() {
   const notification = {
@@ -14,7 +15,7 @@ function NotificationDetails() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
 
         <div className={styles.header}>
           <h1>Notification Details</h1>

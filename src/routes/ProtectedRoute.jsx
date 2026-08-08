@@ -1,16 +1,14 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import GlobalLoader from "../components/common/GlobalLoader";
+import Error403 from "../pages/errors/Error403";
 
 function ProtectedRoute({ allowedRoles, redirectTo = "/login" }) {
   const { isAuthenticated, user, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
-    return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-        <div>Loading...</div>
-      </div>
-    );
+    return <GlobalLoader message="Restoring Session..." />;
   }
 
   if (!isAuthenticated) {
@@ -18,15 +16,7 @@ function ProtectedRoute({ allowedRoles, redirectTo = "/login" }) {
   }
 
   if (allowedRoles && allowedRoles.length > 0 && user?.role && !allowedRoles.includes(user.role)) {
-    const roleHome =
-      user.role === "ADMIN"
-        ? "/admin/dashboard"
-        : user.role === "MENTOR"
-        ? "/mentor/dashboard"
-        : user.role === "TRUSTEE"
-        ? "/trustee/dashboard"
-        : "/student/profile";
-    return <Navigate to={roleHome} replace />;
+    return <Error403 />;
   }
 
   return <Outlet />;

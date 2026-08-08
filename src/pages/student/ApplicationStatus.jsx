@@ -3,11 +3,11 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { studentService } from "../../services/studentService";
 import styles from "./ApplicationStatus.module.css";
-
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 function ApplicationStatus() {
   const location = useLocation();
   const { user } = useAuth();
-  
+
   const [isExisting, setIsExisting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -43,7 +43,7 @@ function ApplicationStatus() {
     return (
       <div className={styles.statusPage}>
         <div className={styles.statusCard} style={{ textAlign: "center" }}>
-          <h2 style={{ color: "#1e3a8a" }}>Loading your status...</h2>
+          <SkeletonLoader variant="detail" />
         </div>
       </div>
     );
@@ -55,8 +55,8 @@ function ApplicationStatus() {
         <h1>{isPendingVerification ? "Verification Status" : "Application Status"}</h1>
 
         <p className={styles.subtitle}>
-          {isPendingVerification 
-            ? "Track the status of your existing student verification." 
+          {isPendingVerification
+            ? "Track the status of your existing student verification."
             : "Track the current status of your internship application."}
         </p>
 
@@ -73,7 +73,7 @@ function ApplicationStatus() {
               </div>
               <div className={styles.row}>
                 <strong>Current Status</strong>
-                <span className={styles.pending}>AWAITING ADMIN REVIEW</span>
+                <span className="premium-badge premium-badge-pending">AWAITING ADMIN REVIEW</span>
               </div>
             </>
           ) : (
@@ -92,7 +92,7 @@ function ApplicationStatus() {
               </div>
               <div className={styles.row}>
                 <strong>Current Status</strong>
-                <span className={styles.pending}>{application?.status || "PENDING"}</span>
+                <span className="premium-badge premium-badge-pending">{application?.status || "PENDING"}</span>
               </div>
             </>
           )}
@@ -101,14 +101,14 @@ function ApplicationStatus() {
         {isPendingVerification ? (
           <div className={styles.timeline}>
             <div className={styles.completed}>✓ Verification Data Submitted</div>
-            <div className={styles.active}>⏳ Admin Verification Pending</div>
+            <div className="premium-badge premium-badge-active">⏳ Admin Verification Pending</div>
             <div>Cohort Assignment</div>
             <div>Internship Begins</div>
           </div>
         ) : (
           <div className={styles.timeline}>
             <div className={styles.completed}>✓ Application Submitted</div>
-            <div className={styles.active}>⏳ Screening Exam Pending</div>
+            <div className="premium-badge premium-badge-active">⏳ Screening Exam Pending</div>
             <div>Qualification Result</div>
             <div>Cohort Assignment</div>
             <div>Internship Begins</div>
@@ -125,7 +125,7 @@ function ApplicationStatus() {
           Continue to My Cohort →
         </Link>
 
-        <Link to="/student/applications" className={styles.button} style={{ marginLeft: "10px", backgroundColor: "#6b7280" }}>
+        <Link to="/student/applications" className={styles.button} style={{ marginLeft: "10px", backgroundcolor: "var(--text-muted)" }}>
           Back to Dashboard
         </Link>
       </div>

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import apiClient, { normalizeListResponse } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./Applications.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function Applications() {
   const [applications, setApplications] = useState([]);
@@ -38,12 +39,12 @@ function Applications() {
       </div>
 
       {loading ? (
-        <p>Loading applications from the database...</p>
+        <SkeletonLoader variant="table" rows={5} />
       ) : applications.length === 0 ? (
         <p>No applications have been submitted yet.</p>
       ) : (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
+        <div className="premium-table-container">
+          <table className="premium-table">
             <thead>
               <tr>
                 <th>Student</th>
@@ -65,14 +66,14 @@ function Applications() {
                       application.status === "APPROVED"
                         ? styles.approved
                         : application.status === "REJECTED"
-                        ? styles.rejected
-                        : styles.pending
+                          ? styles.rejected
+                          : styles.pending
                     }
                   >
                     {application.status || "PENDING"}
                   </td>
 
-                  <td className={styles.actions}>
+                  <td className="actions" style={{ display: "flex", gap: "8px" }}>
                     <Link to={`/admin/application-details/${application.id}`}>View</Link>
                     <Link to={`/admin/approve-application/${application.id}`}>Approve</Link>
                     <Link to={`/admin/reject-application/${application.id}`}>Reject</Link>

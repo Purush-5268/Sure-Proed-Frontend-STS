@@ -4,7 +4,7 @@ import styles from "./Attendance.module.css";
 function Attendance() {
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
 
         <h1>Today's Attendance</h1>
 

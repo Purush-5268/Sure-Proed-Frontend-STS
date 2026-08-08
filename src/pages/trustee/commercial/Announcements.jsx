@@ -121,12 +121,12 @@ function Announcements() {
 
       <div className={styles.list}>
         {loading ? (
-          <div className={styles.loading}>Loading announcements...</div>
+          <SkeletonLoader variant="card" rows={3} />
         ) : announcements.length === 0 ? (
           <div className={styles.empty}>No announcements found.</div>
         ) : (
           announcements.map((a) => (
-            <div key={a.id} className={styles.card}>
+            <div key={a.id} className="premium-card">
               <div 
                 className={styles.priorityIndicator} 
                 style={{ backgroundColor: getPriorityColor(a.priority) }}
@@ -154,7 +154,7 @@ function Announcements() {
                   <span className={styles.date}>
                     Published: {new Date(a.published_at).toLocaleDateString()}
                   </span>
-                  <div className={styles.actions}>
+                  <div className="actions" style={{display: "flex", gap: "8px"}}>
                     <button onClick={() => openModal(a)} className={styles.btnEdit}>Edit</button>
                     <button onClick={() => handleDelete(a.id)} className={styles.btnDelete}>Delete</button>
                   </div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./AdminLogin.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function AdminLogin() {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ function AdminLogin() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
 
         <h1>Admin Login</h1>
 
@@ -58,7 +59,7 @@ function AdminLogin() {
           Login to access the Sure ProEd Admin Portal.
         </p>
 
-        {error && <div style={{ color: "#dc2626", marginBottom: "1rem", fontSize: "14px", backgroundColor: "#fef2f2", padding: "0.5rem", borderRadius: "4px" }}>❌ {error}</div>}
+        {error && <div style={{ color: "#dc2626", marginBottom: "1rem", fontSize: "14px", backgroundColor: "var(--bg-nested)", padding: "0.5rem", borderRadius: "4px" }}>❌ {error}</div>}
 
         <form onSubmit={handleLogin}>
 
@@ -66,8 +67,7 @@ function AdminLogin() {
             <label>Username / Email</label>
 
             <input
-              type="text"
-              placeholder="Enter Admin Email or 'admin'"
+              type="text" className="premium-input" placeholder="Enter Admin Email or 'admin'"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required

@@ -5,111 +5,72 @@ import heroImage from "../../assets/images/hero.svg";
 function Hero() {
   return (
     <section id="home" className={styles.hero}>
-      <div className={styles.left}>
-        <h1>Sure ProEd Internship Management Platform</h1>
+      <div className={styles.container}>
+        <div className={styles.left}>
+          <div className={styles.badge}>
+            <span className={styles.badgeDot}></span>
+            Next-Gen Learning Platform
+          </div>
+          
+          <h1 className={styles.title}>
+            Master Your Future With <span className={styles.highlight}>Sure ProEd</span>
+          </h1>
 
-        <p>
-          Manage internships, screening exams, attendance,
-          assignments, certificates and student progress from one
-          powerful platform.
-        </p>
+          <p className={styles.description}>
+            Manage internships, screening exams, attendance,
+            assignments, certificates, and your complete learning journey from one
+            powerful, unified platform.
+          </p>
 
-        <div className={styles.portalContainer}>
-
-          {/* Student */}
-
-          <div className={styles.portalCard}>
-            <h2>🎓 Student Portal</h2>
-
-            <p>
-              Apply for internships, attend exams and track your
-              complete learning journey.
-            </p>
-
-            <div className={styles.portalButtons}>
-              <Link
-                to="/login"
-                className={styles.primaryBtn}
-              >
-                Student Login
-              </Link>
-
-              <Link
-                to="/signup"
-                className={styles.secondaryBtn}
-              >
-                Student Signup
-              </Link>
-            </div>
+          <div className={styles.actionGroup}>
+            <Link to="/signup" className={styles.primaryBtn}>
+              Get Started Now
+            </Link>
+            <Link to="/login" className={styles.secondaryBtn}>
+              Sign In to Dashboard
+            </Link>
           </div>
 
-          {/* Mentor */}
-
-          <div className={styles.portalCard}>
-            <h2>👨‍🏫 Mentor Portal</h2>
-
-            <p>
-              Manage your students, attendance, assignments and
-              class schedules.
-            </p>
-
-            <div className={styles.portalButtons}>
-              <Link
-                to="/mentor/login"
-                className={styles.primaryBtn}
-              >
-                Mentor Login
-              </Link>
+          <div className={styles.statsRow}>
+            <div className={styles.statItem}>
+              <span className={styles.statNumber}>Comprehensive</span>
+              <span className={styles.statLabel}>Internship Platform</span>
+            </div>
+            <div className={styles.statDivider}></div>
+            <div className={styles.statItem}>
+              <span className={styles.statNumber}>Role-Based</span>
+              <span className={styles.statLabel}>Secure Access</span>
             </div>
           </div>
-
-          {/* Admin */}
-
-          <div className={styles.portalCard}>
-            <h2>👨‍💼 Admin Portal</h2>
-
-            <p>
-              Manage the complete internship platform including
-              students, mentors, companies, exams and reports.
-            </p>
-
-            <div className={styles.portalButtons}>
-              <Link
-                to="/admin/login"
-                className={styles.primaryBtn}
-              >
-                Admin Login
-              </Link>
-            </div>
-          </div>
-
-          {/* Trustee */}
-
-          <div className={styles.portalCard} style={{ borderLeftColor: '#0d9488' }}>
-            <h2 style={{ color: '#0f766e' }}>🛡️ Trustee Portal</h2>
-
-            <p>
-              Board trustees, volunteer coordinators, and commercial partners — manage operations and announcements.
-            </p>
-
-            <div className={styles.portalButtons}>
-              <Link
-                to="/trustee/login"
-                className={styles.trusteePrimaryBtn}
-              >
-                Trustee Login
-              </Link>
-            </div>
-          </div>
-
         </div>
-      </div>
 
-      <div className={styles.right}>
-        <img
-          src={heroImage}
-          alt="Sure ProEd"
-        />
+        <div className={styles.right}>
+          <div className={styles.imageWrapper}>
+            <div className={styles.blob}></div>
+            <img
+              src={heroImage}
+              alt="Sure ProEd Platform"
+              className={styles.heroImage}
+            />
+            
+            {/* Glassmorphic floating elements */}
+            <div className={`${styles.glassCard} ${styles.float1}`}>
+              <div className={styles.glassIcon}>🎓</div>
+              <div>
+                <h4>Interactive Learning</h4>
+                <p>Track your progress</p>
+              </div>
+            </div>
+            
+            <div className={`${styles.glassCard} ${styles.float2}`}>
+              <div className={styles.glassIcon}>📊</div>
+              <div>
+                <h4>Live Analytics</h4>
+                <p>Real-time updates</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

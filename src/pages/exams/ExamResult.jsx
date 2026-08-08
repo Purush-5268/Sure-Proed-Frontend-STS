@@ -23,7 +23,7 @@ function ExamResult() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h1>Screening Exam Result</h1>
 
         <div className={styles.resultBox}>

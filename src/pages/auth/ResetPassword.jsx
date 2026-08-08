@@ -20,7 +20,7 @@ function ResetPassword() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h2>Reset Password</h2>
         <p className={styles.subtitle}>Enter your new password below.</p>
 

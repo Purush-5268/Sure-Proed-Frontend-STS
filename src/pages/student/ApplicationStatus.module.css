@@ -9,8 +9,8 @@
 
 .statusCard {
   width: 100%;
-  max-width: 850px;
-  background: #ffffff;
+  max-width: 100%;
+  background: var(--bg-surface);
   border-radius: 20px;
   padding: 40px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.08);
@@ -24,12 +24,12 @@
 
 .subtitle {
   text-align: center;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 35px;
 }
 
 .details {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 35px;
@@ -39,7 +39,7 @@
   display: flex;
   justify-content: space-between;
   padding: 18px 22px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .row:last-child {
@@ -61,7 +61,7 @@
 .timeline div {
   padding: 15px;
   border-radius: 10px;
-  background: #f3f4f6;
+  background: var(--bg-nested);
 }
 
 .completed {

@@ -3,14 +3,14 @@ import { Link } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./AttendanceManagement.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function AttendanceManagement() {
   const [attendance, setAttendance] = useState([]);
   const [cohorts, setCohorts] = useState([]);
-  const [courses, setCourses] = useState([]); // 🚨 1. Add courses state
+  const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const [selectedCourse, setSelectedCourse] = useState(""); // 🚨 2. Change filterDomain to selectedCourse
+  const [selectedCourse, setSelectedCourse] = useState("");
   const [filterGroup, setFilterGroup] = useState("");
 
   useEffect(() => {
@@ -20,7 +20,7 @@ function AttendanceManagement() {
         const [attendanceResponse, cohortsResponse, coursesResponse] = await Promise.all([
           apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE),
           apiClient.get(API_ENDPOINTS.COHORTS.BASE),
-          apiClient.get(API_ENDPOINTS.COURSES?.BASE || "/api/courses/"), // 🚨 Fetch available courses
+          apiClient.get(API_ENDPOINTS.COURSES?.BASE || "/api/courses/"),
         ]);
 
         if (isMounted) {
@@ -45,8 +45,6 @@ function AttendanceManagement() {
     };
   }, []);
 
-  // 🚨 Fixed String Parsing Logic
-  // 🚨 Bulletproof String Parsing Logic (Handles Brackets AND Hyphens)
   const getCohortName = (cohortId, title) => {
     const cohort = cohorts.find((item) => String(item.id) === String(cohortId));
     if (cohort && cohort.course?.name) return cohort.course.name;
@@ -94,7 +92,6 @@ function AttendanceManagement() {
     return "N/A";
   };
 
-  // 🚨 Filter Logic
   const filteredAttendance = attendance.filter((item) => {
     const domainName = getDomainName(item.cohort, item.title);
     const groupName = getGroupNumber(item.cohort, item.title);
@@ -105,29 +102,54 @@ function AttendanceManagement() {
     return matchesCourse && matchesGroup;
   });
 
-  const handleDownloadExcel = async (itemId, itemTitle, itemDate) => {
+  const handleDownloadExcel = async (sessionId, sessionTitle, sessionDate) => {
     try {
-      const response = await apiClient.get(`/api/attendance/${itemId}/download_excel/`, {
-        responseType: 'blob',
+      const response = await apiClient.get(`/api/attendance/${sessionId}/download_excel/`, {
+        responseType: 'blob', // Crucial for binary file downloads like Excel
       });
 
-      // 🚨 Force Excel MIME type
-      const blob = new Blob([response.data], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      });
+      // 🚨 ANTI-CORRUPTION FIX: Check if the backend sent JSON (like a 202 Waiting message) instead of an Excel file
+      if (response.data.type === 'application/json') {
+        const text = await response.data.text();
+        const json = JSON.parse(text);
+        alert(json.detail || "Report is generating. Please wait a few seconds and try again.");
+        return; // Stop the download!
+      }
+
+      // 🚨 FILENAME FIX: Extract the exact collision-proof filename from Django's headers
+      let filename = 'Attendance_Report.xlsx';
+      const contentDisposition = response.headers['content-disposition'];
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (match && match[1]) {
+          filename = match[1];
+        }
+      } else {
+        // Fallback just in case
+        const safeTitle = (sessionTitle || "Attendance").replace(/[^a-zA-Z0-9]/g, "_");
+        filename = `${safeTitle}_${sessionDate || 'Report'}.xlsx`;
+      }
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-
-      const safeTitle = (itemTitle || "Attendance").replace(/[\s/]/g, "_");
-      // 🚨 Force .xlsx extension
-      link.download = `${safeTitle}_${itemDate}.xlsx`;
+      link.href = url;
+      link.setAttribute('download', filename);
 
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
     } catch (err) {
-      console.error("Failed to download excel report:", err);
-      alert("Failed to download the report. Make sure the session has ended.");
+      console.error("Excel download error:", err);
+      // Safely read the error blob if it's JSON
+      if (err.response && err.response.data && err.response.data.type === 'application/json') {
+        const text = await err.response.data.text();
+        const json = JSON.parse(text);
+        alert(json.detail || "Report is missing or still generating. Please try again.");
+      } else {
+        alert("Failed to download the report. Make sure the session has ended.");
+      }
     }
   };
 
@@ -143,14 +165,11 @@ function AttendanceManagement() {
         </Link>
       </div>
 
-      {/* 🚨 Course Dropdown & Group Input UI */}
-      <div style={{ display: "flex", gap: "16px", marginBottom: "24px", backgroundColor: "white", padding: "16px", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-
-        {/* Course Dropdown */}
+      <div style={{ display: "flex", gap: "16px", marginBottom: "24px", backgroundColor: "var(--bg-surface)", padding: "16px", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
         <select
           value={selectedCourse}
           onChange={(e) => setSelectedCourse(e.target.value)}
-          style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "1px solid #d1d5db", backgroundColor: "white" }}
+          style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}
         >
           <option value="">-- Select Course / Stream --</option>
           {courses.map((c) => (
@@ -160,30 +179,28 @@ function AttendanceManagement() {
           ))}
         </select>
 
-        {/* Group Number Input */}
         <input
-          type="text"
-          placeholder="Filter by Group Number (e.g. G2-26)"
+          type="text" className="premium-input" placeholder="Filter by Group Number (e.g. G2-26)"
           value={filterGroup}
           onChange={(e) => setFilterGroup(e.target.value)}
-          style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "1px solid #d1d5db" }}
+          style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)" }}
         />
 
         <button
           onClick={() => { setSelectedCourse(""); setFilterGroup(""); }}
-          style={{ padding: "10px 16px", backgroundColor: "#f3f4f6", border: "1px solid #d1d5db", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}
+          style={{ padding: "10px 16px", backgroundColor: "var(--bg-nested)", border: "1px solid var(--border-color)", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}
         >
           Clear
         </button>
       </div>
 
       {loading ? (
-        <p>Loading attendance records from the database...</p>
+        <SkeletonLoader variant="table" rows={6} />
       ) : filteredAttendance.length === 0 ? (
         <p>No attendance sessions match your filters.</p>
       ) : (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
+        <div className="premium-table-container">
+          <table className="premium-table">
             <thead>
               <tr>
                 <th>Date</th>
@@ -199,65 +216,94 @@ function AttendanceManagement() {
 
             <tbody>
               {filteredAttendance.map((item) => {
-                const getDownloadLink = (item) => {
-                  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8001/api/";
-                  return `${baseUrl}attendance/${item.id}/download_excel/`;
-                };
+                let whitelistCount = 0;
+                if (Array.isArray(item.guest_emails)) {
+                  whitelistCount = item.guest_emails.length;
+                } else if (typeof item.guest_emails === 'string' && item.guest_emails.trim() !== '') {
+                  whitelistCount = item.guest_emails.split(',').length;
+                } else if (item.notes && item.notes.includes('@')) {
+                  whitelistCount = (item.notes.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi) || []).length;
+                }
 
                 return (
                   <tr key={item.id}>
-                    <td>{item.class_date}</td>
-                    <td>{getCohortName(item.cohort, item.title)}</td>
-                    <td>{getCohortBatch(item.cohort, item.title)}</td>
-                    <td>{Array.isArray(item.attendees) ? item.attendees.length : 0}</td>
-                    <td>{item.guest_emails ? item.guest_emails.length : (item.notes && item.notes.includes('Whitelisted Guests:') ? item.notes.split(',').length - 1 : 0)}</td>
-                    <td>{Array.isArray(item.joined_students) ? item.joined_students.length : 0}</td>
-                    <td>{Math.max(0, (Array.isArray(item.attendees) ? item.attendees.length : 0) - (Array.isArray(item.joined_students) ? item.joined_students.length : 0))}</td>
+                    <td style={{ verticalAlign: "middle" }}>{item.class_date}</td>
+                    <td style={{ verticalAlign: "middle" }}>{getCohortName(item.cohort, item.title)}</td>
+                    <td style={{ verticalAlign: "middle" }}>{getCohortBatch(item.cohort, item.title)}</td>
+                    <td style={{ verticalAlign: "middle" }}>{Array.isArray(item.attendees) ? item.attendees.length : 0}</td>
+                    <td style={{ verticalAlign: "middle", fontWeight: whitelistCount > 0 ? "bold" : "normal", color: whitelistCount > 0 ? "#3b82f6" : "inherit" }}>
+                      {whitelistCount}
+                    </td>
+                    <td style={{ verticalAlign: "middle" }}>{Array.isArray(item.joined_students) ? item.joined_students.length : 0}</td>
+                    <td style={{ verticalAlign: "middle" }}>{Math.max(0, (Array.isArray(item.attendees) ? item.attendees.length : 0) - (Array.isArray(item.joined_students) ? item.joined_students.length : 0))}</td>
 
-                    <td className={styles.actions} style={{ whiteSpace: "nowrap", verticalAlign: "middle" }}>
-                      <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", margin: 0, padding: 0 }}>
-                        {item.conducted === false && (
+                    <td className="actions" style={{ verticalAlign: "middle", padding: "8px 16px" }}>
+                      {(!item.conducted || item.conducted === 'false' || item.conducted === false) ? (
+                        <div style={{ display: "flex", alignItems: "stretch", gap: "8px", margin: 0, padding: 0, height: "32px" }}>
                           <button
                             onClick={() => handleDownloadExcel(item.id, item.title, item.class_date)}
                             style={{
-                              background: "#16a34a",
+                              background: "#10b981",
                               color: "white",
-                              padding: "7px 14px",
-                              borderRadius: "6px",
                               border: "none",
+                              padding: "0 14px",
+                              height: "100%", /* 🚨 Fills the flex container */
+                              borderRadius: "6px",
                               cursor: "pointer",
                               fontWeight: "bold",
                               fontSize: "12px",
-                              display: "inline-flex",
+                              display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
+                              boxSizing: "border-box",
+                              transition: "all 0.2s ease",
+                              whiteSpace: "nowrap",
                               margin: 0
                             }}
                           >
                             ⬇️ Excel
                           </button>
-                        )}
-                        <Link
-                          to="/admin/attendance-details"
-                          state={{ sessionId: item.id, sessionTitle: item.title, sessionDate: item.class_date }}
+
+                          <Link
+                            to="/admin/attendance-details"
+                            state={{ sessionId: item.id, sessionTitle: item.title, sessionDate: item.class_date }}
+                            style={{
+                              background: "var(--primary-color)",
+                              color: "white",
+                              padding: "0 16px",
+                              height: "100%", /* 🚨 Fills the flex container */
+                              borderRadius: "6px",
+                              textDecoration: "none",
+                              fontWeight: "bold",
+                              fontSize: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              boxSizing: "border-box",
+                              whiteSpace: "nowrap",
+                              margin: 0
+                            }}
+                          >
+                            View Details
+                          </Link>
+                        </div>
+                      ) : (
+                        <span
                           style={{
-                            background: "#3b82f6",
-                            color: "white",
-                            padding: "7px 16px",
+                            display: "inline-block",
+                            background: "var(--bg-nested)",
+                            color: "var(--text-muted)",
+                            border: "1px solid var(--border-color)",
+                            padding: "6px 12px",
                             borderRadius: "6px",
-                            textDecoration: "none",
-                            fontWeight: "bold",
                             fontSize: "12px",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            textAlign: "center",
-                            margin: 0
+                            fontWeight: "bold",
+                            whiteSpace: "nowrap"
                           }}
                         >
-                          View
-                        </Link>
-                      </div>
+                          ⏳ Ongoing...
+                        </span>
+                      )}
                     </td>
                   </tr>
                 )

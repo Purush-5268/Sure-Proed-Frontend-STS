@@ -5,6 +5,7 @@ import { attendanceService } from "../../services/attendanceService";
 import { normalizeListResponse } from "../../services/apiClient";
 import apiClient from "../../services/apiClient";
 import styles from "./ScheduleClass.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function ScheduleClass() {
   const [courses, setCourses] = useState([]);
@@ -72,20 +73,58 @@ function ScheduleClass() {
     }));
   };
 
-  // 1. Update the force end class function to use attendanceService
+  // 🚨 New States for Inline Rescheduling
+  const [editingClassId, setEditingClassId] = useState(null);
+  const [editStartTime, setEditStartTime] = useState("");
+  const [editEndTime, setEditEndTime] = useState("");
+
+  const handleStartEdit = (cls) => {
+    setEditingClassId(cls.id);
+    // Format the date/time correctly for the HTML datetime-local input
+    const datePart = cls.class_date || new Date().toISOString().split('T')[0];
+    const startPart = cls.start_time ? cls.start_time.substring(0, 5) : "00:00";
+    const endPart = cls.end_time ? cls.end_time.substring(0, 5) : "23:59";
+
+    setEditStartTime(`${datePart}T${startPart}`);
+    setEditEndTime(`${datePart}T${endPart}`);
+  };
+
+  const handleSaveReschedule = async (classId) => {
+    try {
+      const updatedData = {
+        class_date: editStartTime.split("T")[0],
+        start_time: editStartTime.split("T")[1] + ":00",
+        end_time: editEndTime.split("T")[1] + ":00"
+      };
+
+      await attendanceService.patchAttendanceRecord(classId, updatedData);
+
+      // Update local state to reflect changes instantly
+      setActiveAdminClasses(prev => prev.map(c =>
+        c.id === classId ? { ...c, class_date: updatedData.class_date, start_time: updatedData.start_time, end_time: updatedData.end_time } : c
+      ));
+
+      setEditingClassId(null);
+    } catch (error) {
+      alert("❌ Failed to reschedule. Please check the backend connection.");
+    }
+  };
+
+  // 🚨 FIXED: Force End Class must send 'conducted: false' so backend intercepts it
   const handleForceEndClass = async (classId) => {
     if (!window.confirm("Are you sure you want to end this class and calculate attendance?")) return;
     try {
+      // Optimistic instant removal
       setActiveAdminClasses(prev => prev.filter(c => c.id !== classId));
 
-      // Uses your built-in attendanceService PATCH method
-      await attendanceService.patchAttendanceRecord(classId, { conducted: false });
+      // 🚨 FIX: MUST send conducted: false so Django triggers the aggregate_completed_session logic!
+      await attendanceService.patchAttendanceRecord(classId, { status: "COMPLETED", conducted: false });
 
-      alert("Class ended successfully. Attendance calculated and CSV generated.");
+      alert("✅ Class ended successfully. Attendance calculated.");
     } catch (err) {
       console.error("Failed to end class:", err);
-      loadActiveClasses();
-      alert("Failed to end class. Check backend endpoints.");
+      loadActiveClasses(); // Revert if failed
+      alert("❌ Failed to end class. Check backend endpoints.");
     }
   };
 
@@ -141,6 +180,14 @@ function ScheduleClass() {
       const expectedCount = res?.data?.expected_attendees_count || res?.expected_attendees_count || 0;
       setSuccessMessage(`Live class scheduled! Expected Attendees: ${expectedCount}`);
 
+      // 🚨 INSTANT UI UPDATE: Push the newly created class directly into the state
+      const newSession = res?.data || res;
+      if (newSession && newSession.id) {
+        setActiveAdminClasses(prev => [newSession, ...prev]);
+      } else {
+        loadActiveClasses(); // Fallback if backend doesn't return the object
+      }
+
       setRequest({
         sessionType: "Domain",
         streamId: "",
@@ -150,9 +197,6 @@ function ScheduleClass() {
         endTime: "",
         guestEmails: [],
       });
-
-      loadActiveClasses();
-
     } catch (err) {
       if (err.customError) {
         setErrorMessage(err.customError);
@@ -166,26 +210,26 @@ function ScheduleClass() {
   };
 
   return (
-    <div style={{ padding: "2rem", width: "100%" }}>
-      <div style={{ marginBottom: "2rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div className="premium-page-container">
+      <div className="premium-page-header">
         <div>
-          <h1 style={{ fontSize: "2rem", color: "#111827", margin: 0 }}>Schedule Live Class</h1>
-          <p style={{ color: "#6b7280", marginTop: "0.5rem", margin: "4px 0 0 0" }}>Configure automated Google Meets for Domains, LST, or Celebrations.</p>
+          <h1 className="premium-title">Schedule Live Class</h1>
+          <p className="premium-subtitle">Configure automated Google Meets for Domains, LST, or Celebrations.</p>
         </div>
       </div>
 
-      <div style={{ backgroundColor: "white", borderRadius: "12px", padding: "2rem", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", width: "100%" }}>
-        {successMessage && <div style={{ padding: "1rem", backgroundColor: "#dcfce7", color: "#166534", borderRadius: "8px", marginBottom: "1.5rem", fontWeight: "bold" }}>✅ {successMessage}</div>}
-        {errorMessage && <div style={{ padding: "1rem", backgroundColor: "#fee2e2", color: "#991b1b", borderRadius: "8px", marginBottom: "1.5rem", fontWeight: "bold" }}>❌ {errorMessage}</div>}
+      <div className="premium-glass-card premium-card-large">
+        {successMessage && <div className="premium-alert-success">✅ {successMessage}</div>}
+        {errorMessage && <div className="premium-alert-error">❌ {errorMessage}</div>}
 
-        <form onSubmit={scheduleClass} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+        <form onSubmit={scheduleClass} className="premium-form">
           <div>
-            <label style={{ display: "block", fontWeight: "bold", marginBottom: "0.5rem", color: "#374151" }}>Target Audience (Session Type) *</label>
+            <label className="premium-label">Target Audience (Session Type) *</label>
             <select
               value={request.sessionType}
               onChange={(e) => setRequest({ ...request, sessionType: e.target.value })}
               required
-              style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", border: "1px solid #d1d5db" }}
+              className={`premium-input ${styles.formInput}`}
             >
               <option value="Domain">Technical Domain (Specific Group)</option>
               <option value="LST">Life Skills Training (Entire Batch)</option>
@@ -194,25 +238,25 @@ function ScheduleClass() {
           </div>
 
           {request.sessionType === "Domain" && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", padding: "1rem", backgroundColor: "#faf5ff", borderRadius: "8px", border: "1px solid #e9d5ff" }}>
+            <div className={`premium-section premium-grid-2 ${styles.animatedField}`}>
               <div>
-                <label style={{ display: "block", fontWeight: "bold", marginBottom: "0.5rem", color: "#581c87" }}>Select Stream *</label>
-                <select value={request.streamId} onChange={(e) => setRequest({ ...request, streamId: e.target.value })} required style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", border: "1px solid #d8b4fe" }}>
+                <label className="premium-label">Select Stream *</label>
+                <select value={request.streamId} onChange={(e) => setRequest({ ...request, streamId: e.target.value })} required className={`premium-input ${styles.formInput}`}>
                   <option value="">-- Select Stream --</option>
                   {courses.map(c => <option key={c.id} value={c.id}>{c.name || c.title}</option>)}
                 </select>
               </div>
               <div>
-                <label style={{ display: "block", fontWeight: "bold", marginBottom: "0.5rem", color: "#581c87" }}>Group Code *</label>
-                <input type="text" value={request.groupName} onChange={(e) => setRequest({ ...request, groupName: e.target.value })} placeholder="e.g. G16" required style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", border: "1px solid #d8b4fe", textTransform: "uppercase" }} />
+                <label className="premium-label">Group Code *</label>
+                <input type="text" value={request.groupName} onChange={(e) => setRequest({ ...request, groupName: e.target.value })} placeholder="e.g. G16" required className={`premium-input ${styles.formInput}`} style={{ textTransform: "uppercase" }} />
               </div>
             </div>
           )}
 
           {request.sessionType === "LST" && (
-            <div style={{ padding: "1rem", backgroundColor: "#e0e7ff", borderRadius: "8px", border: "1px solid #c7d2fe" }}>
-              <label style={{ display: "block", fontWeight: "bold", marginBottom: "0.5rem", color: "#312e81" }}>LST Batch Number *</label>
-              <select value={request.lstBatchNumber} onChange={(e) => setRequest({ ...request, lstBatchNumber: e.target.value })} required style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", border: "1px solid #a5b4fc" }}>
+            <div className={`premium-section ${styles.animatedField}`}>
+              <label className="premium-label">LST Batch Number *</label>
+              <select value={request.lstBatchNumber} onChange={(e) => setRequest({ ...request, lstBatchNumber: e.target.value })} required className={`premium-input ${styles.formInput}`}>
                 <option value="">-- Select Batch --</option>
                 <option value="1">Batch 1</option>
                 <option value="2">Batch 2</option>
@@ -220,28 +264,28 @@ function ScheduleClass() {
             </div>
           )}
 
-          <div style={{ padding: "1.25rem", backgroundColor: "#eff6ff", borderRadius: "8px", border: "1px solid #bfdbfe" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: showGuestInput ? "1rem" : "0" }}>
+          <div className="premium-section">
+            <div className="premium-flex-between" style={{ marginBottom: showGuestInput ? "1rem" : "0" }}>
               <div>
-                <label style={{ display: "block", fontWeight: "bold", color: "#1e3a8a" }}>Whitelist Custom Emails (Optional)</label>
-                <p style={{ fontSize: "12px", color: "#1d4ed8", margin: 0 }}>Add trainers, trustees, or students to bypass the Meet waiting room.</p>
+                <label className="premium-label" style={{ color: "var(--text-primary)", marginBottom: 0 }}>Whitelist Custom Emails (Optional)</label>
+                <p style={{ fontSize: "12px", color: "var(--text-primary)", margin: 0 }}>Add trainers, trustees, or students to bypass the Meet waiting room.</p>
               </div>
-              <button type="button" onClick={() => setShowGuestInput(!showGuestInput)} style={{ padding: "0.5rem 1rem", backgroundColor: "#2563eb", color: "white", fontWeight: "bold", borderRadius: "6px", border: "none", cursor: "pointer" }}>
+              <button type="button" onClick={() => setShowGuestInput(!showGuestInput)} className="premium-btn premium-btn-primary">
                 {showGuestInput ? "Hide" : "+ Add Emails"}
               </button>
             </div>
 
             {showGuestInput && (
-              <div>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <input type="email" value={newGuestEmail} onChange={(e) => setNewGuestEmail(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addGuestEmail(e)} placeholder="e.g. rohansir@gmail.com" style={{ flex: 1, padding: "0.75rem", borderRadius: "8px", border: "1px solid #93c5fd" }} />
-                  <button type="button" onClick={addGuestEmail} style={{ padding: "0.75rem 1.5rem", backgroundColor: "#bfdbfe", color: "#1e3a8a", fontWeight: "bold", borderRadius: "8px", border: "none", cursor: "pointer" }}>Add</button>
+              <div className={styles.animatedField}>
+                <div className="premium-flex-row">
+                  <input type="email" value={newGuestEmail} onChange={(e) => setNewGuestEmail(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addGuestEmail(e)} placeholder="e.g. rohansir@gmail.com" className="premium-input" style={{ flex: 1 }} />
+                  <button type="button" onClick={addGuestEmail} className="premium-btn premium-btn-secondary">Add</button>
                 </div>
 
                 {request.guestEmails.length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem", padding: "0.75rem", backgroundColor: "rgba(255,255,255,0.5)", borderRadius: "8px" }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem", padding: "0.75rem", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "8px" }}>
                     {request.guestEmails.map((email, i) => (
-                      <span key={i} style={{ padding: "0.25rem 0.75rem", backgroundColor: "white", border: "1px solid #93c5fd", color: "#1e40af", fontSize: "14px", fontWeight: "bold", borderRadius: "9999px", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <span key={i} className="premium-badge-pill">
                         {email}
                         <button type="button" onClick={() => removeGuestEmail(i)} style={{ color: "#ef4444", border: "none", background: "none", cursor: "pointer", fontSize: "16px", fontWeight: "bold", padding: 0 }}>&times;</button>
                       </span>
@@ -252,69 +296,98 @@ function ScheduleClass() {
             )}
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+          <div className="premium-grid-2">
             <div>
-              <label style={{ display: "block", fontWeight: "bold", marginBottom: "0.5rem", color: "#374151" }}>Start Time *</label>
-              <input type="datetime-local" value={request.startTime} onChange={(e) => setRequest({ ...request, startTime: e.target.value })} required style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", border: "1px solid #d1d5db" }} />
+              <label className="premium-label">Start Time *</label>
+              <input type="datetime-local" value={request.startTime} onChange={(e) => setRequest({ ...request, startTime: e.target.value })} required className="premium-input" />
             </div>
             <div>
-              <label style={{ display: "block", fontWeight: "bold", marginBottom: "0.5rem", color: "#374151" }}>End Time *</label>
-              <input type="datetime-local" value={request.endTime} onChange={(e) => setRequest({ ...request, endTime: e.target.value })} required style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", border: "1px solid #d1d5db" }} />
+              <label className="premium-label">End Time *</label>
+              <input type="datetime-local" value={request.endTime} onChange={(e) => setRequest({ ...request, endTime: e.target.value })} required className="premium-input" />
             </div>
           </div>
 
-          <div style={{ borderTop: "1px solid #f3f4f6", paddingTop: "1.5rem", marginTop: "0.5rem" }}>
-            <button type="submit" disabled={isLoading} style={{ width: "100%", padding: "1rem", backgroundColor: "#facc15", color: "#4c1d95", fontWeight: "900", fontSize: "1.1rem", borderRadius: "8px", border: "none", cursor: isLoading ? "not-allowed" : "pointer", opacity: isLoading ? 0.7 : 1 }}>
-              {isLoading ? "Scheduling..." : "Schedule & Generate Meet Link"}
+          <div style={{ borderTop: "1px solid var(--border-color)", paddingTop: "1.5rem", marginTop: "0.5rem" }}>
+            <button type="submit" disabled={isLoading} className={`premium-btn premium-btn-accent ${styles.submitBtn} ${styles.shinyBtn}`} style={{ width: "100%", opacity: isLoading ? 0.7 : 1 }}>
+              {isLoading ? "⏳ Generating Secure Link..." : "✨ Schedule & Generate Meet Link"}
             </button>
           </div>
         </form>
       </div>
 
       {/* 🚨 ADMIN LIVE RADAR UI 🚨 */}
-      <div style={{ marginTop: "3rem", padding: "2rem", backgroundColor: "#f8fafc", borderRadius: "12px", border: "1px solid #e2e8f0", width: "100%" }}>
-        <h2 style={{ color: "#0f172a", marginBottom: "1.5rem", fontSize: "1.5rem" }}>📡 Live Class Radar</h2>
+      <div className="premium-section" style={{ marginTop: "3rem" }}>
+        <h2 className="premium-title" style={{ marginBottom: "1.5rem" }}>📡 Live Class Radar</h2>
 
-        <div style={{ display: "grid", gap: "1rem" }}>
+        <div className={`premium-form ${styles.radarContainer}`}>
           {activeAdminClasses.map(cls => (
-            <div key={cls.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.5rem", backgroundColor: "white", borderRadius: "8px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+            <div key={cls.id} className={`premium-card ${styles.animatedCard}`} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-              <div>
-                <h3 style={{ margin: "0 0 5px 0", color: "#1e293b", fontSize: "1.2rem" }}>{cls.title}</h3>
-                <p style={{ margin: 0, color: "#64748b", fontSize: "14px" }}>
-                  {/* 🚨 FIX: Now uses the safe generator_info from the fixed serializer */}
-                  Generated by: <strong>{cls.generator_info || "Admin/Mentor"}</strong> |
-                  Attendees Mapped: <strong>{cls.attendees?.length || 0}</strong>
-                </p>
-                <p style={{ margin: "5px 0 0 0", color: "#64748b", fontSize: "12px" }}>
-                  Scheduled For: {new Date(cls.class_date + "T" + cls.start_time).toLocaleString(undefined, {
-                    dateStyle: 'medium',
-                    timeStyle: 'short',
-                    hour12: true
-                  })}
-                </p>
+              <div className="premium-flex-between">
+                <div>
+                  <h3 style={{ margin: "0 0 5px 0", color: "var(--text-primary)", fontSize: "1.2rem" }}>{cls.title}</h3>
+                  <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: "14px" }}>
+                    Generated by: <strong>{cls.generator_info || "Admin/Mentor"}</strong> |
+                    Attendees Mapped: <strong>{cls.attendees?.length || 0}</strong>
+                  </p>
+
+                  {/* Hide standard time display if currently editing */}
+                  {editingClassId !== cls.id && (
+                    <p style={{ margin: "5px 0 0 0", color: "var(--primary-color)", fontSize: "13px", fontWeight: "bold" }}>
+                      ⏱️ Scheduled: {new Date(cls.class_date + "T" + cls.start_time).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                    </p>
+                  )}
+                </div>
+
+                <div className="premium-flex-row">
+                  {editingClassId !== cls.id ? (
+                    <>
+                      <button onClick={() => handleStartEdit(cls)} className="premium-btn premium-btn-secondary">
+                        ✏️ Reschedule
+                      </button>
+                      <button onClick={() => window.open(cls.meeting_link?.startsWith('http') ? cls.meeting_link : `https://${cls.meeting_link}`, '_blank')} disabled={!cls.meeting_link} className="premium-btn premium-btn-primary">
+                        👁️ Spectate
+                      </button>
+                      <button onClick={() => handleForceEndClass(cls.id)} className="premium-btn premium-btn-danger">
+                        🛑 End Class
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => setEditingClassId(null)} className="premium-btn premium-btn-secondary">
+                        Cancel
+                      </button>
+                      <button onClick={() => handleSaveReschedule(cls.id)} className="premium-btn premium-btn-accent">
+                        💾 Save Changes
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
 
-              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                <button
-                  onClick={() => window.open(cls.meeting_link?.startsWith('http') ? cls.meeting_link : `https://${cls.meeting_link}`, '_blank')}
-                  disabled={!cls.meeting_link}
-                  style={{ padding: "10px 16px", backgroundColor: cls.meeting_link ? "#3b82f6" : "#cbd5e1", color: "white", border: "none", borderRadius: "6px", cursor: cls.meeting_link ? "pointer" : "not-allowed", fontWeight: "bold" }}>
-                  👁️ Spectate
-                </button>
-
-                <button
-                  onClick={() => handleForceEndClass(cls.id)}
-                  style={{ padding: "10px 16px", backgroundColor: "#ef4444", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}>
-                  🛑 End Class
-                </button>
-              </div>
+              {/* 🚨 Inline Editor UI */}
+              {editingClassId === cls.id && (
+                <div className={styles.animatedField} style={{ background: 'var(--bg-nested)', padding: '1rem', borderRadius: '8px', display: 'flex', gap: '1rem', border: '1px solid var(--border-color)' }}>
+                  <div style={{ flex: 1 }}>
+                    <label className="premium-label" style={{ fontSize: '12px' }}>New Start Time</label>
+                    <input type="datetime-local" value={editStartTime} onChange={(e) => setEditStartTime(e.target.value)} className={`premium-input ${styles.formInput}`} style={{ minHeight: '40px' }} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label className="premium-label" style={{ fontSize: '12px' }}>New End Time</label>
+                    <input type="datetime-local" value={editEndTime} onChange={(e) => setEditEndTime(e.target.value)} className={`premium-input ${styles.formInput}`} style={{ minHeight: '40px' }} />
+                  </div>
+                </div>
+              )}
 
             </div>
           ))}
           {activeAdminClasses.length === 0 && (
-            <div style={{ padding: "2rem", textAlign: "center", color: "#64748b", backgroundColor: "white", borderRadius: "8px" }}>
-              No active classes generated yet.
+            <div className={styles.sleekEmptyState}>
+              <div className={styles.sleekEmptyStateIcon}>📡</div>
+              <div className={styles.sleekEmptyStateText}>
+                <h3>No Active Classes</h3>
+                <p>No active classes generated yet.</p>
+              </div>
             </div>
           )}
         </div>

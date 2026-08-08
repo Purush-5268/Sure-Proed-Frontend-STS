@@ -1,13 +1,13 @@
 .courseDetailsPage {
   min-height: 100vh;
-  background: #f4f7fb;
+  background: transparent;
   padding: 60px 30px;
 }
 
 .container {
-  max-width: 1000px;
+  max-width: 100%;
   margin: auto;
-  background: #fff;
+  background: var(--bg-surface);
   padding: 40px;
   border-radius: 18px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -20,7 +20,7 @@
 }
 
 .description {
-  color: #6b7280;
+  color: var(--text-secondary);
   line-height: 1.8;
   margin-bottom: 35px;
 }
@@ -33,13 +33,13 @@
 }
 
 .infoGrid div {
-  background: #f8fafc;
+  background: var(--bg-main);
   padding: 18px;
   border-radius: 12px;
 }
 
 .infoGrid h3 {
-  color: #374151;
+  color: var(--text-primary);
   font-size: 15px;
   margin-bottom: 8px;
 }
@@ -61,7 +61,7 @@
 .section ul {
   padding-left: 20px;
   line-height: 2;
-  color: #4b5563;
+  color: var(--text-secondary);
 }
 
 .applyBtn {

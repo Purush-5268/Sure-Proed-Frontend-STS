@@ -1,25 +1,217 @@
 .container {
     padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: 100%;
 }
 
-/* Ensure the live session radar/list items stack cleanly in a single vertical column */
-.classList {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    width: 100%;
+/* 🚨 Upgraded Input: Deep Dark Mode Support & Elegant Glow Focus */
+.formInput {
+    min-height: 48px !important;
+    height: auto !important;
+    padding: 12px 16px !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    box-sizing: border-box !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    background-color: var(--bg-nested) !important;
+    /* Perfect dark mode */
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
 }
 
-.classCard {
+/* The elegant highlight effect when selecting a box */
+.formInput:focus,
+.formInput:focus-visible {
+    transform: translateY(-2px);
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    outline: none !important;
+}
+
+/* 🚨 Smooth Reveal Animation for Filtering/Dropdowns */
+@keyframes expandSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-15px) scale(0.98);
+        /* FIXED: Added missing parentheses */
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.animatedField {
+    animation: expandSlideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform-origin: top center;
+    will-change: transform, opacity;
+}
+
+/* 🚨 Premium Shiny Button Effect */
+.shinyBtn {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    transition: all 0.3s ease !important;
+    border: none !important;
+}
+
+.shinyBtn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.25) 50%, rgba(255, 255, 255, 0) 100%);
+    transform: skewX(-25deg);
+    animation: shineEffect 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: -1;
+}
+
+@keyframes shineEffect {
+    0% {
+        left: -100%;
+    }
+
+    20% {
+        left: 200%;
+    }
+
+    100% {
+        left: 200%;
+    }
+}
+
+/* 🚨 FIXED: Added the missing slideInUp keyframes for the Radar Cards */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animatedCard {
+    animation: slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    will-change: transform, opacity;
+}
+
+.animatedCard:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Stagger the animations based on their order so they appear one by one */
+.animatedCard:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.animatedCard:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.animatedCard:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.animatedCard:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+/* Smooth transition for the submit button */
+.submitBtn {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.submitBtn:active {
+    transform: scale(0.97);
+}
+
+/* 🚨 Radar Container: Fixed height with premium sleek scrollbar */
+.radarContainer {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 12px;
+    /* Space for the scrollbar */
+    scroll-behavior: smooth;
+}
+
+/* Custom Premium Scrollbar for Radar */
+.radarContainer::-webkit-scrollbar {
+    width: 6px;
+}
+
+.radarContainer::-webkit-scrollbar-track {
+    background: var(--bg-nested);
+    border-radius: 8px;
+}
+
+.radarContainer::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.radarContainer::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* 🚨 Sleek, Compact Empty State for the Radar */
+.sleekEmptyState {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    background: #ffffff;
-    padding: 1.5rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    border: 1px solid #e2e8f0;
-    width: 100%;
+    justify-content: center;
+    gap: 16px;
+    padding: 1.5rem 2rem;
+    background: var(--bg-nested);
+    border: 1px dashed var(--border-color);
+    border-radius: 12px;
+    color: var(--text-muted);
+    text-align: left;
+    transition: all 0.3s ease;
+    max-width: 500px;
+    margin: 0 auto;
+    /* Centers the compact box nicely */
+}
+
+.sleekEmptyState:hover {
+    background: var(--bg-surface);
+    border-color: var(--text-muted);
+}
+
+.sleekEmptyStateIcon {
+    font-size: 2rem;
+    opacity: 0.8;
+    animation: floatIcon 3s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+.sleekEmptyStateText h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 0 0 4px 0;
+}
+
+.sleekEmptyStateText p {
+    font-size: 0.85rem;
+    margin: 0;
 }

@@ -1,17 +1,34 @@
 const ACCESS_TOKEN_KEY = "sure_access_token";
 const REFRESH_TOKEN_KEY = "sure_refresh_token";
 const USER_INFO_KEY = "sure_user_info";
+const REMEMBER_ME_KEY = "sure_remember_me";
 
-export const getAccessToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
-export const setAccessToken = (token) => localStorage.setItem(ACCESS_TOKEN_KEY, token);
-export const removeAccessToken = () => localStorage.removeItem(ACCESS_TOKEN_KEY);
+// Determine storage based on user's choice
+const getStorage = () => {
+  const remember = localStorage.getItem(REMEMBER_ME_KEY) === "true";
+  return remember ? localStorage : sessionStorage;
+};
 
-export const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY);
-export const setRefreshToken = (token) => localStorage.setItem(REFRESH_TOKEN_KEY, token);
-export const removeRefreshToken = () => localStorage.removeItem(REFRESH_TOKEN_KEY);
+export const setRememberMe = (value) => {
+  localStorage.setItem(REMEMBER_ME_KEY, value);
+};
+
+export const getAccessToken = () => getStorage().getItem(ACCESS_TOKEN_KEY);
+export const setAccessToken = (token) => getStorage().setItem(ACCESS_TOKEN_KEY, token);
+export const removeAccessToken = () => {
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+};
+
+export const getRefreshToken = () => getStorage().getItem(REFRESH_TOKEN_KEY);
+export const setRefreshToken = (token) => getStorage().setItem(REFRESH_TOKEN_KEY, token);
+export const removeRefreshToken = () => {
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+};
 
 export const getUserInfo = () => {
-  const data = localStorage.getItem(USER_INFO_KEY);
+  const data = getStorage().getItem(USER_INFO_KEY);
   try {
     return data ? JSON.parse(data) : null;
   } catch (e) {
@@ -19,8 +36,11 @@ export const getUserInfo = () => {
   }
 };
 
-export const setUserInfo = (user) => localStorage.setItem(USER_INFO_KEY, JSON.stringify(user));
-export const removeUserInfo = () => localStorage.removeItem(USER_INFO_KEY);
+export const setUserInfo = (user) => getStorage().setItem(USER_INFO_KEY, JSON.stringify(user));
+export const removeUserInfo = () => {
+  localStorage.removeItem(USER_INFO_KEY);
+  sessionStorage.removeItem(USER_INFO_KEY);
+};
 
 export const clearAuthStorage = () => {
   removeAccessToken();

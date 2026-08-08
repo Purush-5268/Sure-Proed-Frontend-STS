@@ -4,8 +4,8 @@
 
 .card {
   width: 100%;
-  max-width: 680px;
-  margin: 0 auto;
+  max-width: 100%;
+  
   background: var(--bg-card);
   padding: 32px;
   border-radius: var(--radius-md);
@@ -36,7 +36,7 @@
   font-size: 14px;
   color: var(--text-primary);
   outline: none;
-  background: #ffffff;
+  background: var(--bg-surface);
   transition: all var(--transition-fast);
 }
 
@@ -91,7 +91,7 @@
   height: var(--button-height);
   padding: 0 24px;
   text-decoration: none;
-  background: #ffffff;
+  background: var(--bg-surface);
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);

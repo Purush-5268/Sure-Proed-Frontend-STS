@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import styles from "./CohortDetails.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function CohortDetails() {
 
@@ -18,7 +19,7 @@ function CohortDetails() {
   return (
     <div className={styles.container}>
 
-      <div className={styles.card}>
+      <div className="premium-card">
 
         <div className={styles.header}>
           <h1>Cohort Details</h1>
@@ -72,7 +73,7 @@ function CohortDetails() {
 
           <div>
             <label>Status</label>
-            <span className={styles.active}>
+            <span className="premium-badge premium-badge-active">
               {cohort.status}
             </span>
           </div>

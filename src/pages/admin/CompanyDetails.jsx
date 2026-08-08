@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./CompanyDetails.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function CompanyDetails() {
   const { id } = useParams();
@@ -28,13 +29,13 @@ function CompanyDetails() {
     }
   }, [id]);
 
-  if (loading) return <div className={styles.container}><div className={styles.card}><h1>Company Details</h1><p>Loading company details...</p></div></div>;
-  if (error) return <div className={styles.container}><div className={styles.card}><h1>Company Details</h1><p style={{ color: "#b91c1c" }}>{error}</p></div></div>;
-  if (!company) return <div className={styles.container}><div className={styles.card}><h1>Company Details</h1><p>No company data found.</p></div></div>;
+  if (loading) return <div className={styles.container}><div className="premium-card"><h1>Company Details</h1><SkeletonLoader variant="detail" /></div></div>;
+  if (error) return <div className={styles.container}><div className="premium-card"><h1>Company Details</h1><p style={{ color: "#b91c1c" }}>{error}</p></div></div>;
+  if (!company) return <div className={styles.container}><div className="premium-card"><h1>Company Details</h1><p>No company data found.</p></div></div>;
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <h1>Company Details</h1>
 
         <div className={styles.info}>

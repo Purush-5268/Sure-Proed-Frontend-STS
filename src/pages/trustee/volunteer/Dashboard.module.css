@@ -4,16 +4,26 @@
   gap: 2rem;
 }
 
+.header {
+  background: linear-gradient(135deg, #fdf4ff 0%, #e0e7ff 100%);
+  padding: 2.5rem;
+  border-radius: var(--radius-2xl);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  text-align: center;
+}
+
 .header h1 {
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--text-primary);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #4c1d95;
   margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
 }
 
 .header p {
-  color: var(--text-secondary);
-  font-size: 1.1rem;
+  color: #5b21b6;
+  font-size: 1.15rem;
+  font-weight: 500;
 }
 
 .statsGrid {
@@ -23,13 +33,12 @@
 }
 
 .statCardAlerts, .statCardSchedule, .statCardAttendance, .statCardUsers {
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  border-radius: var(--radius-2xl);
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
-  border-top: 4px solid transparent;
-  transition: all var(--transition-fast);
+  border: none;
+  transition: all var(--transition-normal);
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -37,12 +46,26 @@
   text-decoration: none;
   position: relative;
   overflow: hidden;
+  z-index: 1;
 }
 
-.statCardAlerts { border-top-color: #ef4444; }
-.statCardSchedule { border-top-color: #14b8a6; }
-.statCardAttendance { border-top-color: #3b82f6; }
-.statCardUsers { border-top-color: #f43f5e; }
+.statCardAlerts::before, .statCardSchedule::before, .statCardAttendance::before, .statCardUsers::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  opacity: 0.05;
+  z-index: -1;
+  transition: opacity var(--transition-normal);
+}
+
+.statCardAlerts:hover::before, .statCardSchedule:hover::before, .statCardAttendance:hover::before, .statCardUsers:hover::before {
+  opacity: 0.15;
+}
+
+.statCardAlerts { background: var(--bg-surface); }
+.statCardSchedule { background: var(--bg-surface); }
+.statCardAttendance { background: var(--bg-surface); }
+.statCardUsers { background: var(--bg-surface); }
 
 .statCardAlerts:hover, .statCardSchedule:hover, .statCardAttendance:hover, .statCardUsers:hover {
   transform: translateY(-4px);

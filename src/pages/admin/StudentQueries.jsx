@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { attendanceService } from "../../services/attendanceService";
 import styles from "./StudentQueries.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function StudentQueries() {
   const [queries, setQueries] = useState([]);
@@ -28,9 +29,9 @@ function StudentQueries() {
     try {
       await attendanceService.updateQueryStatus(warningId, action);
       if (action === 'ACCEPT') {
-         setQueries(prev => prev.filter(q => q.id !== warningId));
+        setQueries(prev => prev.filter(q => q.id !== warningId));
       } else {
-         setQueries(prev => prev.map(q => q.id === warningId ? { ...q, status: 'REJECTED' } : q));
+        setQueries(prev => prev.map(q => q.id === warningId ? { ...q, status: 'REJECTED' } : q));
       }
       alert(`Query successfully ${action}ED.`);
     } catch (err) {
@@ -42,10 +43,10 @@ function StudentQueries() {
   const groupedData = queries.reduce((acc, query) => {
     const domain = query.domain_name || "Unknown Domain";
     const group = query.group_name || "Unknown Group";
-    
+
     if (!acc[domain]) acc[domain] = {};
     if (!acc[domain][group]) acc[domain][group] = [];
-    
+
     acc[domain][group].push(query);
     return acc;
   }, {});
@@ -58,33 +59,33 @@ function StudentQueries() {
       </div>
 
       {loading ? (
-        <p>Loading queries...</p>
+        <SkeletonLoader variant="table" rows={4} />
       ) : Object.keys(groupedData).length === 0 ? (
         <div className={styles.emptyState}>No pending queries or apologies.</div>
       ) : (
         <div className={styles.hierarchyContainer}>
           {Object.entries(groupedData).map(([domain, groups]) => (
             <div key={domain} className={styles.domainBlock}>
-              <div 
-                className={styles.domainHeader} 
+              <div
+                className={styles.domainHeader}
                 onClick={() => setExpandedDomain(expandedDomain === domain ? null : domain)}
               >
                 <h3>📁 {domain}</h3>
                 <span>{expandedDomain === domain ? '▼' : '▶'}</span>
               </div>
-              
+
               {expandedDomain === domain && (
                 <div className={styles.groupsContainer}>
                   {Object.entries(groups).map(([group, students]) => (
                     <div key={group} className={styles.groupBlock}>
-                      <div 
+                      <div
                         className={styles.groupHeader}
                         onClick={() => setExpandedGroup(expandedGroup === group ? null : group)}
                       >
                         <h4>📂 {group} ({students.length})</h4>
                         <span>{expandedGroup === group ? '▼' : '▶'}</span>
                       </div>
-                      
+
                       {expandedGroup === group && (
                         <div className={styles.studentsContainer}>
                           {students.map((student) => (
@@ -93,11 +94,11 @@ function StudentQueries() {
                                 <strong>{student.student_name}</strong>
                                 <span className={styles.dateText}>{student.session_title} - {student.class_date}</span>
                               </div>
-                              
+
                               <div className={styles.apologyBox}>
                                 <p><strong>Apology:</strong> {student.apology_text || "No text provided."}</p>
                               </div>
-                              
+
                               <div className={styles.actionButtons}>
                                 <button onClick={() => handleAction(student.id, 'ACCEPT')} className={styles.btnAccept}>Accept (Restore)</button>
                                 {/* We can let admin reject here too, or just leave it */}

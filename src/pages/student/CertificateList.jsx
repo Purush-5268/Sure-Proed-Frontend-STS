@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import { motion } from "framer-motion";
+import PageHeader from "../../components/ui/PageHeader";
+import EmptyState from "../../components/ui/EmptyState";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./CertificateList.module.css";
 
 function CertificateList() {
@@ -39,38 +43,65 @@ function CertificateList() {
   };
 
   return (
-    <div className={styles.page}>
-      <div className={styles.card}>
-        <h1>My Certificates</h1>
+    <div className="premium-page-container">
+      <PageHeader 
+        title="My Certificates" 
+        description="View and download your internship certificates."
+      />
 
-        <p className={styles.subtitle}>
-          View and download your internship certificates.
-        </p>
-
+      <div className="premium-card" style={{ maxWidth: '900px', margin: '0 auto', padding: '1.75rem' }}>
         {loading ? (
-          <p>Loading certificates from the database...</p>
+          <SkeletonLoader variant="table" rows={4} />
         ) : certificates.length === 0 ? (
-          <p>No certificates are available yet.</p>
+          <EmptyState 
+            icon={<span style={{ fontSize: '2rem' }}>🎓</span>}
+            title="No Certificates Found" 
+            description="You don't have any certificates issued yet."
+          />
         ) : (
-          <div className={styles.list}>
-            {certificates.map((certificate) => (
-              <div key={certificate.id} className={styles.certificateCard}>
-                <h3>{certificate.certificate_type || "Certificate"}</h3>
-
-                <p>
-                  <strong>Certificate ID:</strong> {certificate.certificate_number || certificate.id}
-                </p>
-
-                <p>
-                  <strong>Issue Date:</strong> {formatDate(certificate.issued_at)}
-                </p>
-
-                <span className={styles.issued}>{certificate.status || "ACTIVE"}</span>
-
-                <Link to="/student/certificate-view" state={{ certificate }} className={styles.button}>
-                  View Certificate →
-                </Link>
-              </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {certificates.map((certificate, idx) => (
+              <motion.div 
+                key={certificate.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                whileHover={{ scale: 1.01 }}
+                style={{ 
+                  background: 'var(--bg-nested)', 
+                  border: '1px solid var(--border-color)', 
+                  borderRadius: '10px', 
+                  padding: '1.25rem',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '1rem'
+                }}
+              >
+                <div style={{ flex: 1, minWidth: '220px' }}>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                    <span className="premium-badge premium-badge-active">
+                      {certificate.status || "ACTIVE"}
+                    </span>
+                  </div>
+                  <h3 style={{ fontSize: '1.1rem', margin: '0 0 4px 0', color: 'var(--text-primary)' }}>{certificate.certificate_type || "Certificate"}</h3>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    <strong>ID:</strong> {certificate.certificate_number || certificate.id} &nbsp;|&nbsp; 
+                    <strong> Issued:</strong> {formatDate(certificate.issued_at)}
+                  </p>
+                </div>
+                
+                <div>
+                  <Link 
+                    to="/student/certificate-view" 
+                    state={{ certificate }} 
+                    className="premium-btn premium-btn-primary"
+                  >
+                    View Certificate →
+                  </Link>
+                </div>
+              </motion.div>
             ))}
           </div>
         )}

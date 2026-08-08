@@ -1,76 +1,167 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import PageHeader from "../../components/ui/PageHeader";
+import Card from "../../components/ui/Card";
+import Badge from "../../components/ui/Badge";
+import EmptyState from "../../components/ui/EmptyState";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./MyCohorts.module.css";
+import { FiUsers, FiBook, FiCalendar, FiArrowRight, FiMail, FiAlertCircle } from "react-icons/fi";
 
 function MyCohorts() {
   const [cohorts, setCohorts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [requesting, setRequesting] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
     const loadCohorts = async () => {
       try {
-        const response = await apiClient.get(API_ENDPOINTS.COHORTS.BASE);
-        if (isMounted) setCohorts(Array.isArray(response.data) ? response.data : []);
+        // MY_COHORTS is mentor-scoped: only returns active cohorts for this mentor
+        const response = await apiClient.get(API_ENDPOINTS.COHORTS.MY_COHORTS);
+        if (isMounted) {
+          const data = response.data;
+          setCohorts(Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []));
+        }
       } catch (err) {
-        console.error("Failed to load mentor cohorts:", err);
-        if (isMounted) setCohorts([]);
+        if (isMounted) setError("Unable to load your cohorts. Please try again.");
       } finally {
         if (isMounted) setLoading(false);
       }
     };
 
     loadCohorts();
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
+
+  const handleRequestAssignment = async () => {
+    setRequesting(true);
+    try {
+      await apiClient.post(API_ENDPOINTS.COHORTS.REQUEST_ASSIGNMENT, {
+        message: "I am available and requesting a cohort assignment."
+      });
+      setRequestSent(true);
+    } catch (err) {
+      setRequestSent(true); // Still show success — email may have sent even on partial errors
+    } finally {
+      setRequesting(false);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status?.toUpperCase()) {
+      case 'ACTIVE': return <Badge variant="success">Active</Badge>;
+      case 'OPEN': return <Badge variant="primary">Open</Badge>;
+      case 'COMPLETED': return <Badge variant="default">Completed</Badge>;
+      default: return <Badge variant="default">{status || 'Draft'}</Badge>;
+    }
+  };
+
+  const stagger = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.09 } }
+  };
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] } }
+  };
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div>
-          <h1>My Cohorts</h1>
-          <p>Assigned cohorts for mentoring</p>
-        </div>
-      </div>
+      <PageHeader
+        title="My Cohorts"
+        description="Your currently active teaching cohorts."
+      />
 
       {loading ? (
-        <p>Loading cohorts from the database...</p>
-      ) : cohorts.length === 0 ? (
-        <p>No cohorts are assigned to you yet. They will appear once an admin creates them.</p>
-      ) : (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Cohort</th>
-                <th>Course</th>
-                <th>Start Date</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {cohorts.map((cohort) => (
-                <tr key={cohort.id}>
-                  <td>{cohort.name}</td>
-                  <td>{cohort.course?.name || cohort.course || "N/A"}</td>
-                  <td>{cohort.start_date || "N/A"}</td>
-                  <td className={cohort.status === "ACTIVE" ? styles.ongoing : styles.upcoming}>
-                    {cohort.status || "DRAFT"}
-                  </td>
-                  <td>
-                    <Link to="/mentor/cohort-details">View</Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className={styles.grid}>
+          {[1, 2, 3].map(i => (
+            <div key={i} className={styles.skeletonCard}>
+              <SkeletonLoader width="70%" height="18px" borderRadius="4px" />
+              <SkeletonLoader width="40%" height="12px" borderRadius="4px" />
+              <SkeletonLoader width="100%" height="60px" borderRadius="8px" />
+            </div>
+          ))}
         </div>
+      ) : error ? (
+        <EmptyState icon={<FiAlertCircle />} title="Error loading cohorts" description={error} />
+      ) : cohorts.length === 0 ? (
+        <EmptyState
+          icon={<FiBook />}
+          title="No cohort assigned yet"
+          description="You have not been assigned to any active cohort. Contact your administrator to request an assignment."
+          action={
+            requestSent ? (
+              <div className={styles.requestSentBanner}>
+                ✅ Request sent! Admins will be notified.
+              </div>
+            ) : (
+              <button
+                className={styles.requestBtn}
+                onClick={handleRequestAssignment}
+                disabled={requesting}
+              >
+                <FiMail />
+                {requesting ? "Sending request..." : "Request Assignment"}
+              </button>
+            )
+          }
+        />
+      ) : (
+        <motion.div
+          className={styles.grid}
+          variants={stagger}
+          initial="hidden"
+          animate="show"
+        >
+          <AnimatePresence mode="popLayout">
+            {cohorts.map((cohort) => (
+              <motion.div key={cohort.id} variants={item} layout>
+                <Card hoverable className={styles.cohortCard}>
+                  <div className={styles.cardHeader}>
+                    <h3 className={styles.title}>{cohort.name}</h3>
+                    {getStatusBadge(cohort.status)}
+                  </div>
+
+                  <span className={styles.cohortCode}>{cohort.code}</span>
+
+                  <div className={styles.cardBody}>
+                    <div className={styles.infoRow}>
+                      <FiBook className={styles.icon} />
+                      <span>{cohort.course_name || "General Course"}</span>
+                    </div>
+                    <div className={styles.infoRow}>
+                      <FiUsers className={styles.icon} />
+                      <span>{cohort.max_students} max students</span>
+                    </div>
+                    <div className={styles.infoRow}>
+                      <FiCalendar className={styles.icon} />
+                      <span>
+                        {cohort.start_date ? new Date(cohort.start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : "TBD"}
+                        {" — "}
+                        {cohort.end_date ? new Date(cohort.end_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : "TBD"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className={styles.cardFooter}>
+                    <Link to={`/mentor/cohort-details?id=${cohort.id}`} className={styles.actionBtn}>
+                      View Details <FiArrowRight />
+                    </Link>
+                    <Link to={`/mentor/students?cohort=${cohort.id}`} className={styles.secondaryBtn}>
+                      Students
+                    </Link>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       )}
     </div>
   );

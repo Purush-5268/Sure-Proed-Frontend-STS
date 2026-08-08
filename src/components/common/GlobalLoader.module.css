@@ -1,0 +1,65 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--bg-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.3s ease;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.pulseLogo {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--primary-color), #10b981);
+  border-radius: 12px;
+  animation: pulse 1.5s infinite ease-in-out alternate;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+  100% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
+}
+
+.loadingBarWrapper {
+  width: 200px;
+  height: 4px;
+  background: var(--bg-subtle);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.loadingBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 30%;
+  background: var(--primary-color);
+  border-radius: 4px;
+  animation: slide 1.5s infinite ease-in-out;
+}
+
+@keyframes slide {
+  0% { left: -30%; width: 30%; }
+  50% { width: 40%; }
+  100% { left: 100%; width: 30%; }
+}
+
+.message {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+}

@@ -64,7 +64,7 @@ function TrusteeLogin() {
       <div className={styles.orbOne} />
       <div className={styles.orbTwo} />
 
-      <div className={styles.card}>
+      <div className="premium-card">
         <div className={styles.cardHeader}>
           <div className={styles.iconBadge}>🛡️</div>
           <h1>Trustee Portal</h1>
@@ -81,8 +81,7 @@ function TrusteeLogin() {
             <label htmlFor="trustee-email">Email Address</label>
             <input
               id="trustee-email"
-              type="text"
-              placeholder="Enter your trustee email"
+              type="text" className="premium-input" placeholder="Enter your trustee email"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
