@@ -20,82 +20,122 @@ function Mentors() {
   const [courses, setCourses] = useState([]);
   const [allMentors, setAllMentors] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedCohort, setSelectedCohort] = useState(null);
   const [cohorts, setCohorts] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [loadingMentors, setLoadingMentors] = useState(true);
   const [loadingCohorts, setLoadingCohorts] = useState(false);
-  const [assigning, setAssigning] = useState(null); // { cohortId }
-  const [assignTarget, setAssignTarget] = useState({}); // { cohortId: mentorId }
+  const [assigning, setAssigning] = useState(null); // mentorId
   const [assignSuccess, setAssignSuccess] = useState(null);
 
-  // Load courses and all mentors on mount
+  // Load courses on mount
   useEffect(() => {
+    const abortController = new AbortController();
     let isMounted = true;
 
     const loadCourses = async () => {
       try {
-        const res = await apiClient.get(API_ENDPOINTS.COURSES.BASE);
+        const res = await apiClient.get(API_ENDPOINTS.COURSES.BASE, { signal: abortController.signal });
         if (isMounted) setCourses(normalizeListResponse(res.data));
-      } catch { }
-      finally { if (isMounted) setLoadingCourses(false); }
-    };
-
-    const loadMentors = async () => {
-      try {
-        const res = await apiClient.get(API_ENDPOINTS.USERS.BASE, { params: { role: "MENTOR" } });
-        const users = normalizeListResponse(res.data);
-        if (isMounted) setAllMentors(users.filter(u => u.role === "MENTOR"));
-      } catch { }
-      finally { if (isMounted) setLoadingMentors(false); }
+      } catch (err) { 
+        if (err.name !== 'CanceledError' && err.name !== 'AbortError') console.error(err);
+      }
+      finally { 
+        if (isMounted) {
+          setLoadingCourses(false);
+          setLoadingMentors(false); // Initially false until a course is selected
+        }
+      }
     };
 
     loadCourses();
-    loadMentors();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+      abortController.abort();
+    };
   }, []);
 
-  // Load active cohorts when course is selected
+  // Load active cohorts and relevant mentors when course is selected
   useEffect(() => {
-    if (!selectedCourse) { setCohorts([]); return; }
+    if (!selectedCourse) { 
+      setCohorts([]); 
+      setAllMentors([]); 
+      return; 
+    }
+    setSelectedCohort(null);
     let isMounted = true;
+    const abortController = new AbortController();
+    
     setLoadingCohorts(true);
+    setLoadingMentors(true);
     setCohorts([]);
+    setAllMentors([]);
 
-    const loadCohorts = async () => {
+    const loadData = async () => {
       try {
-        const res = await apiClient.get(API_ENDPOINTS.COHORTS.BASE, {
-          params: { course: selectedCourse.id, status: "ACTIVE" }
-        });
-        const data = normalizeListResponse(res.data);
-        // Extra safety: only show ACTIVE cohorts (never expired/completed)
-        if (isMounted) setCohorts(data.filter(c => c.status === "ACTIVE"));
-      } catch { }
-      finally { if (isMounted) setLoadingCohorts(false); }
+        const [cohortsRes, mentorsRes] = await Promise.all([
+          apiClient.get(API_ENDPOINTS.COHORTS.BASE, {
+            params: { course: selectedCourse.id },
+            signal: abortController.signal
+          }),
+          apiClient.get(API_ENDPOINTS.MENTORS.BASE, {
+            params: { course: selectedCourse.id },
+            signal: abortController.signal
+          })
+        ]);
+        
+        const cohortsData = normalizeListResponse(cohortsRes.data);
+        const mentorsData = normalizeListResponse(mentorsRes.data);
+        
+        if (isMounted) {
+          // Only show currently running cohorts
+          setCohorts(cohortsData.filter(c => ["ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS"].includes(c.status)));
+          setAllMentors(mentorsData);
+        }
+      } catch (err) {
+        if (err.name !== 'CanceledError' && err.name !== 'AbortError') console.error(err);
+      }
+      finally { 
+        if (isMounted) {
+          setLoadingCohorts(false);
+          setLoadingMentors(false);
+        }
+      }
     };
 
-    loadCohorts();
-    return () => { isMounted = false; };
+    loadData();
+    return () => {
+      isMounted = false;
+      abortController.abort();
+    };
   }, [selectedCourse]);
 
-  // Mentors filtered by selected course domain
-  const filteredMentors = selectedCourse
-    ? allMentors.filter(m => {
-        // Check if mentor's profile course matches
-        return !m.mentor_profile_course || m.mentor_profile_course === selectedCourse.id;
-      })
-    : allMentors;
+  const filteredMentors = allMentors;
 
-  const handleAssign = async (cohortId) => {
-    const mentorId = assignTarget[cohortId];
-    if (!mentorId) return;
-    setAssigning(cohortId);
+  // Map mentorId -> active cohorts they are teaching
+  const mentorCohortMap = {};
+  cohorts.forEach(cohort => {
+    // Only use active_mentor per backend instructions
+    if (cohort.active_mentor && cohort.active_mentor.id) {
+      const mId = cohort.active_mentor.id;
+      if (!mentorCohortMap[mId]) mentorCohortMap[mId] = [];
+      mentorCohortMap[mId].push(cohort);
+    }
+  });
+
+  const handleAssign = async (mentorId) => {
+    if (!selectedCohort) return;
+    setAssigning(mentorId);
     try {
-      // POST to cohort assignment endpoint
-      await apiClient.post(`/api/cohorts/${cohortId}/assign-mentor/`, {
+      await apiClient.post(`/api/cohorts/${selectedCohort.id}/assign-mentor/`, {
         mentor: mentorId,
         assigned_from: new Date().toISOString().split("T")[0],
       });
-      setAssignSuccess(cohortId);
+      setAssignSuccess(mentorId);
+      // Refresh cohorts to show updated status
+      const res = await apiClient.get(API_ENDPOINTS.COHORTS.BASE, { params: { course: selectedCourse.id } });
+      const data = normalizeListResponse(res.data);
+      setCohorts(data.filter(c => ["ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS"].includes(c.status)));
       setTimeout(() => setAssignSuccess(null), 3000);
     } catch (err) {
       alert(err?.response?.data?.detail || "Assignment failed. Check if a mentor is already assigned.");
@@ -114,7 +154,7 @@ function Mentors() {
       <div className="premium-page-header">
         <div>
           <h1 className="premium-title">Mentor Management</h1>
-          <p className="premium-subtitle">Assign mentors to active cohorts by course domain.</p>
+          <p className="premium-subtitle">Assign mentors to active cohorts by course.</p>
         </div>
         <Link to="/admin/add-mentor" className="premium-btn premium-btn-primary">
           <FiUserPlus /> Add Mentor
@@ -124,48 +164,65 @@ function Mentors() {
       {/* Step 1: Course Selector */}
       <div className={styles.stepSection}>
         <h2 className={styles.stepTitle}>
-          <span className={styles.stepNum}>1</span> Select a Course Domain
+          <span className={styles.stepNum}>1</span> Select Course
         </h2>
         {loadingCourses ? (
-          <div className={styles.courseGrid}>
-            {[1, 2, 3].map(i => (
-              <div key={i} className={styles.skeletonCourse}>
-                <SkeletonLoader width="60%" height="16px" borderRadius="4px" />
-              </div>
-            ))}
-          </div>
+          <SkeletonLoader width="300px" height="40px" borderRadius="8px" />
         ) : courses.length === 0 ? (
           <p className={styles.emptyNote}>No courses found in the system.</p>
         ) : (
-          <div className={styles.courseGrid}>
-            {courses.map(course => (
-              <button
-                key={course.id}
-                className={`${styles.courseChip} ${selectedCourse?.id === course.id ? styles.selected : ""}`}
-                onClick={() => setSelectedCourse(selectedCourse?.id === course.id ? null : course)}
-              >
-                <FiBook className={styles.chipIcon} />
-                {course.name || course.title}
-                {selectedCourse?.id === course.id && <FiChevronDown className={styles.chipArrow} />}
-              </button>
-            ))}
-          </div>
+          <select
+            className="premium-input"
+            style={{ maxWidth: "400px" }}
+            value={selectedCourse?.id || ""}
+            onChange={e => {
+              const c = courses.find(c => String(c.id) === e.target.value);
+              setSelectedCourse(c || null);
+            }}
+          >
+            <option value="">Select Course ▼</option>
+            {courses.map(c => <option key={c.id} value={c.id}>{c.name || c.title}</option>)}
+          </select>
         )}
       </div>
 
       {selectedCourse && (
-        <>
-          {/* Step 2: Mentors for this Domain */}
+        <div className={styles.stepSection}>
+          <h2 className={styles.stepTitle}>
+            <span className={styles.stepNum}>2</span> Select Active Cohort
+          </h2>
+          {loadingCohorts ? (
+            <SkeletonLoader width="300px" height="40px" borderRadius="8px" />
+          ) : cohorts.length === 0 ? (
+            <p className={styles.emptyNote}>No active cohorts for this course.</p>
+          ) : (
+            <select
+              className="premium-input"
+              style={{ maxWidth: "400px" }}
+              value={selectedCohort?.id || ""}
+              onChange={e => {
+                const c = cohorts.find(c => String(c.id) === e.target.value);
+                setSelectedCohort(c || null);
+              }}
+            >
+              <option value="">Select Active Cohort ▼</option>
+              {cohorts.map(c => <option key={c.id} value={c.id}>{c.code} - {c.name}</option>)}
+            </select>
+          )}
+        </div>
+      )}
+
+      {selectedCourse && (
           <div className={styles.stepSection}>
             <h2 className={styles.stepTitle}>
-              <span className={styles.stepNum}>2</span> Mentors — {selectedCourse.name || selectedCourse.title}
+              <span className={styles.stepNum}>3</span> Mentors
             </h2>
             {loadingMentors ? (
               <SkeletonLoader width="100%" height="80px" borderRadius="8px" />
             ) : filteredMentors.length === 0 ? (
               <div className={styles.emptyMentors}>
                 <FiUsers className={styles.emptyIcon} />
-                <p>No mentors found for this domain.</p>
+                <p>No mentors found for this course.</p>
                 <Link to="/admin/add-mentor" className="premium-btn premium-btn-secondary">Add Mentor</Link>
               </div>
             ) : (
@@ -173,104 +230,68 @@ function Mentors() {
                 <table className="premium-table">
                   <thead>
                     <tr>
-                      <th>Name</th>
-                      <th>Email</th>
+                      <th>Mentor Name</th>
                       <th>Status</th>
-                      <th>Actions</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredMentors.map(mentor => (
-                      <tr key={mentor.id}>
-                        <td>
-                          <div className={styles.mentorCell}>
-                            <div className={styles.mentorAvatar}>
-                              {`${mentor.first_name || "?"}`.charAt(0).toUpperCase()}
+                    {filteredMentors.map(mentor => {
+                      const activeCohorts = mentorCohortMap[mentor.user] || [];
+                      const isTeaching = activeCohorts.length > 0;
+                      return (
+                        <tr key={mentor.id}>
+                          <td>
+                            <div className={styles.mentorCell}>
+                              <div className={styles.mentorAvatar}>
+                                {`${mentor.user_first_name || "?"}`.charAt(0).toUpperCase()}
+                              </div>
+                              {`${mentor.user_first_name || ""} ${mentor.user_last_name || ""}`.trim() || mentor.user_email}
                             </div>
-                            {`${mentor.first_name || ""} ${mentor.last_name || ""}`.trim() || mentor.email}
-                          </div>
-                        </td>
-                        <td>{mentor.email}</td>
-                        <td>
-                          <span className={mentor.is_active ? styles.activeBadge : styles.inactiveBadge}>
-                            {mentor.is_active ? "Active" : "Inactive"}
-                          </span>
-                        </td>
-                        <td>
-                          <div className="premium-flex-row">
-                            <Link to={`/admin/mentor-details/${mentor.id}`} className="premium-btn premium-btn-secondary">View</Link>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td>
+                            {isTeaching ? (
+                              <div style={{ color: "#d97706", fontWeight: "bold" }}>
+                                ALREADY TEACHING
+                                <ul style={{ margin: "4px 0 0 16px", fontSize: "12px", color: "var(--text-secondary)", fontWeight: "normal" }}>
+                                  {activeCohorts.map(c => <li key={c.id}>{c.code} - {c.name}</li>)}
+                                </ul>
+                              </div>
+                            ) : (
+                              <span style={{ color: "#059669", fontWeight: "bold" }}>FREE</span>
+                            )}
+                          </td>
+                          <td>
+                            <div className="premium-flex-row" style={{ gap: "8px" }}>
+                              <Link to={`/admin/mentor-details/${mentor.user}`} className="premium-btn premium-btn-secondary" style={{ padding: "6px 12px" }}>View</Link>
+                              {isTeaching ? (
+                                <button className="premium-btn" disabled style={{ padding: "6px 12px", background: "#e5e7eb", color: "#9ca3af", cursor: "not-allowed" }}>
+                                  Assign
+                                </button>
+                              ) : assignSuccess === mentor.user ? (
+                                <button className="premium-btn" disabled style={{ padding: "6px 12px", background: "#ecfdf5", color: "#059669" }}>
+                                  Assigned!
+                                </button>
+                              ) : (
+                                <button 
+                                  className="premium-btn premium-btn-primary" 
+                                  style={{ padding: "6px 12px" }}
+                                  onClick={() => handleAssign(mentor.user)}
+                                  disabled={!selectedCohort || assigning === mentor.user}
+                                >
+                                  {assigning === mentor.user ? "Assigning..." : "Assign"}
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
             )}
           </div>
-
-          {/* Step 3: Active Cohorts for this Course */}
-          <div className={styles.stepSection}>
-            <h2 className={styles.stepTitle}>
-              <span className={styles.stepNum}>3</span> Active Cohorts — {selectedCourse.name || selectedCourse.title}
-            </h2>
-            {loadingCohorts ? (
-              <SkeletonLoader width="100%" height="120px" borderRadius="8px" />
-            ) : cohorts.length === 0 ? (
-              <div className={styles.emptyMentors}>
-                <FiBook className={styles.emptyIcon} />
-                <p>No active cohorts for this course. Only currently running cohorts appear here.</p>
-              </div>
-            ) : (
-              <motion.div
-                className={styles.cohortGrid}
-                initial="hidden"
-                animate="show"
-                variants={{ show: { transition: { staggerChildren: 0.07 } } }}
-              >
-                <AnimatePresence mode="popLayout">
-                  {cohorts.map(cohort => (
-                    <motion.div key={cohort.id} variants={item} className={styles.cohortAssignCard}>
-                      <div className={styles.cohortInfo}>
-                        <span className={styles.cohortCode}>{cohort.code}</span>
-                        <h4 className={styles.cohortName}>{cohort.name}</h4>
-                        <span className={styles.cohortDates}>
-                          {cohort.start_date} → {cohort.end_date}
-                        </span>
-                      </div>
-
-                      {assignSuccess === cohort.id ? (
-                        <div className={styles.successBadge}>✅ Mentor Assigned!</div>
-                      ) : (
-                        <div className={styles.assignRow}>
-                          <select
-                            className={styles.mentorSelect}
-                            value={assignTarget[cohort.id] || ""}
-                            onChange={e => setAssignTarget(prev => ({ ...prev, [cohort.id]: e.target.value }))}
-                          >
-                            <option value="">Select a mentor…</option>
-                            {filteredMentors.map(m => (
-                              <option key={m.id} value={m.id}>
-                                {`${m.first_name || ""} ${m.last_name || ""}`.trim() || m.email}
-                              </option>
-                            ))}
-                          </select>
-                          <button
-                            className={styles.assignBtn}
-                            onClick={() => handleAssign(cohort.id)}
-                            disabled={!assignTarget[cohort.id] || assigning === cohort.id}
-                          >
-                            {assigning === cohort.id ? "Assigning…" : "Assign"}
-                          </button>
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </motion.div>
-            )}
-          </div>
-        </>
       )}
     </div>
   );

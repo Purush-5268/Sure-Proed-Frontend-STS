@@ -34,7 +34,11 @@ const FloatingTracker = () => {
 
             <button 
               className={styles.stopButton} 
-              onClick={stopTracking}
+              onClick={() => {
+                if (window.confirm("Are you sure? This will stop tracking your attendance and you may be marked absent.")) {
+                  stopTracking();
+                }
+              }}
               title="Leave Session"
             >
               Leave

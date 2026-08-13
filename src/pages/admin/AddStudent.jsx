@@ -1,8 +1,10 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import apiClient from "../../services/apiClient";
+import { FiArrowLeft, FiAlertCircle, FiCheckCircle } from "react-icons/fi";
+import apiClient, { normalizeListResponse } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
-import styles from "./AddStudent.module.css";
+import { courseService } from "../../services/courseService";
+import { cohortService } from "../../services/cohortService";
 
 function AddStudent() {
   const navigate = useNavigate();
@@ -14,32 +16,50 @@ function AddStudent() {
     password: "",
     domain: "",
     course_batch: "",
-    role: "STUDENT",
+    is_active: true,
   });
+
   const [courses, setCourses] = useState([]);
+  const [cohorts, setCohorts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Fetch courses for the Domain dropdown
-  useState(() => {
-    apiClient.get(API_ENDPOINTS.COURSES.BASE).then(res => {
-      setCourses(res.data?.results || res.data || []);
-    }).catch(err => console.error("Failed to load courses", err));
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [coursesRes, cohortsRes] = await Promise.all([
+          courseService.getCourses(),
+          cohortService.getCohorts(),
+        ]);
+        setCourses(normalizeListResponse(coursesRes));
+        setCohorts(normalizeListResponse(cohortsRes));
+      } catch (err) {
+        console.error("Failed to load dropdown data", err);
+      }
+    }
+    loadData();
   }, []);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm(prev => {
+      const newForm = { ...prev, [name]: type === "checkbox" ? checked : value };
+      // If domain changes, reset cohort
+      if (name === "domain") {
+        newForm.course_batch = "";
+      }
+      return newForm;
+    });
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setError("");
     setSuccess("");
 
     if (!form.first_name.trim() || !form.last_name.trim() || !form.email.trim() || !form.password.trim()) {
-      setError("Please provide the student's first name, last name, email, and password.");
+      setError("Please provide first name, last name, email, and a temporary password.");
       return;
     }
 
@@ -49,23 +69,43 @@ function AddStudent() {
     }
 
     setLoading(true);
-
     try {
-      await apiClient.post(API_ENDPOINTS.USERS.BASE, {
+      // 1. Create User
+      const userPayload = {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         email: form.email.trim(),
         phone_number: form.phone_number.trim() || null,
         password: form.password,
-        domain: form.domain.trim() || null,
-        course_batch: form.course_batch.trim() || null,
         role: "STUDENT",
-      });
+        is_active: form.is_active,
+      };
 
-      setSuccess("Student account created successfully.");
-      navigate("/admin/students");
+      const userRes = await apiClient.post(API_ENDPOINTS.USERS.BASE, userPayload);
+      const newUserId = userRes.data.id || userRes.data.user?.id;
+
+      // 2. Update Student Profile if Domain or Cohort is selected
+      if (form.domain || form.course_batch) {
+        // Backend creates StudentProfile via signal. We need to find its ID to PATCH it.
+        const studentsRes = await apiClient.get(API_ENDPOINTS.STUDENTS.BASE);
+        const studentsList = normalizeListResponse(studentsRes.data?.results || studentsRes.data);
+        const studentProfile = studentsList.find(s => s.user?.id === newUserId || s.user === newUserId);
+
+        if (studentProfile) {
+          await apiClient.patch(API_ENDPOINTS.STUDENTS.BY_ID(studentProfile.id), {
+            domain: form.domain || null,
+            course_batch: form.course_batch || null
+          });
+        } else {
+          console.warn("Created student profile not found in recent list. Domain/Cohort not assigned.");
+        }
+      }
+
+      setSuccess("Student created successfully. Ensure you securely share their temporary password.");
+      setTimeout(() => navigate("/admin/students"), 2500);
+
     } catch (err) {
-      const message = err?.response?.data?.detail || err?.response?.data?.email?.[0] || "Unable to create the student account.";
+      const message = err?.response?.data?.detail || err?.response?.data?.email?.[0] || "Failed to create the student account.";
       setError(message);
     } finally {
       setLoading(false);
@@ -73,64 +113,98 @@ function AddStudent() {
   };
 
   return (
-    <div style={{ padding: "2rem", width: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+    <div className="premium-page-container">
+      <div className="premium-page-header">
         <div>
-          <h1 style={{ margin: 0, color: "var(--text-primary)", fontSize: "2rem" }}>Add New Student</h1>
-          <p style={{ color: "var(--text-muted)", margin: "4px 0 0 0" }}>Register a new student and assign their domain and batch.</p>
+          <h1 className="premium-title">Add New Student</h1>
+          <p className="premium-subtitle">Create a student account and assign them to a domain and cohort.</p>
         </div>
-        <Link to="/admin/students" style={{ padding: "10px 20px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>← Back to Students</Link>
+        <Link to="/admin/students" className="premium-btn" style={{ background: "var(--bg-nested)", color: "var(--text-secondary)" }}>
+          <FiArrowLeft /> Back to Students
+        </Link>
       </div>
 
-      <div style={{ backgroundColor: "var(--bg-surface)", padding: "2.5rem", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
-        {error ? <div style={{ color: "#b91c1c", backgroundColor: "#fee2e2", padding: "12px", borderRadius: "8px", marginBottom: "1.5rem", fontWeight: "bold" }}>{error}</div> : null}
-        {success ? <div style={{ color: "#166534", backgroundColor: "var(--bg-nested)", padding: "12px", borderRadius: "8px", marginBottom: "1.5rem", fontWeight: "bold" }}>{success}</div> : null}
+      <div className="premium-card">
+        {error && (
+          <div style={{ display: "flex", gap: "10px", alignItems: "center", color: "#b91c1c", backgroundColor: "#fee2e2", padding: "12px", borderRadius: "8px", marginBottom: "1.5rem", fontWeight: "bold" }}>
+            <FiAlertCircle size={20} /> {error}
+          </div>
+        )}
+        {success && (
+          <div style={{ display: "flex", gap: "10px", alignItems: "center", color: "#166534", backgroundColor: "#ecfdf5", padding: "12px", borderRadius: "8px", marginBottom: "1.5rem", fontWeight: "bold" }}>
+            <FiCheckCircle size={20} /> {success}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-          
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>First Name *</label>
-            <input type="text" name="first_name" value={form.first_name} onChange={handleChange} placeholder="e.g. John" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+        <form onSubmit={handleSubmit} className="premium-grid-2">
+          {/* User Fields */}
+          <div className="premium-form-group">
+            <label className="premium-label">First Name *</label>
+            <input type="text" name="first_name" value={form.first_name} onChange={handleChange} placeholder="e.g. John" className="premium-input" />
           </div>
-          
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Last Name *</label>
-            <input type="text" name="last_name" value={form.last_name} onChange={handleChange} placeholder="e.g. Doe" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+
+          <div className="premium-form-group">
+            <label className="premium-label">Last Name *</label>
+            <input type="text" name="last_name" value={form.last_name} onChange={handleChange} placeholder="e.g. Doe" className="premium-input" />
           </div>
-          
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Email Address *</label>
-            <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="student@example.com" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+
+          <div className="premium-form-group">
+            <label className="premium-label">Email Address *</label>
+            <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="student@example.com" className="premium-input" />
           </div>
-          
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Phone Number</label>
-            <input type="text" name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="+91 9876543210" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+
+          <div className="premium-form-group">
+            <label className="premium-label">Phone Number</label>
+            <input type="tel" name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="+91 9876543210" className="premium-input" />
           </div>
-          
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Assign Domain</label>
-            <select name="domain" value={form.domain} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
-              <option value="">-- Select Domain (Optional) --</option>
-              {courses.map(c => <option key={c.id} value={c.name || c.id}>{c.name}</option>)}
+
+          {/* Profile Fields */}
+          <div className="premium-form-group">
+            <label className="premium-label">Domain (Optional)</label>
+            <select name="domain" value={form.domain} onChange={handleChange} className="premium-input">
+              <option value="">-- Select Domain --</option>
+              {courses.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
             </select>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Group / Batch Number</label>
-            <input type="text" name="course_batch" value={form.course_batch} onChange={handleChange} placeholder="e.g. G15" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", textTransform: "uppercase" }} />
+          <div className="premium-form-group">
+            <label className="premium-label">Cohort / Batch (Optional)</label>
+            <select 
+              name="course_batch" 
+              value={form.course_batch} 
+              onChange={handleChange} 
+              disabled={!form.domain}
+              className="premium-input"
+              style={{ backgroundColor: !form.domain ? "var(--bg-nested)" : "var(--bg-surface)" }}
+            >
+              <option value="">-- Select Batch --</option>
+              {cohorts.filter(c => {
+                 const courseMatched = courses.find(course => course.name === form.domain);
+                 if (!courseMatched) return false;
+                 return c.course?.id === courseMatched.id || c.course === courseMatched.id || c.course?.name === form.domain;
+              }).map(coh => (
+                <option key={coh.id} value={coh.name}>{coh.name}</option>
+              ))}
+            </select>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px", gridColumn: "1 / -1" }}>
-            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Temporary Password *</label>
-            <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="At least 8 characters" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+          <div className="premium-form-group" style={{ gridColumn: "1 / -1", maxWidth: "50%" }}>
+            <label className="premium-label">Temporary Password *</label>
+            <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="At least 8 characters" className="premium-input" />
           </div>
 
-          <div style={{ gridColumn: "1 / -1", display: "flex", gap: "1rem", marginTop: "1rem", borderTop: "1px solid #e5e7eb", paddingTop: "1.5rem" }}>
-            <button type="submit" disabled={loading} style={{ padding: "12px 24px", backgroundColor: "#2563eb", color: "white", borderRadius: "8px", border: "none", fontWeight: "bold", cursor: loading ? "not-allowed" : "pointer" }}>
-              {loading ? "Saving..." : "Save Student"}
+          <div className="premium-form-group" style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: "10px", marginTop: "0.5rem" }}>
+            <input type="checkbox" name="is_active" checked={form.is_active} onChange={handleChange} style={{ width: "18px", height: "18px", cursor: "pointer" }} />
+            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px", cursor: "pointer" }} onClick={() => setForm(p => ({ ...p, is_active: !p.is_active }))}>
+              Account is Active
+            </label>
+          </div>
+
+          <div style={{ gridColumn: "1 / -1", display: "flex", gap: "1rem", marginTop: "1rem", borderTop: "1px solid var(--border-color)", paddingTop: "1.5rem" }}>
+            <button type="submit" disabled={loading} className="premium-btn premium-btn-primary" style={{ cursor: loading ? "not-allowed" : "pointer" }}>
+              {loading ? "Creating Student..." : "Create Student"}
             </button>
-            <Link to="/admin/students" style={{ padding: "12px 24px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>Cancel</Link>
+            <Link to="/admin/students" className="premium-btn" style={{ background: "var(--bg-nested)", color: "var(--text-secondary)" }}>Cancel</Link>
           </div>
         </form>
       </div>

@@ -5,7 +5,11 @@ const ThemeContext = createContext(null);
 export function ThemeProvider({ children }) {
   // Read from localStorage (saved by the user) or default to 'system'
   const [themeMode, setThemeMode] = useState(() => {
-    return localStorage.getItem('sure_theme_pref') || 'system';
+    try {
+      return localStorage.getItem('sure_theme_pref') || 'system';
+    } catch (e) {
+      return 'system';
+    }
   });
 
   useEffect(() => {
@@ -22,7 +26,9 @@ export function ThemeProvider({ children }) {
     };
 
     applyTheme(themeMode);
-    localStorage.setItem('sure_theme_pref', themeMode);
+    try {
+      localStorage.setItem('sure_theme_pref', themeMode);
+    } catch (e) {}
 
     // Listen for system theme changes if set to 'system'
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');

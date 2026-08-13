@@ -22,19 +22,52 @@ export function AuthProvider({ children }) {
 
   // On mount: restore user from stored token
   useEffect(() => {
-    const token = getAccessToken();
-    const storedUser = getUserInfo();
+    const initAuth = async () => {
+      const token = getAccessToken();
+      const storedUser = getUserInfo();
 
-    if (token && storedUser) {
-      setUser(storedUser);
-    } else if (token) {
-      // Try to decode user info from JWT
-      const decoded = parseJwt(token);
-      if (decoded) {
-        setUser(decoded);
+      if (token) {
+        const decoded = parseJwt(token);
+        const isExpired = decoded && decoded.exp && (decoded.exp * 1000 < Date.now());
+
+        if (isExpired) {
+          const refreshToken = getRefreshToken();
+          if (refreshToken) {
+            try {
+              // Bypass apiClient interceptors for the initial refresh to avoid race conditions
+              const response = await fetch(API_ENDPOINTS.AUTH.REFRESH, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refresh: refreshToken })
+              });
+              
+              if (response.ok) {
+                const data = await response.json();
+                setAccessToken(data.access);
+                if (storedUser) {
+                  setUser(storedUser);
+                } else {
+                  setUser(parseJwt(data.access));
+                }
+              } else {
+                clearAuthStorage();
+              }
+            } catch (err) {
+              clearAuthStorage();
+            }
+          } else {
+            clearAuthStorage();
+          }
+        } else {
+          // Token is valid
+          if (storedUser) setUser(storedUser);
+          else if (decoded) setUser(decoded);
+        }
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    initAuth();
   }, []);
 
   const updateUser = (updatedFields) => {

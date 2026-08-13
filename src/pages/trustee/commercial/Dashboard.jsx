@@ -12,8 +12,8 @@ function CommercialDashboard() {
         <div className={styles.heroContent}>
           <h1>Welcome, {userName}</h1>
           <p>
-            Commercial & Operations Dashboard. Manage organization-wide
-            announcements, showcase achievements, and track commercial updates.
+            Higher-Level Operations Dashboard. Manage organization-wide
+            announcements, showcase achievements, and track organization updates.
           </p>
         </div>
         <div className={styles.heroStats}>
@@ -49,7 +49,7 @@ function CommercialDashboard() {
           <div className={styles.cardIconWrapper} style={{ background: '#e0e7ff', color: '#4338ca' }}>
             <span className={styles.cardIcon}>📰</span>
           </div>
-          <h3>Commercial Updates</h3>
+          <h3>Organization Updates</h3>
           <p>Publish news related to partnerships, funding, and expansion efforts.</p>
         </Link>
       </div>

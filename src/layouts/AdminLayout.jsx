@@ -3,7 +3,7 @@ import {
   FaChartPie, FaUsers, FaChalkboardTeacher, FaBuilding, 
   FaBook, FaFileAlt, FaClipboardList, FaLayerGroup, 
   FaCalendarAlt, FaUserCheck, FaTasks, FaCertificate, 
-  FaBell, FaChartBar, FaCog 
+  FaBell, FaChartBar, FaCog, FaShieldAlt
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -16,6 +16,7 @@ import styles from "./AdminLayout.module.css";
 const adminLinks = [
   { label: "Dashboard", path: "/admin/dashboard", icon: <FaChartPie /> },
   { label: "Students", path: "/admin/students", icon: <FaUsers /> },
+  { label: "Trustees", path: "/admin/trustees", icon: <FaShieldAlt /> },
   { label: "Mentors", path: "/admin/mentors", icon: <FaChalkboardTeacher /> },
   { label: "Companies", path: "/admin/companies", icon: <FaBuilding /> },
   { label: "Courses", path: "/admin/courses", icon: <FaBook /> },

@@ -6,6 +6,7 @@ import {
   updateAnnouncement,
   deleteAnnouncement,
 } from "../../../services/trusteeService";
+import SkeletonLoader from "../../../components/common/SkeletonLoader";
 import styles from "./Announcements.module.css";
 
 function Announcements() {

@@ -62,9 +62,25 @@ function AddMentor() {
         is_active: form.is_active,
       };
 
-      await apiClient.post(API_ENDPOINTS.USERS.BASE, payload);
+      const userRes = await apiClient.post(API_ENDPOINTS.USERS.BASE, payload);
+      const newUserId = userRes.data.id || userRes.data.user?.id;
+
+      // 2. Attempt to assign Course (Domain) if selected
+      if (form.domain && newUserId) {
+        try {
+          // The backend might not support this due to serializer constraints (user is read-only).
+          // We attempt POST, if it fails, the backend doesn't support admin profile creation.
+          await apiClient.post(API_ENDPOINTS.MENTORS.PROFILE_BY_ID("").replace(/\/+$/, '/'), {
+            user: newUserId,
+            course: form.domain
+          });
+        } catch (profileErr) {
+          console.warn("Mentor profile creation skipped (backend API constraint):", profileErr);
+        }
+      }
+
       setSuccess("Mentor account created successfully. Share the email and password with the mentor.");
-      navigate("/admin/mentors");
+      setTimeout(() => navigate("/admin/mentors"), 2000);
     } catch (err) {
       const message = err?.response?.data?.detail || err?.response?.data?.email?.[0] || "Unable to create the mentor account.";
       setError(message);
@@ -110,10 +126,10 @@ function AddMentor() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Assigned Domain</label>
+            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Assigned Course</label>
             <select name="domain" value={form.domain} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
-              <option value="">-- Select Domain (Optional) --</option>
-              {courses.map(c => <option key={c.id} value={c.name || c.id}>{c.name}</option>)}
+              <option value="">-- Select Course (Optional) --</option>
+              {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
 

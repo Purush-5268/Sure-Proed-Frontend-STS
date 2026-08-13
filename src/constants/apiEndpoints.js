@@ -20,6 +20,9 @@ export const API_ENDPOINTS = {
   STUDENTS: {
     BASE: "/api/students/",
     BY_ID: (id) => `/api/students/${id}/`,
+    BULK_VERIFY: "/api/students/bulk_verify/",
+    VERIFY: (id) => `/api/students/${id}/verify/`,
+    STATISTICS: "/api/students/statistics/",
   },
 
   // Courses
@@ -50,6 +53,7 @@ export const API_ENDPOINTS = {
 
   // Mentor Profile (authenticated mentor's own profile)
   MENTORS: {
+    BASE: "/api/mentor-profile/",
     PROFILE_ME: "/api/mentor-profile/me/",
     PROFILE_BY_ID: (id) => `/api/mentor-profile/${id}/`,
   },
@@ -79,6 +83,9 @@ export const API_ENDPOINTS = {
   ATTENDANCE: {
     BASE: "/api/attendance/",
     BY_ID: (id) => `/api/attendance/${id}/`,
+    SUMMARY: "/api/attendance-summary/",
+    DOWNLOAD_EXCEL: (id) => `/api/attendance/${id}/download_excel/`,
+    ADD_ATTENDEES: (id) => `/api/attendance/${id}/add-attendees/`,
   },
 
   // Certificates
@@ -95,17 +102,16 @@ export const API_ENDPOINTS = {
   },
 
   // Trustee
+  TRUSTEE_PROFILES: {
+    BASE: "/api/trustees/profiles/",
+    ME: "/api/trustees/profiles/me/",
+    BY_ID: (id) => `/api/trustees/profiles/${id}/`,
+  },
   TRUSTEE: {
     // Volunteer operations
-    TODAY_SESSIONS: "/api/sessions/today/",
-    RECENT_SESSIONS: "/api/sessions/recent/",
-    JOIN_SESSION: (id) => `/api/sessions/${id}/join/`,
-    END_SESSION: (id) => `/api/sessions/${id}/end/`,
-    CREATE_SESSION: "/api/sessions/",
-    WHITELIST_GUEST: (id) => `/api/sessions/${id}/whitelist/`,
     LOW_ATTENDANCE_ALERTS: "/api/attendance/alerts/low/",
     ATTENDANCE_HIERARCHY: "/api/attendance/hierarchy/",
-    DOWNLOAD_CSV: (id) => `/api/attendance/${id}/csv/`,
+    CREATE_SESSION: "/api/sessions/",
     STREAMS: "/api/streams/",
     STUDENTS: "/api/students/",
     REMOVE_STUDENT: (id) => `/api/students/${id}/`,

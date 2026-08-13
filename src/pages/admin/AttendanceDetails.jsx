@@ -11,6 +11,10 @@ function AttendanceDetails() {
 
   const [sessionData, setSessionData] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // 🚨 Whitelist Management State
+  const [guestEmailInput, setGuestEmailInput] = useState("");
+  const [isWhitelisting, setIsWhitelisting] = useState(false);
 
   // 🚨 ADDED SEND WARNING LOGIC
   const handleSendWarning = async (studentId, studentName) => {
@@ -32,24 +36,57 @@ function AttendanceDetails() {
     }
   };
 
-  useEffect(() => {
-    const fetchSessionDetails = async () => {
-      if (!sessionId) {
-        setLoading(false);
-        return;
-      }
-      try {
-        const response = await apiClient.get(`${API_ENDPOINTS.ATTENDANCE.BASE}${sessionId}/`);
-        setSessionData(response.data);
-      } catch (err) {
-        console.error("Failed to load session attendance details:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchSessionDetails = async () => {
+    if (!sessionId) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const response = await apiClient.get(`${API_ENDPOINTS.ATTENDANCE.BASE}${sessionId}/`);
+      setSessionData(response.data);
+    } catch (err) {
+      console.error("Failed to load session attendance details:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchSessionDetails();
   }, [sessionId]);
+
+  const handleAddGuest = async (e) => {
+    e.preventDefault();
+    if (!guestEmailInput.trim()) return;
+
+    setIsWhitelisting(true);
+    try {
+      const emailsArray = guestEmailInput
+        .split(",")
+        .map((e) => e.trim())
+        .filter((e) => e.includes("@"));
+
+      if (emailsArray.length === 0) {
+        alert("Please enter valid email addresses.");
+        setIsWhitelisting(false);
+        return;
+      }
+
+      // Call the add-attendees endpoint
+      const response = await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BASE}${sessionId}/add-attendees/`, { emails: emailsArray });
+      
+      alert(response.data.message || "Guests successfully whitelisted!");
+      setGuestEmailInput("");
+      
+      // Reload session to reflect updated whitelist count
+      await fetchSessionDetails();
+    } catch (error) {
+      console.error("Failed to whitelist guests:", error);
+      alert(error.response?.data?.detail || error.response?.data?.error || "Failed to whitelist guests.");
+    } finally {
+      setIsWhitelisting(false);
+    }
+  };
 
   if (loading) {
     return <div className={styles.container}><SkeletonLoader variant="detail" /></div>;
@@ -90,8 +127,18 @@ function AttendanceDetails() {
           </div>
 
           <div>
-            <label>Total Expected Students</label>
-            <p>{expectedCount}</p>
+            <label>Expected Students</label>
+            <p>{sessionData.actual_student_count || 0}</p>
+          </div>
+
+          <div>
+            <label>Whitelisted Emails</label>
+            <p>{sessionData.whitelist_email_count || 0}</p>
+          </div>
+          
+          <div>
+            <label>Total Combined Attendees</label>
+            <p>{sessionData.total_attendee_count || 0}</p>
           </div>
 
           <div>
@@ -100,16 +147,36 @@ function AttendanceDetails() {
           </div>
 
           <div>
-            <label>Total Absent Students</label>
-            <p>{Math.max(0, expectedCount - joinedCount)}</p>
-          </div>
-
-          <div>
             <label>Status</label>
             <span className={(!sessionData.conducted || sessionData.conducted === 'false') ? styles.absent : styles.present}>
               {(!sessionData.conducted || sessionData.conducted === 'false') ? "Conducted / Ended" : "Active"}
             </span>
           </div>
+        </div>
+
+        {/* 🚨 WHITELIST MANAGEMENT UI */}
+        <div style={{ marginTop: '30px', padding: '20px', background: 'var(--bg-nested)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+          <h2 style={{ fontSize: '18px', marginBottom: '10px', color: 'var(--text-primary)' }}>Whitelist External Guests</h2>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '15px' }}>
+            Add emails (comma separated) to allow them to bypass the waiting room. Changes will sync to Google Calendar automatically in the background.
+          </p>
+          <form onSubmit={handleAddGuest} style={{ display: 'flex', gap: '10px' }}>
+            <input 
+              type="text" 
+              placeholder="e.g. guest1@example.com, guest2@example.com" 
+              value={guestEmailInput}
+              onChange={(e) => setGuestEmailInput(e.target.value)}
+              className="premium-input"
+              style={{ flex: 1 }}
+            />
+            <button 
+              type="submit" 
+              className="premium-btn premium-btn-secondary" 
+              disabled={isWhitelisting || !guestEmailInput.trim()}
+            >
+              {isWhitelisting ? "Syncing..." : "+ Add Guests"}
+            </button>
+          </form>
         </div>
 
         {/* 🚨 ADDED DYNAMIC STUDENT ATTENDANCE TABLE WITH WARNING LOGIC */}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import { attendanceService } from "../../services/attendanceService";
 import styles from "./AttendanceHistory.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 
@@ -10,16 +10,29 @@ function AttendanceHistory() {
   const [loading, setLoading] = useState(true);
   const handleDownloadExcel = async (sessionId, sessionTitle, sessionDate) => {
     try {
-      const response = await apiClient.get(`/api/attendance/${sessionId}/download_excel/`, {
-        responseType: 'blob', // Crucial for binary file downloads like Excel
-      });
+      const response = await attendanceService.downloadExcel(sessionId);
 
-      // 🚨 ANTI-CORRUPTION FIX: Check if the backend sent JSON (like a 202 Waiting message) instead of an Excel file
-      if (response.data.type === 'application/json') {
+      // Check if status is 202 (Report Generating)
+      if (response.status === 202) {
+        // Backend returns JSON with a detail message for 202
+        let detailMessage = "Report is being generated in the background. Please retry in a few seconds.";
+        if (response.data instanceof Blob && response.data.type === 'application/json') {
+          const text = await response.data.text();
+          const json = JSON.parse(text);
+          if (json.detail) detailMessage = json.detail;
+        } else if (response.data && response.data.detail) {
+          detailMessage = response.data.detail;
+        }
+        alert(`⏳ ${detailMessage}`);
+        return; // Stop the download!
+      }
+
+      // Check if the backend sent JSON instead of an Excel file (Error condition)
+      if (response.data instanceof Blob && response.data.type === 'application/json') {
         const text = await response.data.text();
         const json = JSON.parse(text);
-        alert(json.detail || "Report is generating. Please wait a few seconds and try again.");
-        return; // Stop the download!
+        alert(json.detail || "Report is not ready or missing.");
+        return; 
       }
 
       // 🚨 FILENAME FIX: Extract the exact collision-proof filename from Django's headers
@@ -63,8 +76,8 @@ function AttendanceHistory() {
     let isMounted = true;
     const loadAttendance = async () => {
       try {
-        const response = await apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE);
-        if (isMounted) setRecords(Array.isArray(response.data) ? response.data : []);
+        const response = await attendanceService.getAttendanceRecords();
+        if (isMounted) setRecords(Array.isArray(response.results) ? response.results : (Array.isArray(response) ? response : []));
       } catch (err) {
         console.error("Failed to load attendance history:", err);
         if (isMounted) setRecords([]);
@@ -118,7 +131,7 @@ function AttendanceHistory() {
                 <td style={{ verticalAlign: "middle" }}>{formatDate(record.class_date)}</td>
                 <td style={{ verticalAlign: "middle" }}>{record.title || "Attendance Session"}</td>
                 <td style={{ verticalAlign: "middle" }}>{record.cohort?.name || record.cohort || "N/A"}</td>
-                <td style={{ verticalAlign: "middle" }}>{Array.isArray(record.attendees) ? record.attendees.length : 0}</td>
+                <td style={{ verticalAlign: "middle" }}>{Array.isArray(record.attendees) ? record.attendees.length : (record.actual_student_count || 0)}</td>
                 <td style={{ verticalAlign: "middle", color: record.conducted ? "inherit" : "var(--text-muted)" }}>
                   {record.conducted ? "Conducted" : "Cancelled"}
                 </td>

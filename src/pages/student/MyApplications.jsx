@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import apiClient from "../../services/apiClient";
-import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import { applicationService } from "../../services/applicationService";
 import styles from "./MyApplications.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 
@@ -14,8 +13,8 @@ function MyApplications() {
 
     const loadApplications = async () => {
       try {
-        const response = await apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE);
-        if (isMounted) setApplications(Array.isArray(response.data) ? response.data : []);
+        const apps = await applicationService.getApplications();
+        if (isMounted) setApplications(apps);
       } catch (err) {
         console.error("Failed to load applications:", err);
         if (isMounted) setApplications([]);

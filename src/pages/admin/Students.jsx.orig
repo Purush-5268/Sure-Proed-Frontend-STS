@@ -3,8 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { studentService } from "../../services/studentService";
 import { courseService } from "../../services/courseService";
 import { cohortService } from "../../services/cohortService";
-import apiClient, { normalizeListResponse } from "../../services/apiClient";
-import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import { normalizeListResponse } from "../../services/apiClient";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./Students.module.css";
 import { FiUsers, FiClock, FiCheckCircle, FiAlertCircle, FiXCircle, FiShield, FiArrowLeft } from "react-icons/fi";
@@ -28,7 +27,7 @@ function Students() {
   
   // Dashboard stats
   const [stats, setStats] = useState({
-    total: 0, eligibleForBulk: "-", reviewRequired: "-", approved: "-", rejected: "-"
+    total: 0, pending: 0, clear: 0, review: 0, approved: 0, rejected: 0
   });
 
   const [selectedStudent, setSelectedStudent] = useState(null); // For the Profile Modal
@@ -43,117 +42,91 @@ function Students() {
   useEffect(() => {
     async function loadDropdowns() {
       try {
-        const [coursesRes, cohortsRes] = await Promise.allSettled([
+        const [coursesRes, cohortsRes] = await Promise.all([
           courseService.getCourses(),
           cohortService.getCohorts(),
         ]);
-        if (coursesRes.status === "fulfilled") setCourses(normalizeListResponse(coursesRes.value));
-        if (cohortsRes.status === "fulfilled") setCohorts(normalizeListResponse(cohortsRes.value));
+        setCourses(normalizeListResponse(coursesRes));
+        setCohorts(normalizeListResponse(cohortsRes));
       } catch (err) {
         console.error("Failed to load dropdown data", err);
       }
     }
-    
-    async function loadStats() {
-      try {
-        const res = await apiClient.get(API_ENDPOINTS.STUDENTS.STATISTICS);
-        if (res.data) {
-          setStats({
-            total: res.data.total || 0,
-            eligibleForBulk: res.data.eligible_for_bulk || 0,
-            reviewRequired: res.data.review_required || 0,
-            approved: res.data.approved || 0,
-            rejected: res.data.rejected || 0,
-          });
-        }
-      } catch (err) {
-        if (err.name !== 'CanceledError' && err.name !== 'AbortError') {
-          console.error("Failed to load statistics", err);
-        }
-      }
-    }
-
     loadDropdowns();
-    loadStats();
   }, []);
 
   // Fetch paginated students when filters/page change
   useEffect(() => {
-    const abortController = new AbortController();
-
     async function fetchStudents() {
       setLoading(true);
       try {
-        const baseParams = { page };
+        const baseParams = {};
         if (selectedCohort) baseParams.course_batch = selectedCohort;
-        
-        // Map frontend verificationState to backend verification_state contract
-        if (verificationState) {
-          if (verificationState === "ELIGIBLE_FOR_BULK") {
-            baseParams.verification_state = "READY";
-          } else if (verificationState === "REVIEW_REQUIRED") {
-            baseParams.verification_state = "REVIEW";
-          } else if (verificationState === "ADMIN_REJECTED") {
-            baseParams.verification_state = "BLOCKED";
-          }
-          // ADMIN_APPROVED currently has no explicit backend verification_state mapping.
-          // It relies on the client-side filtering below.
-        }
-        
-        // Use client-side course filtering only if no backend support exists.
-        // NOTE: If the backend natively supports `course_id`, add it to baseParams instead of filtering later!
-        
-        // Fetch ONLY the current page for instant performance
-        const data = await studentService.getStudentProfiles(baseParams, { signal: abortController.signal });
-        
-        // Standard DRF Pagination format: { count, next, previous, results }
-        const fetchedStudents = data?.results || (Array.isArray(data) ? data : []);
-        const totalFromServer = data?.count || fetchedStudents.length;
+        if (verificationState) baseParams.verification_state = verificationState;
 
-        // Apply client-side course filtering if selected
-        let finalStudents = fetchedStudents;
+        // Fetch ALL matching students based on backend-supported filters
+        const allFetchedStudents = await studentService.fetchAllStudentProfiles(baseParams);
+        
+        // Client-side course filter (since backend does not natively support course_id querying for students)
+        let filteredStudents = allFetchedStudents;
         if (selectedCourseId) {
-          finalStudents = fetchedStudents.filter(s => 
+          filteredStudents = allFetchedStudents.filter(s => 
             String(studentService.getStudentCourseId(s)) === String(selectedCourseId)
           );
         }
+        
+        // Calculate exact summary counts based on the FULL filtered dataset
+        const currentStats = { 
+          total: filteredStudents.length, 
+          verificationQueue: 0, 
+          eligibleForBulk: 0, 
+          reviewRequired: 0, 
+          approved: 0, 
+          rejected: 0 
+        };
 
-        // Apply client-side Verification state filtering if selected (if the backend didn't handle it)
+        filteredStudents.forEach(s => {
+          if (s.status === "ADMIN_APPROVED") currentStats.approved++;
+          else if (s.status === "ADMIN_REJECTED") currentStats.rejected++;
+          else if (s.status === "PENDING_ADMIN_REVIEW") {
+            currentStats.verificationQueue++;
+            if (studentService.isStudentEligibleForBulk(s)) currentStats.eligibleForBulk++;
+            else if (studentService.isStudentReviewRequired(s)) currentStats.reviewRequired++;
+          }
+        });
+        setStats(currentStats);
+        
+        // Client-side Verification state filter
         if (verificationState) {
-          finalStudents = finalStudents.filter(s => {
+          filteredStudents = filteredStudents.filter(s => {
             if (verificationState === "ADMIN_APPROVED") return s.status === "ADMIN_APPROVED";
             if (verificationState === "ADMIN_REJECTED") return s.status === "ADMIN_REJECTED";
+            if (verificationState === "VERIFICATION_QUEUE") return s.status === "PENDING_ADMIN_REVIEW";
             if (verificationState === "ELIGIBLE_FOR_BULK") return studentService.isStudentEligibleForBulk(s);
             if (verificationState === "REVIEW_REQUIRED") return studentService.isStudentReviewRequired(s);
             return true;
           });
         }
-
-        setStudents(finalStudents);
-        setTotalCount(totalFromServer);
-        setHasNext(Boolean(data?.next));
-        setHasPrev(Boolean(data?.previous) || page > 1);
+        
+        // Apply Client-Side Pagination
+        const PAGE_SIZE = 20; // Default Django REST framework page size
+        setTotalCount(filteredStudents.length);
+        
+        const startIndex = (page - 1) * PAGE_SIZE;
+        const paginatedStudents = filteredStudents.slice(startIndex, startIndex + PAGE_SIZE);
+        
+        setStudents(paginatedStudents);
+        setHasNext(startIndex + PAGE_SIZE < filteredStudents.length);
+        setHasPrev(page > 1);
 
       } catch (err) {
-        if (err.name === 'AbortError' || err.code === 'ERR_CANCELED' || err.name === 'CanceledError') {
-           // Ignored: Component unmounted or request aborted
-           console.log("Request aborted");
-        } else {
-           console.error("Failed to fetch students", err);
-           setStudents([]);
-        }
+        console.error("Failed to fetch students", err);
+        setStudents([]);
       } finally {
-        if (!abortController.signal.aborted) {
-           setLoading(false);
-        }
+        setLoading(false);
       }
     }
-    
     fetchStudents();
-    
-    return () => {
-      abortController.abort();
-    };
   }, [page, selectedCourseId, selectedCohort, verificationState]);
 
   // Reset page when filters change
@@ -259,35 +232,40 @@ function Students() {
         <Link to="/admin/add-student" className="premium-btn premium-btn-primary">+ Add Student</Link>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
-        <div style={{ minHeight: "100px", height: "100%", background: "var(--bg-surface)", padding: "1.25rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", display: "flex", flexDirection: "column", gap: "12px", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", color: "var(--text-secondary)", fontSize: "14px", fontWeight: "bold", lineHeight: "1.4" }}>
-            <FiUsers style={{ marginTop: "2px", flexShrink: 0 }} /> Total Students
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
+        <div style={{ background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-secondary)", fontSize: "14px", fontWeight: "bold" }}>
+            <FiUsers /> Total Students
           </div>
           <div style={{ fontSize: "24px", fontWeight: "bold" }}>{stats.total}</div>
         </div>
-
-        <div style={{ minHeight: "100px", height: "100%", background: "var(--bg-surface)", padding: "1.25rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #2563eb", display: "flex", flexDirection: "column", gap: "12px", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", color: "#1e40af", fontSize: "14px", fontWeight: "bold", lineHeight: "1.4" }}>
-            <FiShield style={{ marginTop: "2px", flexShrink: 0 }} /> Eligible for Bulk
+        <div style={{ background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #3b82f6", display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#1d4ed8", fontSize: "14px", fontWeight: "bold" }}>
+            <FiClock /> Verification Queue
+          </div>
+          <div style={{ fontSize: "24px", fontWeight: "bold" }}>{stats.verificationQueue}</div>
+        </div>
+        <div style={{ background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #2563eb", display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#1e40af", fontSize: "14px", fontWeight: "bold" }}>
+            <FiShield /> Eligible for Bulk
           </div>
           <div style={{ fontSize: "24px", fontWeight: "bold" }}>{stats.eligibleForBulk}</div>
         </div>
-        <div style={{ minHeight: "100px", height: "100%", background: "var(--bg-surface)", padding: "1.25rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #f59e0b", display: "flex", flexDirection: "column", gap: "12px", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", color: "#b45309", fontSize: "14px", fontWeight: "bold", lineHeight: "1.4" }}>
-            <FiAlertCircle style={{ marginTop: "2px", flexShrink: 0 }} /> Review Required
+        <div style={{ background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #f59e0b", display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#b45309", fontSize: "14px", fontWeight: "bold" }}>
+            <FiAlertCircle /> Review Required
           </div>
           <div style={{ fontSize: "24px", fontWeight: "bold" }}>{stats.reviewRequired}</div>
         </div>
-        <div style={{ minHeight: "100px", height: "100%", background: "var(--bg-surface)", padding: "1.25rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #10b981", display: "flex", flexDirection: "column", gap: "12px", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", color: "#047857", fontSize: "14px", fontWeight: "bold", lineHeight: "1.4" }}>
-            <FiCheckCircle style={{ marginTop: "2px", flexShrink: 0 }} /> Approved
+        <div style={{ background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #10b981", display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#047857", fontSize: "14px", fontWeight: "bold" }}>
+            <FiCheckCircle /> Approved
           </div>
           <div style={{ fontSize: "24px", fontWeight: "bold" }}>{stats.approved}</div>
         </div>
-        <div style={{ minHeight: "100px", height: "100%", background: "var(--bg-surface)", padding: "1.25rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #ef4444", display: "flex", flexDirection: "column", gap: "12px", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", color: "#b91c1c", fontSize: "14px", fontWeight: "bold", lineHeight: "1.4" }}>
-            <FiXCircle style={{ marginTop: "2px", flexShrink: 0 }} /> Rejected
+        <div style={{ background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #ef4444", display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#b91c1c", fontSize: "14px", fontWeight: "bold" }}>
+            <FiXCircle /> Rejected
           </div>
           <div style={{ fontSize: "24px", fontWeight: "bold" }}>{stats.rejected}</div>
         </div>
@@ -340,6 +318,7 @@ function Students() {
             style={{ flex: 1, minWidth: "200px" }}
           >
             <option value="">All Statuses</option>
+            <option value="VERIFICATION_QUEUE">Verification Queue</option>
             <option value="ELIGIBLE_FOR_BULK">Eligible for Bulk</option>
             <option value="REVIEW_REQUIRED">Review Required</option>
             <option value="ADMIN_APPROVED">Approved</option>

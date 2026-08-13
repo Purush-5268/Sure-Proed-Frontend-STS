@@ -5,26 +5,41 @@ const REMEMBER_ME_KEY = "sure_remember_me";
 
 // Determine storage based on user's choice
 const getStorage = () => {
-  const remember = localStorage.getItem(REMEMBER_ME_KEY) === "true";
-  return remember ? localStorage : sessionStorage;
+  try {
+    const remember = localStorage.getItem(REMEMBER_ME_KEY) === "true";
+    return remember ? localStorage : sessionStorage;
+  } catch (e) {
+    // Fallback to a dummy storage object if access is denied
+    return {
+      getItem: () => null,
+      setItem: () => {},
+      removeItem: () => {},
+    };
+  }
 };
 
 export const setRememberMe = (value) => {
-  localStorage.setItem(REMEMBER_ME_KEY, value);
+  try {
+    localStorage.setItem(REMEMBER_ME_KEY, value);
+  } catch (e) {}
 };
 
 export const getAccessToken = () => getStorage().getItem(ACCESS_TOKEN_KEY);
 export const setAccessToken = (token) => getStorage().setItem(ACCESS_TOKEN_KEY, token);
 export const removeAccessToken = () => {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
-  sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+  try {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+  } catch (e) {}
 };
 
 export const getRefreshToken = () => getStorage().getItem(REFRESH_TOKEN_KEY);
 export const setRefreshToken = (token) => getStorage().setItem(REFRESH_TOKEN_KEY, token);
 export const removeRefreshToken = () => {
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
-  sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+  try {
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+  } catch (e) {}
 };
 
 export const getUserInfo = () => {
@@ -38,8 +53,10 @@ export const getUserInfo = () => {
 
 export const setUserInfo = (user) => getStorage().setItem(USER_INFO_KEY, JSON.stringify(user));
 export const removeUserInfo = () => {
-  localStorage.removeItem(USER_INFO_KEY);
-  sessionStorage.removeItem(USER_INFO_KEY);
+  try {
+    localStorage.removeItem(USER_INFO_KEY);
+    sessionStorage.removeItem(USER_INFO_KEY);
+  } catch (e) {}
 };
 
 export const clearAuthStorage = () => {

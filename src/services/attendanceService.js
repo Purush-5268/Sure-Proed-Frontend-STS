@@ -40,8 +40,15 @@ export const attendanceService = {
 
   async whitelistGuest(sessionId, emails) {
     // Expects an array of email strings
-    const response = await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId)}whitelist/`, { emails });
+    const response = await apiClient.post(API_ENDPOINTS.ATTENDANCE.ADD_ATTENDEES(sessionId), { emails });
     return response.data;
+  },
+
+  async downloadExcel(sessionId) {
+    const response = await apiClient.get(API_ENDPOINTS.ATTENDANCE.DOWNLOAD_EXCEL(sessionId), {
+      responseType: 'blob' // We set blob, but if it's 202, it will likely return JSON. We need to handle that in the component.
+    });
+    return response;
   },
 
   async markJoined(id) {

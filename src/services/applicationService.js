@@ -4,7 +4,8 @@ import { API_ENDPOINTS } from "../constants/apiEndpoints";
 export const applicationService = {
   async getApplications(params = {}) {
     const response = await apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE, { params });
-    return response.data;
+    const data = response.data;
+    return Array.isArray(data) ? data : (data?.results || []);
   },
 
   async getApplicationById(id) {

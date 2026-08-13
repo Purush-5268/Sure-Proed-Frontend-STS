@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import apiClient, { normalizeListResponse } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./Courses.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function Courses() {
+  const navigate = useNavigate();
   const getCourseImage = (name) => {
     if (!name) return '/sure-logo.jpg';
     const lowerName = name.toLowerCase().trim();
@@ -79,7 +80,7 @@ function Courses() {
       </div>
 
       {loading ? (
-        <div className="premium-card premium-card-large skeleton-shimmer" style={{ height: "300px" }}></div>
+        <SkeletonLoader variant="card" rows={6} />
       ) : courses.length === 0 ? (
         <div className="premium-empty-state">
           <div className="premium-empty-state-icon">📚</div>
@@ -90,7 +91,12 @@ function Courses() {
       ) : (
         <div className={styles.courseGrid}>
           {courses.map((course) => (
-            <Link to={`/admin/course-details/${course.id}`} key={course.id} className={styles.courseCard} style={{ textDecoration: 'none' }}>
+            <div 
+              key={course.id} 
+              className={styles.courseCard} 
+              style={{ cursor: 'pointer' }}
+              onClick={() => navigate(`/admin/course-details/${course.id}`)}
+            >
               <div className={styles.imageWrapper}>
                 <img src={getCourseImage(course.name)} alt={course.name} className={styles.courseImage} />
                 <div className={styles.statusBadge}>{course.status || "DRAFT"}</div>
@@ -110,7 +116,7 @@ function Courses() {
                   </Link>
                 </div>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}

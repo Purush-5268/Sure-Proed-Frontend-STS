@@ -6,6 +6,7 @@ import {
   updateUpdate,
   deleteUpdate,
 } from "../../../services/trusteeService";
+import SkeletonLoader from "../../../components/common/SkeletonLoader";
 import styles from "./Updates.module.css";
 
 function Updates() {
@@ -93,7 +94,7 @@ function Updates() {
     <div className={styles.container}>
       <div className={styles.header}>
         <div>
-          <h2>Commercial Updates</h2>
+          <h2>Organization Updates</h2>
           <p>Publish news related to partnerships, funding, and expansion.</p>
         </div>
         <div className={styles.headerActions}>

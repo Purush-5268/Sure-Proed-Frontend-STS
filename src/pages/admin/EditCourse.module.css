@@ -18,7 +18,7 @@
 
 .card h1 {
   text-align: center;
-  color: #1e3a8a;
+  color: var(--text-primary);
   margin-bottom: 10px;
 }
 
@@ -60,7 +60,8 @@
 .group input:focus,
 .group select:focus,
 .groupFull textarea:focus {
-  border-color: #2563eb;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .groupFull {
@@ -81,7 +82,7 @@
 }
 
 .updateBtn {
-  background: #2563eb;
+  background: var(--primary-color);
   color: white;
   border: none;
   padding: 13px 25px;
@@ -92,21 +93,22 @@
 }
 
 .updateBtn:hover {
-  background: #1d4ed8;
+  background: var(--primary-hover);
 }
 
 .cancelBtn {
   text-decoration: none;
-  background: #e5e7eb;
+  background: var(--bg-nested);
   color: var(--text-primary);
   padding: 13px 25px;
   border-radius: 10px;
   font-weight: 600;
   transition: 0.3s;
+  border: 1px solid var(--border-color);
 }
 
 .cancelBtn:hover {
-  background: #d1d5db;
+  background: var(--border-color);
 }
 
 @media (max-width: 768px) {

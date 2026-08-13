@@ -43,7 +43,7 @@ function Companies() {
       </div>
 
       {loading ? (
-        <div className="skeleton-shimmer" style={{ height: "200px", borderRadius: "8px", width: "100%" }}></div>
+        <SkeletonLoader variant="table" rows={4} />
       ) : companies.length === 0 ? (
         <div className="premium-empty-state">
           <div className="premium-empty-state-icon">🏢</div>

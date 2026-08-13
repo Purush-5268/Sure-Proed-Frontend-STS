@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getStudents, removeStudent } from "../../../services/trusteeService";
+import SkeletonLoader from "../../../components/common/SkeletonLoader";
 import styles from "./Users.module.css";
 
 function VolunteerUsers() {

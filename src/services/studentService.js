@@ -4,6 +4,7 @@ import { API_ENDPOINTS } from "../constants/apiEndpoints";
 const PROFILE_STORAGE_KEY_PREFIX = "sure_student_profile_";
 
 const normalizeProfile = (profile = {}) => ({
+  id: profile.id || null,
   firstName: profile.firstName || profile.first_name || "",
   lastName: profile.lastName || profile.last_name || "",
   email: profile.email || "",
@@ -25,7 +26,7 @@ const normalizeProfile = (profile = {}) => ({
   technicalSkills: profile.technicalSkills || profile.tagline || "",
   // Existing student fields (Single courseBatch like G2-26)
   isExistingStudent: profile.isExistingStudent || "no",
-  domain: profile.domain || "",
+  courseId: profile.course_id || profile.courseId || profile.course || "",
   courseBatch: profile.courseBatch || profile.course_batch || "",
 });
 
@@ -34,25 +35,119 @@ export const isProfileComplete = (profile = {}) => {
 
   return Boolean(
     normalized.firstName &&
-      normalized.lastName &&
-      normalized.email &&
-      normalized.phoneNumber &&
-      normalized.collegeName &&
-      normalized.degree &&
-      normalized.branch &&
-      normalized.graduationYear
+    normalized.lastName &&
+    normalized.email &&
+    normalized.phoneNumber &&
+    normalized.collegeName &&
+    normalized.degree &&
+    normalized.branch &&
+    normalized.graduationYear
   );
+};
+
+export const checkCurrentEnrollment = (profile, activeApplication) => {
+  if (profile?.status === "ADMIN_APPROVED") return true;
+  if (profile?.authoritative_course_batch) return true;
+  if (activeApplication && ['COHORT_ASSIGNED', 'IN_PROGRESS', 'COMPLETED'].includes(activeApplication.status)) return true;
+  return false;
+};
+
+export const resolveStudentEnrollment = (serverProfile, applications = [], courses = []) => {
+  const appsArray = Array.isArray(applications) ? applications : (applications?.results || []);
+  const coursesArray = Array.isArray(courses) ? courses : (courses?.results || []);
+
+  const activeApp = appsArray.find(a => ['COHORT_ASSIGNED', 'IN_PROGRESS', 'COMPLETED'].includes(a.status));
+
+  const isEnrolled = Boolean(
+    (serverProfile?.status === "ADMIN_APPROVED") ||
+    (serverProfile?.authoritative_course_batch) ||
+    activeApp
+  );
+
+  const isExistingStudent = serverProfile?.is_existing_student || serverProfile?.isExistingStudent === "yes";
+
+  if (!isEnrolled) {
+    return { 
+      isEnrolled: false, 
+      isExistingStudent,
+      showVerificationTab: true 
+    };
+  }
+
+  // Resolve Course
+  let courseId = null;
+  let courseName = null;
+
+  if (activeApp?.course?.name) {
+    courseId = activeApp.course.id;
+    courseName = activeApp.course.name;
+  } else if (serverProfile?.course_id) {
+    courseId = serverProfile.course_id;
+    const matched = coursesArray.find(c => c.id === courseId);
+    if (matched) courseName = matched.name;
+  }
+
+  // Resolve Group
+  let group = null;
+  if (activeApp?.assigned_cohort?.code || activeApp?.assigned_cohort?.name) {
+    group = activeApp.assigned_cohort.code || activeApp.assigned_cohort.name;
+  } else if (serverProfile?.authoritative_course_batch) {
+    group = serverProfile.authoritative_course_batch;
+  } else if (serverProfile?.course_batch) {
+    group = serverProfile.course_batch;
+  }
+
+  return {
+    isEnrolled: true,
+    courseId,
+    courseName,
+    group,
+    status: activeApp ? activeApp.status : (serverProfile?.status || "UNKNOWN"),
+    application: activeApp || null,
+    source: activeApp ? "application" : "profile",
+    isExistingStudent,
+    showVerificationTab: false
+  };
+};
+
+// ─── Centralized Classification & Extraction ─────────────────────
+
+export const isStudentEligibleForBulk = (student) => {
+  return (
+    student.status === "PENDING_ADMIN_REVIEW" &&
+    student.review_required === false &&
+    (student.automated_verification_result || "").startsWith("Passed:")
+  );
+};
+
+export const isStudentReviewRequired = (student) => {
+  return (
+    student.status === "PENDING_ADMIN_REVIEW" &&
+    (student.review_required === true || !(student.automated_verification_result || "").startsWith("Passed:"))
+  );
+};
+
+export const getStudentCourseId = (student) => {
+  // Course identity must come exactly from the backend's course reference (either UUID string or ID)
+  return student.course?.id || student.course || student.course_id || null;
 };
 
 export const studentService = {
   // ─── Utility Methods ──────────────────────────────────────────
   isProfileComplete,
+  checkCurrentEnrollment,
+  resolveStudentEnrollment,
+  isStudentEligibleForBulk,
+  isStudentReviewRequired,
+  getStudentCourseId,
 
   // ─── Backend API Methods ──────────────────────────────────────
-  async getStudentProfiles(params = {}) {
-    const response = await apiClient.get(API_ENDPOINTS.STUDENTS.BASE, { params });
+  async getStudentProfiles(params = {}, config = {}) {
+    const response = await apiClient.get(API_ENDPOINTS.STUDENTS.BASE, { params, ...config });
     return response.data;
   },
+
+
 
   async getStudentById(id) {
     const response = await apiClient.get(API_ENDPOINTS.STUDENTS.BY_ID(id));
@@ -78,8 +173,22 @@ export const studentService = {
     const response = await apiClient.delete(API_ENDPOINTS.STUDENTS.BY_ID(id));
     return response.data;
   },
-  
-  
+
+  async bulkVerifyStudents(profileIds) {
+    const response = await apiClient.post(API_ENDPOINTS.STUDENTS.BULK_VERIFY, {
+      profile_ids: profileIds,
+    });
+    return response.data;
+  },
+
+  async verifyStudent(id, action, reason = "") {
+    const payload = { action };
+    if (reason) payload.reason = reason;
+    const response = await apiClient.post(API_ENDPOINTS.STUDENTS.VERIFY(id), payload);
+    return response.data;
+  },
+
+
   // ─── Profile Methods (Backend-First with localStorage Fallback) ──
 
   /**
@@ -119,17 +228,21 @@ export const studentService = {
   },
 
   /**
-   * Get a student profile.
-   * Tries localStorage first (for speed), then backend API.
+   * Get a student profile from the authoritative backend.
    */
   async getProfile(email) {
     if (!email) return null;
     const cleanEmail = email.trim().toLowerCase();
-    const key = `${PROFILE_STORAGE_KEY_PREFIX}${cleanEmail}`;
 
     try {
-      const response = await apiClient.get(API_ENDPOINTS.STUDENTS.BASE);
-      const students = Array.isArray(response.data) ? response.data : [response.data];
+      // Explicitly query for the user's email as a safety net against fetching all students
+      const response = await apiClient.get(API_ENDPOINTS.STUDENTS.BASE, {
+        params: { user__email: cleanEmail }
+      });
+
+      const data = response.data;
+      const students = Array.isArray(data) ? data : (data?.results || []);
+
       const profile = students.find((item) => {
         const user = item.user || {};
         return (user.email || "").toLowerCase() === cleanEmail || (item.email || "").toLowerCase() === cleanEmail;
@@ -148,38 +261,25 @@ export const studentService = {
           graduationYear: profile.graduation_year || profile.graduationYear || "",
           address: profile.bio || profile.address || "",
           technicalSkills: profile.tagline || profile.technicalSkills || "",
-          // Map existing student fields
           isExistingStudent: profile.is_existing_student ? "yes" : profile.isExistingStudent || "no",
-          domain: profile.domain || "",
+          courseId: profile.course_id || profile.courseId || profile.course || "",
           courseBatch: profile.course_batch || profile.courseBatch || "",
         });
-        localStorage.setItem(key, JSON.stringify(mapped));
-        return mapped;
+        return { ...profile, ...mapped };
       }
     } catch (err) {
-      console.warn("Backend profile fetch failed:", err.message || err);
-    }
-
-    const stored = localStorage.getItem(key);
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch (e) {
-        console.error("Error parsing stored profile", e);
-      }
+      console.error("Backend profile fetch failed:", err.message || err);
     }
 
     return null;
   },
 
   /**
-   * Save/update a student profile.
-   * Saves to localStorage and tries to sync to backend API.
+   * Save/update a student profile authoritatively to backend API.
    */
   async saveProfile(email, profileData) {
     if (!email) return null;
     const cleanEmail = email.trim().toLowerCase();
-    const key = `${PROFILE_STORAGE_KEY_PREFIX}${cleanEmail}`;
 
     const existing = (await this.getProfile(cleanEmail)) || {};
     const updated = {
@@ -191,16 +291,7 @@ export const studentService = {
       phoneNumber: profileData.phoneNumber || existing.phoneNumber || "",
     };
 
-    // Save to local storage but omit the File object to prevent JSON circular errors
-    const storageCopy = { ...updated, offerLetter: null };
-    localStorage.setItem(key, JSON.stringify(storageCopy));
-
     try {
-      const profileResponse = await apiClient.get(API_ENDPOINTS.STUDENTS.BASE);
-      const students = Array.isArray(profileResponse.data) ? profileResponse.data : [profileResponse.data];
-      const backendProfile = students[0];
-
-      // Use FormData instead of JSON payload to support Offer Letter file uploads
       const formData = new FormData();
       formData.append("college", updated.collegeName || "");
       formData.append("degree", updated.degree || "");
@@ -212,31 +303,28 @@ export const studentService = {
       formData.append("state", updated.state || "");
       formData.append("bio", updated.address || "");
       formData.append("tagline", updated.technicalSkills || "");
-      
+
       // Verification Fields
       formData.append("is_existing_student", updated.isExistingStudent === "yes");
-      formData.append("domain", updated.domain || "");
-      formData.append("course_batch", updated.courseBatch || ""); // Single string like G2-26 VLSI
-
-      // 🚨 CRITICAL FIX: Allow frontend to force the status to Pending (NOT_AVAILABLE)
-      if (updated.status) {
-        formData.append("status", updated.status);
+      if (updated.courseId) {
+        formData.append("course_id", updated.courseId);
       }
+      formData.append("course_batch", updated.courseBatch || "");
 
       // Append file if exists
       if (profileData.offerLetter) {
-        formData.append("offer_letter", profileData.offerLetter);
+        formData.append("uploaded_offer_letter", profileData.offerLetter);
       }
 
-      // Important: Use FormData in headers
       const config = { headers: { "Content-Type": "multipart/form-data" } };
 
-      if (backendProfile?.id) {
-        await apiClient.patch(API_ENDPOINTS.STUDENTS.BY_ID(backendProfile.id), formData, config);
+      if (existing.id) {
+        await apiClient.patch(API_ENDPOINTS.STUDENTS.BY_ID(existing.id), formData, config);
       } else {
         await apiClient.post(API_ENDPOINTS.STUDENTS.BASE, formData, config);
       }
 
+      // Sync user profile names
       const meResponse = await apiClient.get(API_ENDPOINTS.USERS.ME);
       const userId = meResponse?.data?.id;
       if (userId) {
@@ -247,7 +335,7 @@ export const studentService = {
         });
       }
     } catch (err) {
-      console.warn("Backend profile save failed:", err.message || err);
+      console.error("Backend profile save failed:", err.message || err);
       throw err;
     }
 

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { studentService } from "../../services/studentService";
+import { studentService, resolveStudentEnrollment } from "../../services/studentService";
 import { courseService } from "../../services/courseService";
+import apiClient from "../../services/apiClient";
+import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./ApplyCourse.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 
@@ -11,17 +13,32 @@ function ApplyCourse() {
   const { user } = useAuth();
   const [profileCompleted, setProfileCompleted] = useState(Boolean(location.state?.profileCompleted));
   const [courses, setCourses] = useState([]);
+  const [activeApplication, setActiveApplication] = useState(null);
+  const [resolvedEnrollment, setResolvedEnrollment] = useState({ isEnrolled: false });
+  const [isCurrentlyEnrolled, setIsCurrentlyEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [profileData, coursesData] = await Promise.all([
+        const [profileData, coursesData, appRes] = await Promise.all([
           user?.email ? studentService.getProfile(user.email) : Promise.resolve(null),
           courseService.getCourses(),
+          user?.email ? apiClient.get(API_ENDPOINTS.APPLICATIONS?.BASE || "/applications/") : Promise.resolve({ data: [] })
         ]);
         setProfileCompleted(studentService.isProfileComplete(profileData));
-        setCourses(Array.isArray(coursesData) ? coursesData : coursesData?.results || coursesData?.data || []);
+        const apps = appRes.data?.results || appRes.data || [];
+        const coursesArray = Array.isArray(coursesData) ? coursesData : coursesData?.results || coursesData?.data || [];
+        
+        setCourses(coursesArray);
+        
+        const enrollment = resolveStudentEnrollment(profileData, apps, coursesArray);
+        setResolvedEnrollment(enrollment);
+        
+        if (enrollment.isEnrolled) {
+          setIsCurrentlyEnrolled(true);
+          setActiveApplication(enrollment.application);
+        }
       } catch (err) {
         console.error("Failed to load apply-course data:", err);
       } finally {
@@ -47,6 +64,22 @@ function ApplyCourse() {
 
         {loading ? (
           <SkeletonLoader variant="card" rows={4} />
+          ) : isCurrentlyEnrolled ? (
+            <div style={{ background: 'var(--bg-card)', padding: '40px', borderRadius: '16px', textAlign: 'center', border: '1px solid var(--border-color)', maxWidth: '600px', margin: '40px auto' }}>
+              <h2 style={{ color: 'var(--primary-color)', marginBottom: '16px', fontSize: '24px' }}>🎓 Next Application</h2>
+              <div style={{ background: 'var(--bg-nested)', padding: '20px', borderRadius: '12px', marginBottom: '24px', textAlign: 'left' }}>
+                <p style={{ margin: '0 0 8px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>Current Course</p>
+                <h3 style={{ margin: '0 0 16px 0', fontSize: '18px' }}>{resolvedEnrollment.courseName}</h3>
+                <p style={{ margin: '0 0 8px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>Current Group</p>
+                <h3 style={{ margin: '0 0 16px 0', fontSize: '18px' }}>{resolvedEnrollment.group}</h3>
+                <p style={{ margin: '0 0 8px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>Current Status</p>
+                <h3 style={{ margin: 0, fontSize: '18px' }}>{resolvedEnrollment.status}</h3>
+              </div>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', fontSize: '16px' }}>
+              You are currently enrolled in this Group. You can apply for another Course or Group when eligible.
+            </p>
+              <Link to="/student/dashboard" className={styles.detailsBtn} style={{ display: 'inline-block' }}>Go to Dashboard</Link>
+            </div>
         ) : (
           <div className={styles.courseGrid}>
 
@@ -69,11 +102,6 @@ function ApplyCourse() {
                   <div>
                     <strong>Course Code</strong>
                     <span>{course.code}</span>
-                  </div>
-
-                  <div>
-                    <strong>Domain</strong>
-                    <span>{course.domain}</span>
                   </div>
 
                   <div>

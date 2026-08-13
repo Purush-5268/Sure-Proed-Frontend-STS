@@ -1,0 +1,54 @@
+--- src/pages/admin/Students.jsx
++++ src/pages/admin/Students.jsx
+@@ -233,32 +233,32 @@
+ 
+       {/* Summary Cards */}
+-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
+-        <div style={{ background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", display: "flex", flexDirection: "column", gap: "8px" }}>
+-          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-secondary)", fontSize: "14px", fontWeight: "bold" }}>
++      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
++        <div style={{ minHeight: "100px", height: "100%", background: "var(--bg-surface)", padding: "1.25rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", display: "flex", flexDirection: "column", gap: "12px", justifyContent: "space-between" }}>
++          <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", color: "var(--text-secondary)", fontSize: "14px", fontWeight: "bold", lineHeight: "1.4" }}>
+             <FiUsers style={{ marginTop: "2px", flexShrink: 0 }} /> Total Students
+           </div>
+           <div style={{ fontSize: "24px", fontWeight: "bold" }}>{stats.total}</div>
+         </div>
+-        <div style={{ background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #3b82f6", display: "flex", flexDirection: "column", gap: "8px" }}>
+-          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#1d4ed8", fontSize: "14px", fontWeight: "bold" }}>
++        <div style={{ minHeight: "100px", height: "100%", background: "var(--bg-surface)", padding: "1.25rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #3b82f6", display: "flex", flexDirection: "column", gap: "12px", justifyContent: "space-between" }}>
++          <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", color: "#1d4ed8", fontSize: "14px", fontWeight: "bold", lineHeight: "1.4" }}>
+             <FiClock style={{ marginTop: "2px", flexShrink: 0 }} /> Verification Queue
+           </div>
+           <div style={{ fontSize: "24px", fontWeight: "bold" }}>{stats.verificationQueue}</div>
+         </div>
+-        <div style={{ background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #2563eb", display: "flex", flexDirection: "column", gap: "8px" }}>
+-          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#1e40af", fontSize: "14px", fontWeight: "bold" }}>
++        <div style={{ minHeight: "100px", height: "100%", background: "var(--bg-surface)", padding: "1.25rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #2563eb", display: "flex", flexDirection: "column", gap: "12px", justifyContent: "space-between" }}>
++          <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", color: "#1e40af", fontSize: "14px", fontWeight: "bold", lineHeight: "1.4" }}>
+             <FiShield style={{ marginTop: "2px", flexShrink: 0 }} /> Eligible for Bulk
+           </div>
+           <div style={{ fontSize: "24px", fontWeight: "bold" }}>{stats.eligibleForBulk}</div>
+         </div>
+-        <div style={{ background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #f59e0b", display: "flex", flexDirection: "column", gap: "8px" }}>
+-          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#b45309", fontSize: "14px", fontWeight: "bold" }}>
++        <div style={{ minHeight: "100px", height: "100%", background: "var(--bg-surface)", padding: "1.25rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #f59e0b", display: "flex", flexDirection: "column", gap: "12px", justifyContent: "space-between" }}>
++          <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", color: "#b45309", fontSize: "14px", fontWeight: "bold", lineHeight: "1.4" }}>
+             <FiAlertCircle style={{ marginTop: "2px", flexShrink: 0 }} /> Review Required
+           </div>
+           <div style={{ fontSize: "24px", fontWeight: "bold" }}>{stats.reviewRequired}</div>
+         </div>
+-        <div style={{ background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #10b981", display: "flex", flexDirection: "column", gap: "8px" }}>
+-          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#047857", fontSize: "14px", fontWeight: "bold" }}>
++        <div style={{ minHeight: "100px", height: "100%", background: "var(--bg-surface)", padding: "1.25rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #10b981", display: "flex", flexDirection: "column", gap: "12px", justifyContent: "space-between" }}>
++          <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", color: "#047857", fontSize: "14px", fontWeight: "bold", lineHeight: "1.4" }}>
+             <FiCheckCircle style={{ marginTop: "2px", flexShrink: 0 }} /> Clear (Ready)
+           </div>
+           <div style={{ fontSize: "24px", fontWeight: "bold" }}>{stats.clear}</div>
+         </div>
+-        <div style={{ background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", display: "flex", flexDirection: "column", gap: "8px" }}>
+-          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-secondary)", fontSize: "14px", fontWeight: "bold" }}>
++        <div style={{ minHeight: "100px", height: "100%", background: "var(--bg-surface)", padding: "1.25rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", display: "flex", flexDirection: "column", gap: "12px", justifyContent: "space-between" }}>
++          <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", color: "var(--text-secondary)", fontSize: "14px", fontWeight: "bold", lineHeight: "1.4" }}>
+             <FiCheckCircle style={{ marginTop: "2px", flexShrink: 0 }} /> Approved / Rejected
+           </div>
+           <div style={{ fontSize: "14px", color: "var(--text-secondary)", marginTop: "auto" }}>

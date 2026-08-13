@@ -45,7 +45,11 @@ function Notifications() {
       {loading ? (
         <SkeletonLoader variant="table" rows={5} />
       ) : notifications.length === 0 ? (
-        <p>No notifications are available yet.</p>
+        <div className="premium-empty-state">
+          <div className="premium-empty-state-icon">🔔</div>
+          <h3>No Notifications</h3>
+          <p>No notifications are available yet.</p>
+        </div>
       ) : (
         <div className="premium-table-container">
           <table className="premium-table">

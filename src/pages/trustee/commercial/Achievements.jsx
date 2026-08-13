@@ -6,6 +6,7 @@ import {
   updateAchievement,
   deleteAchievement,
 } from "../../../services/trusteeService";
+import SkeletonLoader from "../../../components/common/SkeletonLoader";
 import styles from "./Achievements.module.css";
 
 function Achievements() {

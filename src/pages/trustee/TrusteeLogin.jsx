@@ -22,13 +22,19 @@ function TrusteeLogin() {
       const userRole = res?.user?.role;
 
       if (userRole === "TRUSTEE") {
-        // Check both token user payload or email identifier fallback so both test logins work instantly
-        const trusteeType = res?.user?.trustee_type || (username.toLowerCase().includes("com_") ? "COMMERCIAL" : "VOLUNTEER");
+        const trusteeType = res?.user?.trustee_type || res?.user?.trusteeType;
 
-        if (trusteeType === "COMMERCIAL") {
+        if (!trusteeType) {
+          setError("Authentication failed: Your Trustee profile type (VOLUNTEER, ADVISOR, or TRUSTEE) is missing. Please contact an administrator.");
+          return;
+        }
+
+        if (trusteeType === "ADVISOR" || trusteeType === "TRUSTEE") {
           navigate("/trustee/commercial/dashboard");
-        } else {
+        } else if (trusteeType === "VOLUNTEER") {
           navigate("/trustee/volunteer/dashboard");
+        } else {
+          setError(`Authentication failed: Invalid Trustee profile type '${trusteeType}'.`);
         }
       } else {
         setError(
@@ -70,7 +76,7 @@ function TrusteeLogin() {
           <h1>Trustee Portal</h1>
           <p>
             Secure access for board trustees, volunteer coordinators, and
-            commercial partners.
+            board advisors.
           </p>
         </div>
 

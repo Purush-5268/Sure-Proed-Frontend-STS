@@ -22,8 +22,21 @@ function MyCohorts() {
     let isMounted = true;
     const loadCohorts = async () => {
       try {
-        // MY_COHORTS is mentor-scoped: only returns active cohorts for this mentor
-        const response = await apiClient.get(API_ENDPOINTS.COHORTS.MY_COHORTS);
+        // Fetch mentor's own profile to get their domain/course
+        const profileRes = await apiClient.get(API_ENDPOINTS.MENTORS.PROFILE_ME);
+        const profileData = profileRes.data?.results?.[0] || profileRes.data;
+        const courseId = profileData?.course || null;
+
+        if (!courseId) {
+          if (isMounted) setCohorts([]);
+          return;
+        }
+
+        // Fetch ALL active cohorts for that domain/course
+        const response = await apiClient.get(API_ENDPOINTS.COHORTS.BASE, {
+          params: { course: courseId, status: "ACTIVE" }
+        });
+
         if (isMounted) {
           const data = response.data;
           setCohorts(Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []));
@@ -75,7 +88,7 @@ function MyCohorts() {
     <div className={styles.container}>
       <PageHeader
         title="My Cohorts"
-        description="Your currently active teaching cohorts."
+        description="Active cohorts for your course/domain."
       />
 
       {loading ? (
@@ -93,8 +106,8 @@ function MyCohorts() {
       ) : cohorts.length === 0 ? (
         <EmptyState
           icon={<FiBook />}
-          title="No cohort assigned yet"
-          description="You have not been assigned to any active cohort. Contact your administrator to request an assignment."
+          title="No active cohorts"
+          description="There are currently no active cohorts for your course domain."
           action={
             requestSent ? (
               <div className={styles.requestSentBanner}>

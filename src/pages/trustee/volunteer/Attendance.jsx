@@ -1,12 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import {
-  getAttendanceHierarchy,
-  getRecentSessions,
-  joinSession,
-  endSession,
-  downloadAttendanceCsv,
-} from "../../../services/trusteeService";
+import { getAttendanceHierarchy } from "../../../services/trusteeService";
+import { attendanceService } from "../../../services/attendanceService";
+import SkeletonLoader from "../../../components/common/SkeletonLoader";
 import styles from "./Attendance.module.css";
 
 function VolunteerAttendance() {
@@ -19,18 +15,13 @@ function VolunteerAttendance() {
 
   const loadData = async () => {
     try {
-      const [hierarchyData, sessionsData] = await Promise.all([
-        getAttendanceHierarchy(),
-        getRecentSessions(),
-      ]);
+      const hierarchyData = await getAttendanceHierarchy().catch(() => []);
+      const res = await attendanceService.getAttendanceRecords({ status: "ACTIVE" });
+      const sessionsData = res.results || res || [];
+      
       setHierarchy(hierarchyData || []);
       setActiveSessions(
-        (sessionsData || []).filter(
-          (s) =>
-            s.status === "Pending" ||
-            s.status === "Scheduled" ||
-            s.status === "Active"
-        )
+        sessionsData.filter((s) => s.conducted !== false)
       );
     } catch (err) {
       console.warn("Could not load attendance data:", err);
@@ -43,20 +34,22 @@ function VolunteerAttendance() {
     loadData();
   }, []);
 
-  const handleJoinClass = async (sessionId) => {
-    try {
-      const res = await joinSession(sessionId);
-      if (res.url) window.open(res.url, "_blank");
-    } catch (err) {
-      alert("Cannot join right now: " + (err.response?.data?.detail || err.message));
+  const handleJoinClass = (session) => {
+    if (session.meeting_link) {
+      window.open(
+        session.meeting_link.startsWith('http') ? session.meeting_link : `https://${session.meeting_link}`, 
+        "_blank"
+      );
+    } else {
+      alert("Cannot join right now: meeting link not found.");
     }
   };
 
   const handleEndClass = async (sessionId) => {
     if (window.confirm("Are you sure you want to END this session?")) {
       try {
-        await endSession(sessionId);
-        alert("Session ended successfully!");
+        await attendanceService.patchAttendanceRecord(sessionId, { conducted: false });
+        alert("Session ended successfully. Reports are generating.");
         loadData();
       } catch (err) {
         alert("Failed to end session: " + (err.response?.data?.detail || err.message));
@@ -64,18 +57,49 @@ function VolunteerAttendance() {
     }
   };
 
-  const handleDownloadCsv = async (sessionId, dateString) => {
+  const handleDownloadExcel = async (sessionId, dateString) => {
     try {
-      const formattedDate = new Date(dateString).toISOString().split("T")[0];
-      const blob = await downloadAttendanceCsv(sessionId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `Attendance_${formattedDate}.csv`;
-      a.click();
+      const response = await attendanceService.downloadExcel(sessionId);
+
+      // Check if status is 202 (Report Generating)
+      if (response.status === 202) {
+        let detailMessage = "Report is being generated in the background. Please retry in a few seconds.";
+        if (response.data instanceof Blob && response.data.type === 'application/json') {
+          const text = await response.data.text();
+          const json = JSON.parse(text);
+          if (json.detail) detailMessage = json.detail;
+        } else if (response.data && response.data.detail) {
+          detailMessage = response.data.detail;
+        }
+        alert(`⏳ ${detailMessage}`);
+        return; 
+      }
+
+      if (response.data instanceof Blob && response.data.type === 'application/json') {
+        const text = await response.data.text();
+        const json = JSON.parse(text);
+        alert(json.detail || "Report is not ready or missing.");
+        return; 
+      }
+
+      const formattedDate = dateString ? new Date(dateString).toISOString().split("T")[0] : "Report";
+      let filename = `Attendance_${formattedDate}.xlsx`;
+      const contentDisposition = response.headers['content-disposition'];
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (match && match[1]) filename = match[1];
+      }
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      alert("Failed to download CSV: " + (err.response?.data?.detail || err.message));
+      alert("Failed to download Excel: " + (err.response?.data?.detail || err.message));
     }
   };
 
@@ -119,22 +143,22 @@ function VolunteerAttendance() {
                 <div key={session.id} className={styles.liveCard}>
                   <div>
                     <p className={styles.liveName}>
-                      {session.streamName || "Global Event"}
-                      {session.groupName && (
+                      {session.title || session.class_type || "Global Event"}
+                      {session.lst_batch && (
                         <span className={styles.liveGroup}>
                           {" "}
-                          | {session.groupName}
+                          | {session.lst_batch}
                         </span>
                       )}
                     </p>
                     <p className={styles.liveTime}>
-                      Started: {new Date(session.startTime).toLocaleTimeString()}
+                      Time: {session.start_time} - {session.end_time}
                     </p>
                   </div>
                   <div className={styles.liveActions}>
                     <button
                       className={styles.btnSpectate}
-                      onClick={() => handleJoinClass(session.id)}
+                      onClick={() => handleJoinClass(session)}
                     >
                       Spectate
                     </button>
@@ -226,10 +250,10 @@ function VolunteerAttendance() {
                       <button
                         className={styles.btnDownload}
                         onClick={() =>
-                          handleDownloadCsv(session.id, session.startTime)
+                          handleDownloadExcel(session.id, session.startTime)
                         }
                       >
-                        Download CSV
+                        Download Excel
                       </button>
                     </div>
                   ))}

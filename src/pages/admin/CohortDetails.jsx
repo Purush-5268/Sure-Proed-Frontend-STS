@@ -113,10 +113,51 @@ import SkeletonLoader from "../../components/common/SkeletonLoader";
 function CohortDetails() {
   const { id } = useParams();
   const [cohort, setCohort] = useState(null);
-  const [courseName, setCourseName] = useState("Loading...");
+  const [courseName, setCourseName] = useState("");
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [updatingStage, setUpdatingStage] = useState(false);
+
+  // Timeline calculation helper
+  const calculateTimeline = (startDateStr) => {
+    if (!startDateStr) return null;
+    const start = new Date(startDateStr);
+    
+    const trainingEnd = new Date(start);
+    trainingEnd.setMonth(trainingEnd.getMonth() + 4);
+    
+    const internshipEnd = new Date(trainingEnd);
+    internshipEnd.setMonth(internshipEnd.getMonth() + 2);
+    
+    const softSkillsEnd = new Date(internshipEnd);
+    softSkillsEnd.setDate(softSkillsEnd.getDate() + 15);
+
+    return {
+      start: start.toISOString().split('T')[0],
+      trainingEnd: trainingEnd.toISOString().split('T')[0],
+      internshipEnd: internshipEnd.toISOString().split('T')[0],
+      graduation: softSkillsEnd.toISOString().split('T')[0]
+    };
+  };
+
+  const handleStageChange = async (e) => {
+    const newStatus = e.target.value;
+    if (!newStatus || newStatus === cohort.status) return;
+
+    setUpdatingStage(true);
+    try {
+      await apiClient.patch(API_ENDPOINTS.COHORTS.BY_ID(id), { status: newStatus });
+      setCohort({ ...cohort, status: newStatus });
+      alert(`Cohort stage updated to ${newStatus}. Note: If this fails, the backend validate_status must be updated to allow this transition.`);
+    } catch (err) {
+      console.error("Failed to update status:", err);
+      const detail = err.response?.data?.detail || err.response?.data?.status?.[0] || err.message;
+      alert(`Backend Validation Error: ${detail}\n\nPlease ask the backend agent to update validate_status in cohorts/serializers.py to allow transitioning to ${newStatus}.`);
+    } finally {
+      setUpdatingStage(false);
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -166,17 +207,65 @@ function CohortDetails() {
           <h1 style={{ fontSize: "2rem", margin: "10px 0", color: "var(--text-primary)" }}>{cohort.name || cohort.code}</h1>
           <p style={{ fontSize: "1.1rem", color: "#4338ca", fontWeight: "600", margin: 0 }}>{courseName}</p>
         </div>
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          {/* Admin Manual Stage Override */}
+          <div style={{ marginRight: "1rem", display: "flex", alignItems: "center", gap: "8px" }}>
+            <label style={{ fontSize: "14px", fontWeight: "bold", color: "var(--text-secondary)" }}>Set Stage:</label>
+            <select 
+              value={cohort.status || ""} 
+              onChange={handleStageChange}
+              disabled={updatingStage}
+              style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--border-color)", fontWeight: "bold" }}
+            >
+              <option value="DRAFT">DRAFT</option>
+              <option value="OPEN">OPEN (Enrollment)</option>
+              <option value="ACTIVE">ACTIVE (Pre-Training)</option>
+              <option value="TRAINING">TRAINING</option>
+              <option value="INTERNSHIP">INTERNSHIP</option>
+              <option value="SOFT_SKILLS">SOFT SKILLS</option>
+              <option value="COMPLETED">COMPLETED (Graduated)</option>
+              <option value="CANCELLED">CANCELLED</option>
+            </select>
+            {updatingStage && <span style={{ fontSize: "12px", color: "#2563eb" }}>Saving...</span>}
+          </div>
+
           <Link to={`/admin/edit-cohort/${cohort.id}`} style={{ padding: "10px 20px", backgroundColor: "#fbbf24", color: "#92400e", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>Edit Cohort</Link>
           <Link to="/admin/cohorts" style={{ padding: "10px 20px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>Back</Link>
         </div>
       </div>
 
+      {/* Dynamic Timeline Visualizer */}
+      {cohort.start_date && (
+        <div style={{ backgroundColor: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-color)", marginBottom: "2rem" }}>
+          <h3 style={{ margin: "0 0 1rem 0", color: "var(--text-primary)" }}>Cohort Timeline (Calculated)</h3>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", padding: "20px 0" }}>
+            {/* Connecting Line */}
+            <div style={{ position: "absolute", top: "50%", left: "0", right: "0", height: "4px", backgroundColor: "#e2e8f0", zIndex: 0, transform: "translateY(-50%)" }}></div>
+            
+            {[
+              { label: "Start", date: calculateTimeline(cohort.start_date).start, active: true },
+              { label: "Training Ends", date: calculateTimeline(cohort.start_date).trainingEnd, active: ["TRAINING", "INTERNSHIP", "SOFT_SKILLS", "COMPLETED"].includes(cohort.status) },
+              { label: "Internship Ends", date: calculateTimeline(cohort.start_date).internshipEnd, active: ["INTERNSHIP", "SOFT_SKILLS", "COMPLETED"].includes(cohort.status) },
+              { label: "Graduation", date: calculateTimeline(cohort.start_date).graduation, active: ["COMPLETED"].includes(cohort.status) }
+            ].map((milestone, idx) => (
+              <div key={idx} style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", background: "var(--bg-surface)", padding: "0 10px" }}>
+                <div style={{ width: "20px", height: "20px", borderRadius: "50%", backgroundColor: milestone.active ? "#3b82f6" : "#cbd5e1", border: "4px solid var(--bg-surface)" }}></div>
+                <p style={{ margin: "8px 0 0 0", fontSize: "14px", fontWeight: "bold", color: milestone.active ? "var(--text-primary)" : "var(--text-muted)" }}>{milestone.label}</p>
+                <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "var(--text-secondary)" }}>{milestone.date}</p>
+              </div>
+            ))}
+          </div>
+          <p style={{ margin: "1rem 0 0 0", fontSize: "13px", color: "#64748b", fontStyle: "italic" }}>
+            * This timeline is automatically calculated from the start date. Changing the current stage dropdown above will update students' view immediately.
+          </p>
+        </div>
+      )}
+
       {/* Details Grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
         <div style={{ backgroundColor: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
-          <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: "bold" }}>Mentors</p>
-          <p style={{ margin: "5px 0 0 0", fontWeight: "600", color: "var(--text-primary)" }}>{mentorNames}</p>
+          <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: "bold" }}>Assigned Mentor</p>
+          <p style={{ margin: "5px 0 0 0", fontWeight: "600", color: "var(--text-primary)" }}>{cohort.active_mentor ? `${cohort.active_mentor.first_name || ""} ${cohort.active_mentor.last_name || ""}`.trim() : "Pending Assignment"}</p>
         </div>
         <div style={{ backgroundColor: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
           <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: "bold" }}>Start & End Dates</p>

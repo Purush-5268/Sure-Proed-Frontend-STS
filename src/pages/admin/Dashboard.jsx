@@ -3,9 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { studentService } from "../../services/studentService";
 import { courseService } from "../../services/courseService";
 import { cohortService } from "../../services/cohortService";
-import { applicationService } from "../../services/applicationService";
-import { attendanceService } from "../../services/attendanceService";
-import { normalizeListResponse } from "../../services/apiClient";
+import apiClient, { normalizeListResponse } from "../../services/apiClient";
+import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./Dashboard.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 
@@ -101,31 +100,41 @@ function Dashboard() {
   };
 
   useEffect(() => {
+    const abortController = new AbortController();
+    
     async function loadDashboardData() {
       try {
         setLoading(true);
         // Added attendanceService.getAttendanceRecords() to fetch real sessions
         const [studentsRes, coursesRes, cohortsRes, appsRes, sessionsRes] = await Promise.allSettled([
-          studentService.getStudentProfiles(),
-          courseService.getCourses(),
-          cohortService.getCohorts(),
-          applicationService.getApplications(),
-          attendanceService.getAttendanceRecords({ status: "ACTIVE" }),
+          studentService.getStudentProfiles({}, { signal: abortController.signal }),
+          apiClient.get(API_ENDPOINTS.COURSES.BASE, { signal: abortController.signal }).then(res => res.data), // Inlining since courseService might not support signal
+          apiClient.get(API_ENDPOINTS.COHORTS.BASE, { signal: abortController.signal }).then(res => res.data),
+          apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE, { signal: abortController.signal }).then(res => res.data),
+          apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { params: { status: "ACTIVE" }, signal: abortController.signal }).then(res => res.data),
         ]);
 
         const studentsList = studentsRes.status === "fulfilled" ? normalizeListResponse(studentsRes.value) : [];
         const coursesList = coursesRes.status === "fulfilled" ? normalizeListResponse(coursesRes.value) : [];
         const cohortsList = cohortsRes.status === "fulfilled" ? normalizeListResponse(cohortsRes.value) : [];
 
-        const studentsCount = studentsList.length;
-        const coursesCount = coursesList.length;
-        const cohortsCount = cohortsList.length;
+        const studentsCount = (studentsRes.status === "fulfilled" && studentsRes.value.count !== undefined) 
+          ? studentsRes.value.count 
+          : studentsList.length;
+          
+        const coursesCount = (coursesRes.status === "fulfilled" && coursesRes.value.count !== undefined)
+          ? coursesRes.value.count
+          : coursesList.length;
+          
+        const cohortsCount = (cohortsRes.status === "fulfilled" && cohortsRes.value.count !== undefined)
+          ? cohortsRes.value.count
+          : cohortsList.length;
 
         let appsData = [];
         let applicationsCount = 0;
         if (appsRes.status === "fulfilled") {
           appsData = normalizeListResponse(appsRes.value);
-          applicationsCount = appsData.length;
+          applicationsCount = appsRes.value.count !== undefined ? appsRes.value.count : appsData.length;
         }
 
         setStats({
@@ -146,12 +155,20 @@ function Dashboard() {
           setActiveSessions(normalizeListResponse(sessionsRes.value));
         }
       } catch (err) {
-        console.error("Failed to load admin dashboard data", err);
+        if (err.name !== 'CanceledError' && err.name !== 'AbortError') {
+          console.error("Failed to load admin dashboard data", err);
+        }
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     }
     loadDashboardData();
+    
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   return (
@@ -261,36 +278,35 @@ function Dashboard() {
 
         {currentView === "cohorts" && (
           <div className={styles.cards}>
-            {/* Scan all students directly to find matching domains and unique batches */}
-            {Array.from(new Set(
-              allStudents
-                .filter(s => s.domain === selectedCourse?.name || s.domain === selectedCourse?.title)
-                .map(s => s.course_batch || "Unassigned Batch")
-            )).map((batchName, idx) => {
-              // Calculate actual student count for this batch
-              const studentCount = allStudents.filter(s => s.course_batch === batchName && (s.domain === selectedCourse?.name || s.domain === selectedCourse?.title)).length;
+            {/* Render actual cohorts for this course */}
+            {allCohorts
+              .filter(c => c.course === selectedCourse?.id || c.course?.id === selectedCourse?.id)
+              .map((cohort, idx) => {
+                // Approximate student count based on loaded student data
+                const studentCount = allStudents.filter(s => s.course_batch === cohort.name || s.course_batch === cohort.code).length;
+                const mentorName = cohort.active_mentor ? `${cohort.active_mentor.first_name || ""} ${cohort.active_mentor.last_name || ""}`.trim() || "Assigned" : "Pending Assignment";
 
-              return (
-                <div key={idx} className="premium-card premium-card-hoverable" onClick={() => navigate('/admin/students', { state: { preSelectedCourse: selectedCourse?.name, preSelectedCohort: batchName } })} style={{ cursor: 'pointer', background: 'linear-gradient(135deg, var(--primary-color), var(--primary-dark))', border: '1px solid var(--border-color)', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <h3 style={{ color: '#ffffff', fontSize: '1.25rem', marginBottom: '8px' }}>{batchName}</h3>
-                    <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.85rem', fontWeight: '500', margin: 0 }}>Click to view students ➔</p>
-                  </div>
+                return (
+                  <div key={cohort.id || idx} className="premium-card premium-card-hoverable" onClick={() => navigate(`/admin/cohort-details/${cohort.id}`)} style={{ cursor: 'pointer', background: 'linear-gradient(135deg, var(--primary-color), var(--primary-dark))', border: '1px solid var(--border-color)', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <h3 style={{ color: '#ffffff', fontSize: '1.25rem', marginBottom: '8px' }}>{cohort.name || cohort.code}</h3>
+                      <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.85rem', fontWeight: '500', margin: 0 }}>Click to manage group ➔</p>
+                    </div>
 
-                  {/* Right-Side Stats & Mentor Assignment Box */}
-                  <div style={{ textAlign: 'right', background: 'rgba(0,0,0,0.25)', padding: '12px 16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <div style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '6px' }}>
-                      👥 {studentCount} Students
-                    </div>
-                    <div style={{ color: '#cbd5e1', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                      <span>👨‍🏫 Mentor: <strong style={{ color: '#fbbf24' }}>Pending Assignment</strong></span>
-                      <span>📚 Active Module: <strong style={{ color: '#38bdf8' }}>Module 1</strong></span>
+                    {/* Right-Side Stats & Mentor Assignment Box */}
+                    <div style={{ textAlign: 'right', background: 'rgba(0,0,0,0.25)', padding: '12px 16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                      <div style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '6px' }}>
+                        👥 {studentCount} Students
+                      </div>
+                      <div style={{ color: '#cbd5e1', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                        <span>👨‍🏫 Mentor: <strong style={{ color: '#fbbf24' }}>{mentorName}</strong></span>
+                        <span>📈 Stage: <strong style={{ color: '#38bdf8' }}>{cohort.status || "DRAFT"}</strong></span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-            {allStudents.filter(s => s.domain === selectedCourse?.name || s.domain === selectedCourse?.title).length === 0 && (
+                )
+              })}
+            {allCohorts.filter(c => c.course === selectedCourse?.id || c.course?.id === selectedCourse?.id).length === 0 && (
               <div className="premium-empty-state" style={{ gridColumn: "1 / -1" }}>
                 <div className="premium-empty-state-icon">👥</div>
                 <h3>No active batches</h3>

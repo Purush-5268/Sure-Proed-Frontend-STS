@@ -1,25 +1,25 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { authService } from "../../services/authService";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { FaCheckCircle, FaTimesCircle, FaEye, FaEyeSlash } from "react-icons/fa";
-import styles from "./Signup.module.css";
+import apiClient from "../../services/apiClient";
+import styles from "../signup/Signup.module.css"; // Reuse signup styles for consistency
 
-function Signup() {
+function SetupPassword() {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const uidb64 = searchParams.get("uidb64");
+  const token = searchParams.get("token");
 
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
     password: "",
     confirmPassword: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const [passwordStrength, setPasswordStrength] = useState({
     length: false,
@@ -30,6 +30,19 @@ function Signup() {
     score: 0,
     label: "Weak"
   });
+
+  if (!uidb64 || !token) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.signupCard} style={{ textAlign: "center" }}>
+          <h2>Invalid Link</h2>
+          <p style={{ color: "var(--text-secondary)", marginTop: "10px" }}>
+            The password setup link is invalid or missing required parameters.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -66,12 +79,6 @@ function Signup() {
     e.preventDefault();
     setError("");
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email.trim())) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -85,31 +92,23 @@ function Signup() {
     setLoading(true);
 
     try {
-      const payload = {
-        first_name: formData.firstName.trim(),
-        last_name: formData.lastName.trim(),
-        email: formData.email.trim().toLowerCase(),
-        phone_number: formData.phoneNumber.trim(),
-        password: formData.password,
-        role: "STUDENT", // Enforce Student role
-      };
-
-      await authService.register(payload);
+      await apiClient.post("/api/users/setup_password/", {
+        uidb64,
+        token,
+        new_password: formData.password
+      });
       
       setSuccess(true);
       setTimeout(() => {
         navigate("/login");
-      }, 2500);
+      }, 3000);
 
     } catch (err) {
-      console.error("Registration error:", err);
       const resData = err.response?.data;
-      let msg = "Failed to create account. Please check your inputs.";
+      let msg = "Failed to setup password. The link might be expired or invalid.";
       if (resData) {
         if (typeof resData === "string") {
           msg = resData;
-        } else if (resData.email) {
-          msg = `Email: ${Array.isArray(resData.email) ? resData.email.join(" ") : resData.email}`;
         } else if (resData.detail) {
           msg = resData.detail;
         } else if (typeof resData === "object") {
@@ -130,8 +129,8 @@ function Signup() {
           <div className={styles.successIconWrapper}>
             <FaCheckCircle className={styles.successIcon} />
           </div>
-          <h2>Account Created Successfully!</h2>
-          <p>Please sign in to continue to your dashboard.</p>
+          <h2>Password Set Successfully!</h2>
+          <p>Your account is now ready. Redirecting to login...</p>
           <div className={styles.redirectLoader}>
             <div className={styles.loadingBar}></div>
           </div>
@@ -144,8 +143,8 @@ function Signup() {
     <div className={styles.container}>
       <div className={styles.signupCard}>
         <div className={styles.header}>
-          <h1>Student Registration</h1>
-          <p>Join the Sure ProEd platform to start your journey.</p>
+          <h1>Setup Your Password</h1>
+          <p>Create a secure password to access your staff account.</p>
         </div>
 
         {error && (
@@ -155,59 +154,37 @@ function Signup() {
         )}
 
         <form className={styles.form} onSubmit={handleSubmit}>
-          <div className={styles.row}>
-            <div className={styles.inputGroup}>
-              <label>First Name *</label>
-              <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required placeholder="John" />
-            </div>
-            <div className={styles.inputGroup}>
-              <label>Last Name *</label>
-              <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required placeholder="Doe" />
+          <div className={styles.inputGroup}>
+            <label>New Password *</label>
+            <div className={styles.passwordInputWrapper}>
+              <input 
+                type={showPassword ? "text" : "password"} 
+                name="password" 
+                value={formData.password} 
+                onChange={handleChange} 
+                required 
+                placeholder="••••••••"
+              />
+              <button type="button" className={styles.togglePasswordBtn} onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
           </div>
 
           <div className={styles.inputGroup}>
-            <label>Email Address *</label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="john.doe@example.com" />
-          </div>
-
-          <div className={styles.inputGroup}>
-            <label>Phone Number *</label>
-            <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required placeholder="+1 234 567 890" />
-          </div>
-
-          <div className={styles.row}>
-            <div className={styles.inputGroup}>
-              <label>Password *</label>
-              <div className={styles.passwordInputWrapper}>
-                <input 
-                  type={showPassword ? "text" : "password"} 
-                  name="password" 
-                  value={formData.password} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="••••••••"
-                />
-                <button type="button" className={styles.togglePasswordBtn} onClick={() => setShowPassword(!showPassword)}>
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
-              </div>
-            </div>
-            <div className={styles.inputGroup}>
-              <label>Confirm Password *</label>
-              <div className={styles.passwordInputWrapper}>
-                <input 
-                  type={showConfirmPassword ? "text" : "password"} 
-                  name="confirmPassword" 
-                  value={formData.confirmPassword} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="••••••••"
-                />
-                <button type="button" className={styles.togglePasswordBtn} onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                  {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
-              </div>
+            <label>Confirm Password *</label>
+            <div className={styles.passwordInputWrapper}>
+              <input 
+                type={showConfirmPassword ? "text" : "password"} 
+                name="confirmPassword" 
+                value={formData.confirmPassword} 
+                onChange={handleChange} 
+                required 
+                placeholder="••••••••"
+              />
+              <button type="button" className={styles.togglePasswordBtn} onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
           </div>
 
@@ -249,7 +226,7 @@ function Signup() {
             disabled={loading || passwordStrength.score < 5}
           >
             <span className={styles.btnText}>
-              {loading ? "Creating Account..." : "Create Account"}
+              {loading ? "Saving Password..." : "Set Password"}
             </span>
             {loading && (
               <div className={styles.loadingDots}>
@@ -257,14 +234,10 @@ function Signup() {
               </div>
             )}
           </button>
-
-          <p className={styles.loginText}>
-            Already have an account? <Link to="/login">Sign In</Link>
-          </p>
         </form>
       </div>
     </div>
   );
 }
 
-export default Signup;
+export default SetupPassword;

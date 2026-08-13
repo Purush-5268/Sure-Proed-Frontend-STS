@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import { attendanceService } from "../../services/attendanceService";
 import styles from "./AttendanceManagement.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 
@@ -10,6 +10,7 @@ function AttendanceManagement() {
   const [cohorts, setCohorts] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
   const [filterGroup, setFilterGroup] = useState("");
 
@@ -34,6 +35,13 @@ function AttendanceManagement() {
         }
       } catch (err) {
         console.error("Failed to load attendance data:", err);
+        if (isMounted) {
+          if (err.response?.status === 403) {
+            setErrorMsg("Permission Denied: You do not have access to view these attendance records.");
+          } else {
+            setErrorMsg("Failed to load attendance data. Please try again later.");
+          }
+        }
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -104,16 +112,29 @@ function AttendanceManagement() {
 
   const handleDownloadExcel = async (sessionId, sessionTitle, sessionDate) => {
     try {
-      const response = await apiClient.get(`/api/attendance/${sessionId}/download_excel/`, {
-        responseType: 'blob', // Crucial for binary file downloads like Excel
-      });
+      const response = await attendanceService.downloadExcel(sessionId);
 
-      // 🚨 ANTI-CORRUPTION FIX: Check if the backend sent JSON (like a 202 Waiting message) instead of an Excel file
-      if (response.data.type === 'application/json') {
+      // Check if status is 202 (Report Generating)
+      if (response.status === 202) {
+        // Backend returns JSON with a detail message for 202
+        let detailMessage = "Report is being generated in the background. Please retry in a few seconds.";
+        if (response.data instanceof Blob && response.data.type === 'application/json') {
+          const text = await response.data.text();
+          const json = JSON.parse(text);
+          if (json.detail) detailMessage = json.detail;
+        } else if (response.data && response.data.detail) {
+          detailMessage = response.data.detail;
+        }
+        alert(`⏳ ${detailMessage}`);
+        return; // Stop the download!
+      }
+
+      // Check if the backend sent JSON instead of an Excel file (Error condition)
+      if (response.data instanceof Blob && response.data.type === 'application/json') {
         const text = await response.data.text();
         const json = JSON.parse(text);
-        alert(json.detail || "Report is generating. Please wait a few seconds and try again.");
-        return; // Stop the download!
+        alert(json.detail || "Report is not ready or missing.");
+        return; 
       }
 
       // 🚨 FILENAME FIX: Extract the exact collision-proof filename from Django's headers
@@ -194,10 +215,23 @@ function AttendanceManagement() {
         </button>
       </div>
 
-      {loading ? (
+      {errorMsg ? (
+        <div className="premium-empty-state">
+          <div className="premium-empty-state-icon">🔒</div>
+          <h3>Access Restricted</h3>
+          <p>{errorMsg}</p>
+        </div>
+      ) : loading ? (
         <SkeletonLoader variant="table" rows={6} />
       ) : filteredAttendance.length === 0 ? (
-        <p>No attendance sessions match your filters.</p>
+        <div className="premium-empty-state">
+          <div className="premium-empty-state-icon">📅</div>
+          <h3>No Attendance Records Found</h3>
+          <p>No attendance sessions match your current filters.</p>
+          <button onClick={() => { setSelectedCourse(""); setFilterGroup(""); }} className="premium-btn premium-btn-secondary">
+            Clear Filters
+          </button>
+        </div>
       ) : (
         <div className="premium-table-container">
           <table className="premium-table">
@@ -216,26 +250,22 @@ function AttendanceManagement() {
 
             <tbody>
               {filteredAttendance.map((item) => {
-                let whitelistCount = 0;
-                if (Array.isArray(item.guest_emails)) {
-                  whitelistCount = item.guest_emails.length;
-                } else if (typeof item.guest_emails === 'string' && item.guest_emails.trim() !== '') {
-                  whitelistCount = item.guest_emails.split(',').length;
-                } else if (item.notes && item.notes.includes('@')) {
-                  whitelistCount = (item.notes.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi) || []).length;
-                }
+                const whitelistCount = item.whitelist_email_count || 0;
+                const totalStudents = item.actual_student_count || 0;
+                const joinedStudents = Array.isArray(item.joined_students) ? item.joined_students.length : 0;
+                const absentStudents = Math.max(0, totalStudents - joinedStudents);
 
                 return (
                   <tr key={item.id}>
                     <td style={{ verticalAlign: "middle" }}>{item.class_date}</td>
                     <td style={{ verticalAlign: "middle" }}>{getCohortName(item.cohort, item.title)}</td>
                     <td style={{ verticalAlign: "middle" }}>{getCohortBatch(item.cohort, item.title)}</td>
-                    <td style={{ verticalAlign: "middle" }}>{Array.isArray(item.attendees) ? item.attendees.length : 0}</td>
+                    <td style={{ verticalAlign: "middle" }}>{totalStudents}</td>
                     <td style={{ verticalAlign: "middle", fontWeight: whitelistCount > 0 ? "bold" : "normal", color: whitelistCount > 0 ? "#3b82f6" : "inherit" }}>
                       {whitelistCount}
                     </td>
-                    <td style={{ verticalAlign: "middle" }}>{Array.isArray(item.joined_students) ? item.joined_students.length : 0}</td>
-                    <td style={{ verticalAlign: "middle" }}>{Math.max(0, (Array.isArray(item.attendees) ? item.attendees.length : 0) - (Array.isArray(item.joined_students) ? item.joined_students.length : 0))}</td>
+                    <td style={{ verticalAlign: "middle" }}>{joinedStudents}</td>
+                    <td style={{ verticalAlign: "middle" }}>{absentStudents}</td>
 
                     <td className="actions" style={{ verticalAlign: "middle", padding: "8px 16px" }}>
                       {(!item.conducted || item.conducted === 'false' || item.conducted === false) ? (

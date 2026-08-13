@@ -66,7 +66,7 @@ export const authService = {
 
   // Register
   async register(payload) {
-    const response = await apiClient.post(`${API_ENDPOINTS.USERS.BASE}/register/`, payload);
+    const response = await apiClient.post(API_ENDPOINTS.USERS.BASE, payload);
     return response.data;
   },
 

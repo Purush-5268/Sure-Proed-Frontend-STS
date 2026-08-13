@@ -89,7 +89,11 @@ function Cohorts() {
       {loading ? (
         <SkeletonLoader variant="table" rows={5} />
       ) : cohorts.length === 0 ? (
-        <p>No cohorts have been created yet. Create one from the button above.</p>
+        <div className="premium-empty-state">
+          <div className="premium-empty-state-icon">👥</div>
+          <h3>No cohorts found</h3>
+          <p>No cohorts have been created yet. Create one from the button above.</p>
+        </div>
       ) : (
         <div className="premium-table-container">
           <table className="premium-table">

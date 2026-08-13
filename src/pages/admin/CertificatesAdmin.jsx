@@ -80,7 +80,11 @@ function CertificatesAdmin() {
       {loading ? (
         <SkeletonLoader variant="table" rows={5} />
       ) : certificates.length === 0 ? (
-        <p>No certificates have been issued yet.</p>
+        <div className="premium-empty-state">
+          <div className="premium-empty-state-icon">🎓</div>
+          <h3>No Certificates Found</h3>
+          <p>No certificates have been issued yet.</p>
+        </div>
       ) : (
         <div className="premium-table-container">
           <table className="premium-table">

@@ -1,11 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import {
-  getTodaySessions,
-  joinSession,
-  endSession,
-  whitelistLateGuest,
-} from "../../../services/trusteeService";
+import { attendanceService } from "../../../services/attendanceService";
 import { useAuth } from "../../../context/AuthContext";
 import styles from "./Dashboard.module.css";
 
@@ -19,9 +14,10 @@ function VolunteerDashboard() {
 
   const fetchLiveSessions = async () => {
     try {
-      const sessionsArray = await getTodaySessions();
-      // Filter out completed ones, keep pending/active
-      setActiveSessions(sessionsArray.filter((s) => s.status !== "Completed"));
+      const res = await attendanceService.getAttendanceRecords({ status: "ACTIVE" });
+      const sessionsArray = res.results || res || [];
+      // Filter out completed ones, keep pending/active (backend filters this mostly, but just in case)
+      setActiveSessions(sessionsArray.filter((s) => s.conducted !== false));
     } catch (err) {
       console.warn("Could not fetch live sessions", err);
       // Fallback for UI if backend is not running
@@ -50,7 +46,7 @@ function VolunteerDashboard() {
       return;
     }
     try {
-      const res = await whitelistLateGuest(sessionId, [email.trim()]);
+      const res = await attendanceService.whitelistGuest(sessionId, [email.trim()]);
       alert(`✅ ${res.message || "Guest whitelisted"}`);
       setLateGuestEmails((prev) => ({ ...prev, [sessionId]: "" }));
       setShowLateInput((prev) => ({ ...prev, [sessionId]: false }));
@@ -59,15 +55,14 @@ function VolunteerDashboard() {
     }
   };
 
-  const handleSpectate = async (sessionId) => {
-    try {
-      const res = await joinSession(sessionId);
-      if (res.url) window.open(res.url, "_blank");
-    } catch (err) {
-      alert(
-        "Cannot spectate right now. Link might still be generating: " +
-          (err.response?.data?.detail || err.message)
+  const handleSpectate = (session) => {
+    if (session.meeting_link) {
+      window.open(
+        session.meeting_link.startsWith('http') ? session.meeting_link : `https://${session.meeting_link}`, 
+        "_blank"
       );
+    } else {
+      alert("Cannot spectate right now. Link might still be generating.");
     }
   };
 
@@ -78,9 +73,9 @@ function VolunteerDashboard() {
       )
     ) {
       try {
-        await endSession(sessionId);
+        await attendanceService.patchAttendanceRecord(sessionId, { conducted: false });
         alert(
-          "✅ SUCCESS\n\nSession ended. Attendance mathematically calculated and CSV is ready for download!"
+          "✅ SUCCESS\n\nSession ended. Reports are being generated in the background."
         );
         fetchLiveSessions();
       } catch (err) {
@@ -156,19 +151,18 @@ function VolunteerDashboard() {
                   {activeSessions.map((session) => (
                     <tr key={session.id}>
                       <td>
-                        <h4 className={styles.className}>{session.sessionType}</h4>
+                        <h4 className={styles.className}>{session.title || session.class_type}</h4>
                         <p className={styles.classDetails}>
-                          {session.streamName || "Global / Life Skills"}
-                          {session.groupName && (
+                          {session.class_type === "DOMAIN" ? "Domain Session" : session.class_type}
+                          {session.lst_batch && (
                             <span className={styles.groupBadge}>
-                              | Group: {session.groupName}
+                              | Batch: {session.lst_batch}
                             </span>
                           )}
                         </p>
                       </td>
                       <td>
-                        {new Date(cls.startTime).toLocaleTimeString()} -{" "}
-                        {new Date(cls.endTime).toLocaleTimeString()}
+                        {session.start_time} - {session.end_time}
                       </td>
                       <td>
                         <span className="badge badgePending">Active</span>
@@ -178,37 +172,37 @@ function VolunteerDashboard() {
                           <div className={styles.actionButtons}>
                             <button
                               className={styles.btnOutlineBlue}
-                              onClick={() => handleToggleLateInput(cls.id)}
+                              onClick={() => handleToggleLateInput(session.id)}
                             >
                               ➕ Add Guest
                             </button>
                             <button
                               className={styles.btnOutlineTeal}
-                              onClick={() => handleSpectate(cls.id)}
+                              onClick={() => handleSpectate(session)}
                             >
                               👁️ Spectate
                             </button>
                             <button
                               className={styles.btnOutlineRed}
-                              onClick={() => handleEndClass(cls.id)}
+                              onClick={() => handleEndClass(session.id)}
                             >
                               🛑 End Now
                             </button>
                           </div>
-                          {showLateInput[cls.id] && (
+                          {showLateInput[session.id] && (
                             <div className={styles.lateInputContainer}>
                               <input
                                 type="email"
                                 placeholder="Late guest email..."
-                                value={lateGuestEmails[cls.id] || ""}
+                                value={lateGuestEmails[session.id] || ""}
                                 onChange={(e) =>
-                                  handleEmailChange(cls.id, e.target.value)
+                                  handleEmailChange(session.id, e.target.value)
                                 }
                                 className="formInput"
                               />
                               <button
                                 className="btn btnPrimary"
-                                onClick={() => handleAddLateGuest(cls.id)}
+                                onClick={() => handleAddLateGuest(session.id)}
                               >
                                 Save
                               </button>

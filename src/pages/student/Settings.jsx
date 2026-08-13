@@ -2,19 +2,46 @@ import React, { useState } from 'react';
 import styles from './Settings.module.css';
 import ThemeToggle from '../../components/common/ThemeToggle';
 import { useAuth } from '../../context/AuthContext';
+import apiClient from '../../services/apiClient';
+import { API_ENDPOINTS } from '../../constants/apiEndpoints';
+import { FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 
 function Settings() {
     const { user } = useAuth();
     const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
-    const handlePasswordChange = (e) => {
+    const handlePasswordChange = async (e) => {
         e.preventDefault();
+        setError("");
+        setSuccess("");
+
         if (passwordData.new !== passwordData.confirm) {
-            alert("New passwords do not match!");
+            setError("New passwords do not match.");
             return;
         }
-        alert("Password reset request sent to server! (Backend wiring needed)");
-        setPasswordData({ current: '', new: '', confirm: '' });
+
+        if (passwordData.new.length < 8) {
+            setError("New password must be at least 8 characters long.");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await apiClient.post(API_ENDPOINTS.USERS.RESET_PASSWORD, {
+                current_password: passwordData.current,
+                new_password: passwordData.new
+            });
+            setSuccess("Password updated successfully.");
+            setPasswordData({ current: '', new: '', confirm: '' });
+            setTimeout(() => setSuccess(""), 3000);
+        } catch (err) {
+            setError(err?.response?.data?.detail || "Failed to update password. Please check your current password.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -74,6 +101,17 @@ function Settings() {
                     </div>
                     <p className={styles.description}>Update your password to keep your account secure.</p>
 
+                    {error && (
+                        <div style={{ display: "flex", gap: "10px", alignItems: "center", color: "#b91c1c", backgroundColor: "#fee2e2", padding: "12px", borderRadius: "8px", marginBottom: "1.5rem", fontWeight: "bold", fontSize: "14px" }}>
+                            <FiAlertCircle size={18} /> {error}
+                        </div>
+                    )}
+                    {success && (
+                        <div style={{ display: "flex", gap: "10px", alignItems: "center", color: "#166534", backgroundColor: "#ecfdf5", padding: "12px", borderRadius: "8px", marginBottom: "1.5rem", fontWeight: "bold", fontSize: "14px" }}>
+                            <FiCheckCircle size={18} /> {success}
+                        </div>
+                    )}
+
                     <form onSubmit={handlePasswordChange} className={styles.passwordForm}>
                         <div className={styles.inputGroup}>
                             <label>Current Password</label>
@@ -87,7 +125,9 @@ function Settings() {
                             <label>Confirm New Password</label>
                             <input type="password" value={passwordData.confirm} onChange={(e) => setPasswordData({ ...passwordData, confirm: e.target.value })} required placeholder="Confirm new password" />
                         </div>
-                        <button type="submit" className={styles.saveBtn}>Update Password</button>
+                        <button type="submit" disabled={loading} className={styles.saveBtn} style={{ cursor: loading ? "not-allowed" : "pointer" }}>
+                            {loading ? "Updating..." : "Update Password"}
+                        </button>
                     </form>
                 </div>
 

@@ -1,8 +1,9 @@
-import React, { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import React, { Suspense, lazy, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 import SessionExpiredModal from "../components/common/SessionExpiredModal";
 import GlobalLoader from "../components/common/GlobalLoader";
+import { useTheme } from "../context/ThemeContext";
 
 /* Layouts */
 import PublicLayout from "../layouts/PublicLayout";
@@ -18,7 +19,28 @@ import Login from "../pages/auth/Login";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 import EmailVerification from "../pages/auth/EmailVerification";
+import SetupPassword from "../pages/auth/SetupPassword";
 import NotFound from "../pages/errors/Error404";
+
+/* Theme Enforcer for Public Pages */
+function ThemeEnforcer() {
+  const location = useLocation();
+  const { theme } = useTheme();
+
+  useEffect(() => {
+    const publicPaths = ['/', '/login', '/signup', '/setup-password', '/forgot-password', '/reset-password', '/email-verification'];
+    const isPublic = publicPaths.includes(location.pathname);
+
+    if (isPublic) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+      const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    }
+  }, [location.pathname, theme]);
+
+  return null;
+}
 
 /* Volunteer Trustee */
 const VolunteerDashboard = lazy(() => import("../pages/trustee/volunteer/Dashboard"));
@@ -84,6 +106,11 @@ import Mentors from "../pages/admin/Mentors";
 import AdminMentorDetails from "../pages/admin/MentorDetails";
 import AddMentor from "../pages/admin/AddMentor";
 import EditMentor from "../pages/admin/EditMentor";
+
+/* Trustee Management (Global) */
+import Trustees from "../pages/admin/Trustees";
+import AddTrustee from "../pages/admin/AddTrustee";
+import TrusteeDetails from "../pages/admin/TrusteeDetails";
 
 /* Company Management */
 import Companies from "../pages/admin/Companies";
@@ -171,6 +198,7 @@ import MentorSettings from "../pages/mentor/Settings";
 function AppRoutes() {
   return (
     <BrowserRouter>
+      <ThemeEnforcer />
       <SessionExpiredModal />
       <Suspense fallback={<GlobalLoader message="Loading module..." />}>
         <Routes>
@@ -182,6 +210,7 @@ function AppRoutes() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/email-verification" element={<EmailVerification />} />
+            <Route path="/setup-password" element={<SetupPassword />} />
           </Route>
 
           {/* ================= STUDENT MODULE (PROTECTED) ================= */}
@@ -243,6 +272,11 @@ function AppRoutes() {
               <Route path="mentor-details/:id" element={<AdminMentorDetails />} />
               <Route path="add-mentor" element={<AddMentor />} />
               <Route path="edit-mentor/:id" element={<EditMentor />} />
+
+              {/* Trustee Management */}
+              <Route path="trustees" element={<Trustees />} />
+              <Route path="add-trustee" element={<AddTrustee />} />
+              <Route path="trustee-details/:id" element={<TrusteeDetails />} />
 
               {/* Companies */}
               <Route path="companies" element={<Companies />} />
@@ -350,8 +384,12 @@ function AppRoutes() {
           {/* ================= TRUSTEE MODULE (PROTECTED) ================= */}
           <Route element={<ProtectedRoute allowedRoles={["TRUSTEE"]} redirectTo="/login" />}>
             <Route path="/trustee" element={<TrusteeLayout />}>
-              <Route index element={<Navigate to="dashboard" replace />} />
-              <Route path="dashboard" element={<Navigate to="volunteer/dashboard" replace />} />
+              {/* 
+                The index and dashboard paths are handled directly by TrusteeLayout.jsx 
+                which securely redirects based on the trusteeType (VOLUNTEER vs COMMERCIAL). 
+              */}
+              <Route index element={null} />
+              <Route path="dashboard" element={null} />
 
               {/* Volunteer Trustee */}
               <Route path="volunteer/dashboard" element={<VolunteerDashboard />} />
