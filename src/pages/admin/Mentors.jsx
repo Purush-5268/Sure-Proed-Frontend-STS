@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import apiClient, { normalizeListResponse } from "../../services/apiClient";
+import { courseService } from "../../services/courseService";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./Mentors.module.css";
@@ -37,10 +38,10 @@ function Mentors() {
       try {
         const res = await apiClient.get(API_ENDPOINTS.COURSES.BASE, { signal: abortController.signal });
         if (isMounted) setCourses(normalizeListResponse(res.data));
-      } catch (err) { 
+      } catch (err) {
         if (err.name !== 'CanceledError' && err.name !== 'AbortError') console.error(err);
       }
-      finally { 
+      finally {
         if (isMounted) {
           setLoadingCourses(false);
           setLoadingMentors(false); // Initially false until a course is selected
@@ -57,15 +58,15 @@ function Mentors() {
 
   // Load active cohorts and relevant mentors when course is selected
   useEffect(() => {
-    if (!selectedCourse) { 
-      setCohorts([]); 
-      setAllMentors([]); 
-      return; 
+    if (!selectedCourse) {
+      setCohorts([]);
+      setAllMentors([]);
+      return;
     }
     setSelectedCohort(null);
     let isMounted = true;
     const abortController = new AbortController();
-    
+
     setLoadingCohorts(true);
     setLoadingMentors(true);
     setCohorts([]);
@@ -83,10 +84,10 @@ function Mentors() {
             signal: abortController.signal
           })
         ]);
-        
+
         const cohortsData = normalizeListResponse(cohortsRes.data);
         const mentorsData = normalizeListResponse(mentorsRes.data);
-        
+
         if (isMounted) {
           // Only show currently running cohorts
           setCohorts(cohortsData.filter(c => ["ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS"].includes(c.status)));
@@ -95,7 +96,7 @@ function Mentors() {
       } catch (err) {
         if (err.name !== 'CanceledError' && err.name !== 'AbortError') console.error(err);
       }
-      finally { 
+      finally {
         if (isMounted) {
           setLoadingCohorts(false);
           setLoadingMentors(false);
@@ -213,85 +214,85 @@ function Mentors() {
       )}
 
       {selectedCourse && (
-          <div className={styles.stepSection}>
-            <h2 className={styles.stepTitle}>
-              <span className={styles.stepNum}>3</span> Mentors
-            </h2>
-            {loadingMentors ? (
-              <SkeletonLoader width="100%" height="80px" borderRadius="8px" />
-            ) : filteredMentors.length === 0 ? (
-              <div className={styles.emptyMentors}>
-                <FiUsers className={styles.emptyIcon} />
-                <p>No mentors found for this course.</p>
-                <Link to="/admin/add-mentor" className="premium-btn premium-btn-secondary">Add Mentor</Link>
-              </div>
-            ) : (
-              <div className="premium-table-container">
-                <table className="premium-table">
-                  <thead>
-                    <tr>
-                      <th>Mentor Name</th>
-                      <th>Status</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredMentors.map(mentor => {
-                      const activeCohorts = mentorCohortMap[mentor.user] || [];
-                      const isTeaching = activeCohorts.length > 0;
-                      return (
-                        <tr key={mentor.id}>
-                          <td>
-                            <div className={styles.mentorCell}>
-                              <div className={styles.mentorAvatar}>
-                                {`${mentor.user_first_name || "?"}`.charAt(0).toUpperCase()}
-                              </div>
-                              {`${mentor.user_first_name || ""} ${mentor.user_last_name || ""}`.trim() || mentor.user_email}
+        <div className={styles.stepSection}>
+          <h2 className={styles.stepTitle}>
+            <span className={styles.stepNum}>3</span> Mentors
+          </h2>
+          {loadingMentors ? (
+            <SkeletonLoader width="100%" height="80px" borderRadius="8px" />
+          ) : filteredMentors.length === 0 ? (
+            <div className={styles.emptyMentors}>
+              <FiUsers className={styles.emptyIcon} />
+              <p>No mentors found for this course.</p>
+              <Link to="/admin/add-mentor" className="premium-btn premium-btn-secondary">Add Mentor</Link>
+            </div>
+          ) : (
+            <div className="premium-table-container">
+              <table className="premium-table">
+                <thead>
+                  <tr>
+                    <th>Mentor Name</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredMentors.map(mentor => {
+                    const activeCohorts = mentorCohortMap[mentor.user] || [];
+                    const isTeaching = activeCohorts.length > 0;
+                    return (
+                      <tr key={mentor.id}>
+                        <td>
+                          <div className={styles.mentorCell}>
+                            <div className={styles.mentorAvatar}>
+                              {`${mentor.user_first_name || "?"}`.charAt(0).toUpperCase()}
                             </div>
-                          </td>
-                          <td>
+                            {`${mentor.user_first_name || ""} ${mentor.user_last_name || ""}`.trim() || mentor.user_email}
+                          </div>
+                        </td>
+                        <td>
+                          {isTeaching ? (
+                            <div style={{ color: "#d97706", fontWeight: "bold" }}>
+                              ALREADY TEACHING
+                              <ul style={{ margin: "4px 0 0 16px", fontSize: "12px", color: "var(--text-secondary)", fontWeight: "normal" }}>
+                                {activeCohorts.map(c => <li key={c.id}>{c.code} - {c.name}</li>)}
+                              </ul>
+                            </div>
+                          ) : (
+                            <span style={{ color: "#059669", fontWeight: "bold" }}>FREE</span>
+                          )}
+                        </td>
+                        <td>
+                          <div className="premium-flex-row" style={{ gap: "8px" }}>
+                            <Link to={`/admin/mentor-details/${mentor.user}`} className="premium-btn premium-btn-secondary" style={{ padding: "6px 12px" }}>View</Link>
                             {isTeaching ? (
-                              <div style={{ color: "#d97706", fontWeight: "bold" }}>
-                                ALREADY TEACHING
-                                <ul style={{ margin: "4px 0 0 16px", fontSize: "12px", color: "var(--text-secondary)", fontWeight: "normal" }}>
-                                  {activeCohorts.map(c => <li key={c.id}>{c.code} - {c.name}</li>)}
-                                </ul>
-                              </div>
+                              <button className="premium-btn" disabled style={{ padding: "6px 12px", background: "#e5e7eb", color: "#9ca3af", cursor: "not-allowed" }}>
+                                Assign
+                              </button>
+                            ) : assignSuccess === mentor.user ? (
+                              <button className="premium-btn" disabled style={{ padding: "6px 12px", background: "#ecfdf5", color: "#059669" }}>
+                                Assigned!
+                              </button>
                             ) : (
-                              <span style={{ color: "#059669", fontWeight: "bold" }}>FREE</span>
+                              <button
+                                className="premium-btn premium-btn-primary"
+                                style={{ padding: "6px 12px" }}
+                                onClick={() => handleAssign(mentor.user)}
+                                disabled={!selectedCohort || assigning === mentor.user}
+                              >
+                                {assigning === mentor.user ? "Assigning..." : "Assign"}
+                              </button>
                             )}
-                          </td>
-                          <td>
-                            <div className="premium-flex-row" style={{ gap: "8px" }}>
-                              <Link to={`/admin/mentor-details/${mentor.user}`} className="premium-btn premium-btn-secondary" style={{ padding: "6px 12px" }}>View</Link>
-                              {isTeaching ? (
-                                <button className="premium-btn" disabled style={{ padding: "6px 12px", background: "#e5e7eb", color: "#9ca3af", cursor: "not-allowed" }}>
-                                  Assign
-                                </button>
-                              ) : assignSuccess === mentor.user ? (
-                                <button className="premium-btn" disabled style={{ padding: "6px 12px", background: "#ecfdf5", color: "#059669" }}>
-                                  Assigned!
-                                </button>
-                              ) : (
-                                <button 
-                                  className="premium-btn premium-btn-primary" 
-                                  style={{ padding: "6px 12px" }}
-                                  onClick={() => handleAssign(mentor.user)}
-                                  disabled={!selectedCohort || assigning === mentor.user}
-                                >
-                                  {assigning === mentor.user ? "Assigning..." : "Assign"}
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

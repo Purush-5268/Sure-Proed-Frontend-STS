@@ -101,7 +101,7 @@ function Dashboard() {
 
   useEffect(() => {
     const abortController = new AbortController();
-    
+
     async function loadDashboardData() {
       try {
         setLoading(true);
@@ -118,14 +118,14 @@ function Dashboard() {
         const coursesList = coursesRes.status === "fulfilled" ? normalizeListResponse(coursesRes.value) : [];
         const cohortsList = cohortsRes.status === "fulfilled" ? normalizeListResponse(cohortsRes.value) : [];
 
-        const studentsCount = (studentsRes.status === "fulfilled" && studentsRes.value.count !== undefined) 
-          ? studentsRes.value.count 
+        const studentsCount = (studentsRes.status === "fulfilled" && studentsRes.value.count !== undefined)
+          ? studentsRes.value.count
           : studentsList.length;
-          
+
         const coursesCount = (coursesRes.status === "fulfilled" && coursesRes.value.count !== undefined)
           ? coursesRes.value.count
           : coursesList.length;
-          
+
         const cohortsCount = (cohortsRes.status === "fulfilled" && cohortsRes.value.count !== undefined)
           ? cohortsRes.value.count
           : cohortsList.length;
@@ -165,7 +165,7 @@ function Dashboard() {
       }
     }
     loadDashboardData();
-    
+
     return () => {
       abortController.abort();
     };

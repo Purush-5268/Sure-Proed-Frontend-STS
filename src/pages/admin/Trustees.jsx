@@ -16,17 +16,17 @@ function Trustees() {
         // Fetch all trustees from users endpoint
         const resUsers = await apiClient.get(API_ENDPOINTS.USERS.BASE, { params: { role: "TRUSTEE" } });
         const users = normalizeListResponse(resUsers.data).filter(u => u.role === "TRUSTEE");
-        
+
         // Fetch trustee profiles
         let profilesMap = {};
         try {
-            const resProfiles = await apiClient.get(API_ENDPOINTS.TRUSTEE_PROFILES.BASE);
-            const profiles = normalizeListResponse(resProfiles.data);
-            profiles.forEach(p => {
-                if (p.email) profilesMap[p.email] = p;
-            });
+          const resProfiles = await apiClient.get(API_ENDPOINTS.TRUSTEE_PROFILES.BASE);
+          const profiles = normalizeListResponse(resProfiles.data);
+          profiles.forEach(p => {
+            if (p.email) profilesMap[p.email] = p;
+          });
         } catch (e) {
-            console.error("Failed to fetch trustee profiles", e);
+          console.error("Failed to fetch trustee profiles", e);
         }
 
         // Merge
@@ -42,7 +42,7 @@ function Trustees() {
         if (isMounted) setLoading(false);
       }
     };
-    
+
     fetchTrustees();
     return () => { isMounted = false; };
   }, []);
@@ -104,9 +104,9 @@ function Trustees() {
                       <span className="premium-badge premium-badge-indigo">
                         <FiShield style={{ marginRight: "4px" }} /> Advisor
                       </span>
-                    ) : t.profile?.trustee_type === "TRUSTEE" ? (
-                      <span className="premium-badge premium-badge-primary">
-                        <FiShield style={{ marginRight: "4px" }} /> Board Trustee
+                    ) : t.profile?.trustee_type === "COMMERCIAL" ? (
+                      <span className="premium-badge premium-badge-purple">
+                        <FiShield style={{ marginRight: "4px" }} /> Trustee
                       </span>
                     ) : (
                       <span className="premium-badge premium-badge-gray">

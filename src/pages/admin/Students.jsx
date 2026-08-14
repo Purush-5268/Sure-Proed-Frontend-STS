@@ -19,13 +19,13 @@ function Students() {
   const [selectedCourseId, setSelectedCourseId] = useState(location.state?.preSelectedCourse || "");
   const [selectedCohort, setSelectedCohort] = useState(location.state?.preSelectedCohort || "");
   const [verificationState, setVerificationState] = useState("");
-  
+
   // Pagination state
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   const [hasPrev, setHasPrev] = useState(false);
-  
+
   // Dashboard stats
   const [stats, setStats] = useState({
     total: 0, eligibleForBulk: "-", reviewRequired: "-", approved: "-", rejected: "-"
@@ -53,7 +53,7 @@ function Students() {
         console.error("Failed to load dropdown data", err);
       }
     }
-    
+
     async function loadStats() {
       try {
         const res = await apiClient.get(API_ENDPOINTS.STUDENTS.STATISTICS);
@@ -86,26 +86,14 @@ function Students() {
       try {
         const baseParams = { page };
         if (selectedCohort) baseParams.course_batch = selectedCohort;
-        
-        // Map frontend verificationState to backend verification_state contract
-        if (verificationState) {
-          if (verificationState === "ELIGIBLE_FOR_BULK") {
-            baseParams.verification_state = "READY";
-          } else if (verificationState === "REVIEW_REQUIRED") {
-            baseParams.verification_state = "REVIEW";
-          } else if (verificationState === "ADMIN_REJECTED") {
-            baseParams.verification_state = "BLOCKED";
-          }
-          // ADMIN_APPROVED currently has no explicit backend verification_state mapping.
-          // It relies on the client-side filtering below.
-        }
-        
+        if (verificationState) baseParams.verification_state = verificationState;
+
         // Use client-side course filtering only if no backend support exists.
         // NOTE: If the backend natively supports `course_id`, add it to baseParams instead of filtering later!
-        
+
         // Fetch ONLY the current page for instant performance
         const data = await studentService.getStudentProfiles(baseParams, { signal: abortController.signal });
-        
+
         // Standard DRF Pagination format: { count, next, previous, results }
         const fetchedStudents = data?.results || (Array.isArray(data) ? data : []);
         const totalFromServer = data?.count || fetchedStudents.length;
@@ -113,7 +101,7 @@ function Students() {
         // Apply client-side course filtering if selected
         let finalStudents = fetchedStudents;
         if (selectedCourseId) {
-          finalStudents = fetchedStudents.filter(s => 
+          finalStudents = fetchedStudents.filter(s =>
             String(studentService.getStudentCourseId(s)) === String(selectedCourseId)
           );
         }
@@ -136,21 +124,21 @@ function Students() {
 
       } catch (err) {
         if (err.name === 'AbortError' || err.code === 'ERR_CANCELED' || err.name === 'CanceledError') {
-           // Ignored: Component unmounted or request aborted
-           console.log("Request aborted");
+          // Ignored: Component unmounted or request aborted
+          console.log("Request aborted");
         } else {
-           console.error("Failed to fetch students", err);
-           setStudents([]);
+          console.error("Failed to fetch students", err);
+          setStudents([]);
         }
       } finally {
         if (!abortController.signal.aborted) {
-           setLoading(false);
+          setLoading(false);
         }
       }
     }
-    
+
     fetchStudents();
-    
+
     return () => {
       abortController.abort();
     };
@@ -194,9 +182,9 @@ function Students() {
       const student = students.find(s => s.id === id);
       return student && isStudentClear(student);
     });
-    
+
     if (verifiedIds.length === 0) return;
-    
+
     if (!window.confirm(`Are you sure you want to bulk approve ${verifiedIds.length} eligible students?`)) {
       return;
     }
@@ -206,10 +194,10 @@ function Students() {
     try {
       const result = await studentService.bulkVerifyStudents(verifiedIds);
       setBulkResult(result);
-      
+
       // Update local state to reflect approvals
       if (result.approved_ids && result.approved_ids.length > 0) {
-        setStudents(prev => prev.map(s => 
+        setStudents(prev => prev.map(s =>
           result.approved_ids.includes(s.id) ? { ...s, status: "ADMIN_APPROVED" } : s
         ));
       }
@@ -221,33 +209,33 @@ function Students() {
     }
   };
 
-    // Helper to render verification status
-    const renderVerificationBadge = (student) => {
-      if (student.status === "ADMIN_APPROVED") {
-        return <span style={{ color: "#059669", fontWeight: "bold", fontSize: "12px" }}>✅ APPROVED</span>;
-      }
-      if (student.status === "ADMIN_REJECTED") {
-        return <span style={{ color: "#dc2626", fontWeight: "bold", fontSize: "12px" }}>❌ REJECTED</span>;
-      }
-      if (studentService.isStudentEligibleForBulk(student)) {
-        return <span style={{ color: "#2563eb", fontWeight: "bold", fontSize: "12px" }}>🟢 ELIGIBLE FOR BULK</span>;
-      }
-      if (studentService.isStudentReviewRequired(student)) {
-        return (
-          <span style={{ color: "#d97706", fontWeight: "bold", fontSize: "12px" }}>
-            ⚠️ REVIEW REQUIRED
-            {student.automated_verification_result?.includes("DUPLICATE") && " (DUP PDF)"}
-            {student.automated_verification_result?.includes("COLLISION") && " (COLLISION)"}
-          </span>
-        );
-      }
-      if (student.status === "NOT_AVAILABLE" || !student.status) {
-        return <span style={{ color: "#9ca3af", fontWeight: "bold", fontSize: "12px" }}>NOT SUBMITTED</span>;
-      }
-      
-      // Fallback for any other state (should not be reached based on contract)
-      return <span style={{ color: "#6b7280", fontWeight: "bold", fontSize: "12px" }}>{student.status || "UNKNOWN"}</span>;
-    };
+  // Helper to render verification status
+  const renderVerificationBadge = (student) => {
+    if (student.status === "ADMIN_APPROVED") {
+      return <span style={{ color: "#059669", fontWeight: "bold", fontSize: "12px" }}>✅ APPROVED</span>;
+    }
+    if (student.status === "ADMIN_REJECTED") {
+      return <span style={{ color: "#dc2626", fontWeight: "bold", fontSize: "12px" }}>❌ REJECTED</span>;
+    }
+    if (studentService.isStudentEligibleForBulk(student)) {
+      return <span style={{ color: "#2563eb", fontWeight: "bold", fontSize: "12px" }}>🟢 ELIGIBLE FOR BULK</span>;
+    }
+    if (studentService.isStudentReviewRequired(student)) {
+      return (
+        <span style={{ color: "#d97706", fontWeight: "bold", fontSize: "12px" }}>
+          ⚠️ REVIEW REQUIRED
+          {student.automated_verification_result?.includes("DUPLICATE") && " (DUP PDF)"}
+          {student.automated_verification_result?.includes("COLLISION") && " (COLLISION)"}
+        </span>
+      );
+    }
+    if (student.status === "NOT_AVAILABLE" || !student.status) {
+      return <span style={{ color: "#9ca3af", fontWeight: "bold", fontSize: "12px" }}>NOT SUBMITTED</span>;
+    }
+
+    // Fallback for any other state (should not be reached based on contract)
+    return <span style={{ color: "#6b7280", fontWeight: "bold", fontSize: "12px" }}>{student.status || "UNKNOWN"}</span>;
+  };
 
   return (
     <div className="premium-page-container">
@@ -316,7 +304,7 @@ function Students() {
           <option value="">All Courses</option>
           {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        
+
         <select
           value={selectedCohort}
           onChange={(e) => setSelectedCohort(e.target.value)}
@@ -326,25 +314,25 @@ function Students() {
         >
           <option value="">All Batches</option>
           {cohorts.filter(c => {
-             const cId = c.course?.id || c.course || c.course_id;
-             return String(cId) === String(selectedCourseId);
+            const cId = c.course?.id || c.course || c.course_id;
+            return String(cId) === String(selectedCourseId);
           }).map(coh => (
             <option key={coh.id} value={coh.code || coh.name || coh.id}>{coh.name || coh.code}</option>
           ))}
         </select>
-        
+
         <select
-            value={verificationState}
-            onChange={(e) => setVerificationState(e.target.value)}
-            className="premium-input"
-            style={{ flex: 1, minWidth: "200px" }}
-          >
-            <option value="">All Statuses</option>
-            <option value="ELIGIBLE_FOR_BULK">Eligible for Bulk</option>
-            <option value="REVIEW_REQUIRED">Review Required</option>
-            <option value="ADMIN_APPROVED">Approved</option>
-            <option value="ADMIN_REJECTED">Rejected</option>
-          </select>
+          value={verificationState}
+          onChange={(e) => setVerificationState(e.target.value)}
+          className="premium-input"
+          style={{ flex: 1, minWidth: "200px" }}
+        >
+          <option value="">All Statuses</option>
+          <option value="ELIGIBLE_FOR_BULK">Eligible for Bulk</option>
+          <option value="REVIEW_REQUIRED">Review Required</option>
+          <option value="ADMIN_APPROVED">Approved</option>
+          <option value="ADMIN_REJECTED">Rejected</option>
+        </select>
       </div>
 
       {/* Bulk Action Bar */}
@@ -353,13 +341,13 @@ function Students() {
           Total Students: <strong>{totalCount}</strong>
         </div>
         <div>
-          <button 
-            onClick={handleBulkVerify} 
+          <button
+            onClick={handleBulkVerify}
             disabled={selectedIds.size === 0 || isVerifying}
-            className="premium-btn" 
-            style={{ 
-              backgroundColor: selectedIds.size > 0 ? "#10b981" : "#9ca3af", 
-              color: "#fff", 
+            className="premium-btn"
+            style={{
+              backgroundColor: selectedIds.size > 0 ? "#10b981" : "#9ca3af",
+              color: "#fff",
               fontWeight: "bold",
               cursor: selectedIds.size > 0 ? "pointer" : "not-allowed"
             }}
@@ -375,8 +363,8 @@ function Students() {
           <thead>
             <tr>
               <th style={{ width: "40px" }}>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   onChange={handleSelectAllClear}
                   checked={students.filter(isStudentClear).length > 0 && selectedIds.size === students.filter(isStudentClear).length}
                   title="Select all CLEAR students on this page"
@@ -408,10 +396,10 @@ function Students() {
                   <tr key={student.id} style={{ borderBottom: "1px solid var(--border-color)", transition: "background-color 0.2s" }} className="premium-table-row">
                     <td>
                       {clear && student.status !== "ADMIN_APPROVED" && (
-                        <input 
-                          type="checkbox" 
-                          checked={selectedIds.has(student.id)} 
-                          onChange={() => handleToggleSelect(student.id)} 
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(student.id)}
+                          onChange={() => handleToggleSelect(student.id)}
                         />
                       )}
                     </td>
@@ -427,9 +415,9 @@ function Students() {
                       {renderVerificationBadge(student)}
                     </td>
                     <td style={{ padding: "1.25rem 1rem" }}>
-                      <button 
-                        onClick={() => setSelectedStudent(student)} 
-                        className="premium-btn" 
+                      <button
+                        onClick={() => setSelectedStudent(student)}
+                        className="premium-btn"
                         style={{ backgroundColor: "var(--bg-nested)", border: "1px solid var(--border-color)", color: "var(--text-primary)", padding: "6px 12px", height: "auto", fontSize: "13px" }}
                       >
                         Inspect
@@ -445,8 +433,8 @@ function Students() {
 
       {/* Pagination Controls */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1.5rem" }}>
-        <button 
-          disabled={!hasPrev || loading} 
+        <button
+          disabled={!hasPrev || loading}
           onClick={() => setPage(p => p - 1)}
           className="premium-btn"
           style={{ backgroundColor: hasPrev ? "var(--primary-color)" : "var(--bg-nested)", color: hasPrev ? "#fff" : "var(--text-muted)" }}
@@ -454,8 +442,8 @@ function Students() {
           &larr; Previous Page
         </button>
         <span style={{ fontSize: "14px", fontWeight: "bold" }}>Page {page}</span>
-        <button 
-          disabled={!hasNext || loading} 
+        <button
+          disabled={!hasNext || loading}
           onClick={() => setPage(p => p + 1)}
           className="premium-btn"
           style={{ backgroundColor: hasNext ? "var(--primary-color)" : "var(--bg-nested)", color: hasNext ? "#fff" : "var(--text-muted)" }}
@@ -479,12 +467,12 @@ function Students() {
 
             <div style={{ backgroundColor: selectedStudent.review_required ? "#fef3c7" : "#f3f4f6", padding: "1.5rem", borderRadius: "12px", marginBottom: "1.5rem", border: selectedStudent.review_required ? "1px solid #f59e0b" : "1px solid #d1d5db" }}>
               <h3 style={{ margin: "0 0 16px 0", fontSize: "16px", color: selectedStudent.review_required ? "#92400e" : "#1f2937", borderBottom: "1px solid rgba(0,0,0,0.1)", paddingBottom: "8px" }}>Verification</h3>
-              
+
               <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px", fontSize: "14px", color: "#4b5563" }}>
                 <div><strong>Status:</strong> {selectedStudent.status === "PENDING_ADMIN_REVIEW" ? "● Verification Pending" : selectedStudent.status.replace("_", " ")}</div>
-                
-                <div><strong>Document:</strong> {selectedStudent.offer_letter ? "Offer Letter submitted" : "Not Submitted"}</div>
-                
+
+                <div><strong>Document:</strong> {(selectedStudent.uploaded_offer_letter || selectedStudent.offer_letter || selectedStudent.offerLetter) ? "Offer Letter submitted" : "Not Submitted"}</div>
+
                 <div>
                   <strong>Automated Verification:</strong> {selectedStudent.automated_verification_result?.toLowerCase().includes("passed") ? "✓ Passed" : (selectedStudent.automated_verification_result ? "Processed" : "N/A")}
                 </div>
@@ -494,9 +482,9 @@ function Students() {
                 )}
               </div>
 
-              {selectedStudent.offer_letter && (
+              {(selectedStudent.uploaded_offer_letter || selectedStudent.offer_letter || selectedStudent.offerLetter) && (
                 <div style={{ marginTop: "16px" }}>
-                  <a href={selectedStudent.offer_letter.startsWith('http') ? selectedStudent.offer_letter : `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${selectedStudent.offer_letter}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", padding: "8px 16px", backgroundColor: "#2563eb", color: "white", textDecoration: "none", borderRadius: "6px", fontWeight: "bold", fontSize: "14px" }}>View Offer Letter</a>
+                  <a href={(selectedStudent.uploaded_offer_letter || selectedStudent.offer_letter || selectedStudent.offerLetter).startsWith('http') ? (selectedStudent.uploaded_offer_letter || selectedStudent.offer_letter || selectedStudent.offerLetter) : `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8001'}${(selectedStudent.uploaded_offer_letter || selectedStudent.offer_letter || selectedStudent.offerLetter)}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", padding: "8px 16px", backgroundColor: "#2563eb", color: "white", textDecoration: "none", borderRadius: "6px", fontWeight: "bold", fontSize: "14px" }}>View Offer Letter</a>
                 </div>
               )}
             </div>
@@ -507,9 +495,9 @@ function Students() {
               <div><strong>College:</strong> {selectedStudent.college || "N/A"}</div>
               <div><strong>Phone:</strong> {selectedStudent.user?.phone_number || "N/A"}</div>
             </div>
-            
+
             <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-              {selectedStudent.status !== "ADMIN_APPROVED" && (
+              {selectedStudent.status === "PENDING_ADMIN_REVIEW" && (
                 <button onClick={async () => {
                   try {
                     await studentService.verifyStudent(selectedStudent.id, "APPROVE");
@@ -518,7 +506,7 @@ function Students() {
                   } catch (e) { alert("Failed to approve: " + (e.response?.data?.detail || e.message)); }
                 }} style={{ flex: 1, padding: "10px", backgroundColor: "#10b981", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>Approve Manually</button>
               )}
-              {selectedStudent.status !== "ADMIN_REJECTED" && (
+              {selectedStudent.status === "PENDING_ADMIN_REVIEW" && (
                 <button onClick={async () => {
                   const reason = window.prompt("Enter rejection reason:");
                   if (reason !== null) {

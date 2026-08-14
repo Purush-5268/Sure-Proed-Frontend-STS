@@ -31,13 +31,14 @@ function Dashboard() {
   const [attendanceHistory, setAttendanceHistory] = useState([]);
 
   useEffect(() => {
+    const abortController = new AbortController();
     let isMounted = true;
 
     async function fetchDashboardData() {
       if (!user?.email) return;
       try {
         // Fetch Profile
-        const res = await studentService.getStudentProfiles();
+        const res = await studentService.getStudentProfiles({}, { signal: abortController.signal });
         const data = res?.data || res;
         const profileObj = Array.isArray(data?.results) ? data.results[0] : (Array.isArray(data) ? data[0] : data);
         if (isMounted) setProfile(profileObj || {});
@@ -110,7 +111,7 @@ function Dashboard() {
     }
 
     fetchDashboardData();
-    return () => { isMounted = false; };
+    return () => { isMounted = false; abortController.abort(); };
   }, [user]);
 
   const handleJoinClass = async (cls) => {

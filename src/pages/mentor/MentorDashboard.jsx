@@ -40,6 +40,7 @@ function MentorDashboard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const abortController = new AbortController();
     let isMounted = true;
     const loadDashboardData = async () => {
       try {
@@ -80,7 +81,7 @@ function MentorDashboard() {
     };
 
     loadDashboardData();
-    return () => { isMounted = false; };
+    return () => { isMounted = false; abortController.abort(); };
   }, []);
 
   const firstName = user?.first_name || user?.firstName || "";
