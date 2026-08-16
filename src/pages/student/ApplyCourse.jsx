@@ -180,9 +180,10 @@ function ApplyCourse() {
         // 1. Check Profile Completion (Default to true so candidates can apply)
         setProfileCompleted(true);
 
-        // 2. Process Courses List
+        // 2. Process Courses List (Filter by open cohorts)
         const rawCourses = Array.isArray(coursesData) ? coursesData : coursesData?.results || coursesData?.data || [];
-        setCourses(rawCourses);
+        const openCourses = rawCourses.filter(course => course.has_open_cohort === true);
+        setCourses(openCourses);
 
         // 3. Process Applications from Backend & Local Storage
         const appliedSet = new Set(JSON.parse(localStorage.getItem("sure_applied_course_ids") || "[]"));
