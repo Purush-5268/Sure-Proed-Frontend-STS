@@ -10,6 +10,16 @@ import SkeletonLoader from "../../components/common/SkeletonLoader";
 function ScheduleClass() {
   const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [activeTab, setActiveTab] = useState("MANUAL");
+  const [automationForm, setAutomationForm] = useState({
+    firstSunday: "",
+    startTime: "",
+    endTime: "",
+    startingBatch: "BATCH_1"
+  });
+  const [automationInfo, setAutomationInfo] = useState(null);
+
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -24,10 +34,16 @@ function ScheduleClass() {
     startTime: "",
     endTime: "",
     guestEmails: [],
+    title: "",
   });
 
   const [showGuestInput, setShowGuestInput] = useState(false);
   const [newGuestEmail, setNewGuestEmail] = useState("");
+
+  // 🚨 State for Manage Attendees (After Generation)
+  const [managingClassId, setManagingClassId] = useState(null);
+  const [newWhitelistEmail, setNewWhitelistEmail] = useState("");
+  const [isAddingWhitelist, setIsAddingWhitelist] = useState(false);
 
   // 🚨 Function to fetch live radar data
   const loadActiveClasses = async () => {
@@ -45,15 +61,76 @@ function ScheduleClass() {
   useEffect(() => {
     async function loadCourses() {
       try {
-        const res = await courseService.getCourses();
-        setCourses(normalizeListResponse(res));
+        const cached = sessionStorage.getItem("sure_courses_cache");
+        if (cached) {
+          setCourses(JSON.parse(cached));
+        } else {
+          const res = await courseService.getCourses();
+          const normalized = normalizeListResponse(res);
+          setCourses(normalized);
+          sessionStorage.setItem("sure_courses_cache", JSON.stringify(normalized));
+        }
       } catch (err) {
         console.error("Failed to load courses:", err);
       }
     }
-    loadCourses();
-    loadActiveClasses(); // Load radar on page load
+    
+    async function fetchAutomation() {
+      try {
+        const res = await apiClient.get('/api/attendance/get-lst-automation/');
+        setAutomationInfo(res.data);
+      } catch (err) {
+        console.error("Failed to load automation info", err);
+      }
+    }
+
+    Promise.all([loadCourses(), loadActiveClasses(), fetchAutomation()]);
   }, []);
+
+  const handleSetupAutomation = async (e) => {
+    e.preventDefault();
+    
+    // Sunday Validation
+    if (automationForm.firstSunday) {
+      const selectedDate = new Date(automationForm.firstSunday);
+      if (selectedDate.getDay() !== 0) {
+         alert("❌ Please select a Sunday date for automatic LST meetings.");
+         return;
+      }
+    }
+    
+    setIsLoading(true);
+    try {
+       const res = await apiClient.post('/api/attendance/setup-lst-automation/', {
+          first_sunday: automationForm.firstSunday,
+          start_time: automationForm.startTime + ":00",
+          end_time: automationForm.endTime + ":00",
+          starting_batch: automationForm.startingBatch,
+          is_paused: false
+       });
+       alert("✅ " + res.data.message);
+       const getRes = await apiClient.get('/api/attendance/get-lst-automation/');
+       setAutomationInfo(getRes.data);
+    } catch (err) {
+       alert("❌ Failed to setup automation: " + (err.response?.data?.error || err.message));
+    } finally {
+       setIsLoading(false);
+    }
+  };
+
+  const handleToggleGlobalAutomation = async (isPaused) => {
+    try {
+      const res = await apiClient.post('/api/attendance/toggle-lst-automation/', {
+        is_paused: isPaused
+      });
+      alert(`✅ ${res.data.message}`);
+      const getRes = await apiClient.get('/api/attendance/get-lst-automation/');
+      setAutomationInfo(getRes.data);
+    } catch (err) {
+      alert(`❌ ${err.response?.data?.error || "Failed to toggle automation."}`);
+    }
+  };
+
 
   const addGuestEmail = (e) => {
     if (e) e.preventDefault();
@@ -110,6 +187,46 @@ function ScheduleClass() {
     }
   };
 
+  const handleAddWhitelistEmail = async (cls) => {
+    if (!newWhitelistEmail || !newWhitelistEmail.includes("@")) {
+      alert("Please enter a valid email.");
+      return;
+    }
+    const currentGuestEmails = cls.guest_emails || [];
+    if (currentGuestEmails.map(e => e.toLowerCase()).includes(newWhitelistEmail.trim().toLowerCase())) {
+      alert("Email already added.");
+      return;
+    }
+
+    setIsAddingWhitelist(true);
+    try {
+      const res = await apiClient.post(`/api/attendance/${cls.id}/add-attendees/`, {
+        emails: [newWhitelistEmail.trim()]
+      });
+      
+      const updatedGuestEmails = res.data?.guest_emails || [];
+      const addedCount = updatedGuestEmails.length - currentGuestEmails.length;
+      
+      setActiveAdminClasses(prev => prev.map(c => {
+         if (c.id === cls.id) {
+            return {
+               ...c,
+               guest_emails: updatedGuestEmails,
+               whitelist_email_count: (c.whitelist_email_count || 0) + addedCount,
+               total_attendee_count: (c.total_attendee_count || c.actual_student_count || 0) + addedCount
+            };
+         }
+         return c;
+      }));
+      setNewWhitelistEmail("");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Failed to add email.");
+    } finally {
+      setIsAddingWhitelist(false);
+    }
+  };
+
   // 🚨 FIXED: Force End Class must send 'conducted: false' so backend intercepts it
   const handleForceEndClass = async (classId) => {
     if (!window.confirm("Are you sure you want to end this class and calculate attendance?")) return;
@@ -125,6 +242,22 @@ function ScheduleClass() {
       console.error("Failed to end class:", err);
       loadActiveClasses(); // Revert if failed
       alert("❌ Failed to end class. Check backend endpoints.");
+    }
+  };
+
+  const handleToggleAutomation = async (isPaused) => {
+    if (!automationInfo?.starting_batch) {
+      alert("Please select an LST Batch first.");
+      return;
+    }
+    try {
+      const res = await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BASE}toggle-lst-automation/`, {
+        lst_batch: automationInfo?.starting_batch,
+        is_paused: isPaused
+      });
+      alert(`✅ ${res.data.message}`);
+    } catch (err) {
+      alert(`❌ ${err.response?.data?.error || "Failed to toggle automation. Ensure the schedule exists."}`);
     }
   };
 
@@ -160,7 +293,7 @@ function ScheduleClass() {
       const finalGroupName = request.groupName ? request.groupName.trim().toUpperCase() : "";
 
       const formattedData = {
-        title: `${request.sessionType} Session - ${finalGroupName || request.lstBatchNumber || 'General'}`.toUpperCase(),
+        title: `${request.sessionType} Session - ${finalGroupName || automationInfo?.starting_batch || 'General'}`.toUpperCase(),
         class_date: request.startTime.split("T")[0],
         start_time: request.startTime.split("T")[1] + ":00",
         end_time: request.endTime.split("T")[1] + ":00",
@@ -171,18 +304,32 @@ function ScheduleClass() {
         session_type: request.sessionType,
         group_name: finalGroupName,
         stream_id: request.streamId,
-        lst_batch: request.lstBatchNumber,
+        lst_batch: automationInfo?.starting_batch,
         guest_emails: request.guestEmails
       };
 
-      const res = await attendanceService.scheduleSession(formattedData);
+      let res;
+      if (request.sessionType === "LST") {
+        res = await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BASE}generate-lst/`, {
+          lst_batch: automationInfo?.starting_batch,
+          class_date: request.startTime.split("T")[0],
+          start_time: request.startTime.split("T")[1] + ":00",
+          end_time: request.endTime.split("T")[1] + ":00",
+          title: request.title,
+          guest_emails: request.guestEmails
+        });
+      } else {
+        res = await attendanceService.scheduleSession(formattedData);
+      }
 
       const expectedCount = res?.data?.expected_attendees_count || res?.expected_attendees_count || 0;
       setSuccessMessage(`Live class scheduled! Expected Attendees: ${expectedCount}`);
 
       // 🚨 INSTANT UI UPDATE: Push the newly created class directly into the state
       const newSession = res?.data || res;
-      if (newSession && newSession.id) {
+      const resolvedId = newSession?.id || newSession?.session_id; // Fix for LST returning session_id instead of id
+      if (newSession && resolvedId) {
+        newSession.id = resolvedId; // Ensure ID is mapped correctly for React keys
         setActiveAdminClasses(prev => [newSession, ...prev]);
       } else {
         loadActiveClasses(); // Fallback if backend doesn't return the object
@@ -196,6 +343,7 @@ function ScheduleClass() {
         startTime: "",
         endTime: "",
         guestEmails: [],
+        title: "",
       });
     } catch (err) {
       if (err.customError) {
@@ -226,6 +374,80 @@ function ScheduleClass() {
         {successMessage && <div className="premium-alert-success">✅ {successMessage}</div>}
         {errorMessage && <div className="premium-alert-error">❌ {errorMessage}</div>}
 
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+          <button 
+            onClick={() => setActiveTab("MANUAL")} 
+            className={`premium-btn ${activeTab === "MANUAL" ? "premium-btn-primary" : "premium-btn-secondary"}`}
+          >
+            Manual Live Class
+          </button>
+          <button 
+            onClick={() => setActiveTab("AUTO")} 
+            className={`premium-btn ${activeTab === "AUTO" ? "premium-btn-primary" : "premium-btn-secondary"}`}
+          >
+            Automatic LST Schedule
+          </button>
+        </div>
+
+        {activeTab === "AUTO" && (
+          <div className="premium-form">
+            <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Automate LST Meetings</h2>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+              Automatically generate LST meetings every Sunday.
+              Batch 1 and Batch 2 will alternate automatically.
+            </p>
+
+            {automationInfo?.configured && (
+              <div style={{ marginBottom: '2rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '8px' }}>
+                <h3 style={{ fontSize: '14px', margin: '0 0 10px 0', color: '#047857' }}>✅ Automation is Currently Active</h3>
+                <ul style={{ fontSize: '13px', color: 'var(--text-primary)', margin: 0, paddingLeft: '20px' }}>
+                  <li>First Sunday: <strong>{automationInfo.first_sunday}</strong></li>
+                  <li>Starting Batch: <strong>{automationInfo.starting_batch === "BATCH_1" ? "Batch 1" : "Batch 2"}</strong></li>
+                  <li>Time: <strong>{automationInfo.start_time} - {automationInfo.end_time}</strong></li>
+                  <li>Status: <strong>{automationInfo.is_paused ? "⏸️ PAUSED" : "▶️ RUNNING"}</strong></li>
+                </ul>
+                <div style={{ marginTop: '1rem' }}>
+                  {automationInfo.is_paused ? (
+                    <button type="button" onClick={() => handleToggleGlobalAutomation(false)} className="premium-btn premium-btn-primary">▶️ Resume Automation</button>
+                  ) : (
+                    <button type="button" onClick={() => handleToggleGlobalAutomation(true)} className="premium-btn premium-btn-secondary">⏸️ Pause Automation</button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleSetupAutomation}>
+              <div className="premium-grid-2" style={{ marginBottom: '1rem' }}>
+                <div>
+                  <label className="premium-label">First Sunday Date *</label>
+                  <input type="date" value={automationForm.firstSunday} onChange={e => setAutomationForm({...automationForm, firstSunday: e.target.value})} required className="premium-input" />
+                </div>
+                <div>
+                  <label className="premium-label">Starting Batch *</label>
+                  <select value={automationForm.startingBatch} onChange={e => setAutomationForm({...automationForm, startingBatch: e.target.value})} className="premium-input">
+                    <option value="BATCH_1">Batch 1</option>
+                    <option value="BATCH_2">Batch 2</option>
+                  </select>
+                </div>
+              </div>
+              <div className="premium-grid-2" style={{ marginBottom: '1.5rem' }}>
+                <div>
+                  <label className="premium-label">Start Time *</label>
+                  <input type="time" value={automationForm.startTime} onChange={e => setAutomationForm({...automationForm, startTime: e.target.value})} required className="premium-input" />
+                </div>
+                <div>
+                  <label className="premium-label">End Time *</label>
+                  <input type="time" value={automationForm.endTime} onChange={e => setAutomationForm({...automationForm, endTime: e.target.value})} required className="premium-input" />
+                </div>
+              </div>
+              <button type="submit" disabled={isLoading} className="premium-btn premium-btn-accent" style={{ width: '100%' }}>
+                {isLoading ? "Saving..." : "Enable Automation"}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {activeTab === "MANUAL" && (
         <form onSubmit={scheduleClass} className="premium-form">
           <div>
             <label className="premium-label">Target Audience (Session Type) *</label>
@@ -259,46 +481,65 @@ function ScheduleClass() {
 
           {request.sessionType === "LST" && (
             <div className={`premium-section ${styles.animatedField}`}>
-              <label className="premium-label">LST Batch Number *</label>
-              <select value={request.lstBatchNumber} onChange={(e) => setRequest({ ...request, lstBatchNumber: e.target.value })} required className={`premium-input ${styles.formInput}`}>
-                <option value="">-- Select Batch --</option>
-                <option value="1">Batch 1</option>
-                <option value="2">Batch 2</option>
-              </select>
+              <div className="premium-grid-2">
+                <div>
+                  <label className="premium-label">LST Batch Number *</label>
+                  <select value={automationInfo?.starting_batch} onChange={(e) => setRequest({ ...request, lstBatchNumber: e.target.value })} required className={`premium-input ${styles.formInput}`}>
+                    <option value="">-- Select Batch --</option>
+                    <option value="BATCH_1">Batch 1</option>
+                    <option value="BATCH_2">Batch 2</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="premium-label">Class / Meet Name *</label>
+                  <input type="text" value={request.title} onChange={(e) => setRequest({ ...request, title: e.target.value })} placeholder="e.g. VLSI LST — Digital Electronics" required className={`premium-input ${styles.formInput}`} />
+                </div>
+              </div>
+
+              {automationInfo?.starting_batch && (
+                <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '8px', border: '1px dashed rgba(59, 130, 246, 0.3)' }}>
+                  <p style={{ margin: '0 0 0.5rem 0', fontSize: '13px', color: 'var(--text-primary)', fontWeight: 'bold' }}>🤖 Sunday Automation Controls</p>
+                  <p style={{ margin: '0 0 1rem 0', fontSize: '12px', color: 'var(--text-secondary)' }}>Automated Google Meets are generated every Sunday by the Celery worker for this batch. You can pause or resume this background process.</p>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button type="button" onClick={() => handleToggleAutomation(true)} className="premium-btn premium-btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }}>⏸️ Pause Automation</button>
+                    <button type="button" onClick={() => handleToggleAutomation(false)} className="premium-btn premium-btn-primary" style={{ padding: '6px 12px', fontSize: '12px' }}>▶️ Resume Automation</button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
           <div className="premium-section">
-            <div className="premium-flex-between" style={{ marginBottom: showGuestInput ? "1rem" : "0" }}>
-              <div>
-                <label className="premium-label" style={{ color: "var(--text-primary)", marginBottom: 0 }}>Whitelist Custom Emails (Optional)</label>
-                <p style={{ fontSize: "12px", color: "var(--text-primary)", margin: 0 }}>Add trainers, trustees, or students to bypass the Meet waiting room.</p>
-              </div>
-              <button type="button" onClick={() => setShowGuestInput(!showGuestInput)} className="premium-btn premium-btn-primary">
-                {showGuestInput ? "Hide" : "+ Add Emails"}
-              </button>
-            </div>
-
-            {showGuestInput && (
-              <div className={styles.animatedField}>
-                <div className="premium-flex-row">
-                  <input type="email" value={newGuestEmail} onChange={(e) => setNewGuestEmail(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addGuestEmail(e)} placeholder="e.g. rohansir@gmail.com" className="premium-input" style={{ flex: 1 }} />
-                  <button type="button" onClick={addGuestEmail} className="premium-btn premium-btn-secondary">Add</button>
+              <div className="premium-flex-between" style={{ marginBottom: showGuestInput ? "1rem" : "0" }}>
+                <div>
+                  <label className="premium-label" style={{ color: "var(--text-primary)", marginBottom: 0 }}>Whitelist Emails (Optional)</label>
+                  <p style={{ fontSize: "12px", color: "var(--text-primary)", margin: 0 }}>Add trainers, trustees, or students to bypass the Meet waiting room.</p>
                 </div>
-
-                {request.guestEmails.length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem", padding: "0.75rem", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "8px" }}>
-                    {request.guestEmails.map((email, i) => (
-                      <span key={i} className="premium-badge-pill">
-                        {email}
-                        <button type="button" onClick={() => removeGuestEmail(i)} style={{ color: "#ef4444", border: "none", background: "none", cursor: "pointer", fontSize: "16px", fontWeight: "bold", padding: 0 }}>&times;</button>
-                      </span>
-                    ))}
-                  </div>
-                )}
+                <button type="button" onClick={() => setShowGuestInput(!showGuestInput)} className="premium-btn premium-btn-primary">
+                  {showGuestInput ? "Hide" : "+ Add Emails"}
+                </button>
               </div>
-            )}
-          </div>
+
+              {showGuestInput && (
+                <div className={styles.animatedField}>
+                  <div className="premium-flex-row">
+                    <input type="email" value={newGuestEmail} onChange={(e) => setNewGuestEmail(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addGuestEmail(e)} placeholder="e.g. rohansir@gmail.com" className="premium-input" style={{ flex: 1 }} />
+                    <button type="button" onClick={addGuestEmail} className="premium-btn premium-btn-secondary">Add</button>
+                  </div>
+
+                  {request.guestEmails.length > 0 && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem", padding: "0.75rem", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "8px" }}>
+                      {request.guestEmails.map((email, i) => (
+                        <span key={i} className="premium-badge-pill">
+                          {email}
+                          <button type="button" onClick={() => removeGuestEmail(i)} style={{ color: "#ef4444", border: "none", background: "none", cursor: "pointer", fontSize: "16px", fontWeight: "bold", padding: 0 }}>&times;</button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
           <div className="premium-grid-2">
             <div>
@@ -317,6 +558,7 @@ function ScheduleClass() {
             </button>
           </div>
         </form>
+        )}
       </div>
 
       {/* 🚨 ADMIN LIVE RADAR UI 🚨 */}
@@ -332,7 +574,10 @@ function ScheduleClass() {
                   <h3 style={{ margin: "0 0 5px 0", color: "var(--text-primary)", fontSize: "1.2rem" }}>{cls.title}</h3>
                   <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: "14px" }}>
                     Generated by: <strong>{cls.generator_info || "Admin/Mentor"}</strong> |
-                    Attendees Expected: <strong>{cls.actual_student_count || 0}</strong>
+                    Attendees Expected: <strong>{cls.total_attendee_count || cls.actual_student_count || 0}</strong>
+                    <span style={{ fontSize: "12px", marginLeft: "8px", color: "var(--text-muted)" }}>
+                      (Students: {cls.actual_student_count || 0}, Whitelisted: {cls.whitelist_email_count || 0})
+                    </span>
                   </p>
 
                   {/* Hide standard time display if currently editing */}
@@ -346,6 +591,9 @@ function ScheduleClass() {
                 <div className="premium-flex-row">
                   {editingClassId !== cls.id ? (
                     <>
+                      <button onClick={() => { setManagingClassId(managingClassId === cls.id ? null : cls.id); setNewWhitelistEmail(""); }} className="premium-btn premium-btn-secondary" style={{ backgroundColor: managingClassId === cls.id ? "rgba(255,255,255,0.1)" : "" }}>
+                        👥 Manage Attendees
+                      </button>
                       <button onClick={() => handleStartEdit(cls)} className="premium-btn premium-btn-secondary">
                         ✏️ Reschedule
                       </button>
@@ -380,6 +628,51 @@ function ScheduleClass() {
                     <label className="premium-label" style={{ fontSize: '12px' }}>New End Time</label>
                     <input type="datetime-local" value={editEndTime} onChange={(e) => setEditEndTime(e.target.value)} className={`premium-input ${styles.formInput}`} style={{ minHeight: '40px' }} />
                   </div>
+                </div>
+              )}
+
+              {/* 🚨 Inline Manage Attendees UI */}
+              {managingClassId === cls.id && (
+                <div className={styles.animatedField} style={{ background: 'var(--bg-nested)', padding: '1rem', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '1rem', border: '1px solid var(--border-color)' }}>
+                  <div className="premium-flex-between">
+                    <h4 style={{ margin: 0, color: "var(--text-primary)" }}>Whitelist Additional Emails</h4>
+                    <span className="premium-badge-pill" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                      Total Whitelisted: {cls.whitelist_email_count || 0}
+                    </span>
+                  </div>
+                  
+                  <div className="premium-flex-row">
+                    <input 
+                      type="email" 
+                      value={newWhitelistEmail} 
+                      onChange={(e) => setNewWhitelistEmail(e.target.value)} 
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddWhitelistEmail(cls)} 
+                      placeholder="e.g. guest@example.com" 
+                      className={`premium-input ${styles.formInput}`} 
+                      style={{ flex: 1, minHeight: '40px' }} 
+                      disabled={isAddingWhitelist}
+                    />
+                    <button 
+                      onClick={() => handleAddWhitelistEmail(cls)} 
+                      disabled={isAddingWhitelist || !newWhitelistEmail} 
+                      className="premium-btn premium-btn-accent"
+                    >
+                      {isAddingWhitelist ? "Adding..." : "+ Add to Calendar"}
+                    </button>
+                  </div>
+                  
+                  {cls.guest_emails && cls.guest_emails.length > 0 && (
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <p style={{ margin: '0 0 0.5rem 0', fontSize: '12px', color: 'var(--text-secondary)' }}>Currently Whitelisted:</p>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                        {cls.guest_emails.map((email, i) => (
+                          <span key={i} className="premium-badge-pill" style={{ fontSize: '12px', padding: '4px 8px' }}>
+                            {email}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

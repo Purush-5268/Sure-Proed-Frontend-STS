@@ -30,13 +30,14 @@ function Applications() {
   }, []);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div>
-          <h1>Application Management</h1>
-          <p>Manage all student applications</p>
+    <div className={styles.page}>
+      <div className={styles.card}>
+        <div className={styles.header}>
+          <div>
+            <h1 style={{ fontSize: "1.65rem", fontWeight: 700, color: "var(--text-primary)" }}>Application Management</h1>
+            <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>Manage all student applications</p>
+          </div>
         </div>
-      </div>
 
       {loading ? (
         <SkeletonLoader variant="table" rows={5} />
@@ -84,6 +85,7 @@ function Applications() {
           </table>
         </div>
       )}
+      </div>
     </div>
   );
 }

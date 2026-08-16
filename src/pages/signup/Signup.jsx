@@ -19,6 +19,8 @@ function Signup() {
     phoneNumber: "",
     password: "",
     confirmPassword: "",
+    gender: "",
+    dateOfBirth: "",
   });
 
   const [passwordStrength, setPasswordStrength] = useState({
@@ -89,9 +91,11 @@ function Signup() {
         first_name: formData.firstName.trim(),
         last_name: formData.lastName.trim(),
         email: formData.email.trim().toLowerCase(),
-        phone_number: formData.phoneNumber.trim(),
+        phone_number: formData.phoneNumber.trim() || null,
         password: formData.password,
-        role: "STUDENT", // Enforce Student role
+        role: "STUDENT",
+        gender: formData.gender || null,
+        date_of_birth: formData.dateOfBirth || null,
       };
 
       await authService.register(payload);
@@ -173,7 +177,23 @@ function Signup() {
 
           <div className={styles.inputGroup}>
             <label>Phone Number *</label>
-            <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required placeholder="+1 234 567 890" />
+            <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required placeholder="9876543210" />
+          </div>
+
+          <div className={styles.row}>
+            <div className={styles.inputGroup}>
+              <label>Gender *</label>
+              <select name="gender" value={formData.gender} onChange={handleChange} required>
+                <option value="">Select Gender</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+            <div className={styles.inputGroup}>
+              <label>Date of Birth *</label>
+              <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
+            </div>
           </div>
 
           <div className={styles.row}>

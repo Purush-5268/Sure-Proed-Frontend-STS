@@ -148,8 +148,14 @@ function AttendanceDetails() {
 
           <div>
             <label>Status</label>
-            <span className={(!sessionData.conducted || sessionData.conducted === 'false') ? styles.absent : styles.present}>
-              {(!sessionData.conducted || sessionData.conducted === 'false') ? "Conducted / Ended" : "Active"}
+            <span className={
+              sessionData.status === 'ATTENDANCE_PENDING' ? styles.pending :
+              sessionData.status === 'ATTENDANCE_FAILED' ? styles.absent :
+              (!sessionData.conducted || sessionData.conducted === 'false') ? styles.absent : styles.present
+            }>
+              {sessionData.status === 'ATTENDANCE_PENDING' ? "Generating Meet Link..." :
+               sessionData.status === 'ATTENDANCE_FAILED' ? "Generation Failed" :
+               (!sessionData.conducted || sessionData.conducted === 'false') ? "Conducted / Ended" : "Active"}
             </span>
           </div>
         </div>

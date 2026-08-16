@@ -13,31 +13,23 @@ function Trustees() {
     let isMounted = true;
     const fetchTrustees = async () => {
       try {
-        // Fetch all trustees from users endpoint
         const resUsers = await apiClient.get(API_ENDPOINTS.USERS.BASE, { params: { role: "TRUSTEE" } });
         const users = normalizeListResponse(resUsers.data).filter(u => u.role === "TRUSTEE");
 
-        // Fetch trustee profiles
-        let profilesMap = {};
-        try {
-          const resProfiles = await apiClient.get(API_ENDPOINTS.TRUSTEE_PROFILES.BASE);
-          const profiles = normalizeListResponse(resProfiles.data);
-          profiles.forEach(p => {
-            if (p.email) profilesMap[p.email] = p;
-          });
-        } catch (e) {
-          console.error("Failed to fetch trustee profiles", e);
-        }
-
-        // Merge
+        // Map trustee_type directly from user object (backend embeds it)
         const enriched = users.map(u => ({
           ...u,
-          profile: profilesMap[u.email] || null
+          profile: {
+            trustee_type: u.trustee_type || null,
+            organization: u.organization || null,
+          }
         }));
 
         if (isMounted) setTrustees(enriched);
       } catch (error) {
-        console.error("Failed to load trustees:", error);
+        if (error.name !== 'CanceledError' && error.name !== 'AbortError') {
+          console.error("Failed to load trustees:", error);
+        }
       } finally {
         if (isMounted) setLoading(false);
       }

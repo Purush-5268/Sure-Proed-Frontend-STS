@@ -15,9 +15,10 @@ function EditCohort() {
     course: "",
     start_date: "",
     end_date: "",
-    max_students: 30,
-    status: "DRAFT",
+    max_students: "",
+    status: "",
     meeting_link: "",
+    batch_type: "",
   });
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
@@ -31,17 +32,18 @@ function EditCohort() {
           apiClient.get(API_ENDPOINTS.COURSES.BASE),
         ]);
 
-        const cohort = cohortResponse.data || {};
+        const data = cohortResponse.data || {};
         setCourses(normalizeListResponse(coursesResponse.data));
         setForm({
-          code: cohort.code || "",
-          name: cohort.name || "",
-          course: cohort.course?.id || cohort.course || "",
-          start_date: cohort.start_date || "",
-          end_date: cohort.end_date || "",
-          max_students: cohort.max_students || 30,
-          status: cohort.status || "DRAFT",
-          meeting_link: cohort.meeting_link || "",
+          code: data.code || "",
+          name: data.name || "",
+          course: data.course?.id || data.course || "",
+          start_date: data.start_date || "",
+          end_date: data.end_date || "",
+          max_students: data.max_students || "",
+          status: data.status || "DRAFT",
+          meeting_link: data.meeting_link || "",
+          batch_type: data.batch_type || "",
         });
       } catch (err) {
         console.error("Failed to load cohort data:", err);
@@ -76,6 +78,7 @@ function EditCohort() {
         max_students: Number(form.max_students) || 30,
         status: form.status,
         meeting_link: form.meeting_link.trim() || null,
+        batch_type: form.batch_type || null,
       };
 
       await apiClient.patch(API_ENDPOINTS.COHORTS.BY_ID(id), payload);
@@ -145,6 +148,15 @@ function EditCohort() {
                 <option value="ACTIVE">Active</option>
                 <option value="COMPLETED">Completed</option>
                 <option value="CANCELLED">Cancelled</option>
+              </select>
+            </div>
+
+            <div className={styles.group}>
+              <label>LST Batch Assignment (Optional)</label>
+              <select name="batch_type" value={form.batch_type} onChange={handleChange}>
+                <option value="">-- No LST Batch --</option>
+                <option value="BATCH_1">Batch 1</option>
+                <option value="BATCH_2">Batch 2</option>
               </select>
             </div>
 

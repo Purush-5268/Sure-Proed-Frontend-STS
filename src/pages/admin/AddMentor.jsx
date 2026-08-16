@@ -12,6 +12,8 @@ function AddMentor() {
     last_name: "",
     email: "",
     phone_number: "",
+    gender: "",
+    date_of_birth: "",
     password: "",
     domain: "",
     role: "MENTOR",
@@ -56,6 +58,8 @@ function AddMentor() {
         last_name: form.last_name.trim(),
         email: form.email.trim(),
         phone_number: form.phone_number.trim() || null,
+        gender: form.gender || null,
+        date_of_birth: form.date_of_birth || null,
         password: form.password,
         domain: form.domain.trim() || null,
         role: "MENTOR",
@@ -123,6 +127,21 @@ function AddMentor() {
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Phone Number</label>
             <input type="tel" name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="+91 9876543210" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Gender</label>
+            <select name="gender" value={form.gender} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
+              <option value="">Select Gender</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Date of Birth</label>
+            <input type="date" name="date_of_birth" value={form.date_of_birth} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>

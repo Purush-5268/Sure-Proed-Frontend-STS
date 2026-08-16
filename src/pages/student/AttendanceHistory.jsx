@@ -119,9 +119,19 @@ function AttendanceHistory() {
                         <td>{item.title || "Class Session"}</td>
                         <td>{item.start_time ? `${item.start_time} - ${item.end_time || ""}`.trim() : "N/A"}</td>
                         <td>
-                          <span className={item.conducted === false ? styles.present : styles.absent} style={item.conducted === false ? { background: '#10b981', color: 'white', padding: '4px 8px', borderRadius: '4px'} : { background: '#64748b', color: 'white', padding: '4px 8px', borderRadius: '4px'} }>
-                            {item.conducted === false ? "Conducted / Ended" : "Live / Scheduled"}
-                          </span>
+                          {item.status === "ATTENDANCE_PENDING" ? (
+                            <span style={{ background: '#f59e0b', color: 'white', padding: '4px 8px', borderRadius: '4px' }}>
+                              Generating Meet Link...
+                            </span>
+                          ) : item.status === "ATTENDANCE_FAILED" ? (
+                            <span style={{ background: '#ef4444', color: 'white', padding: '4px 8px', borderRadius: '4px' }}>
+                              Generation Failed
+                            </span>
+                          ) : (
+                            <span className={item.conducted === false ? styles.present : styles.absent} style={item.conducted === false ? { background: '#10b981', color: 'white', padding: '4px 8px', borderRadius: '4px'} : { background: '#64748b', color: 'white', padding: '4px 8px', borderRadius: '4px'} }>
+                              {item.conducted === false ? "Conducted / Ended" : "Live / Scheduled"}
+                            </span>
+                          )}
                         </td>
                       </tr>
                     ))}

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { studentService } from "../../services/studentService";
 import { courseService } from "../../services/courseService";
 import { cohortService } from "../../services/cohortService";
+import { applicationService } from "../../services/applicationService";
 import apiClient, { normalizeListResponse } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./Dashboard.module.css";
@@ -10,67 +11,37 @@ import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [stats, setStats] = useState({
-    studentsCount: 0,
-    coursesCount: 0,
-    cohortsCount: 0,
-    applicationsCount: 0,
-  });
-  const [recentApplications, setRecentApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  // Hierarchy & Alerts State
-  const [currentView, setCurrentView] = useState("courses"); // "courses" | "cohorts" | "students"
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [selectedCohort, setSelectedCohort] = useState(null);
-  const [pendingQueue, setPendingQueue] = useState([]);
+  // Independent data states
+  const [allStudents, setAllStudents] = useState([]);
   const [allCourses, setAllCourses] = useState([]);
   const [allCohorts, setAllCohorts] = useState([]);
   const [allApps, setAllApps] = useState([]);
-  const [allStudents, setAllStudents] = useState([]); // Track students for dynamic hierarchy
+  const [activeSessions, setActiveSessions] = useState([]);
 
-  // Live Session & Whitelist State
-  const [activeSessions, setActiveSessions] = useState([]); // Now dynamically populated
-  const [showLateInput, setShowLateInput] = useState({});
-  const [lateGuestEmails, setLateGuestEmails] = useState({});
+  // Progressive stats
+  const [stats, setStats] = useState({
+    studentsCount: null,
+    coursesCount: null,
+    cohortsCount: null,
+    applicationsCount: null,
+  });
 
-  // Grouped Pending Approvals logic
-  const groupedPendingQueue = pendingQueue.reduce((acc, app) => {
-    const courseId = app.course?.id || app.course;
-    const cohortId = app.assigned_cohort?.id || app.assigned_cohort;
-    const key = `${courseId}-${cohortId}`;
-    if (!acc[key]) {
-      acc[key] = {
-        course: allCourses.find(c => c.id === courseId) || app.course,
-        cohort: allCohorts.find(c => c.id === cohortId) || app.assigned_cohort,
-        count: 0
-      };
-    }
-    acc[key].count++;
-    return acc;
-  }, {});
+  // Independent loading states
+  const [loadingStudents, setLoadingStudents] = useState(true);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [loadingCohorts, setLoadingCohorts] = useState(true);
+  const [loadingApps, setLoadingApps] = useState(true);
+  const [loadingRadar, setLoadingRadar] = useState(true);
 
-  const toggleLateInput = (sessionId) => {
-    setShowLateInput(prev => ({ ...prev, [sessionId]: !prev[sessionId] }));
-  };
-
-  const handleAddLateGuest = (sessionId) => {
-    const email = lateGuestEmails[sessionId];
-    if (!email || !email.includes('@')) {
-      alert('Please enter a valid email address.');
-      return;
-    }
-    // TODO: Wire to backend adminService.whitelistLateGuest(sessionId, email)
-    alert(`✅ Added ${email} to whitelist for session ${sessionId}`);
-    setLateGuestEmails(prev => ({ ...prev, [sessionId]: '' }));
-    setShowLateInput(prev => ({ ...prev, [sessionId]: false }));
-  };
+  // Hierarchy View State
+  const [currentView, setCurrentView] = useState("courses"); // "courses" | "cohorts" | "students"
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedCohort, setSelectedCohort] = useState(null);
 
   const handleApprove = async (appId) => {
     try {
-      // Assuming patchApplication handles the status update
       await applicationService.patchApplication(appId, { status: "ACCEPTED" });
-      setPendingQueue((prev) => prev.filter((app) => app.id !== appId));
       setAllApps((prev) => prev.map((app) => (app.id === appId ? { ...app, status: "ACCEPTED" } : app)));
     } catch (err) {
       alert("❌ Failed to approve student.");
@@ -80,7 +51,6 @@ function Dashboard() {
   const handleToggleAccess = async (appId, currentStatus) => {
     const newStatus = currentStatus === "ACCEPTED" ? "REMOVED" : "ACCEPTED";
     if (newStatus === "REMOVED" && !window.confirm("Are you sure you want to revoke this student's login access?")) return;
-
     try {
       await applicationService.patchApplication(appId, { status: newStatus });
       setAllApps((prev) => prev.map((app) => (app.id === appId ? { ...app, status: newStatus } : app)));
@@ -91,7 +61,6 @@ function Dashboard() {
 
   const handleAssignLST = async (studentId, lstBatch) => {
     try {
-      // Assuming studentService handles LST assignment on the student profile
       await studentService.patchStudentProfile(studentId, { lst_batch: lstBatch });
       alert(`✅ Student assigned to LST Batch ${lstBatch}`);
     } catch (err) {
@@ -100,73 +69,91 @@ function Dashboard() {
   };
 
   useEffect(() => {
+    let isMounted = true;
     const abortController = new AbortController();
+    const signal = abortController.signal;
 
-    async function loadDashboardData() {
+    // Independent parallel execution of all APIs
+
+    // 1. Students
+    (async () => {
       try {
-        setLoading(true);
-        // Added attendanceService.getAttendanceRecords() to fetch real sessions
-        const [studentsRes, coursesRes, cohortsRes, appsRes, sessionsRes] = await Promise.allSettled([
-          studentService.getStudentProfiles({}, { signal: abortController.signal }),
-          apiClient.get(API_ENDPOINTS.COURSES.BASE, { signal: abortController.signal }).then(res => res.data), // Inlining since courseService might not support signal
-          apiClient.get(API_ENDPOINTS.COHORTS.BASE, { signal: abortController.signal }).then(res => res.data),
-          apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE, { signal: abortController.signal }).then(res => res.data),
-          apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { params: { status: "ACTIVE" }, signal: abortController.signal }).then(res => res.data),
-        ]);
-
-        const studentsList = studentsRes.status === "fulfilled" ? normalizeListResponse(studentsRes.value) : [];
-        const coursesList = coursesRes.status === "fulfilled" ? normalizeListResponse(coursesRes.value) : [];
-        const cohortsList = cohortsRes.status === "fulfilled" ? normalizeListResponse(cohortsRes.value) : [];
-
-        const studentsCount = (studentsRes.status === "fulfilled" && studentsRes.value.count !== undefined)
-          ? studentsRes.value.count
-          : studentsList.length;
-
-        const coursesCount = (coursesRes.status === "fulfilled" && coursesRes.value.count !== undefined)
-          ? coursesRes.value.count
-          : coursesList.length;
-
-        const cohortsCount = (cohortsRes.status === "fulfilled" && cohortsRes.value.count !== undefined)
-          ? cohortsRes.value.count
-          : cohortsList.length;
-
-        let appsData = [];
-        let applicationsCount = 0;
-        if (appsRes.status === "fulfilled") {
-          appsData = normalizeListResponse(appsRes.value);
-          applicationsCount = appsRes.value.count !== undefined ? appsRes.value.count : appsData.length;
-        }
-
-        setStats({
-          studentsCount,
-          coursesCount,
-          cohortsCount,
-          applicationsCount,
-        });
-        setRecentApplications(appsData.slice(0, 5));
-
-        // Setup Hierarchy & Alerts data
-        setAllCourses(coursesList);
-        setAllCohorts(cohortsList);
-        setAllApps(appsData);
-        setAllStudents(studentsList); // Save students list to generate hierarchy
-        setPendingQueue(appsData.filter(app => String(app.status).toUpperCase() === "PENDING"));
-        if (sessionsRes.status === "fulfilled") {
-          setActiveSessions(normalizeListResponse(sessionsRes.value));
-        }
+        const res = await studentService.getStudentProfiles({}, { signal });
+        if (!isMounted) return;
+        const list = normalizeListResponse(res);
+        const count = res.count !== undefined ? res.count : list.length;
+        setAllStudents(list);
+        setStats(prev => ({ ...prev, studentsCount: count }));
       } catch (err) {
-        if (err.name !== 'CanceledError' && err.name !== 'AbortError') {
-          console.error("Failed to load admin dashboard data", err);
-        }
+        if (err.name !== 'CanceledError' && err.name !== 'AbortError') console.error("Students error:", err);
       } finally {
-        if (!abortController.signal.aborted) {
-          setLoading(false);
-        }
+        if (isMounted) setLoadingStudents(false);
       }
-    }
-    loadDashboardData();
+    })();
+
+    // 2. Courses
+    (async () => {
+      try {
+        const res = await apiClient.get(API_ENDPOINTS.COURSES.BASE, { signal });
+        if (!isMounted) return;
+        const list = normalizeListResponse(res.data);
+        const count = res.data?.count !== undefined ? res.data.count : list.length;
+        setAllCourses(list);
+        setStats(prev => ({ ...prev, coursesCount: count }));
+      } catch (err) {
+        if (err.name !== 'CanceledError' && err.name !== 'AbortError') console.error("Courses error:", err);
+      } finally {
+        if (isMounted) setLoadingCourses(false);
+      }
+    })();
+
+    // 3. Cohorts
+    (async () => {
+      try {
+        const res = await apiClient.get(API_ENDPOINTS.COHORTS.BASE, { signal });
+        if (!isMounted) return;
+        const list = normalizeListResponse(res.data);
+        const count = res.data?.count !== undefined ? res.data.count : list.length;
+        setAllCohorts(list);
+        setStats(prev => ({ ...prev, cohortsCount: count }));
+      } catch (err) {
+        if (err.name !== 'CanceledError' && err.name !== 'AbortError') console.error("Cohorts error:", err);
+      } finally {
+        if (isMounted) setLoadingCohorts(false);
+      }
+    })();
+
+    // 4. Applications
+    (async () => {
+      try {
+        const res = await apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE, { signal });
+        if (!isMounted) return;
+        const list = normalizeListResponse(res.data);
+        const count = res.data?.count !== undefined ? res.data.count : list.length;
+        setAllApps(list);
+        setStats(prev => ({ ...prev, applicationsCount: count }));
+      } catch (err) {
+        if (err.name !== 'CanceledError' && err.name !== 'AbortError') console.error("Apps error:", err);
+      } finally {
+        if (isMounted) setLoadingApps(false);
+      }
+    })();
+
+    // 5. Active Sessions
+    (async () => {
+      try {
+        const res = await apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { params: { status: "ACTIVE" }, signal });
+        if (!isMounted) return;
+        setActiveSessions(normalizeListResponse(res.data));
+      } catch (err) {
+        if (err.name !== 'CanceledError' && err.name !== 'AbortError') console.error("Sessions error:", err);
+      } finally {
+        if (isMounted) setLoadingRadar(false);
+      }
+    })();
 
     return () => {
+      isMounted = false;
       abortController.abort();
     };
   }, []);
@@ -182,53 +169,29 @@ function Dashboard() {
       <div className={styles.cards}>
         <div className="premium-card">
           <h3>Total Students</h3>
-          <p>{loading ? "..." : stats.studentsCount}</p>
+          {loadingStudents ? <SkeletonLoader width="60px" height="24px" /> : <p>{stats.studentsCount ?? "0"}</p>}
         </div>
 
         <div className="premium-card">
           <h3>Total Courses</h3>
-          <p>{loading ? "..." : stats.coursesCount}</p>
+          {loadingCourses ? <SkeletonLoader width="60px" height="24px" /> : <p>{stats.coursesCount ?? "0"}</p>}
         </div>
 
         <div className="premium-card">
           <h3>Active Cohorts</h3>
-          <p>{loading ? "..." : stats.cohortsCount}</p>
+          {loadingCohorts ? <SkeletonLoader width="60px" height="24px" /> : <p>{stats.cohortsCount ?? "0"}</p>}
         </div>
 
         <div className="premium-card">
           <h3>Total Applications</h3>
-          <p>{loading ? "..." : stats.applicationsCount}</p>
+          {loadingApps ? <SkeletonLoader width="60px" height="24px" /> : <p>{stats.applicationsCount ?? "0"}</p>}
         </div>
       </div>
 
-      {/* Smart Pending Approvals Widget */}
-      {currentView === "courses" && pendingQueue.length > 0 && (
-        <div className={styles.announcementSection} style={{ backgroundColor: '#fffbeb', borderColor: '#fef3c7', padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem' }}>
-          <h2 style={{ color: '#92400e', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            ⚡ Action Required: Pending Approvals
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-            {Object.values(groupedPendingQueue).map((group, index) => (
-              <div key={index} style={{ backgroundColor: "var(--bg-surface)", padding: '1.5rem', borderRadius: '8px', border: '1px solid #fcd34d', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: '1rem' }}>
-                  In <strong style={{ color: '#4338ca' }}>{group.course?.name || group.course?.title || "Unknown Domain"}</strong> from batch <strong style={{ color: '#047857' }}>{group.cohort?.name || "Unknown"}</strong>, there are <strong style={{ color: '#dc2626', fontSize: '1.2rem' }}>{group.count}</strong> students waiting for approval.
-                </p>
-                <button
-                  onClick={() => {
-                    navigate('/admin/students', { state: { preSelectedCourse: group.course?.name || group.course?.id, preSelectedCohort: group.cohort?.name || group.cohort?.id } });
-                  }}
-                  style={{ marginTop: '1rem', width: '100%', padding: '10px', backgroundColor: '#fbbf24', color: '#92400e', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
-                >
-                  Check & Accept ➔
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Global Active Sessions Banner (Dynamic) */}
-      {currentView === "courses" && activeSessions.filter(s => s.session_type === 'LST' || s.session_type === 'Celebration').map(session => (
+      {currentView === "courses" && loadingRadar ? (
+        <SkeletonLoader variant="cards" count={1} />
+      ) : currentView === "courses" && activeSessions.filter(s => s.session_type === 'LST' || s.session_type === 'Celebration').map(session => (
         <div key={session.id} style={{ background: 'linear-gradient(to right, #ef4444, #f97316)', borderRadius: '16px', padding: '1.5rem', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', border: '1px solid #f87171' }}>
           <div>
             <span style={{ backgroundColor: "var(--bg-surface)", color: '#dc2626', fontSize: '12px', fontWeight: '900', padding: '4px 12px', borderRadius: '9999px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Global Event Live</span>
@@ -260,7 +223,9 @@ function Dashboard() {
 
         {currentView === "courses" && (
           <div className={styles.cards}>
-            {allCourses.length > 0 ? allCourses.map(course => (
+            {loadingCourses ? (
+              <SkeletonLoader variant="cards" count={3} />
+            ) : allCourses.length > 0 ? allCourses.map(course => (
               <div key={course.id} className="premium-card premium-card-hoverable" onClick={() => { setSelectedCourse(course); setCurrentView("cohorts"); }} style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <h3 style={{ color: 'var(--text-primary)', fontSize: '1.1rem', marginBottom: '8px' }}>{course.name || course.title || course.code}</h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Click to view batches ➔</p>
@@ -279,7 +244,9 @@ function Dashboard() {
         {currentView === "cohorts" && (
           <div className={styles.cards}>
             {/* Render actual cohorts for this course */}
-            {allCohorts
+            {loadingCohorts || loadingStudents ? (
+              <SkeletonLoader variant="cards" count={2} />
+            ) : allCohorts
               .filter(c => c.course === selectedCourse?.id || c.course?.id === selectedCourse?.id)
               .map((cohort, idx) => {
                 // Approximate student count based on loaded student data
@@ -318,63 +285,63 @@ function Dashboard() {
 
         {currentView === "students" && (
           <div className="premium-table-container">
-            <table className="premium-table">
-              <thead>
-                <tr>
-                  <th>Student Info</th>
-                  <th>Offer Letter</th>
-                  <th>LST Batch</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allApps.filter(a => a.assigned_cohort === selectedCohort?.id || a.assigned_cohort?.id === selectedCohort?.id).map(app => (
-                  <tr key={app.id}>
-                    <td>
-                      <strong style={{ color: "var(--text-primary)" }}>{app.student?.user?.first_name || app.student?.first_name} {app.student?.user?.last_name || app.student?.last_name}</strong><br />
-                      <span style={{ fontSize: '12px', color: "var(--text-muted)" }}>{app.student?.user?.email || app.student?.email}</span>
-                    </td>
-                    <td>
-                      {(app.student?.offer_letter || app.student?.offerLetter) ? (
-                        <a href={app.student?.offer_letter || app.student?.offerLetter} target="_blank" rel="noopener noreferrer" style={{ color: '#4f46e5', textDecoration: 'none', fontWeight: 'bold' }}>View Document</a>
-                      ) : (
-                        <span style={{ color: "var(--text-muted)" }}>N/A</span>
-                      )}
-                    </td>
-                    <td>
-                      <select
-                        defaultValue={app.student?.lst_batch || ""}
-                        onChange={(e) => handleAssignLST(app.student?.id || app.student, e.target.value)}
-                        style={{ padding: '4px', borderRadius: '4px', border: '1px solid #ccc' }}
-                      >
-                        <option value="">Unassigned</option>
-                        <option value="1">Batch 1</option>
-                        <option value="2">Batch 2</option>
-                      </select>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        {app.status === "PENDING" && (
-                          <button onClick={() => handleApprove(app.id)} className="premium-btn premium-btn-primary" style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}>
-                            Accept
-                          </button>
-                        )}
-                        {app.status === "ACCEPTED" && (
-                          <button onClick={() => handleToggleAccess(app.id, app.status)} className="premium-btn premium-btn-danger" style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}>
-                            Remove
-                          </button>
-                        )}
-                        {app.status === "REMOVED" && (
-                          <button onClick={() => handleToggleAccess(app.id, app.status)} className="premium-btn premium-btn-secondary" style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}>
-                            Accept Back
-                          </button>
-                        )}
-                      </div>
-                    </td>
+            {loadingApps ? (
+              <div style={{ padding: "2rem" }}>
+                <SkeletonLoader width="100%" height="40px" count={3} />
+              </div>
+            ) : allApps.filter(a => a.assigned_cohort === selectedCohort?.id || a.assigned_cohort?.id === selectedCohort?.id).length === 0 ? (
+              <div className="premium-empty-state" style={{ padding: "3rem" }}>
+                <div className="premium-empty-state-icon">🎓</div>
+                <h3>No students</h3>
+                <p>No students assigned to this batch yet.</p>
+              </div>
+            ) : (
+              <table className="premium-table">
+                <thead>
+                  <tr>
+                    <th>Student Info</th>
+                    <th>Offer Letter</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {allApps.filter(a => a.assigned_cohort === selectedCohort?.id || a.assigned_cohort?.id === selectedCohort?.id).map(app => (
+                    <tr key={app.id}>
+                      <td>
+                        <strong style={{ color: "var(--text-primary)" }}>{app.student?.user?.first_name || app.student?.first_name} {app.student?.user?.last_name || app.student?.last_name}</strong><br />
+                        <span style={{ fontSize: '12px', color: "var(--text-muted)" }}>{app.student?.user?.email || app.student?.email}</span>
+                      </td>
+                      <td>
+                        {(app.student?.offer_letter || app.student?.offerLetter) ? (
+                          <a href={app.student?.offer_letter || app.student?.offerLetter} target="_blank" rel="noopener noreferrer" style={{ color: '#4f46e5', textDecoration: 'none', fontWeight: 'bold' }}>View Document</a>
+                        ) : (
+                          <span style={{ color: "var(--text-muted)" }}>N/A</span>
+                        )}
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          {app.status === "PENDING" && (
+                            <button onClick={() => handleApprove(app.id)} className="premium-btn premium-btn-primary" style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}>
+                              Accept
+                            </button>
+                          )}
+                          {app.status === "ACCEPTED" && (
+                            <button onClick={() => handleToggleAccess(app.id, app.status)} className="premium-btn premium-btn-danger" style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}>
+                              Remove
+                            </button>
+                          )}
+                          {app.status === "REMOVED" && (
+                            <button onClick={() => handleToggleAccess(app.id, app.status)} className="premium-btn premium-btn-secondary" style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}>
+                              Accept Back
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
       </div>
@@ -383,16 +350,16 @@ function Dashboard() {
       <div className={styles.announcementSection}>
         <h2>Quick Actions</h2>
         <div className={styles.cards}>
-          <Link to="/admin/add-student" className={`$"premium-card" premium-card-hoverable`}>
+          <Link to="/admin/add-student" className="premium-card premium-card-hoverable">
             <h3>➕ Add Student</h3>
           </Link>
-          <Link to="/admin/add-mentor" className={`$"premium-card" premium-card-hoverable`}>
+          <Link to="/admin/add-mentor" className="premium-card premium-card-hoverable">
             <h3>👨‍🏫 Add Mentor</h3>
           </Link>
-          <Link to="/admin/add-course" className={`$"premium-card" premium-card-hoverable`}>
+          <Link to="/admin/add-course" className="premium-card premium-card-hoverable">
             <h3>📚 Add Course</h3>
           </Link>
-          <Link to="/admin/add-exam" className={`$"premium-card" premium-card-hoverable`}>
+          <Link to="/admin/add-exam" className="premium-card premium-card-hoverable">
             <h3>📝 Create Exam</h3>
           </Link>
         </div>

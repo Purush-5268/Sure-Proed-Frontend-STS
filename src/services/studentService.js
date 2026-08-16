@@ -9,7 +9,7 @@ const normalizeProfile = (profile = {}) => ({
   lastName: profile.lastName || profile.last_name || "",
   email: profile.email || "",
   phoneNumber: profile.phoneNumber || profile.phone_number || "",
-  dob: profile.dob || "",
+  dob: profile.dob || profile.date_of_birth || "",
   gender: profile.gender || "",
   collegeName: profile.collegeName || profile.college || "",
   university: profile.university || "",
@@ -256,6 +256,8 @@ export const studentService = {
           lastName: profile.last_name || profile.lastName || user.last_name || user.lastName || "",
           email: profile.email || user.email || cleanEmail,
           phoneNumber: profile.phone_number || profile.phoneNumber || user.phone_number || user.phoneNumber || "",
+          dob: profile.date_of_birth || user.date_of_birth || "",
+          gender: profile.gender || user.gender || "",
           collegeName: profile.college || profile.collegeName || "",
           branch: profile.specialization || profile.branch || "",
           graduationYear: profile.graduation_year || profile.graduationYear || "",
@@ -289,6 +291,8 @@ export const studentService = {
       firstName: profileData.firstName || existing.firstName || "",
       lastName: profileData.lastName || existing.lastName || "",
       phoneNumber: profileData.phoneNumber || existing.phoneNumber || "",
+      dob: profileData.dob || existing.dob || "",
+      gender: profileData.gender || existing.gender || "",
     };
 
     try {
@@ -298,6 +302,9 @@ export const studentService = {
       formData.append("specialization", updated.branch || "");
       if (updated.graduationYear) {
         formData.append("graduation_year", Number(updated.graduationYear));
+      }
+      if (updated.dob) {
+        formData.append("date_of_birth", updated.dob);
       }
       formData.append("city", updated.city || "");
       formData.append("state", updated.state || "");
@@ -328,11 +335,15 @@ export const studentService = {
       const meResponse = await apiClient.get(API_ENDPOINTS.USERS.ME);
       const userId = meResponse?.data?.id;
       if (userId) {
-        await apiClient.patch(API_ENDPOINTS.USERS.BY_ID(userId), {
+        const userUpdatePayload = {
           first_name: updated.firstName || "",
           last_name: updated.lastName || "",
           phone_number: updated.phoneNumber || "",
-        });
+        };
+        if (updated.gender) userUpdatePayload.gender = updated.gender;
+        if (updated.dob) userUpdatePayload.date_of_birth = updated.dob;
+        
+        await apiClient.patch(API_ENDPOINTS.USERS.BY_ID(userId), userUpdatePayload);
       }
     } catch (err) {
       console.error("Backend profile save failed:", err.message || err);

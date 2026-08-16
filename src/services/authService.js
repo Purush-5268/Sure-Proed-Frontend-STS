@@ -72,19 +72,18 @@ export const authService = {
 
   // Forgot Password
   async forgotPassword(email) {
-    const response = await apiClient.post(`${API_ENDPOINTS.USERS.BASE}/forgot_password/`, { email });
+    const response = await apiClient.post(`${API_ENDPOINTS.USERS.BASE}forgot_password_request/`, { email });
     return response.data;
   },
 
-  // Verify OTP
+  // Verify OTP (Backend verifies this together with the new password)
   async verifyOtp(email, otp) {
-    const response = await apiClient.post(`${API_ENDPOINTS.USERS.BASE}/verify_otp/`, { email, otp });
-    return response.data;
+    return { success: true };
   },
 
   // Reset Password OTP
   async resetPasswordOtp(email, otp, newPassword) {
-    const response = await apiClient.post(`${API_ENDPOINTS.USERS.BASE}/reset_password_otp/`, {
+    const response = await apiClient.post(`${API_ENDPOINTS.USERS.BASE}forgot_password_confirm/`, {
       email,
       otp,
       new_password: newPassword,

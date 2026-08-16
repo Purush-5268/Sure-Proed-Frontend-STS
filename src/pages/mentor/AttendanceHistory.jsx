@@ -131,13 +131,21 @@ function AttendanceHistory() {
                 <td style={{ verticalAlign: "middle" }}>{formatDate(record.class_date)}</td>
                 <td style={{ verticalAlign: "middle" }}>{record.title || "Attendance Session"}</td>
                 <td style={{ verticalAlign: "middle" }}>{record.cohort?.name || record.cohort || "N/A"}</td>
-                <td style={{ verticalAlign: "middle" }}>{Array.isArray(record.attendees) ? record.attendees.length : (record.actual_student_count || 0)}</td>
-                <td style={{ verticalAlign: "middle", color: record.conducted ? "inherit" : "var(--text-muted)" }}>
-                  {record.conducted ? "Conducted" : "Cancelled"}
+                <td style={{ verticalAlign: "middle" }}>{Array.isArray(record.attendees) ? record.attendees.length : (record.total_attendee_count || record.actual_student_count || 0)}</td>
+                <td style={{ verticalAlign: "middle", color: record.status === "ATTENDANCE_FAILED" ? "#ef4444" : record.status === "ATTENDANCE_PENDING" ? "#f59e0b" : record.conducted ? "inherit" : "var(--text-muted)" }}>
+                  {record.status === "ATTENDANCE_FAILED" ? "Failed" : record.status === "ATTENDANCE_PENDING" ? "Generating" : record.conducted ? "Conducted" : "Cancelled"}
                 </td>
                 <td className="actions" style={{ verticalAlign: "middle", padding: "8px 16px" }}>
                   {/* 🚨 Added Excel Download Button */}
-                  {(!record.conducted || record.conducted === 'false' || record.conducted === false) ? (
+                  {record.status === "ATTENDANCE_PENDING" ? (
+                    <span style={{ fontSize: "12px", color: "#f59e0b", fontWeight: "bold" }}>
+                      ⏳ Generating...
+                    </span>
+                  ) : record.status === "ATTENDANCE_FAILED" ? (
+                    <span style={{ fontSize: "12px", color: "#ef4444", fontWeight: "bold" }}>
+                      ❌ Failed
+                    </span>
+                  ) : (!record.conducted || record.conducted === 'false' || record.conducted === false) ? (
                     <button
                       onClick={() => handleDownloadExcel(record.id, record.title, record.class_date)}
                       style={{

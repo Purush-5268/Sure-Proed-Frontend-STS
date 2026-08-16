@@ -38,6 +38,15 @@ function Cohorts() {
     }
   };
 
+  const handleBatchChange = async (id, newBatch) => {
+    try {
+      await cohortService.patchCohort(id, { batch_type: newBatch || null });
+      setCohorts(prev => prev.map(c => c.id === id ? { ...c, batch_type: newBatch || null } : c));
+    } catch (err) {
+      alert("❌ Failed to update batch assignment.");
+    }
+  };
+
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
@@ -110,7 +119,21 @@ function Cohorts() {
             <tbody>
               {cohorts.map((cohort) => (
                 <tr key={cohort.id} style={{ borderBottom: "1px solid var(--border-color)" }}>
-                  <td style={{ padding: "12px" }}>{cohort.name || cohort.code || "N/A"}</td>
+                  <td style={{ padding: "12px" }}>
+                    <div>{cohort.name || cohort.code || "N/A"}</div>
+                    <div style={{ marginTop: "6px", fontSize: "12px", color: "var(--text-secondary)" }}>
+                      <label style={{ marginRight: "4px", fontWeight: "600" }}>LST Batch:</label>
+                      <select 
+                        value={cohort.batch_type || ""} 
+                        onChange={(e) => handleBatchChange(cohort.id, e.target.value)}
+                        style={{ padding: "2px 4px", fontSize: "12px", borderRadius: "4px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-primary)", color: "var(--text-primary)", cursor: "pointer" }}
+                      >
+                        <option value="">None</option>
+                        <option value="BATCH_1">Batch 1</option>
+                        <option value="BATCH_2">Batch 2</option>
+                      </select>
+                    </div>
+                  </td>
                   {/* Safely map the UUID to the Course Name */}
                   <td style={{ padding: "12px", fontWeight: "500", color: "#4338ca" }}>
                     {cohort.course?.name || getCourseName(cohort.course)}

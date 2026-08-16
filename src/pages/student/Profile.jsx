@@ -31,6 +31,7 @@ function Profile() {
 
   const [formData, setFormData] = useState({
     firstName: "", lastName: "", email: "", phoneNumber: "",
+    gender: "", dob: "",
     collegeName: "", degree: "", branch: "", graduationYear: "",
     address: "", city: "", state: "", technicalSkills: "",
     courseId: "", courseBatch: "", offerLetter: null,
@@ -72,6 +73,8 @@ function Profile() {
             lastName: profile?.lastName || user?.last_name || "",
             email: profile?.email || user?.email || "",
             phoneNumber: profile?.phoneNumber || user?.phone_number || "",
+            gender: profile?.gender || user?.gender || "",
+            dob: profile?.dob || user?.date_of_birth || "",
             collegeName: profile?.collegeName || "",
             degree: profile?.degree || "",
             branch: profile?.branch || "",
@@ -101,7 +104,7 @@ function Profile() {
     }
     loadData();
     return () => { isMounted = false; };
-  }, [user]);
+  }, [user?.email]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -183,13 +186,6 @@ function Profile() {
   // Derive one authoritative enrollment state
   const resolvedEnrollment = resolveStudentEnrollment(serverProfile, studentApplications, courses);
   const hasEnrollment = resolvedEnrollment.isEnrolled;
-  const showVerificationTab = resolvedEnrollment.showVerificationTab;
-
-  if (hasEnrollment) {
-    tabs.push({ id: "enrollment", label: "Enrollment", icon: <FiCheckCircle /> });
-  } else if (showVerificationTab) {
-    tabs.push({ id: "verification", label: "Verification", icon: <FiShield /> });
-  }
 
   const requiredFields = ["firstName", "lastName", "email", "phoneNumber", "collegeName", "degree", "branch", "graduationYear"];
   const completedFields = requiredFields.filter(field => Boolean(formData[field]));
@@ -263,6 +259,19 @@ function Profile() {
                       <label className="premium-label">Phone</label>
                       <input className="premium-input" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
                     </div>
+                    <div className="premium-form-group">
+                      <label className="premium-label">Gender</label>
+                      <select className="premium-input" name="gender" value={formData.gender} onChange={handleChange}>
+                        <option value="">Select Gender</option>
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                        <option value="OTHER">Other</option>
+                      </select>
+                    </div>
+                    <div className="premium-form-group">
+                      <label className="premium-label">Date of Birth</label>
+                      <input className="premium-input" type="date" name="dob" value={formData.dob} onChange={handleChange} />
+                    </div>
                   </div>
 
                   <div className="premium-form-group" style={{ marginTop: "16px" }}>
@@ -313,147 +322,6 @@ function Profile() {
                       <label className="premium-label">Technical Skills</label>
                       <input className="premium-input" name="technicalSkills" value={formData.technicalSkills} onChange={handleChange} placeholder="e.g. React, Python" />
                     </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === "verification" && (
-              <motion.div key="verification" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
-                <div className="premium-section">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}><FiShield /> Verification Status</h3>
-                    <StatusBadge status={isExistingStudent ? profileStatus : 'NOT_AVAILABLE'} />
-                  </div>
-
-                  <div className="premium-form-group" style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-card)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                    <input
-                      type="checkbox"
-                      id="existingStudent"
-                      checked={isExistingStudent}
-                      onChange={(e) => setIsExistingStudent(e.target.checked)}
-                      style={{ width: '18px', height: '18px' }}
-                    />
-                    <label htmlFor="existingStudent" style={{ fontWeight: 'bold', cursor: 'pointer', margin: 0 }}>
-                      I am an enrolled SURE ProEd Student
-                    </label>
-                  </div>
-
-                  <AnimatePresence>
-                    {isExistingStudent && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
-
-                        {profileStatus === 'ADMIN_APPROVED' ? (
-                          <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '16px', borderRadius: '8px', marginTop: '16px', display: 'flex', gap: '12px', alignItems: 'center', color: '#047857' }}>
-                            <FiCheckCircle size={24} />
-                            <div>
-                              <strong>Verification Complete</strong>
-                              <p style={{ margin: 0, fontSize: '14px', color: '#065f46' }}>Your offer letter has been approved by an administrator.</p>
-                            </div>
-                          </div>
-                        ) : profileStatus === 'PENDING_ADMIN_REVIEW' ? (
-                          <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '16px', borderRadius: '8px', marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px', color: '#1d4ed8' }}>
-                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                              <FiClock size={24} />
-                              <div>
-                                <strong>Verification Pending</strong>
-                                <p style={{ margin: 0, fontSize: '14px', color: '#1e3a8a' }}>
-                                  Your profile has been submitted successfully and is currently being reviewed by an administrator.
-                                  {uploadedFileUrl && <span> You can view your uploaded document <a href={uploadedFileUrl.startsWith('http') ? uploadedFileUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${uploadedFileUrl}`} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>here</a>.</span>}
-                                </p>
-                              </div>
-                            </div>
-                            {verificationMetadata.automatedResult?.toLowerCase().includes("passed") && (
-                              <div style={{ background: 'rgba(255, 255, 255, 0.5)', padding: '12px', borderRadius: '6px', fontSize: '13px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-                                <div style={{ color: '#065f46', fontWeight: 'bold' }}>✓ Document received successfully.</div>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div style={{ marginTop: '16px' }}>
-                            {profileStatus === 'ADMIN_REJECTED' && (
-                              <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '16px', borderRadius: '8px', marginBottom: '16px', display: 'flex', gap: '12px', alignItems: 'center', color: '#b91c1c' }}>
-                                <FiAlertCircle size={24} style={{ minWidth: '24px' }} />
-                                <div>
-                                  <strong>Document Rejected</strong>
-                                  <p style={{ margin: 0, fontSize: '14px', color: '#7f1d1d' }}>
-                                    Your previously uploaded offer letter was rejected. Please upload a valid SURE Trust offer letter below.
-                                  </p>
-                                  {verificationMetadata.rejectionReason && (
-                                    <p style={{ margin: '8px 0 0 0', fontSize: '13px', fontStyle: 'italic', background: 'rgba(255,255,255,0.5)', padding: '8px', borderRadius: '4px' }}>
-                                      <strong>Reason:</strong> {verificationMetadata.rejectionReason}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                            {profileStatus === 'NOT_AVAILABLE' && (
-                              <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '16px', borderRadius: '8px', marginBottom: '16px', display: 'flex', gap: '12px', alignItems: 'center', color: '#b45309' }}>
-                                <FiClock size={24} style={{ minWidth: '24px' }} />
-                                <div>
-                                  <strong>Action Required</strong>
-                                  <p style={{ margin: 0, fontSize: '14px', color: '#92400e' }}>Please upload your SURE Trust offer letter to proceed with course enrollment.</p>
-                                </div>
-                              </div>
-                            )}
-
-                            <div className="premium-grid-2">
-                              <div className="premium-form-group">
-                                <label className="premium-label">Course</label>
-                                <select className="premium-input" name="courseId" value={formData.courseId} onChange={(e) => { handleChange(e); setFormData(prev => ({ ...prev, courseBatch: "" })); }} required>
-                                  <option value="">Select your Course</option>
-                                  {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                </select>
-                              </div>
-                              <div className="premium-form-group">
-                                <label className="premium-label">Group</label>
-                                <input type="text" className="premium-input" name="courseBatch" value={formData.courseBatch} onChange={handleChange} placeholder="e.g. G2-26" required disabled={!formData.courseId} />
-                              </div>
-                            </div>
-
-                            <div className="premium-form-group" style={{ marginTop: '16px' }}>
-                              <label className="premium-label">Upload {uploadedFileUrl ? "New" : ""} Offer Letter (PDF)</label>
-                              <div style={{ border: '2px dashed var(--border-color)', padding: '24px', textAlign: 'center', borderRadius: '8px', background: 'var(--bg-card)' }}>
-                                <FiUploadCloud size={32} color="var(--primary-color)" style={{ marginBottom: '8px' }} />
-                                <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '12px' }}>Drag and drop or click to upload</p>
-                                <input type="file" accept=".pdf" onChange={handleFileChange} className="premium-input" style={{ width: '100%', maxWidth: '300px' }} />
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-            )}
-            {activeTab === "enrollment" && (
-              <motion.div key="enrollment" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
-                <div className="premium-section">
-                  <h3 style={{ marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary-color)' }}>🎓 Current Enrollment</h3>
-                  <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div>
-                        <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>Course</p>
-                        <h4 style={{ margin: '4px 0 0 0', fontSize: '20px' }}>{resolvedEnrollment.courseName}</h4>
-                      </div>
-                      {resolvedEnrollment.status && <StatusBadge status={resolvedEnrollment.status} />}
-                    </div>
-
-                    <div className="premium-grid-2">
-                      <div>
-                        <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>Group</p>
-                        <p style={{ margin: '4px 0 0 0', fontWeight: 'bold', fontSize: '16px' }}>{resolvedEnrollment.group}</p>
-                      </div>
-                      {resolvedEnrollment.application?.application_number && (
-                        <div>
-                          <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>Application ID</p>
-                          <p style={{ margin: '4px 0 0 0', fontWeight: 'bold', fontSize: '16px' }}>{resolvedEnrollment.application.application_number}</p>
-                        </div>
-                      )}
-                    </div>
-
                   </div>
                 </div>
               </motion.div>

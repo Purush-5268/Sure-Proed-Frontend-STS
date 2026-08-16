@@ -115,4 +115,4 @@
 
 .buttons a:hover {
   background: #1d4ed8;
-}
+}.pending { color: #f59e0b; font-weight: bold; }

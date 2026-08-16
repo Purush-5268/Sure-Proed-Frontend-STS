@@ -59,6 +59,13 @@ function CourseDetails() {
     return String(value).split(/\n|,/).filter(Boolean);
   };
 
+  const renderListItem = (item) => {
+    if (typeof item === 'object' && item !== null) {
+      return item.title || item.module || item.name || JSON.stringify(item);
+    }
+    return item;
+  };
+
   return (
     <div className={styles.courseDetailsPage}>
       <div className={styles.container}>
@@ -93,7 +100,7 @@ function CourseDetails() {
               <h2>Prerequisites</h2>
               <ul>
                 {renderList(course.prerequisites).length > 0 ? (
-                  renderList(course.prerequisites).map((item, index) => <li key={index}>{item}</li>)
+                  renderList(course.prerequisites).map((item, index) => <li key={index}>{renderListItem(item)}</li>)
                 ) : (
                   <li>No prerequisites listed.</li>
                 )}
@@ -104,7 +111,7 @@ function CourseDetails() {
               <h2>Curriculum</h2>
               <ul>
                 {renderList(course.curriculum).length > 0 ? (
-                  renderList(course.curriculum).map((item, index) => <li key={index}>{item}</li>)
+                  renderList(course.curriculum).map((item, index) => <li key={index}>{renderListItem(item)}</li>)
                 ) : (
                   <li>No curriculum listed.</li>
                 )}

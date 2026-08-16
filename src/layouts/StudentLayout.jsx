@@ -8,7 +8,7 @@ import {
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import Sidebar from "../components/layout/Sidebar";
-import FloatingTracker from "../components/common/FloatingTracker";
+
 
 import styles from "./StudentLayout.module.css";
 
@@ -20,6 +20,7 @@ const studentLinks = [
   { label: "Exams", path: "/student/exam-instructions", icon: <FaClipboardCheck /> },
   { label: "Cohort", path: "/student/cohort", icon: <FaUsers /> },
   { label: "Attendance", path: "/student/attendance", icon: <FaCalendarCheck /> },
+  { label: "Permissions", path: "/student/permissions", icon: <FaCalendarCheck /> },
   { label: "Assignments", path: "/student/assignments", icon: <FaTasks /> },
   { label: "Certificates", path: "/student/certificates", icon: <FaAward /> },
   { label: "Settings", path: "/student/settings", icon: <FaCog /> },
@@ -41,7 +42,7 @@ function StudentLayout() {
         </main>
       </div>
 
-      <FloatingTracker />
+
       <Footer />
     </>
   );

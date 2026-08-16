@@ -30,7 +30,7 @@ function ApplicationDetails() {
   }, [id]);
 
   if (loading) return <div className={styles.container}><div className="premium-card"><h1>Application Details</h1><SkeletonLoader variant="detail" /></div></div>;
-  if (error) return <div className={styles.container}><div className="premium-card"><h1>Application Details</h1><p style={{ color: "#b91c1c" }}>{error}</p></div></div>;
+  if (error) return <div className={styles.container}><div className="premium-card"><h1>Application Details</h1><p style={{ color: "var(--danger-color)" }}>{error}</p></div></div>;
   if (!application) return <div className={styles.container}><div className="premium-card"><h1>Application Details</h1><p>No application found.</p></div></div>;
 
   const user = application.student?.user || {};
@@ -86,11 +86,51 @@ function ApplicationDetails() {
             <label>Remarks</label>
             <p>{application.remarks || "No remarks provided."}</p>
           </div>
+          <div>
+            <label>Access Status</label>
+            <span className={application.is_restricted ? styles.rejected : styles.approved}>
+              {application.is_restricted ? "REVOKED / RESTRICTED" : "NORMAL"}
+            </span>
+          </div>
         </div>
 
         <div className={styles.buttons}>
           <Link to={`/admin/approve-application/${application.id}`}>Approve</Link>
           <Link to={`/admin/reject-application/${application.id}`}>Reject</Link>
+          
+          {application.is_restricted ? (
+            <button 
+              className={styles.restoreBtn} 
+              onClick={async () => {
+                if (window.confirm("Are you sure you want to RESTORE access?")) {
+                  try {
+                    await apiClient.post(API_ENDPOINTS.APPLICATIONS.RESTORE_ACCESS(application.id));
+                    setApplication({...application, is_restricted: false});
+                  } catch(e) {
+                    alert("Failed to restore access.");
+                  }
+                }
+              }}
+            >
+              Restore Access
+            </button>
+          ) : (
+            <button 
+              className={styles.revokeBtn} 
+              onClick={async () => {
+                if (window.confirm("Are you sure you want to REVOKE access? The student will lose access to cohort resources and live classes.")) {
+                  try {
+                    await apiClient.post(API_ENDPOINTS.APPLICATIONS.REVOKE_ACCESS(application.id));
+                    setApplication({...application, is_restricted: true});
+                  } catch(e) {
+                    alert("Failed to revoke access.");
+                  }
+                }
+              }}
+            >
+              Revoke Access
+            </button>
+          )}
         </div>
       </div>
     </div>

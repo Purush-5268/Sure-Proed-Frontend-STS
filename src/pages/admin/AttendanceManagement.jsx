@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { attendanceService } from "../../services/attendanceService";
 import styles from "./AttendanceManagement.module.css";
@@ -10,18 +11,20 @@ function AttendanceManagement() {
   const [cohorts, setCohorts] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorState, setErrorState] = useState(null); // null, '403', '500', 'NETWORK'
   const [selectedCourse, setSelectedCourse] = useState("");
   const [filterGroup, setFilterGroup] = useState("");
 
   useEffect(() => {
     let isMounted = true;
+    const abortController = new AbortController();
+
     const loadData = async () => {
       try {
         const [attendanceResponse, cohortsResponse, coursesResponse] = await Promise.all([
-          apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE),
-          apiClient.get(API_ENDPOINTS.COHORTS.BASE),
-          apiClient.get(API_ENDPOINTS.COURSES?.BASE || "/api/courses/"),
+          apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { signal: abortController.signal }),
+          apiClient.get(API_ENDPOINTS.COHORTS.BASE, { signal: abortController.signal }),
+          apiClient.get(API_ENDPOINTS.COURSES?.BASE || "/api/courses/", { signal: abortController.signal }),
         ]);
 
         if (isMounted) {
@@ -34,12 +37,15 @@ function AttendanceManagement() {
           setCourses(Array.isArray(courseData.results) ? courseData.results : (Array.isArray(courseData) ? courseData : []));
         }
       } catch (err) {
+        if (err.name === 'CanceledError' || err.name === 'AbortError') return;
         console.error("Failed to load attendance data:", err);
         if (isMounted) {
-          if (err.response?.status === 403) {
-            setErrorMsg("Permission Denied: You do not have access to view these attendance records.");
+          if (!err.response) {
+            setErrorState('NETWORK');
+          } else if (err.response?.status === 403) {
+            setErrorState('403');
           } else {
-            setErrorMsg("Failed to load attendance data. Please try again later.");
+            setErrorState('500');
           }
         }
       } finally {
@@ -50,6 +56,7 @@ function AttendanceManagement() {
     loadData();
     return () => {
       isMounted = false;
+      abortController.abort();
     };
   }, []);
 
@@ -114,44 +121,43 @@ function AttendanceManagement() {
     try {
       const response = await attendanceService.downloadExcel(sessionId);
 
-      // Check if status is 202 (Report Generating)
-      if (response.status === 202) {
-        // Backend returns JSON with a detail message for 202
-        let detailMessage = "Report is being generated in the background. Please retry in a few seconds.";
-        if (response.data instanceof Blob && response.data.type === 'application/json') {
-          const text = await response.data.text();
-          const json = JSON.parse(text);
-          if (json.detail) detailMessage = json.detail;
-        } else if (response.data && response.data.detail) {
-          detailMessage = response.data.detail;
-        }
+      // Check if status is 202 or 425 (Report Pending / Too Early)
+      if (response.status === 202 || response.status === 425) {
+        let detailMessage = response.data?.detail || response.data?.message || "Attendance data is pending. Please wait for Google to finalize the conference log.";
         alert(`⏳ ${detailMessage}`);
-        return; // Stop the download!
+        return;
       }
 
-      // Check if the backend sent JSON instead of an Excel file (Error condition)
-      if (response.data instanceof Blob && response.data.type === 'application/json') {
-        const text = await response.data.text();
-        const json = JSON.parse(text);
-        alert(json.detail || "Report is not ready or missing.");
-        return; 
+      // Handle Blob error responses safely
+      let responseData = response.data;
+      if (responseData instanceof Blob) {
+        if (responseData.type === 'application/json' || responseData.type.includes('text')) {
+          const text = await responseData.text();
+          try {
+            const json = JSON.parse(text);
+            alert(`⚠️ ${json.detail || json.message || "Report is not ready yet."}`);
+            return;
+          } catch (e) {
+            // Not JSON, proceed as file
+          }
+        }
       }
 
-      // 🚨 FILENAME FIX: Extract the exact collision-proof filename from Django's headers
+      // 🚨 FILENAME FIX: Extract filename from Django's headers
       let filename = 'Attendance_Report.xlsx';
-      const contentDisposition = response.headers['content-disposition'];
+      const contentDisposition = response.headers?.['content-disposition'];
       if (contentDisposition) {
         const match = contentDisposition.match(/filename="?([^"]+)"?/);
         if (match && match[1]) {
           filename = match[1];
         }
       } else {
-        // Fallback just in case
         const safeTitle = (sessionTitle || "Attendance").replace(/[^a-zA-Z0-9]/g, "_");
         filename = `${safeTitle}_${sessionDate || 'Report'}.xlsx`;
       }
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const blobType = responseData instanceof Blob ? responseData.type : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+      const url = window.URL.createObjectURL(new Blob([responseData], { type: blobType }));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', filename);
@@ -163,14 +169,22 @@ function AttendanceManagement() {
 
     } catch (err) {
       console.error("Excel download error:", err);
-      // Safely read the error blob if it's JSON
-      if (err.response && err.response.data && err.response.data.type === 'application/json') {
-        const text = await err.response.data.text();
-        const json = JSON.parse(text);
-        alert(json.detail || "Report is missing or still generating. Please try again.");
-      } else {
-        alert("Failed to download the report. Make sure the session has ended.");
+      let errorMsg = "Failed to download the report. Make sure the session has ended and Google Meet data is available.";
+
+      try {
+        const errResponse = err.response?.data;
+        if (errResponse instanceof Blob) {
+          const text = await errResponse.text();
+          const json = JSON.parse(text);
+          errorMsg = json.detail || json.message || errorMsg;
+        } else if (errResponse?.detail || errResponse?.message) {
+          errorMsg = errResponse.detail || errResponse.message;
+        }
+      } catch (e) {
+        // Fallback to default error message if blob parsing fails
       }
+
+      alert(`❌ ${errorMsg}`);
     }
   };
 
@@ -215,22 +229,36 @@ function AttendanceManagement() {
         </button>
       </div>
 
-      {errorMsg ? (
+      {errorState === 'NETWORK' ? (
         <div className="premium-empty-state">
-          <div className="premium-empty-state-icon">🔒</div>
+          <div className="premium-empty-state-icon" style={{ color: "#ef4444" }}>🌐</div>
+          <h3>Network Error</h3>
+          <p>Please check your internet connection.</p>
+        </div>
+      ) : errorState === '403' ? (
+        <div className="premium-empty-state">
+          <div className="premium-empty-state-icon" style={{ color: "#ef4444" }}>🔒</div>
           <h3>Access Restricted</h3>
-          <p>{errorMsg}</p>
+          <p>You do not have permission to view attendance records.</p>
+        </div>
+      ) : errorState === '500' ? (
+        <div className="premium-empty-state">
+          <div className="premium-empty-state-icon" style={{ color: "#ef4444" }}>⚠️</div>
+          <h3>Unable to load attendance data</h3>
+          <p>The server encountered an error. Please try again later.</p>
         </div>
       ) : loading ? (
         <SkeletonLoader variant="table" rows={6} />
       ) : filteredAttendance.length === 0 ? (
         <div className="premium-empty-state">
           <div className="premium-empty-state-icon">📅</div>
-          <h3>No Attendance Records Found</h3>
-          <p>No attendance sessions match your current filters.</p>
-          <button onClick={() => { setSelectedCourse(""); setFilterGroup(""); }} className="premium-btn premium-btn-secondary">
-            Clear Filters
-          </button>
+          <h3>No active classes yet</h3>
+          <p>Attendance will appear here when a class is conducted.</p>
+          {(selectedCourse || filterGroup) && (
+            <button onClick={() => { setSelectedCourse(""); setFilterGroup(""); }} className="premium-btn premium-btn-secondary" style={{ marginTop: "1rem" }}>
+              Clear Filters
+            </button>
+          )}
         </div>
       ) : (
         <div className="premium-table-container">
@@ -251,7 +279,7 @@ function AttendanceManagement() {
             <tbody>
               {filteredAttendance.map((item) => {
                 const whitelistCount = item.whitelist_email_count || 0;
-                const totalStudents = item.actual_student_count || 0;
+                const totalStudents = item.total_attendee_count || item.actual_student_count || 0;
                 const joinedStudents = Array.isArray(item.joined_students) ? item.joined_students.length : 0;
                 const absentStudents = Math.max(0, totalStudents - joinedStudents);
 
@@ -268,7 +296,20 @@ function AttendanceManagement() {
                     <td style={{ verticalAlign: "middle" }}>{absentStudents}</td>
 
                     <td className="actions" style={{ verticalAlign: "middle", padding: "8px 16px" }}>
-                      {(!item.conducted || item.conducted === 'false' || item.conducted === false) ? (
+                      {item.status === "ATTENDANCE_PENDING" ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span style={{ color: "#f59e0b", fontWeight: "bold", fontSize: "12px", border: "1px solid #f59e0b", padding: "4px 8px", borderRadius: "4px", backgroundColor: "rgba(245, 158, 11, 0.1)" }}>
+                            Generating Meet Link...
+                          </span>
+                        </div>
+                      ) : item.status === "ATTENDANCE_FAILED" ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span style={{ color: "#ef4444", fontWeight: "bold", fontSize: "12px", border: "1px solid #ef4444", padding: "4px 8px", borderRadius: "4px", backgroundColor: "rgba(239, 68, 68, 0.1)" }}>
+                            Generation Failed
+                          </span>
+                          <button onClick={() => {/* retry logic here if backend supported */ }} style={{ cursor: "pointer", background: "none", border: "none", color: "#3b82f6", textDecoration: "underline" }}>Retry</button>
+                        </div>
+                      ) : (!item.conducted || item.conducted === 'false' || item.conducted === false) ? (
                         <div style={{ display: "flex", alignItems: "stretch", gap: "8px", margin: 0, padding: 0, height: "32px" }}>
                           <button
                             onClick={() => handleDownloadExcel(item.id, item.title, item.class_date)}

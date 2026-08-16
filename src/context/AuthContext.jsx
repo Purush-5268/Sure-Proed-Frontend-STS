@@ -20,54 +20,44 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // On mount: restore user from stored token
+  // On mount: restore user from stored token and securely verify state
   useEffect(() => {
+    let isMounted = true;
+
     const initAuth = async () => {
       const token = getAccessToken();
       const storedUser = getUserInfo();
 
-      if (token) {
-        const decoded = parseJwt(token);
-        const isExpired = decoded && decoded.exp && (decoded.exp * 1000 < Date.now());
+      if (!token) {
+        if (isMounted) setLoading(false);
+        return;
+      }
 
-        if (isExpired) {
-          const refreshToken = getRefreshToken();
-          if (refreshToken) {
-            try {
-              // Bypass apiClient interceptors for the initial refresh to avoid race conditions
-              const response = await fetch(API_ENDPOINTS.AUTH.REFRESH, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refresh: refreshToken })
-              });
-              
-              if (response.ok) {
-                const data = await response.json();
-                setAccessToken(data.access);
-                if (storedUser) {
-                  setUser(storedUser);
-                } else {
-                  setUser(parseJwt(data.access));
-                }
-              } else {
-                clearAuthStorage();
-              }
-            } catch (err) {
-              clearAuthStorage();
-            }
+      const decoded = parseJwt(token);
+      try {
+        const res = await apiClient.get(API_ENDPOINTS.USERS.ME);
+        if (isMounted && res.data) {
+          // Stabilize user object reference by checking for deep equality
+          setUser(prev => JSON.stringify(prev) === JSON.stringify(res.data) ? prev : res.data);
+          setUserInfo(res.data);
+        }
+      } catch (err) {
+        // If apiClient fails, the interceptor handles token refresh and clearing storage on 401.
+        // We fallback to stored data ONLY if the token is still present (network error/500).
+        if (isMounted) {
+          if (getAccessToken()) {
+            setUser(storedUser || decoded);
           } else {
-            clearAuthStorage();
+            setUser(null);
           }
-        } else {
-          // Token is valid
-          if (storedUser) setUser(storedUser);
-          else if (decoded) setUser(decoded);
         }
       }
-      setLoading(false);
+      
+      if (isMounted) setLoading(false);
     };
 
     initAuth();
+    return () => { isMounted = false; };
   }, []);
 
   const updateUser = (updatedFields) => {

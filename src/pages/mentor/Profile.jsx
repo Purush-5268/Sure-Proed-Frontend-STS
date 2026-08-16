@@ -31,7 +31,7 @@ function computeCompletion(user, profile) {
 function Profile() {
   const { user, updateUser } = useAuth();
   const [profile, setProfile] = useState({ linkedin_url: "", experience_years: "", course: null });
-  const [form, setForm] = useState({ first_name: "", last_name: "", email: "", phone_number: "" });
+  const [form, setForm] = useState({ first_name: "", last_name: "", email: "", phone_number: "", gender: "", date_of_birth: "" });
   const [profileForm, setProfileForm] = useState({ linkedin_url: "", experience_years: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -57,6 +57,8 @@ function Profile() {
           last_name: userData.last_name || "",
           email: userData.email || "",
           phone_number: userData.phone_number || "",
+          gender: userData.gender || "",
+          date_of_birth: userData.date_of_birth || "",
         });
         setProfile(profileData);
         setProfileForm({
@@ -71,6 +73,8 @@ function Profile() {
             last_name: user.last_name || "",
             email: user.email || "",
             phone_number: user.phone_number || "",
+            gender: user.gender || "",
+            date_of_birth: user.date_of_birth || "",
           });
         }
       } finally {
@@ -99,11 +103,15 @@ function Profile() {
     setSuccess("");
     try {
       // Save base user info
-      const userRes = await apiClient.patch(API_ENDPOINTS.USERS.BY_ID(user.id), {
+      const userUpdatePayload = {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         phone_number: form.phone_number.trim() || null,
-      });
+      };
+      if (form.gender) userUpdatePayload.gender = form.gender;
+      if (form.date_of_birth) userUpdatePayload.date_of_birth = form.date_of_birth;
+
+      const userRes = await apiClient.patch(API_ENDPOINTS.USERS.BY_ID(user.id), userUpdatePayload);
 
       // Save mentor profile fields
       await apiClient.patch(API_ENDPOINTS.MENTORS.PROFILE_ME, {
@@ -226,6 +234,19 @@ function Profile() {
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Phone Number</label>
                   <input className={styles.input} type="text" name="phone_number" value={form.phone_number} onChange={handleUserChange} />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Gender</label>
+                  <select className={styles.input} name="gender" value={form.gender} onChange={handleUserChange}>
+                    <option value="">Select Gender</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Date of Birth</label>
+                  <input className={styles.input} type="date" name="date_of_birth" value={form.date_of_birth} onChange={handleUserChange} />
                 </div>
               </div>
 

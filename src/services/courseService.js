@@ -1,15 +1,33 @@
 import apiClient from "./apiClient";
 import { API_ENDPOINTS } from "../constants/apiEndpoints";
 
+let getCoursesPromise = null;
+
+let getCourseByIdPromises = {};
+
 export const courseService = {
   async getCourses(params = {}) {
+    if (Object.keys(params).length === 0) {
+      if (getCoursesPromise) return getCoursesPromise;
+      
+      getCoursesPromise = apiClient.get(API_ENDPOINTS.COURSES.BASE, { params })
+        .then(res => res.data)
+        .finally(() => { getCoursesPromise = null; });
+      return getCoursesPromise;
+    }
+    
     const response = await apiClient.get(API_ENDPOINTS.COURSES.BASE, { params });
     return response.data;
   },
 
   async getCourseById(id) {
-    const response = await apiClient.get(API_ENDPOINTS.COURSES.BY_ID(id));
-    return response.data;
+    if (getCourseByIdPromises[id]) return getCourseByIdPromises[id];
+    
+    getCourseByIdPromises[id] = apiClient.get(API_ENDPOINTS.COURSES.BY_ID(id))
+      .then(res => res.data)
+      .finally(() => { delete getCourseByIdPromises[id]; });
+      
+    return getCourseByIdPromises[id];
   },
 
   async createCourse(courseData) {

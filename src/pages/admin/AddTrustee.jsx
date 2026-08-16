@@ -10,6 +10,8 @@ function AddTrustee() {
     first_name: "",
     last_name: "",
     email: "",
+    gender: "",
+    date_of_birth: "",
     trustee_type: "VOLUNTEER",
     organization: "",
     designation: "",
@@ -42,6 +44,8 @@ function AddTrustee() {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         email: form.email.trim(),
+        gender: form.gender || null,
+        date_of_birth: form.date_of_birth || null,
         role: "TRUSTEE",
         is_active: form.is_active,
       };
@@ -112,7 +116,22 @@ function AddTrustee() {
 
           <div className="premium-form-group">
             <label className="premium-label">Email Address *</label>
-            <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="trustee@organization.com" className="premium-input" />
+            <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="trustee@suretrust.local" className="premium-input" />
+          </div>
+
+          <div className="premium-form-group">
+            <label className="premium-label">Gender</label>
+            <select className="premium-input" name="gender" value={form.gender} onChange={handleChange}>
+              <option value="">Select Gender</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+
+          <div className="premium-form-group">
+            <label className="premium-label">Date of Birth</label>
+            <input className="premium-input" type="date" name="date_of_birth" value={form.date_of_birth} onChange={handleChange} />
           </div>
 
           <div className="premium-form-group">

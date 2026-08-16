@@ -98,3 +98,53 @@
 .buttons a:hover {
   opacity: 0.9;
 }
+
+.revokeBtn {
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid #dc2626;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.revokeBtn:hover {
+  background: #fef2f2;
+}
+
+.restoreBtn {
+  background: transparent;
+  color: #2563eb;
+  border: 1px solid #2563eb;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.restoreBtn:hover {
+  background: #eff6ff;
+}
+
+.approved {
+  display: inline-block;
+  width: fit-content;
+  padding: 8px 16px;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.rejected {
+  display: inline-block;
+  width: fit-content;
+  padding: 8px 16px;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 20px;
+  font-weight: 600;
+}

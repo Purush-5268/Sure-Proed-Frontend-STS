@@ -82,12 +82,12 @@ apiClient.interceptors.response.use(
       }
 
       // 2. Ignore 401s on the public registration flow if a stale token was somehow attached
-      if (originalRequest.url.includes(API_ENDPOINTS.USERS.BASE)) {
+      if (originalRequest.url.includes(API_ENDPOINTS.USERS.BASE) && !originalRequest.url.includes(API_ENDPOINTS.USERS.ME)) {
         return Promise.reject(error);
       }
 
-      // 3. Prevent background heartbeat requests from triggering global UI session expiration
-      const isHeartbeat = originalRequest.url.includes('/heartbeat/');
+
+
 
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -107,9 +107,7 @@ apiClient.interceptors.response.use(
       if (!refreshToken) {
         clearAuthStorage();
         isRefreshing = false;
-        if (!isHeartbeat) {
-          window.dispatchEvent(new CustomEvent('sure_session_expired'));
-        }
+        window.dispatchEvent(new CustomEvent('sure_session_expired'));
         return Promise.reject(error);
       }
 
@@ -126,10 +124,7 @@ apiClient.interceptors.response.use(
       } catch (refreshErr) {
         processQueue(refreshErr, null);
         clearAuthStorage();
-        // Dispatch event for UI to show notification gracefully, ONLY if it's not a heartbeat
-        if (!isHeartbeat) {
-          window.dispatchEvent(new CustomEvent('sure_session_expired'));
-        }
+        window.dispatchEvent(new CustomEvent('sure_session_expired'));
         return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;
@@ -140,4 +135,5 @@ apiClient.interceptors.response.use(
   }
 );
 
+// Deduplication removed temporarily to fix AbortController conflicts
 export default apiClient;

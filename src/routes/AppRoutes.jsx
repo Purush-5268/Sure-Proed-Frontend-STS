@@ -151,6 +151,8 @@ import AttendanceManagement from "../pages/admin/AttendanceManagement";
 import AttendanceDetails from "../pages/admin/AttendanceDetails";
 import UpdateAttendance from "../pages/admin/UpdateAttendance";
 import AttendanceHistoryAdmin from "../pages/admin/AttendanceHistoryAdmin";
+import PermissionsAdmin from "../pages/admin/PermissionsAdmin";
+import PermissionsStudent from "../pages/student/PermissionsStudent";
 
 /* Assignment Management */
 import AssignmentsAdmin from "../pages/admin/AssignmentsAdmin";
@@ -241,6 +243,7 @@ function AppRoutes() {
 
               <Route path="attendance" element={<Attendance />} />
               <Route path="attendance-history" element={<AttendanceHistory />} />
+              <Route path="permissions" element={<PermissionsStudent />} />
 
               <Route path="assignments" element={<AssignmentList />} />
               <Route path="assignment-details" element={<AssignmentDetails />} />
@@ -321,6 +324,7 @@ function AppRoutes() {
               <Route path="attendance-details" element={<AttendanceDetails />} />
               <Route path="update-attendance" element={<UpdateAttendance />} />
               <Route path="attendance-history-admin" element={<AttendanceHistoryAdmin />} />
+              <Route path="permissions" element={<PermissionsAdmin />} />
 
               {/* Assignments */}
               <Route path="assignments" element={<AssignmentsAdmin />} />

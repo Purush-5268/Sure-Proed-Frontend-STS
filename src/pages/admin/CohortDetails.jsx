@@ -102,22 +102,41 @@
 
 // export default CohortDetails;
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import apiClient, { normalizeListResponse } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { applicationService } from "../../services/applicationService";
 import { courseService } from "../../services/courseService";
+import { cohortService } from "../../services/cohortService";
 import styles from "./CohortDetails.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function CohortDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [cohort, setCohort] = useState(null);
   const [courseName, setCourseName] = useState("");
-  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatingStage, setUpdatingStage] = useState(false);
+
+  const [updatingBatch, setUpdatingBatch] = useState(false);
+
+  const handleBatchChange = async (e) => {
+    const newBatch = e.target.value;
+    if (!newBatch || newBatch === cohort.batch_type) return;
+
+    setUpdatingBatch(true);
+    try {
+      await cohortService.patchCohort(cohort.id, { batch_type: newBatch });
+      setCohort({ ...cohort, batch_type: newBatch });
+    } catch (err) {
+      alert("Failed to update LST Batch.");
+    } finally {
+      setUpdatingBatch(false);
+    }
+  };
+
 
   // Timeline calculation helper
   const calculateTimeline = (startDateStr) => {
@@ -140,6 +159,8 @@ function CohortDetails() {
       graduation: softSkillsEnd.toISOString().split('T')[0]
     };
   };
+
+  
 
   const handleStageChange = async (e) => {
     const newStatus = e.target.value;
@@ -175,11 +196,6 @@ function CohortDetails() {
           setCourseName(cohortData.course?.name || "N/A");
         }
 
-        // Fetch Students/Applications for this Cohort
-        const appsRes = await applicationService.getApplications();
-        const allApps = normalizeListResponse(appsRes);
-        const cohortStudents = allApps.filter(app => app.assigned_cohort === id || app.assigned_cohort?.id === id);
-        setStudents(cohortStudents);
 
       } catch (err) {
         console.error("Failed to load details:", err);
@@ -210,6 +226,20 @@ function CohortDetails() {
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           {/* Admin Manual Stage Override */}
           <div style={{ marginRight: "1rem", display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{ marginRight: "1rem", display: "flex", alignItems: "center", gap: "8px" }}>
+              <label style={{ fontSize: "14px", fontWeight: "bold", color: "var(--text-secondary)" }}>LST Batch:</label>
+              <select 
+                value={cohort.batch_type || ""} 
+                onChange={handleBatchChange}
+                disabled={updatingBatch}
+                style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--border-color)", fontWeight: "bold", backgroundColor: "var(--bg-main)" }}
+              >
+                <option value="">-- None --</option>
+                <option value="BATCH_1">Batch 1</option>
+                <option value="BATCH_2">Batch 2</option>
+              </select>
+            </div>
+            
             <label style={{ fontSize: "14px", fontWeight: "bold", color: "var(--text-secondary)" }}>Set Stage:</label>
             <select 
               value={cohort.status || ""} 
@@ -273,7 +303,7 @@ function CohortDetails() {
         </div>
         <div style={{ backgroundColor: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
           <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: "bold" }}>Capacity</p>
-          <p style={{ margin: "5px 0 0 0", fontWeight: "600", color: "var(--text-primary)" }}>{students.length} / {cohort.max_students || "Unlimited"}</p>
+          <p style={{ margin: "5px 0 0 0", fontWeight: "600", color: "var(--text-primary)" }}>{cohort.max_students || "Unlimited"}</p>
         </div>
         <div style={{ backgroundColor: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
           <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: "bold" }}>Meeting Link</p>
@@ -281,48 +311,36 @@ function CohortDetails() {
         </div>
       </div>
 
-      {/* Enrolled Students Table */}
-      <div style={{ backgroundColor: "var(--bg-surface)", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", overflow: "hidden" }}>
+            {/* Student Management Shortcuts */}
+      <div style={{ backgroundColor: "var(--bg-surface)", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", overflow: "hidden", marginBottom: "2rem" }}>
         <div style={{ padding: "1.5rem", borderBottom: "1px solid var(--border-color)", backgroundColor: "var(--bg-main)" }}>
-          <h2 style={{ margin: 0, fontSize: "1.25rem", color: "var(--text-primary)" }}>Enrolled Students</h2>
+          <h2 style={{ margin: 0, fontSize: "1.25rem", color: "var(--text-primary)" }}>Student Management</h2>
+          <p style={{ margin: "5px 0 0 0", fontSize: "13px", color: "var(--text-secondary)" }}>View and manage students enrolled in this cohort from the Student Management panel.</p>
         </div>
-        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
-          <thead style={{ backgroundColor: "var(--bg-nested)" }}>
-            <tr>
-              <th style={{ padding: "1rem", color: "var(--text-secondary)" }}>Name</th>
-              <th style={{ padding: "1rem", color: "var(--text-secondary)" }}>Email</th>
-              <th style={{ padding: "1rem", color: "var(--text-secondary)" }}>Status</th>
-              <th style={{ padding: "1rem", color: "var(--text-secondary)" }}>Resume</th>
-              <th style={{ padding: "1rem", color: "var(--text-secondary)" }}>Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            {students.length === 0 ? (
-              <tr><td colSpan="5" style={{ padding: "2rem", textAlign: "center", color: "var(--text-muted)" }}>No students enrolled in this cohort yet.</td></tr>
-            ) : (
-              students.map((app) => (
-                <tr key={app.id} style={{ borderBottom: "1px solid var(--border-color)" }}>
-                  <td style={{ padding: "1rem", fontWeight: "600", color: "var(--text-primary)" }}>{app.student?.user?.first_name || app.student?.first_name} {app.student?.user?.last_name || app.student?.last_name}</td>
-                  <td style={{ padding: "1rem", color: "var(--text-secondary)" }}>{app.student?.user?.email || app.student?.email}</td>
-                  <td style={{ padding: "1rem" }}>
-                    <span style={{ padding: "4px 8px", backgroundColor: app.status === "ACCEPTED" ? "#dcfce7" : "#fef3c7", color: app.status === "ACCEPTED" ? "#166534" : "#92400e", borderRadius: "4px", fontSize: "12px", fontWeight: "bold" }}>
-                      {app.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: "1rem" }}>
-                    {(app.student?.resume || app.resume) ? (
-                      <a href={app.student?.resume || app.resume} target="_blank" rel="noreferrer" style={{ color: "#2563eb", fontWeight: "bold", textDecoration: "none" }}>View Resume</a>
-                    ) : <span style={{ color: "var(--text-muted)" }}>N/A</span>}
-                  </td>
-                  <td style={{ padding: "1rem", fontWeight: "bold", color: "#4f46e5" }}>
-                    {app.score || app.exam_score || "Pending"}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+        <div style={{ padding: "1.5rem", display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+          <button 
+            onClick={() => navigate(`/admin/students?cohort=${id}`)}
+            className="premium-btn premium-btn-secondary"
+            style={{ display: "flex", alignItems: "center", gap: "8px" }}
+          >
+            👥 View All Enrolled Students
+          </button>
+          <button 
+            onClick={() => navigate(`/admin/students?cohort=${id}&status=QUALIFIED`)}
+            className="premium-btn"
+            style={{ backgroundColor: "#059669", color: "white", display: "flex", alignItems: "center", gap: "8px", border: "none" }}
+          >
+            ✅ View Passed Students
+          </button>
+          <button 
+            onClick={() => navigate(`/admin/students?cohort=${id}&status=REJECTED`)}
+            className="premium-btn"
+            style={{ backgroundColor: "#dc2626", color: "white", display: "flex", alignItems: "center", gap: "8px", border: "none" }}
+          >
+            ❌ View Failed Students
+          </button>
+        </div>
+</div>
     </div>
   );
 }

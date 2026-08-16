@@ -37,6 +37,8 @@ export const API_ENDPOINTS = {
     BY_ID: (id) => `/api/applications/${id}/`,
     ASSIGN_COHORT: (id) => `/api/applications/${id}/assign-cohort/`,
     CHECK_COMPLETION: (id) => `/api/applications/${id}/check-completion/`,
+    REVOKE_ACCESS: (id) => `/api/applications/${id}/revoke_access/`,
+    RESTORE_ACCESS: (id) => `/api/applications/${id}/restore_access/`,
   },
 
   // Cohorts
@@ -84,8 +86,13 @@ export const API_ENDPOINTS = {
     BASE: "/api/attendance/",
     BY_ID: (id) => `/api/attendance/${id}/`,
     SUMMARY: "/api/attendance-summary/",
-    DOWNLOAD_EXCEL: (id) => `/api/attendance/${id}/download_excel/`,
+    DOWNLOAD_EXCEL: (id) => `/api/attendance/${id}/official-attendance/download/`,
     ADD_ATTENDEES: (id) => `/api/attendance/${id}/add-attendees/`,
+    WARNINGS: "/api/attendance/warnings/",
+    RESOLVE_WARNING: "/api/attendance/resolve_warning/",
+    ADMIN_QUERIES: "/api/attendance/admin_queries/",
+    ADMIN_UPDATE_QUERY: "/api/attendance/admin_update_query/",
+    CHAT_HISTORY: "/api/attendance/chat_history/",
   },
 
   // Certificates

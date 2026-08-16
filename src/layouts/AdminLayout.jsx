@@ -25,6 +25,7 @@ const adminLinks = [
   { label: "Cohorts", path: "/admin/cohorts", icon: <FaLayerGroup /> },
   { label: "Schedule Class", path: "/admin/schedule", icon: <FaCalendarAlt /> },
   { label: "Attendance", path: "/admin/attendance", icon: <FaUserCheck /> },
+  { label: "Permissions", path: "/admin/permissions", icon: <FaUserCheck /> },
   { label: "Assignments", path: "/admin/assignments", icon: <FaTasks /> },
   { label: "Certificates", path: "/admin/certificates", icon: <FaCertificate /> },
   { label: "Notifications", path: "/admin/notifications", icon: <FaBell /> },

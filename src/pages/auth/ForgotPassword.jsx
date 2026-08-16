@@ -13,6 +13,7 @@ function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleRequestOtp = async (e) => {
     e.preventDefault();
@@ -48,6 +49,11 @@ function ForgotPassword() {
     
     if (newPassword.length < 8) {
       setError("Password must be at least 8 characters long.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
       return;
     }
 
@@ -156,7 +162,18 @@ function ForgotPassword() {
                 disabled={loading}
               />
             </div>
-            <button type="submit" className={`${styles.submitBtn} ${loading ? styles.loadingBtn : ''}`} disabled={loading || newPassword.length < 8}>
+            <div className={styles.inputGroup} style={{ marginTop: "1rem" }}>
+              <label>Confirm Password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                placeholder="Confirm new password"
+                disabled={loading}
+              />
+            </div>
+            <button type="submit" className={`${styles.submitBtn} ${loading ? styles.loadingBtn : ''}`} disabled={loading || newPassword.length < 8 || newPassword !== confirmPassword}>
               <span className={styles.btnText}>{loading ? "Resetting..." : "Reset Password"}</span>
             </button>
           </form>
