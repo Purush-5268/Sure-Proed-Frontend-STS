@@ -190,7 +190,7 @@ function AddStudent() {
             <label className="premium-label">Domain (Optional)</label>
             <select name="domain" value={form.domain} onChange={handleChange} className="premium-input">
               <option value="">-- Select Domain --</option>
-              {courses.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+              {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
 
@@ -206,11 +206,11 @@ function AddStudent() {
             >
               <option value="">-- Select Batch --</option>
               {cohorts.filter(c => {
-                 const courseMatched = courses.find(course => course.name === form.domain);
+                 const courseMatched = courses.find(course => course.id === form.domain);
                  if (!courseMatched) return false;
-                 return c.course?.id === courseMatched.id || c.course === courseMatched.id || c.course?.name === form.domain;
+                 return c.course?.id === courseMatched.id || c.course === courseMatched.id;
               }).map(coh => (
-                <option key={coh.id} value={coh.name}>{coh.name}</option>
+                <option key={coh.id} value={coh.id}>{coh.name}</option>
               ))}
             </select>
           </div>
