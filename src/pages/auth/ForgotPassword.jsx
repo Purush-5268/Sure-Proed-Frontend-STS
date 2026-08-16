@@ -65,7 +65,13 @@ function ForgotPassword() {
         navigate("/login");
       }, 3000);
     } catch (err) {
-      setError(err.response?.data?.detail || "Failed to reset password.");
+      if (err.response?.data) {
+        const data = err.response.data;
+        const msg = data.detail || data.non_field_errors?.[0] || data.new_password?.[0] || data.otp?.[0] || data.email?.[0] || "Failed to reset password.";
+        setError(msg);
+      } else {
+        setError("Failed to reset password. Please check your network.");
+      }
     } finally {
       setLoading(false);
     }

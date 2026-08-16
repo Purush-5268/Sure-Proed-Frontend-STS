@@ -88,20 +88,24 @@ function AddStudent() {
       const userRes = await apiClient.post(API_ENDPOINTS.USERS.BASE, userPayload);
       const newUserId = userRes.data.id || userRes.data.user?.id;
 
-      // 2. Update Student Profile if Domain or Cohort is selected
+      // 2. Create Application if Domain or Cohort is selected
       if (form.domain || form.course_batch) {
-        // Backend creates StudentProfile via signal. We need to find its ID to PATCH it.
-        const studentsRes = await apiClient.get(API_ENDPOINTS.STUDENTS.BASE);
-        const studentsList = normalizeListResponse(studentsRes.data?.results || studentsRes.data);
-        const studentProfile = studentsList.find(s => s.user?.id === newUserId || s.user === newUserId);
+        try {
+          const studentsRes = await apiClient.get(API_ENDPOINTS.STUDENTS.BASE);
+          const studentsList = normalizeListResponse(studentsRes.data?.results || studentsRes.data);
+          const studentProfile = studentsList.find(s => s.user?.id === newUserId || s.user === newUserId);
 
-        if (studentProfile) {
-          await apiClient.patch(API_ENDPOINTS.STUDENTS.BY_ID(studentProfile.id), {
-            domain: form.domain || null,
-            course_batch: form.course_batch || null
-          });
-        } else {
-          console.warn("Created student profile not found in recent list. Domain/Cohort not assigned.");
+          if (studentProfile) {
+            await apiClient.post(API_ENDPOINTS.APPLICATIONS.BASE, {
+              student: studentProfile.id,
+              course: form.domain || undefined,
+            });
+            // Note: Assigning cohort directly requires backend validation (LinkedIn/GitHub). 
+            // If it fails, the application might still be created. Admin can assign later.
+          }
+        } catch (appErr) {
+          console.warn("Could not create application for the new student:", appErr);
+          // Don't fail the whole user creation just because application failed
         }
       }
 
