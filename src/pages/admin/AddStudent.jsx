@@ -91,9 +91,12 @@ function AddStudent() {
       // 2. Create Application if Domain or Cohort is selected
       if (form.domain || form.course_batch) {
         try {
-          const studentsRes = await apiClient.get(API_ENDPOINTS.STUDENTS.BASE);
+          // Wait a short moment to ensure the signal creates the profile and it is searchable
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          const studentsRes = await apiClient.get(`${API_ENDPOINTS.STUDENTS.BASE}?search=${encodeURIComponent(form.email)}`);
           const studentsList = normalizeListResponse(studentsRes.data?.results || studentsRes.data);
-          const studentProfile = studentsList.find(s => s.user?.id === newUserId || s.user === newUserId);
+          const studentProfile = studentsList.find(s => s.user?.email?.toLowerCase() === form.email.toLowerCase() || s.user === newUserId);
 
           if (studentProfile) {
             const payload = {
@@ -106,9 +109,18 @@ function AddStudent() {
               payload.status = "COHORT_ASSIGNED";
             }
             
-            await apiClient.post(API_ENDPOINTS.APPLICATIONS.BASE, payload);
-            // Note: Assigning cohort directly requires backend validation (LinkedIn/GitHub). 
-            // If the backend team has applied the admin bypass, this will work.
+            try {
+              await apiClient.post(API_ENDPOINTS.APPLICATIONS.BASE, payload);
+              // Note: Assigning cohort directly requires backend validation (LinkedIn/GitHub). 
+              // If the backend team has applied the admin bypass, this will work.
+            } catch (postErr) {
+              console.warn("Application creation with cohort failed. Retrying without cohort.", postErr);
+              if (payload.assigned_cohort) {
+                delete payload.assigned_cohort;
+                delete payload.status;
+                await apiClient.post(API_ENDPOINTS.APPLICATIONS.BASE, payload);
+              }
+            }
           }
         } catch (appErr) {
           console.warn("Could not create application for the new student:", appErr);
