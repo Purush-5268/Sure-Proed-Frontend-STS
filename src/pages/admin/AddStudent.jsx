@@ -96,12 +96,19 @@ function AddStudent() {
           const studentProfile = studentsList.find(s => s.user?.id === newUserId || s.user === newUserId);
 
           if (studentProfile) {
-            await apiClient.post(API_ENDPOINTS.APPLICATIONS.BASE, {
+            const payload = {
               student: studentProfile.id,
               course: form.domain || undefined,
-            });
+            };
+            
+            if (form.course_batch) {
+              payload.assigned_cohort = form.course_batch;
+              payload.status = "COHORT_ASSIGNED";
+            }
+            
+            await apiClient.post(API_ENDPOINTS.APPLICATIONS.BASE, payload);
             // Note: Assigning cohort directly requires backend validation (LinkedIn/GitHub). 
-            // If it fails, the application might still be created. Admin can assign later.
+            // If the backend team has applied the admin bypass, this will work.
           }
         } catch (appErr) {
           console.warn("Could not create application for the new student:", appErr);
