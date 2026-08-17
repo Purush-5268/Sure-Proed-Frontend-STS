@@ -34,7 +34,7 @@ function CertificateVerify() {
         <h1>Certificate Verification</h1>
 
         <p className={styles.subtitle}>
-          Enter the certificate number or code to verify it against the backend database.
+          Enter the certificate number or code to verify it.
         </p>
 
         <div className={styles.form}>

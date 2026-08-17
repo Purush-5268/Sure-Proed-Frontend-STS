@@ -59,6 +59,27 @@ export const authService = {
     return response.data;
   },
 
+  // GitHub OAuth Connect URL
+  async getGithubConnectUrl() {
+    const response = await apiClient.get(API_ENDPOINTS.AUTH.GITHUB_CONNECT);
+    return response.data;
+  },
+
+  // GitHub OAuth Callback
+  async handleGithubCallback(code, state) {
+    const response = await apiClient.post(API_ENDPOINTS.AUTH.GITHUB_CALLBACK, {
+      code,
+      state,
+    });
+    return response.data;
+  },
+
+  // Disconnect GitHub
+  async disconnectGithub() {
+    const response = await apiClient.post(API_ENDPOINTS.AUTH.GITHUB_DISCONNECT);
+    return response.data;
+  },
+
   // Logout
   logout() {
     clearAuthStorage();

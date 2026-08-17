@@ -350,7 +350,7 @@ function MyApplications() {
                       </button>
                     ) : (
                       <Link
-                        to="/student/exams"
+                        to="/student/exam-instructions"
                         className={styles.button}
                         style={{ flex: 2, backgroundColor: "#059669", textAlign: "center" }}
                       >

@@ -6,6 +6,9 @@ export const API_ENDPOINTS = {
     LINKEDIN_CONNECT: "/api/auth/linkedin/connect/",
     LINKEDIN_CALLBACK: "/api/auth/linkedin/callback/",
     LINKEDIN_DISCONNECT: "/api/auth/linkedin/disconnect/",
+    GITHUB_CONNECT: "/api/auth/github/connect/",
+    GITHUB_CALLBACK: "/api/auth/github/callback/",
+    GITHUB_DISCONNECT: "/api/auth/github/disconnect/",
   },
 
   // Users

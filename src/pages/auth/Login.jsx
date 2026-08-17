@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { authService } from "../../services/authService";
 import { setAccessToken, setRefreshToken, setUserInfo, parseJwt } from "../../utils/tokenStorage";
-import heroImage from "../../assets/images/hero.svg";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import loginUrl from "../../assets/animations/Login.lottie?url";
 import styles from "./Login.module.css";
 
 function Login() {
@@ -125,36 +126,36 @@ function Login() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2>Welcome back to Sure ProEd</h2>
+            <h2>Welcome back to SURE ProEd</h2>
             <p>Access your dashboard to manage your learning journey, internships, and schedules.</p>
             <div style={{ position: "relative", width: "100%", maxWidth: "420px", margin: "0 auto" }}>
-              <motion.div animate={{ y: [0, -10, 0], x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }} style={{ position: "absolute", top: "10%", left: "-10%", color: "var(--accent-color)", fontSize: "2.5rem", opacity: 0.7, zIndex: 0 }}>
+              <motion.div animate={{ y: [0, -10, 0], x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }} style={{ position: "absolute", top: "5%", left: "-3%", color: "var(--accent-color)", fontSize: "2rem", opacity: 0.6, zIndex: 0 }}>
                 <FaGraduationCap />
               </motion.div>
-              <motion.div animate={{ y: [0, 15, 0], x: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }} style={{ position: "absolute", top: "20%", right: "-5%", color: "#3b82f6", fontSize: "2rem", opacity: 0.6, zIndex: 0 }}>
+              <motion.div animate={{ y: [0, 15, 0], x: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }} style={{ position: "absolute", top: "15%", right: "-3%", color: "#3b82f6", fontSize: "1.8rem", opacity: 0.55, zIndex: 0 }}>
                 <FaMicrochip />
               </motion.div>
-              <motion.div animate={{ y: [0, -20, 0] }} transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 2 }} style={{ position: "absolute", bottom: "15%", left: "-5%", color: "#10b981", fontSize: "2.2rem", opacity: 0.7, zIndex: 0 }}>
+              <motion.div animate={{ y: [0, -20, 0] }} transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 2 }} style={{ position: "absolute", bottom: "15%", left: "-3%", color: "#10b981", fontSize: "1.8rem", opacity: 0.6, zIndex: 0 }}>
                 <FaLaptopCode />
               </motion.div>
-              <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 0.5 }} style={{ position: "absolute", bottom: "25%", right: "-10%", color: "#8b5cf6", fontSize: "2.5rem", opacity: 0.6, zIndex: 0 }}>
+              <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 0.5 }} style={{ position: "absolute", bottom: "20%", right: "-3%", color: "#8b5cf6", fontSize: "2rem", opacity: 0.55, zIndex: 0 }}>
                 <FaBrain />
               </motion.div>
-              <motion.img 
-                src={heroImage} 
-                alt="Platform Login" 
-                className={styles.image} 
+              <motion.div
                 animate={{ y: [0, -15, 0] }}
                 transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                whileHover={{ scale: 1.05, rotate: 2 }}
-                style={{ position: "relative", zIndex: 1 }}
-              />
+                whileHover={{ scale: 1.05, filter: "drop-shadow(0 20px 25px rgba(0,0,0,0.2))" }}
+                style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: "420px", margin: "0 auto", cursor: "pointer" }}
+              >
+                <DotLottieReact src={loginUrl} loop autoplay />
+              </motion.div>
             </div>
           </motion.div>
         </div>
 
         <div className={styles.card}>
-          <div className={styles.cardHeader}>
+          <div className={styles.formContainer}>
+            <div className={styles.cardHeader}>
             <h1>Sign In</h1>
             <p className={styles.subtitle}>Enter your credentials to access your account.</p>
           </div>
@@ -252,6 +253,7 @@ function Login() {
             <Link to="/" className={styles.homeLink}>
               Return to Home
             </Link>
+          </div>
           </div>
         </div>
       </div>

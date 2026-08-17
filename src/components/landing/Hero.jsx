@@ -13,13 +13,12 @@ function Hero() {
           </div>
           
           <h1 className={styles.title}>
-            Master Your Future With <span className={styles.highlight}>Sure ProEd</span>
+            Master Your Future With <span className={styles.highlight}>SURE ProEd</span>
           </h1>
 
           <p className={styles.description}>
-            Manage internships, screening exams, attendance,
-            assignments, certificates, and your complete learning journey from one
-            powerful, unified platform.
+            Manage your learning journey, live sessions, assignments, and secure your
+            future with the SURE TRUST advanced learning management platform.
           </p>
 
           <div className={styles.actionGroup}>
@@ -33,13 +32,13 @@ function Hero() {
 
           <div className={styles.statsRow}>
             <div className={styles.statItem}>
-              <span className={styles.statNumber}>Comprehensive</span>
-              <span className={styles.statLabel}>Internship Platform</span>
+              <span className={styles.statNumber}>SURE TRUST</span>
+              <span className={styles.statLabel}>Excellence in Education</span>
             </div>
             <div className={styles.statDivider}></div>
             <div className={styles.statItem}>
-              <span className={styles.statNumber}>Role-Based</span>
-              <span className={styles.statLabel}>Secure Access</span>
+              <span className={styles.statNumber}>Unified</span>
+              <span className={styles.statLabel}>Learning Management</span>
             </div>
           </div>
         </div>
@@ -49,7 +48,7 @@ function Hero() {
             <div className={styles.blob}></div>
             <img
               src={heroImage}
-              alt="Sure ProEd Platform"
+              alt="SURE ProEd Platform"
               className={styles.heroImage}
             />
             

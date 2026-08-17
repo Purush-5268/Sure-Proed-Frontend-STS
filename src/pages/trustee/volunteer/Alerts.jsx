@@ -42,7 +42,7 @@ function VolunteerAlerts() {
       </div>
 
       {loading ? (
-        <div className={styles.loadingState}>Scanning database...</div>
+        <div className={styles.loadingState}>Loading alerts...</div>
       ) : flaggedStudents.length === 0 ? (
         <div className={styles.successState}>
           <span className={styles.successIcon}>🎉</span>

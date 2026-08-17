@@ -11,6 +11,7 @@ import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import styles from "./Dashboard.module.css";
 import { FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi";
+import FeedbackWidget from "../../components/common/FeedbackWidget";
 
 function Dashboard() {
   const { user } = useAuth();
@@ -175,7 +176,7 @@ function Dashboard() {
       <header className={styles.header}>
         <div>
           <h3 style={{ margin: 0, fontSize: '24px' }}>Welcome back, {`${user?.first_name || ''} ${user?.last_name || ''}`.trim() || profile?.first_name || "Student"}!</h3>
-          <p style={{ margin: '8px 0 0 0', opacity: 0.9 }}>{stats?.application_course_title || profile?.course_name || "Awaiting Course Assignment"} | {stats?.active_cohort?.code || profile?.cohort_code || "Awaiting Cohort Assignment"}</p>
+          <p style={{ margin: '8px 0 0 0', opacity: 0.9 }}>{profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "Awaiting Course Assignment"} | {profile?.current_application?.assigned_cohort?.code || stats?.active_cohort?.code || profile?.cohort_code || "Awaiting Cohort Assignment"}</p>
         </div>
       </header>
 
@@ -185,11 +186,11 @@ function Dashboard() {
         {/* Left Side: Domain Stream Info */}
         <div className={styles.heroContent} style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05), transparent)', border: '1px solid var(--border-color)', borderRadius: '24px', padding: '32px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
           <p className={styles.streamLabel} style={{ color: 'var(--primary-color)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '12px' }}>Current Enrollment</p>
-          <h2 className={styles.streamTitle} style={{ fontSize: '32px', marginTop: '8px', marginBottom: '16px', color: 'var(--text-primary)' }}>{stats?.application_course_title || profile?.course_name || "Awaiting Course Assignment"}</h2>
+          <h2 className={styles.streamTitle} style={{ fontSize: '32px', marginTop: '8px', marginBottom: '16px', color: 'var(--text-primary)' }}>{profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "Awaiting Course Assignment"}</h2>
 
           <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
             <span style={{ background: 'var(--primary-color)', color: '#fff', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', letterSpacing: '0.5px' }}>
-              📦 GROUP: {stats?.active_cohort?.code || profile?.cohort_code || "Awaiting Cohort Assignment"}
+              📦 GROUP: {profile?.current_application?.assigned_cohort?.code || stats?.active_cohort?.code || profile?.cohort_code || "Awaiting Cohort Assignment"}
             </span>
           </div>
 
@@ -377,6 +378,13 @@ function Dashboard() {
               <span style={{ fontWeight: 'bold' }}>{stats?.upcoming_exams?.length || 0}</span>
             </div>
           </div>
+        </div>
+
+        {/* Feedback Stats */}
+        <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <h3 style={{ fontSize: '16px', marginBottom: '16px', color: 'var(--text-primary)' }}>Share Your Experience</h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>Your feedback helps us improve SURE ProEd. Let us know how things are going!</p>
+          <FeedbackWidget />
         </div>
 
       </div>

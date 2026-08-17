@@ -294,7 +294,7 @@ function ApplyCourse() {
         )}
 
         {loading ? (
-          <p style={{ color: "#64748b" }}>Loading courses from the database...</p>
+          <p style={{ color: "#64748b" }}>Loading available courses...</p>
         ) : courses.length === 0 ? (
           <div style={{ textAlign: "center", padding: "40px", backgroundColor: "#f8fafc", borderRadius: "12px", border: "1px dashed #cbd5e1" }}>
             <h3 style={{ color: "#475569", marginBottom: "8px" }}>No Courses Available</h3>

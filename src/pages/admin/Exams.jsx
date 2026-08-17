@@ -137,7 +137,7 @@ function Exams() {
     return parts[0].substring(0, 2).toUpperCase();
   };
 
-  // Helper to clean up raw database email addresses
+  // Helper to clean up raw email addresses
   const cleanEmail = (rawEmail) => {
     if (!rawEmail || rawEmail === "N/A") return "";
     const str = String(rawEmail).trim();
@@ -550,7 +550,7 @@ function Exams() {
 
         {/* Redesigned Student Exam Sessions Table */}
         {loading ? (
-          <p style={{ color: "var(--text-secondary)", padding: "20px 0" }}>Loading candidate exam sessions from database...</p>
+          <p style={{ color: "var(--text-secondary)", padding: "20px 0" }}>Loading candidate exam sessions...</p>
         ) : filteredExams.length === 0 ? (
           <div style={{ padding: "32px", textAlign: "center", background: "var(--bg-nested)", borderRadius: "8px", border: "1px dashed var(--border-color)" }}>
             <p style={{ margin: 0, color: "var(--text-secondary)", fontWeight: 500 }}>No matching student exam sessions found.</p>

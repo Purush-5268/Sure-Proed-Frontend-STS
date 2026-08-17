@@ -185,6 +185,21 @@ function AddStudent() {
             <input type="tel" name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="+91 9876543210" className="premium-input" />
           </div>
 
+          <div className="premium-form-group">
+            <label className="premium-label">Gender</label>
+            <select name="gender" value={form.gender} onChange={handleChange} className="premium-input">
+              <option value="">Select Gender</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+
+          <div className="premium-form-group">
+            <label className="premium-label">Date of Birth</label>
+            <input type="date" name="date_of_birth" value={form.date_of_birth} onChange={handleChange} className="premium-input" />
+          </div>
+
           {/* Profile Fields */}
           <div className="premium-form-group">
             <label className="premium-label">Domain (Optional)</label>

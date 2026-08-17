@@ -19,7 +19,7 @@ function Statistics() {
       <div className={styles.container}>
         <div className={styles.header}>
           <h2>Platform <span className={styles.highlight}>Impact</span></h2>
-          <p>Real-time analytics and statistics powered by our backend systems.</p>
+          <p>Real-time analytics and statistics powered by SURE TRUST.</p>
         </div>
 
         <div className={styles.statsContainer}>
@@ -28,8 +28,8 @@ function Statistics() {
               <div className={styles.iconWrapper}>
                 <FaServer className={styles.pulseIcon} />
               </div>
-              <h3>Synchronizing Data</h3>
-              <p>Connecting to backend APIs to fetch live platform statistics...</p>
+              <h3>Preparing Live Insights</h3>
+              <p>Fetching the latest announcements and global learning statistics...</p>
               <div className={styles.loader}>
                 <div className={styles.loaderBar}></div>
               </div>

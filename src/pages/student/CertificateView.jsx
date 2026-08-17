@@ -21,7 +21,7 @@ function CertificateView() {
         <h1>Certificate Details</h1>
 
         <p className={styles.subtitle}>
-          This certificate is loaded from the backend database.
+          This certificate is authentic and securely loaded.
         </p>
 
         {!certificate ? (

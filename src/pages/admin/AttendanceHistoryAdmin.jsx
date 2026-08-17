@@ -61,9 +61,9 @@ function AttendanceHistoryAdmin() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <div>
-          <h1>Attendance History</h1>
-          <p>Live records from the database</p>
+        <div className={styles.headerTitles}>
+          <h2>Attendance History</h2>
+          <p>Live records securely fetched</p>
         </div>
 
         <Link to="/admin/attendance" className={styles.backBtn}>

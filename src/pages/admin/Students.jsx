@@ -130,6 +130,7 @@ function Students() {
         // Fetch applications for the loaded students using available application IDs
         const appIdsToFetch = new Set();
         fetchedStudents.forEach(s => {
+          if (s.application_id) appIdsToFetch.add(s.application_id);
           if (s.active_cohort?.application_id) appIdsToFetch.add(s.active_cohort.application_id);
           if (s.completed_cohorts?.length > 0) {
             s.completed_cohorts.forEach(cc => {
@@ -164,6 +165,8 @@ function Students() {
             resolvedApp = Object.values(newAppMap).find(app => app.student?.id === s.id && app.course?.id === selectedCourseId);
           } else if (selectedCohort) {
             resolvedApp = Object.values(newAppMap).find(app => app.student?.id === s.id && app.assigned_cohort?.id === selectedCohort);
+          } else if (s.application_id) {
+            resolvedApp = newAppMap[s.application_id];
           } else if (s.active_cohort?.application_id) {
             resolvedApp = newAppMap[s.active_cohort.application_id];
           } else if (s.completed_cohorts?.length > 0) {
@@ -190,9 +193,7 @@ function Students() {
 
       } catch (err) {
         if (err.name !== 'AbortError' && err.code !== 'ERR_CANCELED' && err.name !== 'CanceledError') {
-          console.error("Failed to fetch data. Database connection may have dropped.", err);
-          // 🚨 FIX: We NO LONGER do setStudents([]) here! 
-          // This prevents the screen from going blank when PostgreSQL drops the connection.
+          console.error("Failed to fetch data.", err);
         }
       } finally {
         if (!abortController.signal.aborted) {
@@ -214,6 +215,8 @@ function Students() {
       resolvedApp = Object.values(applicationsMap).find(app => app.student?.id === student.id && app.course?.id === selectedCourseId);
     } else if (selectedCohort) {
       resolvedApp = Object.values(applicationsMap).find(app => app.student?.id === student.id && app.assigned_cohort?.id === selectedCohort);
+    } else if (student.application_id) {
+      resolvedApp = applicationsMap[student.application_id];
     } else if (student.active_cohort?.application_id) {
       resolvedApp = applicationsMap[student.active_cohort.application_id];
     } else if (student.completed_cohorts?.length > 0) {
@@ -292,7 +295,7 @@ function Students() {
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ fontSize: "28px", fontWeight: "bold" }}>{totalStudentsCount}</div>
-            <span className="text-sm text-gray-500" style={{ color: "#6b7280", fontSize: "13px", marginTop: "2px" }}>Showing {students.length} of {totalCount || '...'} total in database</span>
+            <span className="text-sm text-gray-500" style={{ color: "#6b7280", fontSize: "13px", marginTop: "2px" }}>Showing {students.length} of {totalCount || '...'} total enrolled</span>
           </div>
         </div>
         <div style={{ minHeight: "100px", background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #10b981", display: "flex", flexDirection: "column", gap: "12px", transition: "transform 0.2s, box-shadow 0.2s", cursor: "default" }} className="hover:shadow-md hover:-translate-y-1">
@@ -431,7 +434,7 @@ function Students() {
                     </td>
                     <td style={{ padding: "1.25rem 1rem" }}>
                       <span style={{ display: "inline-block", fontWeight: "600", color: "var(--accent-color)", backgroundColor: "var(--bg-nested)", padding: "4px 8px", borderRadius: "6px", fontSize: "13px", marginBottom: "4px" }}>
-                        {student.active_cohort?.course_name || student.course_name || "Not Assigned"}
+                        {student.active_cohort?.course_name || student.current_application?.course?.name || student.course_name || "Not Assigned"}
                       </span>
                       <span style={{ display: "block", fontSize: "12px", color: "var(--text-secondary)", fontWeight: "600" }}>
                         {student.cohort_code || student.active_cohort?.cohort_code || "Not Assigned"}

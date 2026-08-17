@@ -3,32 +3,62 @@ import { API_ENDPOINTS } from "../constants/apiEndpoints";
 
 const PROFILE_STORAGE_KEY_PREFIX = "sure_student_profile_";
 
-const normalizeProfile = (profile = {}) => ({
-  id: profile.id || null,
-  firstName: profile.firstName || profile.first_name || "",
-  lastName: profile.lastName || profile.last_name || "",
-  email: profile.email || "",
-  phoneNumber: profile.phoneNumber || profile.phone_number || "",
-  dob: profile.dob || profile.date_of_birth || "",
-  gender: profile.gender || "",
-  collegeName: profile.collegeName || profile.college || "",
-  university: profile.university || "",
-  degree: profile.degree || "",
-  branch: profile.branch || profile.specialization || "",
-  currentYear: profile.currentYear || "",
-  cgpa: profile.cgpa || "",
-  graduationYear: profile.graduationYear || profile.graduation_year || "",
-  address: profile.address || profile.bio || "",
-  city: profile.city || "",
-  district: profile.district || "",
-  state: profile.state || "",
-  pincode: profile.pincode || "",
-  technicalSkills: profile.technicalSkills || profile.tagline || "",
-  // Existing student fields (Single courseBatch like G2-26)
-  isExistingStudent: profile.isExistingStudent || "no",
-  courseId: profile.course_id || profile.courseId || profile.course || "",
-  courseBatch: profile.courseBatch || profile.course_batch || "",
-});
+const normalizeProfile = (profile = {}) => {
+  const user = profile.user || {};
+  
+  // Fix mixed-content issues by stripping absolute HTTP backend origins for media URLs
+  let photoUrl = profile.profile_photo || "";
+  if (photoUrl && photoUrl.includes("106.51.129.34:8000")) {
+    photoUrl = new URL(photoUrl).pathname; // Extract only the /media/... part
+  }
+
+  return {
+    ...profile,
+    profile_photo: photoUrl,
+    id: profile.id || null,
+    firstName: profile.first_name || profile.firstName || user.first_name || user.firstName || "",
+    lastName: profile.last_name || profile.lastName || user.last_name || user.lastName || "",
+    email: profile.email || user.email || "",
+    phoneNumber: profile.phone_number || profile.phoneNumber || user.phone_number || user.phoneNumber || "",
+    dob: profile.date_of_birth || profile.dob || user.date_of_birth || "",
+    gender: profile.gender || user.gender || "",
+    
+    // Core details
+    college: profile.college || profile.collegeName || "",
+    degree: profile.degree || "",
+    specialization: profile.specialization || profile.branch || "",
+    education_level: profile.education_level || "",
+    graduation_year: profile.graduation_year || profile.graduationYear || "",
+    city: profile.city || "",
+    state: profile.state || "",
+    country: profile.country || "",
+    bio: profile.bio || profile.address || "",
+    tagline: profile.tagline || profile.technicalSkills || "",
+    
+    // Extras (Backend sends arrays, Frontend needs comma-separated strings)
+    skills: Array.isArray(profile.skills) ? profile.skills.join(", ") : (profile.skills || ""),
+    hobbies: Array.isArray(profile.hobbies) ? profile.hobbies.join(", ") : (profile.hobbies || ""),
+    languages: Array.isArray(profile.languages) ? profile.languages.join(", ") : (profile.languages || ""),
+    portfolio_url: profile.portfolio_url || "",
+    resume: profile.resume || "",
+
+    // Integrations
+    linkedin_url: profile.linkedin_url || "",
+    github_username: profile.github_username || "",
+    
+    // Legacy mapping (For backwards compatibility with some components)
+    collegeName: profile.college || profile.collegeName || "",
+    branch: profile.specialization || profile.branch || "",
+    graduationYear: profile.graduation_year || profile.graduationYear || "",
+    address: profile.bio || profile.address || "",
+    technicalSkills: profile.tagline || profile.technicalSkills || "",
+    
+    // Existing student fields (Single courseBatch like G2-26)
+    isExistingStudent: profile.is_existing_student ? "yes" : profile.isExistingStudent || "no",
+    courseId: profile.course_id || profile.courseId || profile.course || "",
+    courseBatch: profile.course_batch || profile.courseBatch || "",
+  };
+};
 
 export const isProfileComplete = (profile = {}) => {
   const normalized = normalizeProfile(profile);
@@ -38,10 +68,10 @@ export const isProfileComplete = (profile = {}) => {
     normalized.lastName &&
     normalized.email &&
     normalized.phoneNumber &&
-    normalized.collegeName &&
+    normalized.college &&
     normalized.degree &&
-    normalized.branch &&
-    normalized.graduationYear
+    normalized.specialization &&
+    normalized.graduation_year
   );
 };
 
@@ -249,25 +279,7 @@ export const studentService = {
       }) || students[0];
 
       if (profile) {
-        const user = profile.user || {};
-        const mapped = normalizeProfile({
-          ...profile,
-          firstName: profile.first_name || profile.firstName || user.first_name || user.firstName || "",
-          lastName: profile.last_name || profile.lastName || user.last_name || user.lastName || "",
-          email: profile.email || user.email || cleanEmail,
-          phoneNumber: profile.phone_number || profile.phoneNumber || user.phone_number || user.phoneNumber || "",
-          dob: profile.date_of_birth || user.date_of_birth || "",
-          gender: profile.gender || user.gender || "",
-          collegeName: profile.college || profile.collegeName || "",
-          branch: profile.specialization || profile.branch || "",
-          graduationYear: profile.graduation_year || profile.graduationYear || "",
-          address: profile.bio || profile.address || "",
-          technicalSkills: profile.tagline || profile.technicalSkills || "",
-          isExistingStudent: profile.is_existing_student ? "yes" : profile.isExistingStudent || "no",
-          courseId: profile.course_id || profile.courseId || profile.course || "",
-          courseBatch: profile.course_batch || profile.courseBatch || "",
-        });
-        return { ...profile, ...mapped };
+        return normalizeProfile(profile);
       }
     } catch (err) {
       console.error("Backend profile fetch failed:", err.message || err);
@@ -297,31 +309,40 @@ export const studentService = {
 
     try {
       const formData = new FormData();
-      formData.append("college", updated.collegeName || "");
-      formData.append("degree", updated.degree || "");
-      formData.append("specialization", updated.branch || "");
-      if (updated.graduationYear) {
-        formData.append("graduation_year", Number(updated.graduationYear));
+      
+      // Fields exactly matching backend (strings)
+      const stringFieldsToAppend = [
+        "college", "degree", "specialization", "education_level", 
+        "city", "state", "country", "bio", "tagline",
+        "portfolio_url", "linkedin_url", "github_username",
+        "skills", "hobbies", "languages"
+      ];
+      
+      stringFieldsToAppend.forEach(field => {
+        if (updated[field] !== undefined) {
+          formData.append(field, updated[field] || "");
+        }
+      });
+      
+      if (updated.graduation_year) formData.append("graduation_year", Number(updated.graduation_year));
+      if (updated.dob) formData.append("date_of_birth", updated.dob);
+      if (updated.gender) formData.append("gender", updated.gender);
+      
+      // Handle file uploads
+      if (updated.profile_photo instanceof File) {
+        formData.append("profile_photo", updated.profile_photo);
       }
-      if (updated.dob) {
-        formData.append("date_of_birth", updated.dob);
+      if (updated.resume instanceof File) {
+        formData.append("resume", updated.resume);
       }
-      formData.append("city", updated.city || "");
-      formData.append("state", updated.state || "");
-      formData.append("bio", updated.address || "");
-      formData.append("tagline", updated.technicalSkills || "");
-
+      if (updated.offerLetter instanceof File) {
+        formData.append("uploaded_offer_letter", updated.offerLetter);
+      }
+      
       // Verification Fields
       formData.append("is_existing_student", updated.isExistingStudent === "yes");
-      if (updated.courseId) {
-        formData.append("course_id", updated.courseId);
-      }
+      if (updated.courseId) formData.append("course_id", updated.courseId);
       formData.append("course_batch", updated.courseBatch || "");
-
-      // Append file if exists
-      if (profileData.offerLetter) {
-        formData.append("uploaded_offer_letter", profileData.offerLetter);
-      }
 
       const config = { headers: { "Content-Type": "multipart/form-data" } };
 

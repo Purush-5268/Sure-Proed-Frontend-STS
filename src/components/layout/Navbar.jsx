@@ -1,13 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./Navbar.module.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
+import { studentService } from "../../services/studentService";
 
 function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (isAuthenticated && user?.role === "STUDENT" && user?.email) {
+      studentService.getProfile(user.email).then((profile) => {
+        if (isMounted && profile?.profile_photo) {
+          setProfilePhoto(profile.profile_photo);
+        }
+      }).catch(err => console.error("Could not load profile photo for navbar"));
+    }
+    return () => { isMounted = false; };
+  }, [isAuthenticated, user]);
 
   const handleLogout = () => {
     logout();
@@ -51,14 +65,19 @@ function Navbar() {
 
         <div className={styles.buttons}>
           {isAuthenticated ? (
-            <>
-              <Link to={getDashboardPath()} onClick={closeMenu} className={styles.signupBtn}>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <Link to={getDashboardPath()} onClick={closeMenu} className={styles.signupBtn} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                {profilePhoto ? (
+                  <img src={profilePhoto} alt="Profile" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }} />
+                ) : (
+                  <FaUserCircle size={20} />
+                )}
                 My Account
               </Link>
               <button onClick={handleLogout} className={styles.loginBtn} style={{ cursor: "pointer", border: "none" }}>
                 Sign Out
               </button>
-            </>
+            </div>
           ) : (
             <>
               <Link to="/login" onClick={closeMenu} className={styles.loginBtn}>

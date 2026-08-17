@@ -4,9 +4,15 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  assetsInclude: ['**/*.lottie'],
   server: {
     proxy: {
       '/api': {
+        target: 'http://106.51.129.34:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/media': {
         target: 'http://106.51.129.34:8000',
         changeOrigin: true,
         secure: false,
@@ -16,6 +22,11 @@ export default defineConfig({
   preview: {
     proxy: {
       '/api': {
+        target: 'http://106.51.129.34:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/media': {
         target: 'http://106.51.129.34:8000',
         changeOrigin: true,
         secure: false,

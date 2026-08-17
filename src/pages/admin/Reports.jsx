@@ -28,7 +28,7 @@ function Reports() {
             },
             {
               title: "Course Report",
-              description: `${Array.isArray(coursesResponse.data) ? coursesResponse.data.length : 0} courses available in the database.`,
+              description: `${Array.isArray(coursesResponse.data) ? coursesResponse.data.length : 0} courses available in the platform.`,
               link: "/admin/courses",
             },
             {
