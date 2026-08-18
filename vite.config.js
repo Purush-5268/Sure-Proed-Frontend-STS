@@ -6,6 +6,9 @@ export default defineConfig({
   plugins: [react()],
   assetsInclude: ['**/*.lottie'],
   server: {
+    allowedHosts: [
+      'turret-suing-snub.ngrok-free.dev', // Add your ngrok domain here
+    ],
     proxy: {
       '/api': {
         target: 'http://106.51.129.34:8000',

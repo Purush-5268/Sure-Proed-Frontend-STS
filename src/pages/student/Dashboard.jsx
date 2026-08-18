@@ -12,6 +12,7 @@ import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, Tooltip, Responsive
 import styles from "./Dashboard.module.css";
 import { FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi";
 import FeedbackWidget from "../../components/common/FeedbackWidget";
+import AttendanceWarningPopup from "../../components/attendance/AttendanceWarningPopup";
 
 function Dashboard() {
   const { user } = useAuth();
@@ -33,6 +34,9 @@ function Dashboard() {
   const [attendanceHistory, setAttendanceHistory] = useState([]);
 
   useEffect(() => {
+    if ("Notification" in window && Notification.permission !== "denied") {
+      Notification.requestPermission();
+    }
     const abortController = new AbortController();
     let isMounted = true;
 
@@ -243,11 +247,25 @@ function Dashboard() {
             ) : (
               todayClasses.map((cls, idx) => {
                 const classStart = new Date(`${cls.class_date}T${cls.start_time}`);
-                const classEnd = cls.end_time ? new Date(`${cls.class_date}T${cls.end_time}`) : new Date(classStart.getTime() + 2 * 60 * 60 * 1000);
+                let classEnd = cls.end_time ? new Date(`${cls.class_date}T${cls.end_time}`) : new Date(classStart.getTime() + 2 * 60 * 60 * 1000);
+                
+                // Smart midnight crossing detection: if end time is mathematically smaller, it's on the next day
+                let isNextDay = false;
+                if (classEnd < classStart) {
+                  classEnd = new Date(classEnd.getTime() + 24 * 60 * 60 * 1000);
+                  isNextDay = true;
+                }
+                
                 const now = new Date();
 
                 const windowOpenTime = new Date(classStart.getTime() - 10 * 60 * 1000);
-                const windowCloseTime = new Date(classStart.getTime() + 10 * 60 * 1000);
+                const windowCloseTime = new Date(classStart.getTime()); // Closes exactly at start time
+                
+                // Chrome notification trigger
+                if (now >= windowOpenTime && now <= new Date(windowOpenTime.getTime() + 60000) && Notification.permission === "granted" && !cls.notified) {
+                   cls.notified = true;
+                   new Notification(`Live Class: ${cls.title}`, { body: "Join window is now open! Please join before class starts." });
+                }
                 
                 const classOpen = cls.conducted !== false &&
                   cls.status !== 'COMPLETED' &&
@@ -270,7 +288,7 @@ function Dashboard() {
                       <div>
                         <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-primary)' }}>{cls.title || cls.session_type || "Live Session"}</h4>
                         <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <FiClock /> {classStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {classEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          <FiClock /> {classStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {classEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {isNextDay && <span style={{ fontSize: '11px', background: 'var(--bg-nested)', padding: '2px 6px', borderRadius: '4px', marginLeft: '4px' }}>(Next Day)</span>}
                         </p>
                       </div>
 
@@ -286,7 +304,7 @@ function Dashboard() {
                       ) : isLate ? (
                         <div style={{ textAlign: 'right', maxWidth: '200px' }}>
                           <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🔒 Window Closed</span>
-                          <div style={{ fontSize: '12px', color: '#ef4444' }}>Please join within 10 mins of start time.</div>
+                          <div style={{ fontSize: '12px', color: '#ef4444' }}>Join time has expired.</div>
                           <a href="mailto:admin@sureproed.com?subject=Late Join Request" style={{ fontSize: '12px', color: '#0ea5e9', textDecoration: 'none', display: 'block', marginTop: '6px', fontWeight: 'bold' }}>Request Admin Permission</a>
                         </div>
                       ) : hasEnded ? (
@@ -388,6 +406,8 @@ function Dashboard() {
         </div>
 
       </div>
+
+      <AttendanceWarningPopup />
     </div>
   );
 }

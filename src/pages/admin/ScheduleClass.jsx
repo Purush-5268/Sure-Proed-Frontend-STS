@@ -40,6 +40,9 @@ function ScheduleClass() {
   const [showGuestInput, setShowGuestInput] = useState(false);
   const [newGuestEmail, setNewGuestEmail] = useState("");
 
+  const [cohorts, setCohorts] = useState([]);
+  const [loadingCohorts, setLoadingCohorts] = useState(false);
+
   // 🚨 State for Manage Attendees (After Generation)
   const [managingClassId, setManagingClassId] = useState(null);
   const [newWhitelistEmail, setNewWhitelistEmail] = useState("");
@@ -86,6 +89,27 @@ function ScheduleClass() {
 
     Promise.all([loadCourses(), loadActiveClasses(), fetchAutomation()]);
   }, []);
+
+  useEffect(() => {
+    if (request.streamId) {
+      const fetchCohorts = async () => {
+        setLoadingCohorts(true);
+        try {
+          const res = await apiClient.get('/api/cohorts/', { params: { course: request.streamId } });
+          const allCohorts = normalizeListResponse(res.data);
+          setCohorts(allCohorts);
+        } catch (err) {
+          console.error("Failed to load cohorts:", err);
+        } finally {
+          setLoadingCohorts(false);
+        }
+      };
+      fetchCohorts();
+    } else {
+      setCohorts([]);
+      setRequest(prev => ({ ...prev, cohortId: "", groupName: "" }));
+    }
+  }, [request.streamId]);
 
   const handleSetupAutomation = async (e) => {
     e.preventDefault();
@@ -268,15 +292,10 @@ function ScheduleClass() {
     setErrorMessage("");
 
     try {
-      // 1. Dynamically search for the strict Cohort UUID using your project's apiClient
-      const cohortRes = await apiClient.get('/api/cohorts/');
-      const cohortData = cohortRes.data;
-      const allCohorts = Array.isArray(cohortData?.results) ? cohortData.results : (Array.isArray(cohortData) ? cohortData : []);
-
-      const typedGroup = request.groupName.trim().toLowerCase();
-      const matchedCohort = allCohorts.find(c =>
-        (c.name?.toLowerCase() === typedGroup || c.code?.toLowerCase() === typedGroup || c.batch_name?.toLowerCase() === typedGroup)
-      );
+      let matchedCohort = null;
+      if (request.sessionType === "Domain" && request.cohortId) {
+        matchedCohort = { id: request.cohortId };
+      }
 
       // 2. Get the valid User UUID safely
       const currentUser = JSON.parse(localStorage.getItem("user") || '{}');
@@ -322,7 +341,7 @@ function ScheduleClass() {
         res = await attendanceService.scheduleSession(formattedData);
       }
 
-      const expectedCount = res?.data?.expected_attendees_count || res?.expected_attendees_count || 0;
+      const expectedCount = res?.data?.total_attendee_count ?? res?.total_attendee_count ?? res?.data?.expected_attendees_count ?? res?.expected_attendees_count ?? 0;
       setSuccessMessage(`Live class scheduled! Expected Attendees: ${expectedCount}`);
 
       // 🚨 INSTANT UI UPDATE: Push the newly created class directly into the state
@@ -473,8 +492,20 @@ function ScheduleClass() {
                 </select>
               </div>
               <div>
-                <label className="premium-label">Group Code *</label>
-                <input type="text" value={request.groupName} onChange={(e) => setRequest({ ...request, groupName: e.target.value })} placeholder="e.g. G16" required className={`premium-input ${styles.formInput}`} style={{ textTransform: "uppercase" }} />
+                <label className="premium-label">Select Cohort *</label>
+                <select 
+                  value={request.cohortId || ""} 
+                  onChange={(e) => {
+                    const selected = cohorts.find(c => c.id === e.target.value);
+                    setRequest({ ...request, cohortId: e.target.value, groupName: selected?.code || selected?.name || "" });
+                  }} 
+                  required 
+                  className={`premium-input ${styles.formInput}`}
+                  disabled={!request.streamId || loadingCohorts}
+                >
+                  <option value="">{loadingCohorts ? "Loading Cohorts..." : "-- Select Cohort --"}</option>
+                  {cohorts.map(c => <option key={c.id} value={c.id}>{c.name} ({c.code})</option>)}
+                </select>
               </div>
             </div>
           )}

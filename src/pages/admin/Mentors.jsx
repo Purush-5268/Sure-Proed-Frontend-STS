@@ -29,6 +29,11 @@ function Mentors() {
   const [assigning, setAssigning] = useState(null); // mentorId
   const [assignSuccess, setAssignSuccess] = useState(null);
 
+  // New states for "Show Current Mentors"
+  const [viewMode, setViewMode] = useState("assign"); // "assign" or "list"
+  const [globalMentors, setGlobalMentors] = useState([]);
+  const [loadingGlobalMentors, setLoadingGlobalMentors] = useState(false);
+
   // Load courses on mount
   useEffect(() => {
     const abortController = new AbortController();
@@ -145,6 +150,20 @@ function Mentors() {
     }
   };
 
+  const handleFetchAllMentors = async () => {
+    setViewMode("list");
+    if (globalMentors.length > 0) return; // Already fetched
+    setLoadingGlobalMentors(true);
+    try {
+      const res = await apiClient.get(API_ENDPOINTS.MENTORS.BASE);
+      setGlobalMentors(normalizeListResponse(res.data));
+    } catch (err) {
+      console.error("Failed to fetch all mentors", err);
+    } finally {
+      setLoadingGlobalMentors(false);
+    }
+  };
+
   const item = {
     hidden: { opacity: 0, y: 12 },
     show: { opacity: 1, y: 0, transition: { duration: 0.3 } }
@@ -155,18 +174,34 @@ function Mentors() {
       <div className="premium-page-header">
         <div>
           <h1 className="premium-title">Mentor Management</h1>
-          <p className="premium-subtitle">Assign mentors to active cohorts by course.</p>
+          <p className="premium-subtitle">Manage and assign mentors to active cohorts.</p>
         </div>
-        <Link to="/admin/add-mentor" className="premium-btn premium-btn-primary">
-          <FiUserPlus /> Add Mentor
-        </Link>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button 
+            onClick={() => setViewMode("assign")} 
+            className={`premium-btn ${viewMode === "assign" ? "premium-btn-primary" : "premium-btn-secondary"}`}
+          >
+            Assign Mentors
+          </button>
+          <button 
+            onClick={handleFetchAllMentors} 
+            className={`premium-btn ${viewMode === "list" ? "premium-btn-primary" : "premium-btn-secondary"}`}
+          >
+            <FiUsers /> Show Current Mentors
+          </button>
+          <Link to="/admin/add-mentor" className="premium-btn premium-btn-primary">
+            <FiUserPlus /> Add Mentor
+          </Link>
+        </div>
       </div>
 
-      {/* Step 1: Course Selector */}
-      <div className={styles.stepSection}>
-        <h2 className={styles.stepTitle}>
-          <span className={styles.stepNum}>1</span> Select Course
-        </h2>
+      {viewMode === "assign" ? (
+        <>
+          {/* Step 1: Course Selector */}
+          <div className={styles.stepSection}>
+            <h2 className={styles.stepTitle}>
+              <span className={styles.stepNum}>1</span> Select Course
+            </h2>
         {loadingCourses ? (
           <SkeletonLoader width="300px" height="40px" borderRadius="8px" />
         ) : courses.length === 0 ? (
@@ -288,6 +323,51 @@ function Mentors() {
                       </tr>
                     );
                   })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+        </>
+      ) : (
+        <div className={styles.stepSection} style={{ marginTop: "20px" }}>
+          <h2 className={styles.stepTitle}>All Current Mentors</h2>
+          {loadingGlobalMentors ? (
+            <SkeletonLoader variant="table" rows={6} />
+          ) : globalMentors.length === 0 ? (
+            <p className={styles.emptyNote}>No mentors registered in the system.</p>
+          ) : (
+            <div className="premium-table-container">
+              <table className="premium-table">
+                <thead>
+                  <tr>
+                    <th>Mentor Name</th>
+                    <th>Email</th>
+                    <th>Specialization / Course</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {globalMentors.map(mentor => (
+                    <tr key={mentor.id}>
+                      <td>
+                        <div className={styles.mentorCell}>
+                          <div className={styles.mentorAvatar}>
+                            {`${mentor.user_first_name || "?"}`.charAt(0).toUpperCase()}
+                          </div>
+                          {`${mentor.user_first_name || ""} ${mentor.user_last_name || ""}`.trim() || mentor.user_email || "Unknown"}
+                        </div>
+                      </td>
+                      <td>{mentor.user_email || "N/A"}</td>
+                      <td>{mentor.specialization || mentor.assigned_course?.name || "Unassigned"}</td>
+                      <td>
+                        <Link to={`/admin/mentor-details/${mentor.user}`} className="premium-btn premium-btn-secondary" style={{ padding: "6px 12px" }}>
+                          View Details
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

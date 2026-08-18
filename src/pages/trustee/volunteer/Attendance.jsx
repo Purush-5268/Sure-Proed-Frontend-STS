@@ -99,7 +99,21 @@ function VolunteerAttendance() {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      alert("Failed to download Excel: " + (err.response?.data?.detail || err.message));
+      console.error("Excel download error:", err);
+      let errorMsg = "Failed to download the report. Make sure the session has ended.";
+      try {
+        const errData = err.response?.data;
+        if (errData instanceof Blob) {
+          const text = await errData.text();
+          const json = JSON.parse(text);
+          errorMsg = json.detail || json.message || errorMsg;
+        } else if (errData?.detail || errData?.message) {
+          errorMsg = errData.detail || errData.message;
+        }
+      } catch (e) {
+        // Fallback if parsing fails
+      }
+      alert(`Attendance download failed: ${errorMsg}`);
     }
   };
 

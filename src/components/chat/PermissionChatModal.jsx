@@ -24,7 +24,9 @@ function PermissionChatModal({ warningId, onClose }) {
 
     // 2. Initialize WebSocket Connection
     const token = getAccessToken();
-    const wsUrl = `ws://${window.location.host}/ws/attendance/permissions/${warningId}/?token=${token}`;
+    const wsHost = window.location.protocol === "https:" ? "wss" : "ws";
+    const host = process.env.NODE_ENV === "development" ? "106.51.129.34:8000" : window.location.host;
+    const wsUrl = `${wsHost}://${host}/ws/chat/${warningId}/?token=${token}`;
     
     wsRef.current = new WebSocket(wsUrl);
 

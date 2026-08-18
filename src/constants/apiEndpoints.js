@@ -44,6 +44,18 @@ export const API_ENDPOINTS = {
     RESTORE_ACCESS: (id) => `/api/applications/${id}/restore_access/`,
   },
 
+  // Pre-Screening
+  PRE_SCREENING: {
+    BASE: "/api/pre-screening/",
+    BY_ID: (id) => `/api/pre-screening/${id}/`,
+    UPDATE_STATUS: (id) => `/api/pre-screening/${id}/update-status/`,
+  },
+  PRE_SCREENING_INTERVIEW: {
+    BASE: "/api/pre-screening-interview/",
+    BY_ID: (id) => `/api/pre-screening-interview/${id}/`,
+    UPDATE_STATUS: (id) => `/api/pre-screening-interview/${id}/update-status/`,
+  },
+
   // Cohorts
   COHORTS: {
     BASE: "/api/cohorts/",
@@ -58,9 +70,9 @@ export const API_ENDPOINTS = {
 
   // Mentor Profile (authenticated mentor's own profile)
   MENTORS: {
-    BASE: "/api/mentor-profile/",
-    PROFILE_ME: "/api/mentor-profile/me/",
-    PROFILE_BY_ID: (id) => `/api/mentor-profile/${id}/`,
+    BASE: "/api/volunteers/mentor-profiles/",
+    PROFILE_ME: "/api/volunteers/mentor-profiles/me/",
+    PROFILE_BY_ID: (id) => `/api/volunteers/mentor-profiles/${id}/`,
   },
 
   // Exams & Questions

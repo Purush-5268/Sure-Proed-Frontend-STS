@@ -184,7 +184,7 @@ function AttendanceManagement() {
         // Fallback to default error message if blob parsing fails
       }
 
-      alert(`❌ ${errorMsg}`);
+      alert(`Attendance download failed: ${errorMsg}`);
     }
   };
 

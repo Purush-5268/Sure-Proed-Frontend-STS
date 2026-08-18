@@ -1,156 +1,91 @@
-.page {
-  width: 100%;
-}
-
-.card {
-  width: 100%;
-  background: var(--bg-card);
-  border-radius: var(--radius-md);
-  padding: 28px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
-}
-
-.header {
+.hierarchyContainer {
+  margin-top: 1rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 16px;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.header h1 {
-  font-size: 1.75rem;
-  color: var(--primary-dark);
-  margin-bottom: 4px;
-}
-
-.header p {
-  color: var(--text-muted);
-  font-size: 0.95rem;
-}
-
-.searchBox {
-  margin-bottom: 20px;
-}
-
-.searchBox input {
-  width: 100%;
-  height: var(--input-height);
-  padding: 8px 14px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  outline: none;
-  font-size: 14px;
-  color: var(--text-primary);
+.courseBlock {
   background: var(--bg-surface);
-  transition: all var(--transition-fast);
-}
-
-.searchBox input:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
-
-.tableWrapper {
-  width: 100%;
-  overflow-x: auto;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
-  background: var(--bg-card);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 600px;
-}
-
-.table th {
-  background: var(--bg-subtle);
-  color: var(--text-primary);
-  padding: 12px 16px;
-  text-align: left;
-  font-size: 14px;
-  font-weight: 600;
-  border-bottom: 1px solid var(--border-color);
-  white-space: nowrap;
-}
-
-.table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-color);
-  font-size: 14px;
-  color: var(--text-secondary);
-  vertical-align: middle;
-}
-
-.table tr:hover td {
-  background: var(--primary-light);
-}
-
-.actions {
+.courseHeader {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
   align-items: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  background: var(--bg-surface-hover);
+  border-bottom: 1px solid transparent;
+  transition: background 0.2s;
 }
 
-.actions a {
-  display: inline-flex;
+.courseHeader:hover {
+  background: var(--bg-surface-active);
+}
+
+.courseBlock[data-expanded="true"] .courseHeader {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.icon {
+  margin-right: 12px;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+}
+
+.courseName {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.courseContent {
+  padding: 16px;
+  background: var(--bg-body);
+}
+
+.cohortBlock {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.cohortBlock:last-child {
+  margin-bottom: 0;
+}
+
+.cohortHeader {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  background: var(--primary-color);
-  color: #ffffff;
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
+  padding: 12px 16px;
+  cursor: pointer;
+  background: var(--bg-surface);
+  transition: background 0.2s;
+}
+
+.cohortHeader:hover {
+  background: var(--bg-surface-hover);
+}
+
+.cohortName {
   font-weight: 500;
-  transition: all var(--transition-fast);
+  font-size: 1rem;
+  color: var(--text-primary);
 }
 
-.actions a:hover {
-  background: var(--primary-hover);
+.appContainer {
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-body);
 }
 
-.approved {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 50px;
-  background: var(--status-active-bg);
-  color: var(--status-active-text);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.pending {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 50px;
-  background: var(--status-pending-bg);
-  color: var(--status-pending-text);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.rejected {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 50px;
-  background: var(--status-inactive-bg);
-  color: var(--status-inactive-text);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-@media (max-width: 768px) {
-  .card {
-    padding: 16px;
-  }
+.emptyNote {
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: 16px;
 }

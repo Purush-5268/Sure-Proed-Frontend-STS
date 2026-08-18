@@ -164,8 +164,22 @@ function Attendance() {
       link.download = `attendance_report_${sessionId}.xlsx`;
       link.click();
       URL.revokeObjectURL(url);
-    } catch {
-      alert("Could not download report. It may still be generating.");
+    } catch (err) {
+      console.error("Excel download error:", err);
+      let errorMsg = "Could not download report. It may still be generating.";
+      try {
+        const errData = err.response?.data;
+        if (errData instanceof Blob) {
+          const text = await errData.text();
+          const json = JSON.parse(text);
+          errorMsg = json.detail || json.message || errorMsg;
+        } else if (errData?.detail || errData?.message) {
+          errorMsg = errData.detail || errData.message;
+        }
+      } catch (e) {
+        // Fallback if parsing fails
+      }
+      alert(`Attendance download failed: ${errorMsg}`);
     }
   };
 

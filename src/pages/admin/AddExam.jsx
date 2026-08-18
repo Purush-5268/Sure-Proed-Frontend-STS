@@ -151,7 +151,7 @@
 
 // export default AddExam;
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./AddExam.module.css";
@@ -159,9 +159,13 @@ import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function AddExam() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialAppId = queryParams.get("appId") || "";
+
   const [applications, setApplications] = useState([]);
   const [form, setForm] = useState({
-    application: "",
+    application: initialAppId,
     level: "MIXED",
     duration_minutes: "45",
     pass_percentage: "60",

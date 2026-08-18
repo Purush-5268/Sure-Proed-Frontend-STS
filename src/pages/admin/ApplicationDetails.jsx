@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { FiChevronDown, FiChevronUp, FiCheckCircle, FiXCircle, FiClock, FiFileText, FiVideo, FiShield, FiUsers, FiAward } from "react-icons/fi";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./ApplicationDetails.module.css";
@@ -10,128 +11,416 @@ function ApplicationDetails() {
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  
+  // Available Cohorts for Assignment
+  const [cohorts, setCohorts] = useState([]);
+
+  // Panel toggles
+  const [expanded, setExpanded] = useState({
+    overview: true,
+    screening: false,
+    interview: false,
+    cohort: false,
+    completion: false,
+    update: false
+  });
+
+  const togglePanel = (panel) => {
+    setExpanded(prev => ({ ...prev, [panel]: !prev[panel] }));
+  };
+
+  const loadApplication = async () => {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.APPLICATIONS.BY_ID(id));
+      setApplication(response.data || null);
+      if (response.data?.course) {
+        // Fetch cohorts for this course
+        const cohortsRes = await apiClient.get(API_ENDPOINTS.COHORTS.BASE, { params: { course: response.data.course } });
+        setCohorts(cohortsRes.data?.results || cohortsRes.data || []);
+      }
+    } catch (err) {
+      console.error("Failed to load application details:", err);
+      setError("Unable to load application details.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadApplication = async () => {
-      try {
-        const response = await apiClient.get(API_ENDPOINTS.APPLICATIONS.BY_ID(id));
-        setApplication(response.data || null);
-      } catch (err) {
-        console.error("Failed to load application details:", err);
-        setError("Unable to load application details.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-      loadApplication();
-    }
+    if (id) loadApplication();
   }, [id]);
 
-  if (loading) return <div className={styles.container}><div className="premium-card"><h1>Application Details</h1><SkeletonLoader variant="detail" /></div></div>;
-  if (error) return <div className={styles.container}><div className="premium-card"><h1>Application Details</h1><p style={{ color: "var(--danger-color)" }}>{error}</p></div></div>;
-  if (!application) return <div className={styles.container}><div className="premium-card"><h1>Application Details</h1><p>No application found.</p></div></div>;
+  // Actions
+  const handleUpdateScreening = async (e) => {
+    e.preventDefault();
+    if (!application?.pre_screening?.id) return alert("No screening record exists for this application.");
+    const formData = new FormData(e.target);
+    const payload = {
+      status: formData.get("status"),
+      remarks: formData.get("remarks")
+    };
+    
+    setSubmitting(true);
+    try {
+      await apiClient.post(API_ENDPOINTS.PRE_SCREENING.UPDATE_STATUS(application.pre_screening.id), payload);
+      alert("Screening updated successfully.");
+      loadApplication();
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to update screening.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-  const user = application.student?.user || {};
+  const handleUpdateInterview = async (e) => {
+    e.preventDefault();
+    if (!application?.pre_screening_interview?.id) return alert("No interview record exists for this application.");
+    const formData = new FormData(e.target);
+    const payload = {
+      status: formData.get("status"),
+      feedback: formData.get("feedback"),
+      score: formData.get("score")
+    };
+    
+    setSubmitting(true);
+    try {
+      await apiClient.post(API_ENDPOINTS.PRE_SCREENING_INTERVIEW.UPDATE_STATUS(application.pre_screening_interview.id), payload);
+      alert("Interview updated successfully.");
+      loadApplication();
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to update interview.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleAssignCohort = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const cohortId = formData.get("cohort");
+    if (!cohortId) return alert("Please select a cohort.");
+
+    setSubmitting(true);
+    try {
+      await apiClient.post(API_ENDPOINTS.APPLICATIONS.ASSIGN_COHORT(id), { cohort_id: cohortId });
+      alert("Cohort assigned successfully.");
+      loadApplication();
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to assign cohort.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCheckCompletion = async () => {
+    setSubmitting(true);
+    try {
+      const res = await apiClient.post(API_ENDPOINTS.APPLICATIONS.CHECK_COMPLETION(id));
+      alert(res.data?.message || "Course completion processed.");
+      loadApplication();
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to process completion. Ensure requirements are met.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleGeneralUpdate = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const payload = {
+      status: formData.get("status"),
+      remarks: formData.get("remarks")
+    };
+    
+    setSubmitting(true);
+    try {
+      await apiClient.patch(API_ENDPOINTS.APPLICATIONS.BY_ID(id), payload);
+      alert("Application updated successfully.");
+      loadApplication();
+    } catch (err) {
+      alert("Failed to update application.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) return <div className={styles.pageContainer}><SkeletonLoader variant="detail" rows={10} /></div>;
+  if (error) return <div className={styles.pageContainer}><p style={{ color: "var(--danger-color)" }}>{error}</p></div>;
+  if (!application) return <div className={styles.pageContainer}><p>No application found.</p></div>;
+
+  const stu = application.student || {};
+  const user = stu.user || {};
   const fullName = `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "Unknown";
 
   return (
-    <div className={styles.container}>
-      <div className="premium-card">
-        <div className={styles.header}>
-          <h1>Application Details</h1>
-          <Link to="/admin/applications">Back</Link>
-        </div>
+    <div className={styles.pageContainer}>
+      <div className={styles.header}>
+        <h1>Application Control Panel</h1>
+        <Link to="/admin/applications" className="premium-btn premium-btn-secondary">Back to List</Link>
+      </div>
 
-        <div className={styles.grid}>
-          <div>
-            <label>Student Name</label>
-            <p>{fullName}</p>
+      <div className={styles.panelsContainer}>
+        
+        {/* PANEL A: Overview */}
+        <div className={styles.panel} data-expanded={expanded.overview}>
+          <div className={styles.panelHeader} onClick={() => togglePanel('overview')}>
+            <div className={styles.panelTitle}><FiFileText /> A. Application Overview</div>
+            {expanded.overview ? <FiChevronUp /> : <FiChevronDown />}
           </div>
-
-          <div>
-            <label>Email</label>
-            <p>{user.email || "N/A"}</p>
-          </div>
-
-          <div>
-            <label>Phone</label>
-            <p>{user.phone_number || "N/A"}</p>
-          </div>
-
-          <div>
-            <label>Course</label>
-            <p>{application.course?.name || "N/A"}</p>
-          </div>
-
-          <div>
-            <label>Application Number</label>
-            <p>{application.application_number || "N/A"}</p>
-          </div>
-
-          <div>
-            <label>Applied On</label>
-            <p>{application.applied_at ? new Date(application.applied_at).toLocaleDateString() : "N/A"}</p>
-          </div>
-
-          <div>
-            <label>Status</label>
-            <span className={application.status === "REJECTED" ? styles.rejected : application.status === "QUALIFIED" || application.status === "COHORT_ASSIGNED" ? styles.approved : styles.pending}>
-              {application.status || "PENDING"}
-            </span>
-          </div>
-
-          <div>
-            <label>Remarks</label>
-            <p>{application.remarks || "No remarks provided."}</p>
-          </div>
-          <div>
-            <label>Access Status</label>
-            <span className={application.is_restricted ? styles.rejected : styles.approved}>
-              {application.is_restricted ? "REVOKED / RESTRICTED" : "NORMAL"}
-            </span>
-          </div>
-        </div>
-
-        <div className={styles.buttons}>
-          <Link to={`/admin/approve-application/${application.id}`}>Approve</Link>
-          <Link to={`/admin/reject-application/${application.id}`}>Reject</Link>
-          
-          {application.is_restricted ? (
-            <button 
-              className={styles.restoreBtn} 
-              onClick={async () => {
-                if (window.confirm("Are you sure you want to RESTORE access?")) {
-                  try {
-                    await apiClient.post(API_ENDPOINTS.APPLICATIONS.RESTORE_ACCESS(application.id));
-                    setApplication({...application, is_restricted: false});
-                  } catch(e) {
-                    alert("Failed to restore access.");
-                  }
-                }
-              }}
-            >
-              Restore Access
-            </button>
-          ) : (
-            <button 
-              className={styles.revokeBtn} 
-              onClick={async () => {
-                if (window.confirm("Are you sure you want to REVOKE access? The student will lose access to cohort resources and live classes.")) {
-                  try {
-                    await apiClient.post(API_ENDPOINTS.APPLICATIONS.REVOKE_ACCESS(application.id));
-                    setApplication({...application, is_restricted: true});
-                  } catch(e) {
-                    alert("Failed to revoke access.");
-                  }
-                }
-              }}
-            >
-              Revoke Access
-            </button>
+          {expanded.overview && (
+            <div className={styles.panelContent}>
+              <div className={styles.grid}>
+                <div className={styles.gridItem}>
+                  <span className={styles.label}>Application #</span>
+                  <span className={styles.value}>{application.application_number}</span>
+                </div>
+                <div className={styles.gridItem}>
+                  <span className={styles.label}>Student</span>
+                  <span className={styles.value}>{fullName} ({stu.student_code || "No Code"})</span>
+                </div>
+                <div className={styles.gridItem}>
+                  <span className={styles.label}>Course</span>
+                  <span className={styles.value}>{application.course?.name || application.course || "N/A"}</span>
+                </div>
+                <div className={styles.gridItem}>
+                  <span className={styles.label}>Applied On</span>
+                  <span className={styles.value}>{application.applied_at ? new Date(application.applied_at).toLocaleDateString() : "N/A"}</span>
+                </div>
+                <div className={styles.gridItem}>
+                  <span className={styles.label}>Workflow Status</span>
+                  <span className={`${styles.statusBadge} ${application.status === 'REJECTED' ? 'premium-badge-danger' : 'premium-badge-primary'}`}>
+                    {application.status}
+                  </span>
+                </div>
+                <div className={styles.gridItem}>
+                  <span className={styles.label}>Exam Result</span>
+                  <span className={styles.value}>
+                    {application.qualified === true ? <span style={{color:"var(--success-color)"}}>Passed</span> : application.qualified === false ? <span style={{color:"var(--danger-color)"}}>Failed</span> : "Pending"}
+                  </span>
+                </div>
+              </div>
+            </div>
           )}
         </div>
+
+        {/* PANEL B: Screening */}
+        <div className={styles.panel} data-expanded={expanded.screening}>
+          <div className={styles.panelHeader} onClick={() => togglePanel('screening')}>
+            <div className={styles.panelTitle}><FiClock /> B. Screening & Exam Result</div>
+            {expanded.screening ? <FiChevronUp /> : <FiChevronDown />}
+          </div>
+          {expanded.screening && (
+            <div className={styles.panelContent}>
+              {application.pre_screening ? (
+                <form onSubmit={handleUpdateScreening}>
+                  <div className={styles.grid} style={{ marginBottom: "20px" }}>
+                    <div className={styles.gridItem}>
+                      <span className={styles.label}>Current Status</span>
+                      <span className={styles.value}>{application.pre_screening.status}</span>
+                    </div>
+                    <div className={styles.gridItem}>
+                      <span className={styles.label}>Exam Level</span>
+                      <span className={styles.value}>{application.pre_screening.level || "N/A"}</span>
+                    </div>
+                  </div>
+                  
+                  <div className={styles.formGroup}>
+                    <label>Update Status</label>
+                    <select name="status" className="premium-input" defaultValue={application.pre_screening.status} required>
+                      <option value="PENDING">Pending</option>
+                      <option value="IN_PROGRESS">In Progress</option>
+                      <option value="SUBMITTED">Submitted</option>
+                      <option value="EVALUATED">Evaluated</option>
+                      <option value="PASSED">Passed</option>
+                      <option value="FAILED">Failed</option>
+                    </select>
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Admin Remarks</label>
+                    <textarea name="remarks" className="premium-input" rows={2} defaultValue={application.pre_screening.remarks}></textarea>
+                  </div>
+                  <div className={styles.actionRow} style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid var(--border-color)" }}>
+                    <button type="submit" className="premium-btn premium-btn-primary" disabled={submitting}>Save Screening</button>
+                    <Link to="/admin/exams" className="premium-btn premium-btn-secondary">View Exam Dashboard</Link>
+                  </div>
+                </form>
+              ) : (
+                <div style={{ padding: "20px", background: "var(--bg-secondary)", borderRadius: "8px", textAlign: "center" }}>
+                  <p style={{ color: "var(--text-secondary)", marginBottom: "16px" }}>No pre-screening exam record exists for this application yet.</p>
+                  <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
+                    <Link to={`/admin/add-exam?appId=${application.id}`} className="premium-btn premium-btn-primary">
+                      Assign Exam Now
+                    </Link>
+                    <Link to="/admin/exams" className="premium-btn premium-btn-secondary">
+                      Go to Exams Tab
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* PANEL C: Candidate Interview */}
+        <div className={styles.panel} data-expanded={expanded.interview}>
+          <div className={styles.panelHeader} onClick={() => togglePanel('interview')}>
+            <div className={styles.panelTitle}><FiVideo /> C. Candidate Interview</div>
+            {expanded.interview ? <FiChevronUp /> : <FiChevronDown />}
+          </div>
+          {expanded.interview && (
+            <div className={styles.panelContent}>
+              {application.pre_screening_interview ? (
+                <form onSubmit={handleUpdateInterview}>
+                  <div className={styles.grid} style={{ marginBottom: "20px" }}>
+                    <div className={styles.gridItem}>
+                      <span className={styles.label}>Current Status</span>
+                      <span className={styles.value}>{application.pre_screening_interview.status}</span>
+                    </div>
+                    <div className={styles.gridItem}>
+                      <span className={styles.label}>Score</span>
+                      <span className={styles.value}>{application.pre_screening_interview.score || "N/A"}</span>
+                    </div>
+                  </div>
+                  
+                  <div className={styles.formGroup}>
+                    <label>Update Status</label>
+                    <select name="status" className="premium-input" defaultValue={application.pre_screening_interview.status} required>
+                      <option value="SCHEDULED">Scheduled</option>
+                      <option value="COMPLETED">Completed</option>
+                      <option value="PASSED">Passed</option>
+                      <option value="FAILED">Failed</option>
+                    </select>
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Interview Score (0-100)</label>
+                    <input type="number" name="score" className="premium-input" defaultValue={application.pre_screening_interview.score} min="0" max="100" />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Interview Feedback</label>
+                    <textarea name="feedback" className="premium-input" rows={2} defaultValue={application.pre_screening_interview.feedback}></textarea>
+                  </div>
+                  <div className={styles.actionRow}>
+                    <button type="submit" className="premium-btn premium-btn-primary" disabled={submitting}>Save Interview</button>
+                  </div>
+                </form>
+              ) : (
+                <p style={{ color: "var(--text-secondary)" }}>No interview record generated for this application.</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* PANEL E: Cohort Management */}
+        <div className={styles.panel} data-expanded={expanded.cohort}>
+          <div className={styles.panelHeader} onClick={() => togglePanel('cohort')}>
+            <div className={styles.panelTitle}><FiUsers /> E. Cohort Assignment</div>
+            {expanded.cohort ? <FiChevronUp /> : <FiChevronDown />}
+          </div>
+          {expanded.cohort && (
+            <div className={styles.panelContent}>
+              <div className={styles.grid} style={{ marginBottom: "20px" }}>
+                <div className={styles.gridItem}>
+                  <span className={styles.label}>Current Cohort</span>
+                  <span className={styles.value}>
+                    {application.assigned_cohort?.name ? `${application.assigned_cohort.code} - ${application.assigned_cohort.name}` : application.assigned_cohort || "Unassigned"}
+                  </span>
+                </div>
+              </div>
+              
+              <form onSubmit={handleAssignCohort}>
+                <div className={styles.formGroup}>
+                  <label>Assign to Cohort</label>
+                  <select name="cohort" className="premium-input" required disabled={cohorts.length === 0}>
+                    <option value="">Select a Cohort...</option>
+                    {cohorts.map(c => (
+                      <option key={c.id} value={c.id}>{c.code} - {c.name}</option>
+                    ))}
+                  </select>
+                  {cohorts.length === 0 && <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>No cohorts available for this course.</span>}
+                </div>
+                <div className={styles.actionRow}>
+                  <button type="submit" className="premium-btn premium-btn-primary" disabled={submitting || cohorts.length === 0}>Assign Cohort</button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+
+        {/* PANEL F: Course Completion */}
+        <div className={styles.panel} data-expanded={expanded.completion}>
+          <div className={styles.panelHeader} onClick={() => togglePanel('completion')}>
+            <div className={styles.panelTitle}><FiAward /> F. Course Completion</div>
+            {expanded.completion ? <FiChevronUp /> : <FiChevronDown />}
+          </div>
+          {expanded.completion && (
+            <div className={styles.panelContent}>
+              <div className={styles.grid} style={{ marginBottom: "20px" }}>
+                <div className={styles.gridItem}>
+                  <span className={styles.label}>Completed</span>
+                  <span className={styles.value}>{application.completed_course ? "Yes" : "No"}</span>
+                </div>
+                <div className={styles.gridItem}>
+                  <span className={styles.label}>Final Score</span>
+                  <span className={styles.value}>{application.final_score || "N/A"}</span>
+                </div>
+                <div className={styles.gridItem}>
+                  <span className={styles.label}>Completion Date</span>
+                  <span className={styles.value}>{application.completed_at ? new Date(application.completed_at).toLocaleDateString() : "N/A"}</span>
+                </div>
+              </div>
+
+              <div className={styles.actionRow} style={{ justifyContent: "flex-start" }}>
+                <button onClick={handleCheckCompletion} className="premium-btn premium-btn-secondary" disabled={submitting || application.completed_course}>
+                  Trigger Completion Check
+                </button>
+                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", alignSelf: "center", margin: 0 }}>
+                  This will evaluate attendance and assignments to trigger final completion.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* PANEL G: General Updates / Offer Letter */}
+        <div className={styles.panel} data-expanded={expanded.update}>
+          <div className={styles.panelHeader} onClick={() => togglePanel('update')}>
+            <div className={styles.panelTitle}><FiShield /> G. General Updates & Manual Status</div>
+            {expanded.update ? <FiChevronUp /> : <FiChevronDown />}
+          </div>
+          {expanded.update && (
+            <div className={styles.panelContent}>
+              <form onSubmit={handleGeneralUpdate}>
+                <div className={styles.formGroup}>
+                  <label>Override Status (Use carefully!)</label>
+                  <select name="status" className="premium-input" defaultValue={application.status} required>
+                    <option value="APPLIED">Applied</option>
+                    <option value="PRE_SCREENING_PENDING">Pre-Screening Pending</option>
+                    <option value="EXAM_PENDING">Exam Pending</option>
+                    <option value="QUALIFIED">Qualified</option>
+                    <option value="REJECTED">Rejected</option>
+                    <option value="WAITLISTED">Waitlisted</option>
+                    <option value="COHORT_ASSIGNED">Cohort Assigned</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="DROPPED">Dropped</option>
+                    <option value="SUSPENDED">Suspended</option>
+                    <option value="CANCELLED">Cancelled</option>
+                  </select>
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Remarks</label>
+                  <textarea name="remarks" className="premium-input" rows={2} defaultValue={application.remarks}></textarea>
+                </div>
+                <div className={styles.actionRow}>
+                  <button type="submit" className="premium-btn premium-btn-danger" disabled={submitting}>Force Update Application</button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );
