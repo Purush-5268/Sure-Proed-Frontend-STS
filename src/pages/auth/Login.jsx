@@ -26,27 +26,44 @@ function Login() {
     const params = new URLSearchParams(window.location.search);
     const access = params.get("access");
     const refresh = params.get("refresh");
+    const code = params.get("code");
+    const state = params.get("state");
 
-    if (access) {
-      setAccessToken(access);
-      if (refresh) setRefreshToken(refresh);
-      const decoded = parseJwt(access) || {};
-      const firstName = params.get("firstName") || decoded.first_name || decoded.firstName || "";
-      const lastName = params.get("lastName") || decoded.last_name || decoded.lastName || "";
-      const email = params.get("email") || decoded.email || "linkedin_user@sureproed.com";
+    const processTokens = (access_token, refresh_token, decoded_override = {}) => {
+      setAccessToken(access_token);
+      if (refresh_token) setRefreshToken(refresh_token);
+      
+      const decoded = parseJwt(access_token) || {};
+      const firstName = decoded_override.firstName || params.get("firstName") || decoded.first_name || decoded.firstName || "";
+      const lastName = decoded_override.lastName || params.get("lastName") || decoded.last_name || decoded.lastName || "";
+      const email = decoded_override.email || params.get("email") || decoded.email || "linkedin_user@sureproed.com";
+      const role = decoded_override.role || decoded.role || "STUDENT";
+      
       const userObj = {
-        id: decoded.user_id || decoded.id || undefined,
+        id: decoded_override.id || decoded.user_id || decoded.id || undefined,
         email,
         first_name: firstName,
         last_name: lastName,
         firstName,
         lastName,
-        role: decoded.role || "STUDENT",
+        role,
       };
+      
       setUserInfo(userObj);
       updateUser(userObj);
       window.history.replaceState({}, "", "/login");
-      navigate("/student/profile", { replace: true });
+      
+      // Route based on role
+      setTimeout(() => {
+        if (role === "ADMIN") navigate("/admin/dashboard", { replace: true });
+        else if (role === "MENTOR") navigate("/mentor/dashboard", { replace: true });
+        else if (role === "TRUSTEE") navigate("/trustee/dashboard", { replace: true });
+        else navigate("/student/profile", { replace: true });
+      }, 100);
+    };
+
+    if (access) {
+      processTokens(access, refresh);
     }
   }, [navigate, updateUser]);
 
