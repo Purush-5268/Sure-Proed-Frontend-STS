@@ -1,8 +1,9 @@
 import { Outlet, useLocation } from "react-router-dom";
-import { 
-  FaChartPie, FaUsers, FaChalkboardTeacher, FaBuilding, 
-  FaBook, FaFileAlt, FaClipboardList, FaLayerGroup, 
-  FaCalendarAlt, FaUserCheck, FaTasks, FaCertificate, 
+import { useEffect } from "react";
+import {
+  FaChartPie, FaUsers, FaChalkboardTeacher, FaBuilding,
+  FaBook, FaFileAlt, FaClipboardList, FaLayerGroup,
+  FaCalendarAlt, FaUserCheck, FaTasks, FaCertificate,
   FaBell, FaChartBar, FaCog, FaShieldAlt
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,9 +42,14 @@ const pageVariants = {
 
 function AdminLayout() {
   const location = useLocation();
-  
+
+  useEffect(() => {
+    document.body.setAttribute("data-role", "admin");
+    return () => document.body.removeAttribute("data-role");
+  }, []);
+
   return (
-    <div className={styles.layoutWrapper} data-role="admin">
+    <>
       <Navbar />
 
       <div className={styles.layout}>
@@ -69,7 +75,7 @@ function AdminLayout() {
       </div>
 
       <Footer />
-    </div>
+    </>
   );
 }
 

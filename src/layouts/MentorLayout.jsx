@@ -1,8 +1,9 @@
 import { Outlet } from "react-router-dom";
-import { 
-  FaChalkboardTeacher, FaUsers, FaCalendarAlt, 
-  FaVideo, FaUserGraduate, FaUserCheck, 
-  FaTasks, FaUserCircle, FaCog 
+import { useEffect } from "react";
+import {
+  FaChalkboardTeacher, FaUsers, FaCalendarAlt,
+  FaVideo, FaUserGraduate, FaUserCheck,
+  FaTasks, FaUserCircle, FaCog
 } from "react-icons/fa";
 
 import Navbar from "../components/layout/Navbar";
@@ -24,13 +25,17 @@ const mentorLinks = [
 ];
 
 function MentorLayout() {
-  return (
-    <div className={styles.layoutWrapper} data-role="mentor">
-      <Navbar />
+  useEffect(() => {
+    document.body.setAttribute("data-role", "mentor");
+    return () => document.body.removeAttribute("data-role");
+  }, []);
 
+  return (
+    <>
+      <Navbar />
       <div className={styles.layout}>
         <Sidebar
-          title="Mentor"
+          title="Teacher Portal"
           links={mentorLinks}
         />
 
@@ -40,7 +45,7 @@ function MentorLayout() {
       </div>
 
       <Footer />
-    </div>
+    </>
   );
 }
 

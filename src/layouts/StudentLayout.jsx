@@ -1,4 +1,5 @@
 import { Outlet } from "react-router-dom";
+import { useEffect } from "react";
 import {
   FaChartLine, FaUserAlt, FaBookOpen, FaFileSignature,
   FaClipboardCheck, FaUsers, FaCalendarCheck,
@@ -27,8 +28,13 @@ const studentLinks = [
 ];
 
 function StudentLayout() {
+  useEffect(() => {
+    document.body.setAttribute("data-role", "student");
+    return () => document.body.removeAttribute("data-role");
+  }, []);
+
   return (
-    <div className={styles.layoutWrapper} data-role="student">
+    <>
       <Navbar />
 
       <div className={styles.layout}>
@@ -43,7 +49,7 @@ function StudentLayout() {
       </div>
 
       <Footer />
-    </div>
+    </>
   );
 }
 
