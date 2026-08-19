@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
+import { useOutletContext } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import PageHeader from "../../components/ui/PageHeader";
@@ -33,6 +34,7 @@ function getSalutation(gender) {
 
 function MentorDashboard() {
   const { user } = useAuth();
+  const { globalCohort } = useOutletContext() || {};
   const [cohorts, setCohorts] = useState([]);
   const [todaySessions, setTodaySessions] = useState([]);
   const [recentSubmissions, setRecentSubmissions] = useState([]);
@@ -40,25 +42,40 @@ function MentorDashboard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // If there is no globalCohort yet (meaning cohorts haven't loaded in layout or none assigned), wait.
+    if (globalCohort === undefined) return;
+    
     const abortController = new AbortController();
     let isMounted = true;
+    setLoading(true);
+
     const loadDashboardData = async () => {
       try {
         const today = new Date().toISOString().split("T")[0];
 
+        // Base params for cohort filtering if a specific cohort is selected
+        const cohortParams = globalCohort ? { cohort: globalCohort } : {};
+
         const [cohortsRes, attendanceRes, submissionsRes] = await Promise.allSettled([
           apiClient.get(API_ENDPOINTS.COHORTS.MY_COHORTS),
           apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, {
-            params: { conducted: "true", class_date: today }
+            params: { conducted: "true", class_date: today, ...cohortParams }
           }),
-          apiClient.get(API_ENDPOINTS.SUBMISSIONS.BASE),
+          apiClient.get(API_ENDPOINTS.SUBMISSIONS.BASE, {
+            params: { ...cohortParams }
+          }),
         ]);
 
         if (!isMounted) return;
 
         if (cohortsRes.status === "fulfilled") {
           const data = cohortsRes.value.data;
-          setCohorts(Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []));
+          // Filter cohorts to only show the global selected one if applicable, or all
+          let myCohorts = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
+          if (globalCohort) {
+            myCohorts = myCohorts.filter(c => String(c.id) === String(globalCohort));
+          }
+          setCohorts(myCohorts);
         }
 
         if (attendanceRes.status === "fulfilled") {
@@ -82,7 +99,7 @@ function MentorDashboard() {
 
     loadDashboardData();
     return () => { isMounted = false; abortController.abort(); };
-  }, []);
+  }, [globalCohort]);
 
   const firstName = user?.first_name || user?.firstName || "";
   const salutation = getSalutation(user?.gender);

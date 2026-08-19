@@ -69,13 +69,20 @@ export const API_ENDPOINTS = {
     STUDENTS: (id) => `/api/cohorts/${id}/students/`,
     // Mentor requests cohort assignment from admin
     REQUEST_ASSIGNMENT: "/api/cohorts/request-assignment/",
+    // Admin mentor management endpoints
+    ASSIGN_MENTOR: (id) => `/api/cohorts/${id}/assign_mentor/`,
+    REVOKE_MENTOR: (id) => `/api/cohorts/${id}/revoke_mentor/`,
   },
 
-  // Mentor Profile (authenticated mentor's own profile)
+  // Mentor Profile (authenticated mentor's own profile or admin fetching by user id)
   MENTORS: {
     BASE: "/api/volunteers/mentor-profiles/",
     PROFILE_ME: "/api/volunteers/mentor-profiles/me/",
     PROFILE_BY_ID: (id) => `/api/volunteers/mentor-profiles/${id}/`,
+    // Filter profile by user UUID: /api/mentor-profiles/?user={user_uuid}
+    // Wait, the user said the exact route is /api/mentor-profiles/ not /api/volunteers/mentor-profiles/.
+    // Let me check the backend urls.py first. I will add exactly what the user stated.
+    PROFILE_BY_USER: (userId) => `/api/mentor-profiles/?user=${userId}`,
   },
 
   // Exams & Questions

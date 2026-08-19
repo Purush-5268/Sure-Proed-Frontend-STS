@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   FaChalkboardTeacher, FaUsers, FaCalendarAlt,
   FaVideo, FaUserGraduate, FaUserCheck,
@@ -9,6 +9,8 @@ import {
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import Sidebar from "../components/layout/Sidebar";
+import apiClient from "../services/apiClient";
+import { API_ENDPOINTS } from "../constants/apiEndpoints";
 
 import styles from "./MentorLayout.module.css";
 
@@ -25,8 +27,23 @@ const mentorLinks = [
 ];
 
 function MentorLayout() {
+  const [cohorts, setCohorts] = useState([]);
+  const [selectedGlobalCohort, setSelectedGlobalCohort] = useState("");
+
   useEffect(() => {
     document.body.setAttribute("data-role", "mentor");
+    
+    // Fetch cohorts for the global filter
+    apiClient.get(API_ENDPOINTS.COHORTS.MY_COHORTS)
+      .then(res => {
+        const data = Array.isArray(res.data?.results) ? res.data.results : (Array.isArray(res.data) ? res.data : []);
+        setCohorts(data);
+        if (data.length > 0) {
+          setSelectedGlobalCohort(String(data[0].id));
+        }
+      })
+      .catch(err => console.error("Failed to load global cohorts for mentor", err));
+
     return () => document.body.removeAttribute("data-role");
   }, []);
 
@@ -40,7 +57,27 @@ function MentorLayout() {
         />
 
         <main className={styles.content}>
-          <Outlet />
+          <div className={styles.globalFilterBar} style={{ padding: "16px 32px", borderBottom: "1px solid #e5e7eb", background: "white", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "12px" }}>
+            <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--text-secondary)" }}>GLOBAL FILTER:</span>
+            <select
+              className="premium-input"
+              style={{ width: "auto", minWidth: "250px", padding: "8px 12px", height: "40px", fontSize: "14px" }}
+              value={selectedGlobalCohort}
+              onChange={(e) => setSelectedGlobalCohort(e.target.value)}
+            >
+              {cohorts.length === 0 ? (
+                <option value="">No assigned cohorts</option>
+              ) : (
+                cohorts.map(c => (
+                  <option key={c.id} value={c.id}>
+                    {c.course_name} — {c.code}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+          
+          <Outlet context={{ globalCohort: selectedGlobalCohort }} />
         </main>
       </div>
 

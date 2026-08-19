@@ -76,10 +76,9 @@ function AddMentor() {
       const newUserId = userRes.data.id || userRes.data.user?.id;
 
       // 2. Attempt to assign Course (Domain) if selected
-      // Also update mentor profile fields if any are provided
       if (newUserId) {
         try {
-          const profilePayload = { user: newUserId };
+          const profilePayload = {};
           if (form.domain) profilePayload.course = form.domain;
           if (form.company_name.trim()) profilePayload.company_name = form.company_name.trim();
           if (form.designation.trim()) profilePayload.designation = form.designation.trim();
@@ -88,12 +87,21 @@ function AddMentor() {
           if (form.linkedin_url.trim()) profilePayload.linkedin_url = form.linkedin_url.trim();
           if (form.bio.trim()) profilePayload.bio = form.bio.trim();
 
-          // Assuming the backend has a specific profile endpoint. 
-          // If the profile is auto-created, we might need to PATCH it instead of POST.
-          // Or POST if it doesn't exist. We'll try POST, and if it fails, maybe the backend creates it automatically.
-          await apiClient.post(API_ENDPOINTS.MENTORS.PROFILE_BY_ID("").replace(/\/+$/, '/'), profilePayload);
+          if (Object.keys(profilePayload).length > 0) {
+            // Mentor profiles are auto-created by the backend signal upon user creation.
+            // Fetch the auto-created profile ID using the user_id query parameter.
+            const profileRes = await apiClient.get(API_ENDPOINTS.MENTORS.BASE, { params: { user: newUserId } });
+            const profileData = Array.isArray(profileRes.data?.results) ? profileRes.data.results : (Array.isArray(profileRes.data) ? profileRes.data : []);
+            const profileId = profileData[0]?.id;
+
+            if (profileId) {
+              await apiClient.patch(API_ENDPOINTS.MENTORS.PROFILE_BY_ID(profileId), profilePayload);
+            } else {
+              console.warn("Could not find auto-created Mentor Profile for the new user.");
+            }
+          }
         } catch (profileErr) {
-          console.warn("Mentor profile creation/update encountered an issue (backend might auto-create or missing endpoint):", profileErr);
+          console.warn("Mentor profile update encountered an issue:", profileErr);
         }
       }
 
