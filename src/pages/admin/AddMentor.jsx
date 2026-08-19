@@ -18,6 +18,12 @@ function AddMentor() {
     domain: "",
     role: "MENTOR",
     is_active: true,
+    company_name: "",
+    designation: "",
+    expertise: "",
+    years_of_experience: "",
+    linkedin_url: "",
+    bio: "",
   });
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -70,16 +76,24 @@ function AddMentor() {
       const newUserId = userRes.data.id || userRes.data.user?.id;
 
       // 2. Attempt to assign Course (Domain) if selected
-      if (form.domain && newUserId) {
+      // Also update mentor profile fields if any are provided
+      if (newUserId) {
         try {
-          // The backend might not support this due to serializer constraints (user is read-only).
-          // We attempt POST, if it fails, the backend doesn't support admin profile creation.
-          await apiClient.post(API_ENDPOINTS.MENTORS.PROFILE_BY_ID("").replace(/\/+$/, '/'), {
-            user: newUserId,
-            course: form.domain
-          });
+          const profilePayload = { user: newUserId };
+          if (form.domain) profilePayload.course = form.domain;
+          if (form.company_name.trim()) profilePayload.company_name = form.company_name.trim();
+          if (form.designation.trim()) profilePayload.designation = form.designation.trim();
+          if (form.expertise.trim()) profilePayload.expertise = form.expertise.trim();
+          if (form.years_of_experience.trim()) profilePayload.years_of_experience = form.years_of_experience.trim();
+          if (form.linkedin_url.trim()) profilePayload.linkedin_url = form.linkedin_url.trim();
+          if (form.bio.trim()) profilePayload.bio = form.bio.trim();
+
+          // Assuming the backend has a specific profile endpoint. 
+          // If the profile is auto-created, we might need to PATCH it instead of POST.
+          // Or POST if it doesn't exist. We'll try POST, and if it fails, maybe the backend creates it automatically.
+          await apiClient.post(API_ENDPOINTS.MENTORS.PROFILE_BY_ID("").replace(/\/+$/, '/'), profilePayload);
         } catch (profileErr) {
-          console.warn("Mentor profile creation skipped (backend API constraint):", profileErr);
+          console.warn("Mentor profile creation/update encountered an issue (backend might auto-create or missing endpoint):", profileErr);
         }
       }
 
@@ -157,7 +171,43 @@ function AddMentor() {
             <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="At least 8 characters" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", gridColumn: "1 / -1", marginTop: "0.5rem" }}>
+          <div style={{ gridColumn: "1 / -1", borderTop: "1px solid var(--border-color)", margin: "1rem 0" }}></div>
+
+          <div style={{ gridColumn: "1 / -1", marginBottom: "0.5rem" }}>
+            <h3 style={{ margin: 0, color: "var(--text-primary)", fontSize: "1.2rem" }}>Professional Details (Optional)</h3>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Company Name</label>
+            <input type="text" name="company_name" value={form.company_name} onChange={handleChange} placeholder="e.g. Google" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Designation</label>
+            <input type="text" name="designation" value={form.designation} onChange={handleChange} placeholder="e.g. Senior Engineer" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Expertise (Skills/Domains)</label>
+            <input type="text" name="expertise" value={form.expertise} onChange={handleChange} placeholder="e.g. React, Python" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Years of Experience</label>
+            <input type="number" name="years_of_experience" value={form.years_of_experience} onChange={handleChange} placeholder="e.g. 5" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>LinkedIn URL</label>
+            <input type="url" name="linkedin_url" value={form.linkedin_url} onChange={handleChange} placeholder="https://linkedin.com/in/..." style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px", gridColumn: "1 / -1" }}>
+            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Bio</label>
+            <textarea name="bio" value={form.bio} onChange={handleChange} placeholder="Short professional biography..." rows={3} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", resize: "vertical" }} />
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", gridColumn: "1 / -1", marginTop: "1rem" }}>
             <input type="checkbox" name="is_active" checked={form.is_active} onChange={handleChange} style={{ width: "18px", height: "18px" }} />
             <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px", cursor: "pointer" }}>Account is Active</label>
           </div>

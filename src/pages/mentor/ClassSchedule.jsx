@@ -35,7 +35,7 @@ function ClassSchedule() {
     };
   }, []);
 
-  const [scheduleForm, setScheduleForm] = useState({ title: "", startTime: "", endTime: "", guestEmails: [] });
+  const [scheduleForm, setScheduleForm] = useState({ title: "", cohortId: "", startTime: "", endTime: "", guestEmails: [] });
   const [newGuestEmail, setNewGuestEmail] = useState("");
   const [isScheduling, setIsScheduling] = useState(false);
   const [showScheduleForm, setShowScheduleForm] = useState(false);
@@ -44,12 +44,40 @@ function ClassSchedule() {
     e.preventDefault();
     setIsScheduling(true);
     try {
-      await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BASE}schedule/`, { ...scheduleForm, sessionType: "Domain" });
+      if (!scheduleForm.cohortId) {
+        alert("Please select a cohort.");
+        setIsScheduling(false);
+        return;
+      }
+
+      // Split datetime-local into class_date and time strings
+      const startDt = new Date(scheduleForm.startTime);
+      const endDt = new Date(scheduleForm.endTime);
+      
+      const class_date = startDt.toISOString().split("T")[0];
+      const start_time = startDt.toTimeString().split(" ")[0];
+      const end_time = endDt.toTimeString().split(" ")[0];
+
+      // Find the cohort to get the stream_id (course ID) if needed
+      const selectedCohort = schedules.find(c => String(c.id) === scheduleForm.cohortId);
+
+      const payload = {
+        title: scheduleForm.title,
+        frontend_cohort_id: scheduleForm.cohortId,
+        stream_id: selectedCohort?.course?.id || selectedCohort?.course,
+        class_date,
+        start_time,
+        end_time,
+        session_type: "Domain",
+        guest_emails: scheduleForm.guestEmails.join(",")
+      };
+
+      await apiClient.post(API_ENDPOINTS.ATTENDANCE.BASE, payload);
       alert("✅ Domain Session Scheduled!");
-      setScheduleForm({ title: "", startTime: "", endTime: "", guestEmails: [] });
+      setScheduleForm({ title: "", cohortId: "", startTime: "", endTime: "", guestEmails: [] });
       setShowScheduleForm(false);
     } catch (err) {
-      alert("❌ Failed to schedule class.");
+      alert(err?.response?.data?.detail || "❌ Failed to schedule class.");
     } finally {
       setIsScheduling(false);
     }
@@ -113,6 +141,22 @@ function ClassSchedule() {
                     className={styles.input} 
                     placeholder="e.g. Advanced State Management"
                   />
+                </div>
+                <div className={styles.fullWidth}>
+                  <label className={styles.label}>Select Cohort <span className={styles.required}>*</span></label>
+                  <select
+                    required
+                    value={scheduleForm.cohortId}
+                    onChange={e => setScheduleForm({ ...scheduleForm, cohortId: e.target.value })}
+                    className={styles.input}
+                  >
+                    <option value="">-- Select Assigned Cohort --</option>
+                    {schedules.map(cohort => (
+                      <option key={cohort.id} value={cohort.id}>
+                        {cohort.code} - {cohort.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className={styles.formGroup}>

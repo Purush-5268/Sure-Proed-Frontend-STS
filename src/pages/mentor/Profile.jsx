@@ -15,8 +15,12 @@ const PROFILE_FIELDS = [
   { key: "last_name", label: "Last Name", source: "user" },
   { key: "email", label: "Email", source: "user" },
   { key: "phone_number", label: "Phone Number", source: "user" },
-  { key: "linkedin_url", label: "LinkedIn URL", source: "profile" },
+  { key: "company_name", label: "Company", source: "profile" },
+  { key: "designation", label: "Designation", source: "profile" },
+  { key: "expertise", label: "Expertise", source: "profile" },
   { key: "experience_years", label: "Experience", source: "profile" },
+  { key: "linkedin_url", label: "LinkedIn URL", source: "profile" },
+  { key: "bio", label: "Bio", source: "profile" },
 ];
 
 function computeCompletion(user, profile) {
@@ -32,7 +36,7 @@ function Profile() {
   const { user, updateUser } = useAuth();
   const [profile, setProfile] = useState({ linkedin_url: "", experience_years: "", course: null });
   const [form, setForm] = useState({ first_name: "", last_name: "", email: "", phone_number: "", gender: "", date_of_birth: "" });
-  const [profileForm, setProfileForm] = useState({ linkedin_url: "", experience_years: "" });
+  const [profileForm, setProfileForm] = useState({ linkedin_url: "", experience_years: "", company_name: "", designation: "", expertise: "", bio: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
@@ -63,7 +67,11 @@ function Profile() {
         setProfile(profileData);
         setProfileForm({
           linkedin_url: profileData.linkedin_url || "",
-          experience_years: profileData.experience_years || "",
+          experience_years: profileData.experience_years || profileData.years_of_experience || "",
+          company_name: profileData.company_name || "",
+          designation: profileData.designation || "",
+          expertise: profileData.expertise || "",
+          bio: profileData.bio || "",
         });
       } catch {
         // Use user from auth context as fallback
@@ -116,7 +124,11 @@ function Profile() {
       // Save mentor profile fields
       await apiClient.patch(API_ENDPOINTS.MENTORS.PROFILE_ME, {
         linkedin_url: profileForm.linkedin_url.trim() || null,
-        experience_years: profileForm.experience_years.trim() || null,
+        years_of_experience: profileForm.experience_years.trim() || null,
+        company_name: profileForm.company_name.trim() || null,
+        designation: profileForm.designation.trim() || null,
+        expertise: profileForm.expertise.trim() || null,
+        bio: profileForm.bio.trim() || null,
       });
 
       updateUser({
@@ -255,15 +267,31 @@ function Profile() {
               </h3>
               <div className={styles.formGrid}>
                 <div className={styles.formGroup}>
-                  <label className={styles.label}>Experience (years)</label>
-                  <input className={styles.input} type="text" name="experience_years" value={profileForm.experience_years} onChange={handleProfileChange} placeholder="e.g. 5 years" />
+                  <label className={styles.label}>Company Name</label>
+                  <input className={styles.input} type="text" name="company_name" value={profileForm.company_name} onChange={handleProfileChange} placeholder="e.g. Acme Corp" />
                 </div>
                 <div className={styles.formGroup}>
+                  <label className={styles.label}>Designation</label>
+                  <input className={styles.input} type="text" name="designation" value={profileForm.designation} onChange={handleProfileChange} placeholder="e.g. Senior Software Engineer" />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Expertise / Domains</label>
+                  <input className={styles.input} type="text" name="expertise" value={profileForm.expertise} onChange={handleProfileChange} placeholder="e.g. React, Node.js" />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Experience (years)</label>
+                  <input className={styles.input} type="text" name="experience_years" value={profileForm.experience_years} onChange={handleProfileChange} placeholder="e.g. 5" />
+                </div>
+                <div className={styles.formGroup} style={{ gridColumn: "1 / -1" }}>
                   <label className={styles.label}>
                     <FiLinkedin style={{ display: "inline", marginRight: "4px" }} />
                     LinkedIn URL
                   </label>
                   <input className={styles.input} type="url" name="linkedin_url" value={profileForm.linkedin_url} onChange={handleProfileChange} placeholder="https://linkedin.com/in/yourname" />
+                </div>
+                <div className={styles.formGroup} style={{ gridColumn: "1 / -1" }}>
+                  <label className={styles.label}>Bio</label>
+                  <textarea className={styles.input} name="bio" value={profileForm.bio} onChange={handleProfileChange} placeholder="Short professional bio..." rows={4} style={{ resize: "vertical" }} />
                 </div>
               </div>
 
