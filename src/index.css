@@ -131,13 +131,13 @@
    typography, spacing, and surface variables intact.
    ═══════════════════════════════════════════════════════ */
 
-/* Admin: steel-purple / slate-purple — premium command-center feel */
+/* Admin: True Purple — vibrant command-center feel */
 [data-role="admin"] {
-  --primary-color: #5b4e8c;
-  --primary-hover: #4a3d7a;
-  --primary-dark: #3b2f64;
-  --primary-light: #f1effe;
-  --accent-color: #7c6fb0;
+  --primary-color: #8b5cf6;
+  --primary-hover: #7c3aed;
+  --primary-dark: #6d28d9;
+  --primary-light: #f5f3ff;
+  --accent-color: #a78bfa;
   --status-info-bg: #ede9fe;
   --status-info-text: #4c1d95;
 }

@@ -25,11 +25,12 @@ const mentorLinks = [
 
 function MentorLayout() {
   return (
-    <div data-role="mentor">
+    <div className={styles.layoutWrapper} data-role="mentor">
       <Navbar />
+
       <div className={styles.layout}>
         <Sidebar
-          title="Teacher Portal"
+          title="Mentor"
           links={mentorLinks}
         />
 

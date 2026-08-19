@@ -43,10 +43,10 @@ function AdminLayout() {
   const location = useLocation();
   
   return (
-    <>
+    <div className={styles.layoutWrapper} data-role="admin">
       <Navbar />
 
-      <div className={styles.layout} data-role="admin">
+      <div className={styles.layout}>
         <Sidebar
           title="Admin"
           links={adminLinks}
@@ -69,7 +69,7 @@ function AdminLayout() {
       </div>
 
       <Footer />
-    </>
+    </div>
   );
 }
 
