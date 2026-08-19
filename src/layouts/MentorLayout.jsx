@@ -25,7 +25,7 @@ const mentorLinks = [
 
 function MentorLayout() {
   return (
-    <div data-mentor-theme="true">
+    <div data-role="mentor">
       <Navbar />
       <div className={styles.layout}>
         <Sidebar

@@ -4,7 +4,7 @@ import { studentService } from "../../services/studentService";
 import { courseService } from "../../services/courseService";
 import { cohortService } from "../../services/cohortService";
 import { applicationService } from "../../services/applicationService";
-import apiClient, { normalizeListResponse } from "../../services/apiClient";
+import apiClient, { normalizeListResponse, fetchAllPages } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./Dashboard.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
@@ -78,10 +78,10 @@ function Dashboard() {
     // 1. Students
     (async () => {
       try {
-        const res = await studentService.getStudentProfiles({}, { signal });
+        const res = await fetchAllPages(API_ENDPOINTS.STUDENTS.BASE, { signal });
         if (!isMounted) return;
-        const list = normalizeListResponse(res);
-        const count = res.count !== undefined ? res.count : list.length;
+        const list = res;
+        const count = list.length;
         setAllStudents(list);
         setStats(prev => ({ ...prev, studentsCount: count }));
       } catch (err) {
@@ -94,10 +94,10 @@ function Dashboard() {
     // 2. Courses
     (async () => {
       try {
-        const res = await apiClient.get(API_ENDPOINTS.COURSES.BASE, { signal });
+        const res = await fetchAllPages(API_ENDPOINTS.COURSES.BASE, { signal });
         if (!isMounted) return;
-        const list = normalizeListResponse(res.data);
-        const count = res.data?.count !== undefined ? res.data.count : list.length;
+        const list = res;
+        const count = list.length;
         setAllCourses(list);
         setStats(prev => ({ ...prev, coursesCount: count }));
       } catch (err) {
@@ -110,10 +110,10 @@ function Dashboard() {
     // 3. Cohorts
     (async () => {
       try {
-        const res = await apiClient.get(API_ENDPOINTS.COHORTS.BASE, { signal });
+        const res = await fetchAllPages(API_ENDPOINTS.COHORTS.BASE, { signal });
         if (!isMounted) return;
-        const list = normalizeListResponse(res.data);
-        const count = res.data?.count !== undefined ? res.data.count : list.length;
+        const list = res;
+        const count = list.length;
         setAllCohorts(list);
         setStats(prev => ({ ...prev, cohortsCount: count }));
       } catch (err) {
@@ -126,10 +126,10 @@ function Dashboard() {
     // 4. Applications
     (async () => {
       try {
-        const res = await apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE, { signal });
+        const res = await fetchAllPages(API_ENDPOINTS.APPLICATIONS.BASE, { signal });
         if (!isMounted) return;
-        const list = normalizeListResponse(res.data);
-        const count = res.data?.count !== undefined ? res.data.count : list.length;
+        const list = res;
+        const count = list.length;
         setAllApps(list);
         setStats(prev => ({ ...prev, applicationsCount: count }));
       } catch (err) {
@@ -250,7 +250,7 @@ function Dashboard() {
               .filter(c => c.course === selectedCourse?.id || c.course?.id === selectedCourse?.id)
               .map((cohort, idx) => {
                 // Approximate student count based on loaded student data
-                const studentCount = allStudents.filter(s => s.course_batch === cohort.name || s.course_batch === cohort.code).length;
+                const studentCount = allStudents.filter(s => s.cohort_code === cohort.code || s.cohort === cohort.id).length;
                 const mentorName = cohort.active_mentor ? `${cohort.active_mentor.first_name || ""} ${cohort.active_mentor.last_name || ""}`.trim() || "Assigned" : "Pending Assignment";
 
                 return (

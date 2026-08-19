@@ -182,11 +182,13 @@
     width: 100%;
     min-width: 100%;
     height: auto;
-    position: relative;
-    top: 0;
-    padding: var(--space-md) var(--space-lg);
+    position: sticky;
+    top: var(--navbar-height);
+    z-index: 100;
+    padding: var(--space-sm) var(--space-lg);
     border-right: none;
     border-bottom: 1px solid var(--border-color);
+    background: var(--bg-surface);
   }
 
   .sidebarCollapsed {
@@ -214,9 +216,11 @@
 
   .nav {
     display: none;
-    margin-top: var(--space-md);
-    padding-top: var(--space-md);
+    margin-top: var(--space-sm);
+    padding-top: var(--space-sm);
     border-top: 1px solid var(--border-color);
+    max-height: 60vh;
+    overflow-y: auto;
   }
 
   .navMobileOpen {

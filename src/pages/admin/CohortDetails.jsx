@@ -124,12 +124,12 @@ function CohortDetails() {
 
   const handleBatchChange = async (e) => {
     const newBatch = e.target.value;
-    if (!newBatch || newBatch === cohort.batch_type) return;
+    if (newBatch === (cohort.lst_batch || "")) return;
 
     setUpdatingBatch(true);
     try {
-      await cohortService.patchCohort(cohort.id, { batch_type: newBatch });
-      setCohort({ ...cohort, batch_type: newBatch });
+      const response = await cohortService.patchCohort(cohort.id, { lst_batch: newBatch || null });
+      setCohort(response);
     } catch (err) {
       alert("Failed to update LST Batch.");
     } finally {
@@ -142,13 +142,13 @@ function CohortDetails() {
   const calculateTimeline = (startDateStr) => {
     if (!startDateStr) return null;
     const start = new Date(startDateStr);
-    
+
     const trainingEnd = new Date(start);
     trainingEnd.setMonth(trainingEnd.getMonth() + 4);
-    
+
     const internshipEnd = new Date(trainingEnd);
     internshipEnd.setMonth(internshipEnd.getMonth() + 2);
-    
+
     const softSkillsEnd = new Date(internshipEnd);
     softSkillsEnd.setDate(softSkillsEnd.getDate() + 15);
 
@@ -160,7 +160,7 @@ function CohortDetails() {
     };
   };
 
-  
+
 
   const handleStageChange = async (e) => {
     const newStatus = e.target.value;
@@ -228,8 +228,8 @@ function CohortDetails() {
           <div style={{ marginRight: "1rem", display: "flex", alignItems: "center", gap: "8px" }}>
             <div style={{ marginRight: "1rem", display: "flex", alignItems: "center", gap: "8px" }}>
               <label style={{ fontSize: "14px", fontWeight: "bold", color: "var(--text-secondary)" }}>LST Batch:</label>
-              <select 
-                value={cohort.batch_type || ""} 
+              <select
+                value={cohort.lst_batch || ""}
                 onChange={handleBatchChange}
                 disabled={updatingBatch}
                 style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--border-color)", fontWeight: "bold", backgroundColor: "var(--bg-main)" }}
@@ -239,10 +239,10 @@ function CohortDetails() {
                 <option value="BATCH_2">Batch 2</option>
               </select>
             </div>
-            
+
             <label style={{ fontSize: "14px", fontWeight: "bold", color: "var(--text-secondary)" }}>Set Stage:</label>
-            <select 
-              value={cohort.status || ""} 
+            <select
+              value={cohort.status || ""}
               onChange={handleStageChange}
               disabled={updatingStage}
               style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--border-color)", fontWeight: "bold" }}
@@ -271,7 +271,7 @@ function CohortDetails() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", padding: "20px 0" }}>
             {/* Connecting Line */}
             <div style={{ position: "absolute", top: "50%", left: "0", right: "0", height: "4px", backgroundColor: "#e2e8f0", zIndex: 0, transform: "translateY(-50%)" }}></div>
-            
+
             {[
               { label: "Start", date: calculateTimeline(cohort.start_date).start, active: true },
               { label: "Training Ends", date: calculateTimeline(cohort.start_date).trainingEnd, active: ["TRAINING", "INTERNSHIP", "SOFT_SKILLS", "COMPLETED"].includes(cohort.status) },
@@ -311,28 +311,28 @@ function CohortDetails() {
         </div>
       </div>
 
-            {/* Student Management Shortcuts */}
+      {/* Student Management Shortcuts */}
       <div style={{ backgroundColor: "var(--bg-surface)", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", overflow: "hidden", marginBottom: "2rem" }}>
         <div style={{ padding: "1.5rem", borderBottom: "1px solid var(--border-color)", backgroundColor: "var(--bg-main)" }}>
           <h2 style={{ margin: 0, fontSize: "1.25rem", color: "var(--text-primary)" }}>Student Management</h2>
           <p style={{ margin: "5px 0 0 0", fontSize: "13px", color: "var(--text-secondary)" }}>View and manage students enrolled in this cohort from the Student Management panel.</p>
         </div>
         <div style={{ padding: "1.5rem", display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-          <button 
+          <button
             onClick={() => navigate(`/admin/students?cohort=${id}`)}
             className="premium-btn premium-btn-secondary"
             style={{ display: "flex", alignItems: "center", gap: "8px" }}
           >
             👥 View All Enrolled Students
           </button>
-          <button 
+          <button
             onClick={() => navigate(`/admin/students?cohort=${id}&status=QUALIFIED`)}
             className="premium-btn"
             style={{ backgroundColor: "#059669", color: "white", display: "flex", alignItems: "center", gap: "8px", border: "none" }}
           >
             ✅ View Passed Students
           </button>
-          <button 
+          <button
             onClick={() => navigate(`/admin/students?cohort=${id}&status=REJECTED`)}
             className="premium-btn"
             style={{ backgroundColor: "#dc2626", color: "white", display: "flex", alignItems: "center", gap: "8px", border: "none" }}
@@ -340,7 +340,7 @@ function CohortDetails() {
             ❌ View Failed Students
           </button>
         </div>
-</div>
+      </div>
     </div>
   );
 }

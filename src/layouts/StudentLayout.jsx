@@ -28,7 +28,7 @@ const studentLinks = [
 
 function StudentLayout() {
   return (
-    <>
+    <div data-role="student">
       <Navbar />
 
       <div className={styles.layout}>
@@ -42,9 +42,8 @@ function StudentLayout() {
         </main>
       </div>
 
-
       <Footer />
-    </>
+    </div>
   );
 }
 

@@ -395,3 +395,81 @@
     padding: 30px 20px;
   }
 }
+
+/* ─── OTP Step styles ─────────────────────────────────── */
+.otpIcon {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: 12px;
+}
+
+.otpRow {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 24px 0;
+}
+
+.otpInput {
+  width: 48px;
+  height: 56px;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  caret-color: var(--primary-color);
+}
+.otpInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.resendRow {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.resendTimer { color: var(--text-muted); }
+
+.resendBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.resendBtn:hover { background: var(--primary-light); }
+.resendBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.backBtn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: 12px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px;
+}
+.backBtn:hover { color: var(--primary-color); }
+
+@media (max-width: 480px) {
+  .otpInput { width: 40px; height: 48px; font-size: 18px; }
+  .otpRow { gap: 6px; }
+}

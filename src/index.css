@@ -124,6 +124,105 @@
   --shadow-float: 0 25px 50px -12px rgb(0 0 0 / 0.9);
 }
 
+/* ═══════════════════════════════════════════════════════
+   ROLE-SPECIFIC THEMES
+   Applied via data-role attribute on the layout root element.
+   These override primary color tokens while keeping global
+   typography, spacing, and surface variables intact.
+   ═══════════════════════════════════════════════════════ */
+
+/* Admin: slate/indigo — command-center, information-dense */
+[data-role="admin"] {
+  --primary-color: #3b4f6e;
+  --primary-hover: #2e3f5a;
+  --primary-dark: #1e2d42;
+  --primary-light: #eef2f8;
+  --accent-color: #4f46e5;
+}
+[data-theme="dark"][data-role="admin"],
+[data-role="admin"] [data-theme="dark"] {
+  --primary-color: #6b85b0;
+  --primary-hover: #7d9bc8;
+  --primary-dark: #4a6491;
+  --primary-light: #1a2335;
+  --accent-color: #818cf8;
+}
+
+/* Mentor: violet/purple — teaching, cohort-management */
+[data-role="mentor"] {
+  --primary-color: #7c3aed;
+  --primary-hover: #6d28d9;
+  --primary-dark: #5b21b6;
+  --primary-light: #f5f3ff;
+  --accent-color: #a855f7;
+}
+[data-theme="dark"][data-role="mentor"],
+[data-role="mentor"] [data-theme="dark"] {
+  --primary-color: #a78bfa;
+  --primary-hover: #c4b5fd;
+  --primary-dark: #7c3aed;
+  --primary-light: #1e1040;
+  --accent-color: #c084fc;
+}
+
+/* Student: teal/emerald — energetic, modern, mobile-first */
+[data-role="student"] {
+  --primary-color: #0d9488;
+  --primary-hover: #0f766e;
+  --primary-dark: #115e59;
+  --primary-light: #f0fdfa;
+  --accent-color: #06b6d4;
+}
+[data-theme="dark"][data-role="student"],
+[data-role="student"] [data-theme="dark"] {
+  --primary-color: #2dd4bf;
+  --primary-hover: #5eead4;
+  --primary-dark: #0d9488;
+  --primary-light: #042f2e;
+  --accent-color: #22d3ee;
+}
+
+/* ═══════════════════════════════════════════════════════
+   MOTION SAFETY
+   Respect user preference for reduced motion globally.
+   ═══════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE TABLE UTILITY
+   Wrap any <table> in .responsive-table for safe mobile layout.
+   ═══════════════════════════════════════════════════════ */
+.responsive-table {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-md);
+}
+.responsive-table table {
+  min-width: 600px;
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CARD ENTRANCE ANIMATION
+   Applied to any element with class .card-enter.
+   ═══════════════════════════════════════════════════════ */
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.card-enter {
+  animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+
+
 * {
   margin: 0;
   padding: 0;

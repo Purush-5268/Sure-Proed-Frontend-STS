@@ -33,6 +33,29 @@ export const normalizeListResponse = (payload) => {
   return [];
 };
 
+export const fetchAllPages = async (url, config = {}) => {
+  let allResults = [];
+  let currentUrl = url;
+  
+  while (currentUrl) {
+    // If currentUrl is a full URL (from backend next link), use it directly. 
+    // Axios handles full URLs gracefully by ignoring the baseURL.
+    const response = await apiClient.get(currentUrl, config);
+    
+    if (response.data && Array.isArray(response.data.results)) {
+      allResults = [...allResults, ...response.data.results];
+      currentUrl = response.data.next || null;
+    } else if (Array.isArray(response.data)) {
+      allResults = [...allResults, ...response.data];
+      currentUrl = null;
+    } else {
+      currentUrl = null;
+    }
+  }
+  
+  return allResults;
+};
+
 // Request Interceptor: Attach JWT Bearer Token
 apiClient.interceptors.request.use(
   (config) => {

@@ -9,6 +9,9 @@ export const API_ENDPOINTS = {
     GITHUB_CONNECT: "/api/auth/github/connect/",
     GITHUB_CALLBACK: "/api/auth/github/callback/",
     GITHUB_DISCONNECT: "/api/auth/github/disconnect/",
+    // OTP-gated email verification registration flow
+    SEND_VERIFICATION_OTP: "/api/auth/send-verification-otp/",
+    VERIFY_EMAIL_OTP: "/api/auth/verify-email-otp/",
   },
 
   // Users
@@ -145,5 +148,12 @@ export const API_ENDPOINTS = {
     ACHIEVEMENT_BY_ID: (id) => `/api/trustee/achievements/${id}/`,
     UPDATES: "/api/trustee/updates/",
     UPDATE_BY_ID: (id) => `/api/trustee/updates/${id}/`,
+  },
+  // Notifications (personal, user-scoped)
+  NOTIFICATIONS: {
+    BASE: "/api/notifications/",
+    BY_ID: (id) => `/api/notifications/${id}/`,
+    // Backend exposes: PATCH /api/notifications/{id}/mark_read/
+    MARK_READ: (id) => `/api/notifications/${id}/mark_read/`,
   },
 };

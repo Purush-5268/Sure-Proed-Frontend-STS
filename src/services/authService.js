@@ -85,10 +85,26 @@ export const authService = {
     clearAuthStorage();
   },
 
-  // Register
+  // Register — used for ADMIN-CREATED user accounts only.
+  // For public self-registration use sendEmailVerificationOTP + verifyEmailOTP instead.
   async register(payload) {
     const response = await apiClient.post(API_ENDPOINTS.USERS.BASE, payload);
     return response.data;
+  },
+
+  // Step 1 of OTP-gated self-registration:
+  // Sends all form data to backend which stages it and dispatches OTP email.
+  async sendEmailVerificationOTP(payload) {
+    const response = await apiClient.post(API_ENDPOINTS.AUTH.SEND_VERIFICATION_OTP, payload);
+    return response.data;
+  },
+
+  // Step 2 of OTP-gated self-registration:
+  // Backend verifies OTP, creates user, returns JWT tokens.
+  // The backend is the authority — no frontend-only verification flag.
+  async verifyEmailOTP(email, otp) {
+    const response = await apiClient.post(API_ENDPOINTS.AUTH.VERIFY_EMAIL_OTP, { email, otp });
+    return response.data; // { access, refresh, user, is_email_verified }
   },
 
   // Forgot Password

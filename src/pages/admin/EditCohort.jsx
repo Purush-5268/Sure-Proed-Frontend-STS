@@ -18,7 +18,7 @@ function EditCohort() {
     max_students: "",
     status: "",
     meeting_link: "",
-    batch_type: "",
+    lst_batch: "",
   });
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
@@ -43,7 +43,7 @@ function EditCohort() {
           max_students: data.max_students || "",
           status: data.status || "DRAFT",
           meeting_link: data.meeting_link || "",
-          batch_type: data.batch_type || "",
+          lst_batch: data.lst_batch || "",
         });
       } catch (err) {
         console.error("Failed to load cohort data:", err);
@@ -78,7 +78,7 @@ function EditCohort() {
         max_students: Number(form.max_students) || 30,
         status: form.status,
         meeting_link: form.meeting_link.trim() || null,
-        batch_type: form.batch_type || null,
+        lst_batch: form.lst_batch || null,
       };
 
       await apiClient.patch(API_ENDPOINTS.COHORTS.BY_ID(id), payload);
@@ -153,7 +153,7 @@ function EditCohort() {
 
             <div className={styles.group}>
               <label>LST Batch Assignment (Optional)</label>
-              <select name="batch_type" value={form.batch_type} onChange={handleChange}>
+              <select name="lst_batch" value={form.lst_batch} onChange={handleChange}>
                 <option value="">-- No LST Batch --</option>
                 <option value="BATCH_1">Batch 1</option>
                 <option value="BATCH_2">Batch 2</option>

@@ -40,8 +40,8 @@ function Cohorts() {
 
   const handleBatchChange = async (id, newBatch) => {
     try {
-      await cohortService.patchCohort(id, { batch_type: newBatch || null });
-      setCohorts(prev => prev.map(c => c.id === id ? { ...c, batch_type: newBatch || null } : c));
+      const response = await cohortService.patchCohort(id, { lst_batch: newBatch || null });
+      setCohorts(prev => prev.map(c => c.id === id ? response : c));
     } catch (err) {
       alert("❌ Failed to update batch assignment.");
     }
@@ -123,8 +123,8 @@ function Cohorts() {
                     <div>{cohort.name || cohort.code || "N/A"}</div>
                     <div style={{ marginTop: "6px", fontSize: "12px", color: "var(--text-secondary)" }}>
                       <label style={{ marginRight: "4px", fontWeight: "600" }}>LST Batch:</label>
-                      <select 
-                        value={cohort.batch_type || ""} 
+                      <select
+                        value={cohort.lst_batch || ""}
                         onChange={(e) => handleBatchChange(cohort.id, e.target.value)}
                         style={{ padding: "2px 4px", fontSize: "12px", borderRadius: "4px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-primary)", color: "var(--text-primary)", cursor: "pointer" }}
                       >

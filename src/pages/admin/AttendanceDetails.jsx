@@ -103,8 +103,8 @@ function AttendanceDetails() {
     );
   }
 
-  const expectedCount = Array.isArray(sessionData.attendees) ? sessionData.attendees.length : 0;
-  const joinedCount = Array.isArray(sessionData.joined_students) ? sessionData.joined_students.length : 0;
+  const expectedCount = sessionData.google_total_students ?? (Array.isArray(sessionData.attendees) ? sessionData.attendees.length : 0);
+  const joinedCount = sessionData.google_joined_count ?? (Array.isArray(sessionData.joined_students) ? sessionData.joined_students.length : 0);
 
   return (
     <div className={styles.container}>
@@ -144,6 +144,24 @@ function AttendanceDetails() {
           <div>
             <label>Total Joined Students</label>
             <p>{joinedCount}</p>
+          </div>
+          
+          <div>
+            <label>Meet Start Time</label>
+            <p>
+              {sessionData.class_start_time
+                ? new Date(sessionData.class_start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : "Not available yet"}
+            </p>
+          </div>
+
+          <div>
+            <label>Meet End Time</label>
+            <p>
+              {sessionData.class_end_time
+                ? new Date(sessionData.class_end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : "Not available yet"}
+            </p>
           </div>
 
           <div>
@@ -214,19 +232,20 @@ function AttendanceDetails() {
                   const isJoined = Array.isArray(sessionData.joined_students) && sessionData.joined_students.some(js => js === studentId || (typeof js === 'object' && js.id === studentId));
                   const attPercentage = isObject && student.attendance_percentage !== undefined ? student.attendance_percentage : (isJoined ? 100 : 0);
 
-                  const isLowAttendance = attPercentage < 40;
+                  const isLowAttendance = attPercentage > 0 && attPercentage < 40;
+                  const isAbsent = attPercentage === 0;
 
                   return (
-                    <tr key={studentId || idx} style={{ background: isLowAttendance ? "rgba(239, 68, 68, 0.05)" : "transparent" }}>
+                    <tr key={studentId || idx} style={{ background: isLowAttendance || isAbsent ? "rgba(239, 68, 68, 0.05)" : "transparent" }}>
                       <td style={{ verticalAlign: "middle" }}>{studentName}</td>
                       <td style={{ verticalAlign: "middle" }}>{studentEmail}</td>
-                      <td style={{ verticalAlign: "middle", color: isLowAttendance ? "#ef4444" : "inherit", fontWeight: isLowAttendance ? "bold" : "normal" }}>
+                      <td style={{ verticalAlign: "middle", color: isLowAttendance || isAbsent ? "#ef4444" : "inherit", fontWeight: isLowAttendance || isAbsent ? "bold" : "normal" }}>
                         {attPercentage}%
                       </td>
                       <td style={{ verticalAlign: "middle" }}>
                         {isLowAttendance ? (
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <span style={{ color: "#ef4444", fontSize: "12px", fontWeight: "bold" }}>⚠️ Defaulter</span>
+                            <span style={{ color: "#ef4444", fontSize: "12px", fontWeight: "bold" }}>⚠️ Attendance Below Threshold</span>
                             <button
                               onClick={() => handleSendWarning(studentId, studentName)}
                               style={{
@@ -238,6 +257,42 @@ function AttendanceDetails() {
                               onMouseOut={(e) => e.target.style.background = "#ef4444"}
                             >
                               Send Warning
+                            </button>
+                            <button
+                              onClick={() => alert('Permission Request backend endpoint missing. Missing contract: POST /api/attendance/request_permission/ requires target_student, session_id, reason')}
+                              style={{
+                                background: "#f59e0b", color: "white", border: "none",
+                                padding: "6px 12px", borderRadius: "6px", fontSize: "11px",
+                                fontWeight: "bold", cursor: "pointer", transition: "all 0.2s ease"
+                              }}
+                            >
+                              Request Permission
+                            </button>
+                          </div>
+                        ) : isAbsent ? (
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <span style={{ color: "#ef4444", fontSize: "12px", fontWeight: "bold" }}>⚠️ Absent</span>
+                            <button
+                              onClick={() => handleSendWarning(studentId, studentName)}
+                              style={{
+                                background: "#ef4444", color: "white", border: "none",
+                                padding: "6px 12px", borderRadius: "6px", fontSize: "11px",
+                                fontWeight: "bold", cursor: "pointer", transition: "all 0.2s ease"
+                              }}
+                              onMouseOver={(e) => e.target.style.background = "#dc2626"}
+                              onMouseOut={(e) => e.target.style.background = "#ef4444"}
+                            >
+                              Send Warning
+                            </button>
+                            <button
+                              onClick={() => alert('Permission Request backend endpoint missing. Missing contract: POST /api/attendance/request_permission/ requires target_student, session_id, reason')}
+                              style={{
+                                background: "#f59e0b", color: "white", border: "none",
+                                padding: "6px 12px", borderRadius: "6px", fontSize: "11px",
+                                fontWeight: "bold", cursor: "pointer", transition: "all 0.2s ease"
+                              }}
+                            >
+                              Request Permission
                             </button>
                           </div>
                         ) : (

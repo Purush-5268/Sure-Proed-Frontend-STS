@@ -46,7 +46,7 @@ function AdminLayout() {
     <>
       <Navbar />
 
-      <div className={styles.layout}>
+      <div className={styles.layout} data-role="admin">
         <Sidebar
           title="Admin"
           links={adminLinks}

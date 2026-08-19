@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
 import { studentService } from "../../services/studentService";
+import NotificationBell from "../common/NotificationBell";
 
 function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -40,8 +41,11 @@ function Navbar() {
   return (
     <nav className={styles.navbar}>
       <div className={styles.logo}>
-        <Link to="/" onClick={closeMenu} style={{ textDecoration: "none", color: "inherit" }}>
-          Sure ProEd
+        <Link to="/" onClick={closeMenu} style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: "10px" }}>
+          <img src="/sure-logo.jpg" alt="SURE Trust Logo" style={{ height: "32px", width: "32px", borderRadius: "4px", objectFit: "cover" }} />
+          <span style={{ fontWeight: "700" }}>
+            SURE ProEd
+          </span>
         </Link>
       </div>
 
@@ -65,7 +69,8 @@ function Navbar() {
 
         <div className={styles.buttons}>
           {isAuthenticated ? (
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <NotificationBell />
               <Link to={getDashboardPath()} onClick={closeMenu} className={styles.signupBtn} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 {profilePhoto ? (
                   <img src={profilePhoto} alt="Profile" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }} />

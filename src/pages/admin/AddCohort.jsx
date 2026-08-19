@@ -17,7 +17,7 @@ function AddCohort() {
     max_students: 30,
     status: "DRAFT",
     meeting_link: "",
-    batch_type: "",
+    lst_batch: "",
   });
   const [loading, setLoading] = useState(false);
   const [loadingCourses, setLoadingCourses] = useState(true);
@@ -76,7 +76,7 @@ function AddCohort() {
         max_students: Number(form.max_students) || 30,
         status: form.status,
         meeting_link: form.meeting_link.trim() || null,
-        batch_type: form.batch_type || null,
+        lst_batch: form.lst_batch || null,
         created_by: currentUser.id,
       };
 
@@ -160,7 +160,7 @@ function AddCohort() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
               <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>LST Batch Assignment (Optional)</label>
-              <select name="batch_type" value={form.batch_type} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
+              <select name="lst_batch" value={form.lst_batch} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
                 <option value="">-- No LST Batch --</option>
                 <option value="BATCH_1">Batch 1</option>
                 <option value="BATCH_2">Batch 2</option>

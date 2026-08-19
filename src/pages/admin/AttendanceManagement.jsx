@@ -268,6 +268,8 @@ function AttendanceManagement() {
                 <th>Date</th>
                 <th>Domain Name</th>
                 <th>Group Number</th>
+                <th>Meet Start</th>
+                <th>Meet End</th>
                 <th>Total Students</th>
                 <th>Whitelisted</th>
                 <th>Joined</th>
@@ -279,15 +281,25 @@ function AttendanceManagement() {
             <tbody>
               {filteredAttendance.map((item) => {
                 const whitelistCount = item.whitelist_email_count || 0;
-                const totalStudents = item.total_attendee_count || item.actual_student_count || 0;
-                const joinedStudents = Array.isArray(item.joined_students) ? item.joined_students.length : 0;
-                const absentStudents = Math.max(0, totalStudents - joinedStudents);
+                const totalStudents = item.google_total_students ?? (item.total_attendee_count || item.actual_student_count || 0);
+                const joinedStudents = item.google_joined_count ?? (Array.isArray(item.joined_students) ? item.joined_students.length : 0);
+                const absentStudents = item.google_absent_count ?? Math.max(0, totalStudents - joinedStudents);
 
                 return (
                   <tr key={item.id}>
                     <td style={{ verticalAlign: "middle" }}>{item.class_date}</td>
                     <td style={{ verticalAlign: "middle" }}>{getCohortName(item.cohort, item.title)}</td>
                     <td style={{ verticalAlign: "middle" }}>{getCohortBatch(item.cohort, item.title)}</td>
+                    <td style={{ verticalAlign: "middle", whiteSpace: "nowrap" }}>
+                      {item.class_start_time
+                        ? new Date(item.class_start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : "Not available yet"}
+                    </td>
+                    <td style={{ verticalAlign: "middle", whiteSpace: "nowrap" }}>
+                      {item.class_end_time
+                        ? new Date(item.class_end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : "Not available yet"}
+                    </td>
                     <td style={{ verticalAlign: "middle" }}>{totalStudents}</td>
                     <td style={{ verticalAlign: "middle", fontWeight: whitelistCount > 0 ? "bold" : "normal", color: whitelistCount > 0 ? "#3b82f6" : "inherit" }}>
                       {whitelistCount}

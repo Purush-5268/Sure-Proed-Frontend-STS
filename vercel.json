@@ -1,8 +1,16 @@
 {
     "rewrites": [
         {
-            "source": "/hello",
-            "destination": "/"
+            "source": "/api/:path*",
+            "destination": "https://sureproed.com/api/:path*"
+        },
+        {
+            "source": "/media/:path*",
+            "destination": "https://sureproed.com/media/:path*"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
         }
     ]
 }
