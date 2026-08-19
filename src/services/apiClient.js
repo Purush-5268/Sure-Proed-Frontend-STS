@@ -7,7 +7,7 @@ import {
 } from "../utils/tokenStorage";
 import { API_ENDPOINTS } from "../constants/apiEndpoints";
 
-const BASE_URL = "";
+const BASE_URL = import.meta.env.VITE_API_URL || "";
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -36,12 +36,12 @@ export const normalizeListResponse = (payload) => {
 export const fetchAllPages = async (url, config = {}) => {
   let allResults = [];
   let currentUrl = url;
-  
+
   while (currentUrl) {
     // If currentUrl is a full URL (from backend next link), use it directly. 
     // Axios handles full URLs gracefully by ignoring the baseURL.
     const response = await apiClient.get(currentUrl, config);
-    
+
     if (response.data && Array.isArray(response.data.results)) {
       allResults = [...allResults, ...response.data.results];
       currentUrl = response.data.next || null;
@@ -52,7 +52,7 @@ export const fetchAllPages = async (url, config = {}) => {
       currentUrl = null;
     }
   }
-  
+
   return allResults;
 };
 

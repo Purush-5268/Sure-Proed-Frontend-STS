@@ -114,22 +114,60 @@ function Signup() {
     if (name === "password") setPasswordStrength(evaluatePassword(value));
   };
 
+  // All required fields for the backend send-verification-otp call
+  // Backend serializer: first_name, last_name, password (min 8 + strong) are validated
+  const formReady =
+    formData.firstName.trim().length >= 2 &&
+    formData.lastName.trim().length >= 1 &&
+    EMAIL_REGEX.test(formData.email.trim()) &&
+    formData.phoneNumber.trim().length >= 10 &&
+    formData.gender !== "" &&
+    formData.dateOfBirth !== "" &&
+    formData.password === formData.confirmPassword &&
+    passwordStrength.score >= 5;
+
   // Only fires when user explicitly clicks "Verify Email"
   const handleSendOtp = async () => {
     setOtpError("");
     const email = formData.email.trim().toLowerCase();
-    if (!EMAIL_REGEX.test(email)) { setOtpError("Please enter a valid email address."); return; }
+
+    // ── Pre-flight checks — mirror backend validation ──────────────────────
+    if (!EMAIL_REGEX.test(email)) {
+      setOtpError("Please enter a valid email address."); return;
+    }
+    if (formData.firstName.trim().length < 2) {
+      setOtpError("Please fill in your first name before verifying."); return;
+    }
+    if (!formData.lastName.trim()) {
+      setOtpError("Please fill in your last name before verifying."); return;
+    }
+    if (formData.phoneNumber.trim().length < 10) {
+      setOtpError("Please enter a valid 10-digit phone number."); return;
+    }
+    if (!formData.gender) {
+      setOtpError("Please select your gender before verifying."); return;
+    }
+    if (!formData.dateOfBirth) {
+      setOtpError("Please enter your date of birth before verifying."); return;
+    }
+    if (passwordStrength.score < 5) {
+      setOtpError("Please set a very strong password (all 5 requirements) before verifying your email."); return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setOtpError("Passwords do not match. Please fix before verifying."); return;
+    }
+    // ── End pre-flight ─────────────────────────────────────────────────────
 
     setSendingOtp(true);
     try {
       const payload = {
-        first_name:   formData.firstName.trim(),
-        last_name:    formData.lastName.trim(),
+        first_name:    formData.firstName.trim(),
+        last_name:     formData.lastName.trim(),
         email,
-        phone_number: formData.phoneNumber.trim() || null,
-        password:     formData.password,
-        role:         "STUDENT",
-        gender:       formData.gender || null,
+        phone_number:  formData.phoneNumber.trim() || null,
+        password:      formData.password,
+        role:          "STUDENT",
+        gender:        formData.gender || null,
         date_of_birth: formData.dateOfBirth || null,
       };
       const res = await authService.sendEmailVerificationOTP(payload);
@@ -142,8 +180,16 @@ function Signup() {
       setTimeout(() => otpRefs.current[0]?.focus(), 80);
     } catch (err) {
       const data = err?.response?.data;
-      const msg  = data?.detail || data?.email?.[0] || data?.message ||
-        (typeof data === "string" ? data : null) || "Failed to send OTP. Please try again.";
+      // Show the most useful error from the backend without exposing internals
+      const msg =
+        data?.detail ||
+        data?.password?.[0] ||
+        data?.email?.[0] ||
+        data?.first_name?.[0] ||
+        data?.last_name?.[0] ||
+        data?.message ||
+        (typeof data === "string" ? data : null) ||
+        "Failed to send OTP. Please check your details and try again.";
       setOtpError(msg);
     } finally {
       setSendingOtp(false);
@@ -252,7 +298,15 @@ function Signup() {
 
           {/* Email + Verify button */}
           <div className={styles.inputGroup}>
-            <label>Email Address *</label>
+            <label>
+              Email Address *{" "}
+              {!emailVerified && (
+                <span className={styles.labelHint}>
+                  — fill all fields &amp; set password first, then click Verify Email
+                </span>
+              )}
+            </label>
+
             <div className={styles.emailRow}>
               <input
                 type="email"
@@ -273,12 +327,17 @@ function Signup() {
                   type="button"
                   className={styles.verifyEmailBtn}
                   onClick={handleSendOtp}
-                  disabled={!emailValid || sendingOtp || showOtpPanel}
+                  disabled={sendingOtp || showOtpPanel || emailVerified}
+                  title={!formReady ? "Fill in all fields with a strong password before verifying" : "Click to send OTP to your email"}
                 >
-                  {sendingOtp ? "Sending..." : showOtpPanel ? "Code Sent" : "Verify Email"}
+                  {sendingOtp ? "Sending..." : showOtpPanel ? "Code Sent ✓" : "Verify Email"}
                 </button>
               )}
             </div>
+            {/* Pre-flight / OTP send error shown under email row */}
+            {otpError && !showOtpPanel && (
+              <div className={styles.otpError} style={{ marginTop: "6px" }}>{otpError}</div>
+            )}
           </div>
 
           {/* OTP Panel — shown inline after "Verify Email" is clicked */}
