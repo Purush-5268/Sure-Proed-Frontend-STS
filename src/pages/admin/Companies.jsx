@@ -31,14 +31,14 @@ function Companies() {
 
   return (
     <div className="premium-card" style={{ padding: "var(--space-2xl)" }}>
-      <div className={styles.header} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-lg)" }}>
+      <div className={styles.header} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", marginBottom: "var(--space-lg)", gap: "12px" }}>
         <div>
           <h1 style={{ fontSize: "var(--font-2xl)", color: "var(--text-primary)", margin: 0 }}>Companies</h1>
           <p style={{ color: "var(--text-secondary)", margin: 0 }}>Manage hiring companies.</p>
         </div>
 
-        <Link to="/admin/add-company" className="premium-btn premium-btn-primary">
-          + Add Company
+        <Link to="/admin/add-company" className="premium-btn premium-btn-primary" style={{ height: "40px", display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "16px", fontWeight: "bold" }}>+</span> Add Company
         </Link>
       </div>
 

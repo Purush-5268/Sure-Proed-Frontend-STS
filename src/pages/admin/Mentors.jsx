@@ -176,20 +176,22 @@ function Mentors() {
           <h1 className="premium-title">Mentor Management</h1>
           <p className="premium-subtitle">Manage and assign mentors to active cohorts.</p>
         </div>
-        <div style={{ display: "flex", gap: "12px" }}>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap", marginTop: "12px" }}>
           <button 
             onClick={() => setViewMode("assign")} 
             className={`premium-btn ${viewMode === "assign" ? "premium-btn-primary" : "premium-btn-secondary"}`}
+            style={{ height: "40px", display: "flex", alignItems: "center", gap: "8px" }}
           >
             Assign Mentors
           </button>
           <button 
             onClick={handleFetchAllMentors} 
             className={`premium-btn ${viewMode === "list" ? "premium-btn-primary" : "premium-btn-secondary"}`}
+            style={{ height: "40px", display: "flex", alignItems: "center", gap: "8px" }}
           >
             <FiUsers /> Show Current Mentors
           </button>
-          <Link to="/admin/add-mentor" className="premium-btn premium-btn-primary">
+          <Link to="/admin/add-mentor" className="premium-btn premium-btn-primary" style={{ height: "40px", display: "flex", alignItems: "center", gap: "8px" }}>
             <FiUserPlus /> Add Mentor
           </Link>
         </div>
@@ -280,9 +282,9 @@ function Mentors() {
                         <td>
                           <div className={styles.mentorCell}>
                             <div className={styles.mentorAvatar}>
-                              {`${mentor.user_first_name || "?"}`.charAt(0).toUpperCase()}
+                              {`${mentor.first_name || "?"}`.charAt(0).toUpperCase()}
                             </div>
-                            {`${mentor.user_first_name || ""} ${mentor.user_last_name || ""}`.trim() || mentor.user_email}
+                            {`${mentor.first_name || ""} ${mentor.last_name || ""}`.trim() || mentor.email || mentor.user_email}
                           </div>
                         </td>
                         <td>
@@ -354,12 +356,12 @@ function Mentors() {
                       <td>
                         <div className={styles.mentorCell}>
                           <div className={styles.mentorAvatar}>
-                            {`${mentor.user_first_name || "?"}`.charAt(0).toUpperCase()}
+                            {`${mentor.first_name || "?"}`.charAt(0).toUpperCase()}
                           </div>
-                          {`${mentor.user_first_name || ""} ${mentor.user_last_name || ""}`.trim() || mentor.user_email || "Unknown"}
+                          {`${mentor.first_name || ""} ${mentor.last_name || ""}`.trim() || mentor.email || mentor.user_email || "Unknown"}
                         </div>
                       </td>
-                      <td>{mentor.user_email || "N/A"}</td>
+                      <td>{mentor.email || mentor.user_email || "N/A"}</td>
                       <td>{mentor.specialization || mentor.assigned_course?.name || "Unassigned"}</td>
                       <td>
                         <Link to={`/admin/mentor-details/${mentor.user}`} className="premium-btn premium-btn-secondary" style={{ padding: "6px 12px" }}>
