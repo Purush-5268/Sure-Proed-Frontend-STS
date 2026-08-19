@@ -131,38 +131,46 @@
    typography, spacing, and surface variables intact.
    ═══════════════════════════════════════════════════════ */
 
-/* Admin: slate/indigo — command-center, information-dense */
+/* Admin: steel-purple / slate-purple — premium command-center feel */
 [data-role="admin"] {
-  --primary-color: #3b4f6e;
-  --primary-hover: #2e3f5a;
-  --primary-dark: #1e2d42;
-  --primary-light: #eef2f8;
-  --accent-color: #4f46e5;
+  --primary-color: #5b4e8c;
+  --primary-hover: #4a3d7a;
+  --primary-dark: #3b2f64;
+  --primary-light: #f1effe;
+  --accent-color: #7c6fb0;
+  --status-info-bg: #ede9fe;
+  --status-info-text: #4c1d95;
 }
-[data-theme="dark"][data-role="admin"],
-[data-role="admin"] [data-theme="dark"] {
-  --primary-color: #6b85b0;
-  --primary-hover: #7d9bc8;
-  --primary-dark: #4a6491;
-  --primary-light: #1a2335;
-  --accent-color: #818cf8;
+[data-role="admin"][data-theme="dark"],
+[data-theme="dark"] [data-role="admin"] {
+  --primary-color: #9b8ec4;
+  --primary-hover: #b3a8d6;
+  --primary-dark: #7c6fb0;
+  --primary-light: #1e1833;
+  --accent-color: #a78bfa;
+  --status-info-bg: rgba(167, 139, 250, 0.15);
+  --status-info-text: #c4b5fd;
 }
 
-/* Mentor: violet/purple — teaching, cohort-management */
+/* Mentor: blue — academic, training, cohort-management */
 [data-role="mentor"] {
-  --primary-color: #7c3aed;
-  --primary-hover: #6d28d9;
-  --primary-dark: #5b21b6;
-  --primary-light: #f5f3ff;
-  --accent-color: #a855f7;
+  --primary-color: #1d6aba;
+  --primary-hover: #155da3;
+  --primary-dark: #0e4b8c;
+  --primary-light: #eff6ff;
+  --accent-color: #3b82f6;
+  --status-info-bg: #dbeafe;
+  --status-info-text: #1e40af;
 }
-[data-theme="dark"][data-role="mentor"],
-[data-role="mentor"] [data-theme="dark"] {
-  --primary-color: #a78bfa;
-  --primary-hover: #c4b5fd;
-  --primary-dark: #7c3aed;
-  --primary-light: #1e1040;
-  --accent-color: #c084fc;
+[data-role="mentor"][data-theme="dark"],
+[data-theme="dark"] [data-role="mentor"] {
+  --primary-color: #60a5fa;
+  --primary-hover: #93c5fd;
+  --primary-dark: #3b82f6;
+  --primary-light: #0c1f3f;
+  --accent-color: #93c5fd;
+  --status-info-bg: rgba(59, 130, 246, 0.15);
+  --status-info-text: #93c5fd;
 }
 
 /* Student: teal/emerald — energetic, modern, mobile-first */
@@ -172,15 +180,20 @@
   --primary-dark: #115e59;
   --primary-light: #f0fdfa;
   --accent-color: #06b6d4;
+  --status-info-bg: #ccfbf1;
+  --status-info-text: #065f46;
 }
-[data-theme="dark"][data-role="student"],
-[data-role="student"] [data-theme="dark"] {
+[data-role="student"][data-theme="dark"],
+[data-theme="dark"] [data-role="student"] {
   --primary-color: #2dd4bf;
   --primary-hover: #5eead4;
   --primary-dark: #0d9488;
   --primary-light: #042f2e;
   --accent-color: #22d3ee;
+  --status-info-bg: rgba(45, 212, 191, 0.15);
+  --status-info-text: #5eead4;
 }
+
 
 /* ═══════════════════════════════════════════════════════
    MOTION SAFETY

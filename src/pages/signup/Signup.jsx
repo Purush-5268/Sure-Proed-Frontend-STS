@@ -1,18 +1,24 @@
 /**
  * Signup.jsx — OTP-gated student self-registration
  *
- * Flow:
- *   Step 1: Collect full form data → "Send OTP" → calls /api/auth/send-verification-otp/
- *   Step 2: Enter 6-digit OTP → "Verify & Create Account" → calls /api/auth/verify-email-otp/
- *            Backend is the authority on whether OTP is valid.
- *            On success, backend returns JWT tokens + creates user.
- *            We store the JWT and navigate to dashboard.
+ * UX Flow:
+ *   1. User fills the full registration form.
+ *   2. Next to the Email field is a "Verify Email" button.
+ *      → Only enabled when a valid email is typed.
+ *      → Clicking it (and ONLY clicking it) triggers send-verification-otp.
+ *   3. An OTP modal/inline section appears.
+ *   4. User enters OTP. On backend success: email shown as ✓ Verified.
+ *   5. If user changes email after verification, verified state resets immediately.
+ *   6. "Create Account" button only enabled when email is verified.
  *
- * Rules:
- *   - Never expose OTP or backend internals in UI
- *   - Resend timer: 60s
- *   - Handles: expired OTP, wrong OTP, already registered, rate limit, backend errors
- *   - Submit only available after backend confirms OTP via JWT response
+ * Backend authority:
+ *   - verifyEmailOTP() returns JWT on success → user created.
+ *   - We store JWT and navigate to dashboard.
+ *   - No frontend-only verification flag used to bypass backend.
+ *
+ * Endpoints used (Phase 1, already in authService):
+ *   POST /api/auth/send-verification-otp/
+ *   POST /api/auth/verify-email-otp/
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -20,249 +26,190 @@ import { authService } from "../../services/authService";
 import { useAuth } from "../../context/AuthContext";
 import {
   FaCheckCircle, FaTimesCircle, FaEye, FaEyeSlash,
-  FaEnvelope, FaArrowRight, FaRedo
+  FaRedo, FaEnvelopeOpenText
 } from "react-icons/fa";
 import { setAccessToken, setRefreshToken, setUserInfo } from "../../utils/tokenStorage";
 import styles from "./Signup.module.css";
 
 const RESEND_COOLDOWN_S = 60;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function evaluatePassword(pwd) {
+  const length  = pwd.length >= 8;
+  const upper   = /[A-Z]/.test(pwd);
+  const lower   = /[a-z]/.test(pwd);
+  const number  = /[0-9]/.test(pwd);
+  const special = /[^A-Za-z0-9]/.test(pwd);
+  const score   = [length, upper, lower, number, special].filter(Boolean).length;
+  const label   = score === 5 ? "Very Strong" : score >= 4 ? "Strong" : score === 3 ? "Medium" : "Weak";
+  return { length, upper, lower, number, special, score, label };
+}
 
 function Signup() {
-  const navigate = useNavigate();
+  const navigate   = useNavigate();
   const { updateUser } = useAuth();
 
-  // ─── Step control ─────────────────────────────────
-  const [step, setStep] = useState(1); // 1 = form, 2 = OTP
-
-  // ─── Step 1 state ─────────────────────────────────
+  // ─── Form data ───────────────────────────────────────
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
-    password: "",
-    confirmPassword: "",
-    gender: "",
-    dateOfBirth: "",
+    firstName: "", lastName: "", email: "",
+    phoneNumber: "", password: "", confirmPassword: "",
+    gender: "", dateOfBirth: "",
   });
-  const [showPassword, setShowPassword] = useState(false);
+
+  const [showPassword, setShowPassword]           = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState({
-    length: false, upper: false, lower: false, number: false, special: false,
-    score: 0, label: "Weak",
-  });
+  const [passwordStrength, setPasswordStrength]   = useState(evaluatePassword(""));
 
-  // ─── Step 2 state ─────────────────────────────────
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [resendTimer, setResendTimer] = useState(RESEND_COOLDOWN_S);
-  const [canResend, setCanResend] = useState(false);
-  const timerRef = useRef(null);
-  const otpInputRefs = useRef([]);
+  // ─── Email verification state ─────────────────────────
+  // emailVerified is only set to true when the backend verifyEmailOTP succeeds
+  // and returns JWT tokens.
+  const [emailVerified, setEmailVerified]         = useState(false);
+  const [verifiedEmail, setVerifiedEmail]         = useState(""); // the email that was verified
+  const [showOtpPanel, setShowOtpPanel]           = useState(false);
+  const [otp, setOtp]                             = useState(["", "", "", "", "", ""]);
+  const [deliveryHint, setDeliveryHint]           = useState("");
+  const [sendingOtp, setSendingOtp]               = useState(false);
+  const [verifyingOtp, setVerifyingOtp]           = useState(false);
+  const [otpError, setOtpError]                   = useState("");
+  const [resendTimer, setResendTimer]             = useState(RESEND_COOLDOWN_S);
+  const [canResend, setCanResend]                 = useState(false);
+  const timerRef                                  = useRef(null);
+  const otpRefs                                   = useRef([]);
 
-  // ─── Shared state ──────────────────────────────────
-  const [loading, setLoading] = useState(false);
-  const [sendingOtp, setSendingOtp] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-  // deliveryEmail is what backend confirmed OTP was sent to (may be mapped email)
-  const [deliveryHint, setDeliveryHint] = useState("");
+  // ─── Form-level state ─────────────────────────────────
+  const [loading, setLoading]   = useState(false);
+  const [formError, setFormError] = useState("");
+  const [success, setSuccess]   = useState(false);
 
-  // Start countdown when step = 2
+  // ─── Watch email field: reset verification if email changes ──
   useEffect(() => {
-    if (step !== 2) return;
+    if (emailVerified && formData.email.toLowerCase() !== verifiedEmail.toLowerCase()) {
+      setEmailVerified(false);
+      setVerifiedEmail("");
+      setShowOtpPanel(false);
+      setOtp(["", "", "", "", "", ""]);
+      setOtpError("");
+    }
+  }, [formData.email, emailVerified, verifiedEmail]);
+
+  // ─── Resend countdown ────────────────────────────────
+  const startResendTimer = () => {
     setResendTimer(RESEND_COOLDOWN_S);
     setCanResend(false);
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
-      setResendTimer((t) => {
-        if (t <= 1) {
-          clearInterval(timerRef.current);
-          setCanResend(true);
-          return 0;
-        }
+      setResendTimer(t => {
+        if (t <= 1) { clearInterval(timerRef.current); setCanResend(true); return 0; }
         return t - 1;
       });
     }, 1000);
-    return () => clearInterval(timerRef.current);
-  }, [step]);
+  };
 
-  // ─── Helpers ───────────────────────────────────────
+  useEffect(() => () => clearInterval(timerRef.current), []);
+
+  // ─── Handlers ────────────────────────────────────────
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (name === "password") evaluatePassword(value);
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === "password") setPasswordStrength(evaluatePassword(value));
   };
 
-  const evaluatePassword = (pwd) => {
-    const length = pwd.length >= 8;
-    const upper = /[A-Z]/.test(pwd);
-    const lower = /[a-z]/.test(pwd);
-    const number = /[0-9]/.test(pwd);
-    const special = /[^A-Za-z0-9]/.test(pwd);
-    let score = [length, upper, lower, number, special].filter(Boolean).length;
-    const label = score === 5 ? "Very Strong" : score >= 4 ? "Strong" : score === 3 ? "Medium" : "Weak";
-    setPasswordStrength({ length, upper, lower, number, special, score, label });
-  };
-
-  // ─── Step 1: Send OTP ──────────────────────────────
-  const handleSendOtp = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email.trim())) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-    if (passwordStrength.score < 5) {
-      setError("Please meet all password requirements before requesting OTP.");
-      return;
-    }
+  // Only fires when user explicitly clicks "Verify Email"
+  const handleSendOtp = async () => {
+    setOtpError("");
+    const email = formData.email.trim().toLowerCase();
+    if (!EMAIL_REGEX.test(email)) { setOtpError("Please enter a valid email address."); return; }
 
     setSendingOtp(true);
     try {
       const payload = {
-        first_name: formData.firstName.trim(),
-        last_name: formData.lastName.trim(),
-        email: formData.email.trim().toLowerCase(),
+        first_name:   formData.firstName.trim(),
+        last_name:    formData.lastName.trim(),
+        email,
         phone_number: formData.phoneNumber.trim() || null,
-        password: formData.password,
-        role: "STUDENT",
-        gender: formData.gender || null,
+        password:     formData.password,
+        role:         "STUDENT",
+        gender:       formData.gender || null,
         date_of_birth: formData.dateOfBirth || null,
       };
       const res = await authService.sendEmailVerificationOTP(payload);
-      // Backend returns { detail: "...dispatched to <email>..." }
-      // Extract delivery hint from detail message (do NOT expose raw OTP)
       const detail = res?.detail || "";
-      const match = detail.match(/dispatched to (.+?)\./i);
-      setDeliveryHint(match ? match[1] : formData.email.trim().toLowerCase());
-      setStep(2);
+      const match  = detail.match(/dispatched to (.+?)\./i);
+      setDeliveryHint(match ? match[1] : email);
+      setShowOtpPanel(true);
       setOtp(["", "", "", "", "", ""]);
+      startResendTimer();
+      setTimeout(() => otpRefs.current[0]?.focus(), 80);
     } catch (err) {
       const data = err?.response?.data;
-      const msg = data?.detail || data?.email?.[0] || data?.message ||
+      const msg  = data?.detail || data?.email?.[0] || data?.message ||
         (typeof data === "string" ? data : null) || "Failed to send OTP. Please try again.";
-      setError(msg);
+      setOtpError(msg);
     } finally {
       setSendingOtp(false);
     }
   };
 
-  // ─── Step 2: OTP input handling ────────────────────
-  const handleOtpChange = (index, value) => {
-    if (!/^\d?$/.test(value)) return; // digits only
-    const next = [...otp];
-    next[index] = value;
-    setOtp(next);
-    if (value && index < 5) {
-      otpInputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      otpInputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handleOtpPaste = (e) => {
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (pasted.length === 6) {
-      setOtp(pasted.split(""));
-      otpInputRefs.current[5]?.focus();
-    }
-    e.preventDefault();
-  };
-
-  const otpValue = otp.join("");
-
-  // ─── Step 2: Resend OTP ────────────────────────────
+  // Resend: re-send OTP for the same email
   const handleResend = async () => {
     if (!canResend) return;
-    setError("");
-    setCanResend(false);
+    setOtpError("");
     setOtp(["", "", "", "", "", ""]);
-    setSendingOtp(true);
-    try {
-      const payload = {
-        first_name: formData.firstName.trim(),
-        last_name: formData.lastName.trim(),
-        email: formData.email.trim().toLowerCase(),
-        phone_number: formData.phoneNumber.trim() || null,
-        password: formData.password,
-        role: "STUDENT",
-        gender: formData.gender || null,
-        date_of_birth: formData.dateOfBirth || null,
-      };
-      await authService.sendEmailVerificationOTP(payload);
-      setResendTimer(RESEND_COOLDOWN_S);
-      if (timerRef.current) clearInterval(timerRef.current);
-      timerRef.current = setInterval(() => {
-        setResendTimer((t) => {
-          if (t <= 1) {
-            clearInterval(timerRef.current);
-            setCanResend(true);
-            return 0;
-          }
-          return t - 1;
-        });
-      }, 1000);
-    } catch (err) {
-      const data = err?.response?.data;
-      const msg = data?.detail || "Failed to resend OTP.";
-      setError(msg);
-      setCanResend(true);
-    } finally {
-      setSendingOtp(false);
-    }
+    await handleSendOtp();
   };
 
-  // ─── Step 2: Verify OTP ────────────────────────────
-  const handleVerifyOtp = async (e) => {
+  // OTP input box handling
+  const handleOtpChange = (i, val) => {
+    if (!/^\d?$/.test(val)) return;
+    const next = [...otp]; next[i] = val; setOtp(next);
+    if (val && i < 5) otpRefs.current[i + 1]?.focus();
+  };
+  const handleOtpKeyDown = (i, e) => {
+    if (e.key === "Backspace" && !otp[i] && i > 0) otpRefs.current[i - 1]?.focus();
+  };
+  const handleOtpPaste = (e) => {
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pasted.length === 6) { setOtp(pasted.split("")); otpRefs.current[5]?.focus(); }
     e.preventDefault();
-    if (otpValue.length !== 6) {
-      setError("Please enter the complete 6-digit code.");
-      return;
-    }
-    setError("");
-    setLoading(true);
+  };
+
+  // Verify OTP — backend is authority
+  const handleVerifyOtp = async () => {
+    const otpVal = otp.join("");
+    if (otpVal.length !== 6) { setOtpError("Enter the full 6-digit code."); return; }
+    setOtpError("");
+    setVerifyingOtp(true);
     try {
-      // Backend is the authority — on success it returns JWT + creates user
-      const res = await authService.verifyEmailOTP(
-        formData.email.trim().toLowerCase(),
-        otpValue
-      );
-      // Store tokens and user info
+      const email = formData.email.trim().toLowerCase();
+      const res   = await authService.verifyEmailOTP(email, otpVal);
+      // Backend confirmed email is valid. Store tokens and mark as verified.
       if (res.access) {
         setAccessToken(res.access);
-        if (res.refresh) setRefreshToken(res.refresh);
-        if (res.user) {
-          setUserInfo(res.user);
-          updateUser(res.user);
-        }
+        if (res.refresh)    setRefreshToken(res.refresh);
+        if (res.user)       { setUserInfo(res.user); updateUser(res.user); }
       }
+      // Mark email as verified (backend authority confirmed)
+      setEmailVerified(true);
+      setVerifiedEmail(email);
+      setShowOtpPanel(false);
+      clearInterval(timerRef.current);
       setSuccess(true);
-      setTimeout(() => navigate("/student/profile", { replace: true }), 2000);
+      setTimeout(() => navigate("/student/profile", { replace: true }), 1800);
     } catch (err) {
       const data = err?.response?.data;
-      const msg = data?.detail || data?.otp?.[0] || data?.message ||
-        (typeof data === "string" ? data : null) ||
-        "Invalid or expired code. Please check and try again.";
-      setError(msg);
-      // Clear OTP on wrong attempt
+      const msg  = data?.detail || data?.otp?.[0] || data?.message ||
+        (typeof data === "string" ? data : null) || "Invalid or expired code. Try again.";
+      setOtpError(msg);
       setOtp(["", "", "", "", "", ""]);
-      otpInputRefs.current[0]?.focus();
+      otpRefs.current[0]?.focus();
     } finally {
-      setLoading(false);
+      setVerifyingOtp(false);
     }
   };
 
-  // ─── Success screen ────────────────────────────────
+  const emailValid = EMAIL_REGEX.test(formData.email.trim());
+
+  // ─── Success screen ───────────────────────────────────
   if (success) {
     return (
       <div className={styles.container}>
@@ -280,98 +227,18 @@ function Signup() {
     );
   }
 
-  // ─── Step 2: OTP entry ─────────────────────────────
-  if (step === 2) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.signupCard}>
-          <div className={styles.header}>
-            <div className={styles.otpIcon}><FaEnvelope /></div>
-            <h1>Verify Your Email</h1>
-            <p>
-              We sent a 6-digit code to <strong>{deliveryHint}</strong>.
-              Enter it below to create your account.
-            </p>
-          </div>
-
-          {error && <div className={styles.errorToast}>{error}</div>}
-
-          <form className={styles.form} onSubmit={handleVerifyOtp}>
-            <div className={styles.otpRow} onPaste={handleOtpPaste}>
-              {otp.map((digit, i) => (
-                <input
-                  key={i}
-                  ref={(el) => (otpInputRefs.current[i] = el)}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  className={styles.otpInput}
-                  value={digit}
-                  onChange={(e) => handleOtpChange(i, e.target.value)}
-                  onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                  autoFocus={i === 0}
-                  aria-label={`OTP digit ${i + 1}`}
-                />
-              ))}
-            </div>
-
-            <button
-              type="submit"
-              className={`${styles.submitBtn} ${loading ? styles.loadingBtn : ""}`}
-              disabled={loading || otpValue.length !== 6}
-            >
-              <span className={styles.btnText}>
-                {loading ? "Verifying..." : "Verify & Create Account"}
-              </span>
-              {loading && (
-                <div className={styles.loadingDots}>
-                  <span></span><span></span><span></span>
-                </div>
-              )}
-            </button>
-
-            <div className={styles.resendRow}>
-              {canResend ? (
-                <button
-                  type="button"
-                  className={styles.resendBtn}
-                  onClick={handleResend}
-                  disabled={sendingOtp}
-                >
-                  <FaRedo /> {sendingOtp ? "Sending..." : "Resend Code"}
-                </button>
-              ) : (
-                <span className={styles.resendTimer}>
-                  Resend in <strong>{resendTimer}s</strong>
-                </span>
-              )}
-            </div>
-
-            <button
-              type="button"
-              className={styles.backBtn}
-              onClick={() => { setStep(1); setError(""); }}
-            >
-              ← Edit registration details
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  // ─── Step 1: Registration form ─────────────────────
   return (
     <div className={styles.container}>
       <div className={styles.signupCard}>
         <div className={styles.header}>
           <h1>Student Registration</h1>
-          <p>Fill in your details. We'll send a verification code to your email.</p>
+          <p>Fill in your details and verify your email to create your account.</p>
         </div>
 
-        {error && <div className={styles.errorToast}>{error}</div>}
+        {formError && <div className={styles.errorToast}>{formError}</div>}
 
-        <form className={styles.form} onSubmit={handleSendOtp}>
+        <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
+          {/* Name row */}
           <div className={styles.row}>
             <div className={styles.inputGroup}>
               <label>First Name *</label>
@@ -383,16 +250,90 @@ function Signup() {
             </div>
           </div>
 
+          {/* Email + Verify button */}
           <div className={styles.inputGroup}>
             <label>Email Address *</label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="john.doe@example.com" />
+            <div className={styles.emailRow}>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                placeholder="john.doe@example.com"
+                disabled={emailVerified}
+                className={emailVerified ? styles.inputVerified : ""}
+              />
+              {emailVerified ? (
+                <span className={styles.verifiedBadge}>
+                  <FaCheckCircle /> Verified
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.verifyEmailBtn}
+                  onClick={handleSendOtp}
+                  disabled={!emailValid || sendingOtp || showOtpPanel}
+                >
+                  {sendingOtp ? "Sending..." : showOtpPanel ? "Code Sent" : "Verify Email"}
+                </button>
+              )}
+            </div>
           </div>
 
+          {/* OTP Panel — shown inline after "Verify Email" is clicked */}
+          {showOtpPanel && !emailVerified && (
+            <div className={styles.otpPanel}>
+              <div className={styles.otpPanelHeader}>
+                <FaEnvelopeOpenText className={styles.otpPanelIcon} />
+                <span>Enter the 6-digit code sent to <strong>{deliveryHint}</strong></span>
+              </div>
+              {otpError && <div className={styles.otpError}>{otpError}</div>}
+              <div className={styles.otpRow} onPaste={handleOtpPaste}>
+                {otp.map((digit, i) => (
+                  <input
+                    key={i}
+                    ref={el => (otpRefs.current[i] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    className={styles.otpInput}
+                    value={digit}
+                    onChange={e => handleOtpChange(i, e.target.value)}
+                    onKeyDown={e => handleOtpKeyDown(i, e)}
+                    aria-label={`OTP digit ${i + 1}`}
+                  />
+                ))}
+              </div>
+              <div className={styles.otpActions}>
+                <button
+                  type="button"
+                  className={styles.verifyOtpBtn}
+                  onClick={handleVerifyOtp}
+                  disabled={verifyingOtp || otp.join("").length !== 6}
+                >
+                  {verifyingOtp ? "Verifying..." : "Verify Code"}
+                </button>
+                <div className={styles.resendRow}>
+                  {canResend ? (
+                    <button type="button" className={styles.resendBtn} onClick={handleResend} disabled={sendingOtp}>
+                      <FaRedo /> {sendingOtp ? "Sending..." : "Resend Code"}
+                    </button>
+                  ) : (
+                    <span className={styles.resendTimer}>Resend in <strong>{resendTimer}s</strong></span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Phone */}
           <div className={styles.inputGroup}>
             <label>Phone Number *</label>
             <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required placeholder="9876543210" />
           </div>
 
+          {/* Gender + DOB */}
           <div className={styles.row}>
             <div className={styles.inputGroup}>
               <label>Gender *</label>
@@ -409,19 +350,17 @@ function Signup() {
             </div>
           </div>
 
+          {/* Password */}
           <div className={styles.row}>
             <div className={styles.inputGroup}>
               <label>Password *</label>
               <div className={styles.passwordInputWrapper}>
                 <input
                   type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  placeholder="••••••••"
+                  name="password" value={formData.password}
+                  onChange={handleChange} required placeholder="••••••••"
                 />
-                <button type="button" className={styles.togglePasswordBtn} onClick={() => setShowPassword(!showPassword)}>
+                <button type="button" className={styles.togglePasswordBtn} onClick={() => setShowPassword(s => !s)}>
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
@@ -431,19 +370,17 @@ function Signup() {
               <div className={styles.passwordInputWrapper}>
                 <input
                   type={showConfirmPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                  placeholder="••••••••"
+                  name="confirmPassword" value={formData.confirmPassword}
+                  onChange={handleChange} required placeholder="••••••••"
                 />
-                <button type="button" className={styles.togglePasswordBtn} onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                <button type="button" className={styles.togglePasswordBtn} onClick={() => setShowConfirmPassword(s => !s)}>
                   {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
             </div>
           </div>
 
+          {/* Password Strength */}
           {formData.password && (
             <div className={styles.passwordStrengthContainer}>
               <div className={styles.strengthHeader}>
@@ -458,39 +395,48 @@ function Signup() {
                 ))}
               </div>
               <div className={styles.passwordRules}>
-                <div className={passwordStrength.length ? styles.ruleValid : styles.ruleInvalid}>
-                  {passwordStrength.length ? <FaCheckCircle /> : <FaTimesCircle />} Min 8 characters
-                </div>
-                <div className={passwordStrength.upper ? styles.ruleValid : styles.ruleInvalid}>
-                  {passwordStrength.upper ? <FaCheckCircle /> : <FaTimesCircle />} Uppercase
-                </div>
-                <div className={passwordStrength.lower ? styles.ruleValid : styles.ruleInvalid}>
-                  {passwordStrength.lower ? <FaCheckCircle /> : <FaTimesCircle />} Lowercase
-                </div>
-                <div className={passwordStrength.number ? styles.ruleValid : styles.ruleInvalid}>
-                  {passwordStrength.number ? <FaCheckCircle /> : <FaTimesCircle />} Number
-                </div>
-                <div className={passwordStrength.special ? styles.ruleValid : styles.ruleInvalid}>
-                  {passwordStrength.special ? <FaCheckCircle /> : <FaTimesCircle />} Special char
-                </div>
+                {[
+                  [passwordStrength.length,  "Min 8 characters"],
+                  [passwordStrength.upper,   "Uppercase"],
+                  [passwordStrength.lower,   "Lowercase"],
+                  [passwordStrength.number,  "Number"],
+                  [passwordStrength.special, "Special char"],
+                ].map(([ok, label]) => (
+                  <div key={label} className={ok ? styles.ruleValid : styles.ruleInvalid}>
+                    {ok ? <FaCheckCircle /> : <FaTimesCircle />} {label}
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
+          {/* Submit — only enabled after email verified by backend */}
+          {!emailVerified && (
+            <p className={styles.verifyNotice}>
+              ⚠️ Please verify your email above before creating your account.
+            </p>
+          )}
+
           <button
-            type="submit"
-            className={`${styles.submitBtn} ${sendingOtp ? styles.loadingBtn : ""}`}
-            disabled={sendingOtp || passwordStrength.score < 5}
+            type="button"
+            className={`${styles.submitBtn} ${loading ? styles.loadingBtn : ""}`}
+            disabled={loading || !emailVerified || passwordStrength.score < 5}
+            onClick={async () => {
+              setFormError("");
+              if (formData.password !== formData.confirmPassword) {
+                setFormError("Passwords do not match.");
+                return;
+              }
+              // At this point email is verified by backend (JWT already stored).
+              // Account was already created by verifyEmailOTP — just navigate.
+              setSuccess(true);
+              setTimeout(() => navigate("/student/profile", { replace: true }), 1000);
+            }}
           >
             <span className={styles.btnText}>
-              {sendingOtp ? "Sending OTP..." : "Send Verification Code"}
+              {loading ? "Creating Account..." : "Create Account"}
             </span>
-            <FaArrowRight style={{ marginLeft: "8px" }} />
-            {sendingOtp && (
-              <div className={styles.loadingDots}>
-                <span></span><span></span><span></span>
-              </div>
-            )}
+            {loading && <div className={styles.loadingDots}><span></span><span></span><span></span></div>}
           </button>
 
           <p className={styles.loginText}>
