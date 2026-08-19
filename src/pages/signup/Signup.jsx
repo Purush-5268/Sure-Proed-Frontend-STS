@@ -327,7 +327,7 @@ function Signup() {
                   type="button"
                   className={styles.verifyEmailBtn}
                   onClick={handleSendOtp}
-                  disabled={sendingOtp || showOtpPanel || emailVerified}
+                  disabled={!formReady || sendingOtp || showOtpPanel || emailVerified}
                   title={!formReady ? "Fill in all fields with a strong password before verifying" : "Click to send OTP to your email"}
                 >
                   {sendingOtp ? "Sending..." : showOtpPanel ? "Code Sent ✓" : "Verify Email"}
