@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../../context/AuthContext";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import PageHeader from "../../components/ui/PageHeader";
@@ -12,6 +13,7 @@ import styles from "./MyCohorts.module.css";
 import { FiUsers, FiBook, FiCalendar, FiArrowRight, FiMail, FiAlertCircle } from "react-icons/fi";
 
 function MyCohorts() {
+  const { user } = useAuth();
   const [cohorts, setCohorts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,8 +24,9 @@ function MyCohorts() {
     let isMounted = true;
     const loadCohorts = async () => {
       try {
+        if (!user?.id) return;
         // Fetch mentor's own profile to get their domain/course
-        const profileRes = await apiClient.get(API_ENDPOINTS.MENTORS.PROFILE_ME);
+        const profileRes = await apiClient.get(API_ENDPOINTS.MENTORS.PROFILE_BY_USER(user.id));
         const profileData = profileRes.data?.results?.[0] || profileRes.data;
         const courseId = profileData?.course || null;
 

@@ -36,6 +36,7 @@ function MentorDashboard() {
   const { user } = useAuth();
   const { globalCohort } = useOutletContext() || {};
   const [cohorts, setCohorts] = useState([]);
+  const [totalStudents, setTotalStudents] = useState(0);
   const [todaySessions, setTodaySessions] = useState([]);
   const [recentSubmissions, setRecentSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,12 +57,15 @@ function MentorDashboard() {
         // Base params for cohort filtering if a specific cohort is selected
         const cohortParams = globalCohort ? { cohort: globalCohort } : {};
 
-        const [cohortsRes, attendanceRes, submissionsRes] = await Promise.allSettled([
+        const [cohortsRes, attendanceRes, submissionsRes, studentsRes] = await Promise.allSettled([
           apiClient.get(API_ENDPOINTS.COHORTS.MY_COHORTS),
           apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, {
             params: { conducted: "true", class_date: today, ...cohortParams }
           }),
           apiClient.get(API_ENDPOINTS.SUBMISSIONS.BASE, {
+            params: { ...cohortParams }
+          }),
+          apiClient.get(API_ENDPOINTS.STUDENTS.BASE, {
             params: { ...cohortParams }
           }),
         ]);
@@ -90,6 +94,12 @@ function MentorDashboard() {
           setRecentSubmissions(subs.slice(0, 5));
         }
 
+        if (studentsRes.status === "fulfilled") {
+          const data = studentsRes.value.data;
+          // DRF paginated response has 'count', else use array length
+          setTotalStudents(data?.count !== undefined ? data.count : (Array.isArray(data) ? data.length : 0));
+        }
+
       } catch (err) {
         if (isMounted) setError("Failed to load dashboard data.");
       } finally {
@@ -104,8 +114,6 @@ function MentorDashboard() {
   const firstName = user?.first_name || user?.firstName || "";
   const salutation = getSalutation(user?.gender);
   const welcomeName = firstName ? `${firstName}${salutation}` : (user?.email || "Mentor");
-
-  const totalStudents = cohorts.reduce((acc, c) => acc + (c.student_count || 0), 0);
 
   const stagger = {
     hidden: { opacity: 0 },

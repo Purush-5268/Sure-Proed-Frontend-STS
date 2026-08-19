@@ -48,13 +48,14 @@ function Profile() {
       try {
         // Load user's base info
         const userRes = await apiClient.get(API_ENDPOINTS.USERS.ME);
-        // Load mentor-specific profile
-        const profileRes = await apiClient.get(API_ENDPOINTS.MENTORS.PROFILE_ME).catch(() => ({ data: {} }));
+        const userData = userRes.data;
+        
+        // Load mentor-specific profile using user ID
+        const profileRes = await apiClient.get(API_ENDPOINTS.MENTORS.PROFILE_BY_USER(userData.id)).catch(() => ({ data: {} }));
 
         if (!isMounted) return;
 
-        const userData = userRes.data;
-        const profileData = profileRes.data;
+        const profileData = profileRes.data?.results?.[0] || profileRes.data || {};
 
         setForm({
           first_name: userData.first_name || "",
@@ -122,14 +123,16 @@ function Profile() {
       const userRes = await apiClient.patch(API_ENDPOINTS.USERS.BY_ID(user.id), userUpdatePayload);
 
       // Save mentor profile fields
-      await apiClient.patch(API_ENDPOINTS.MENTORS.PROFILE_ME, {
-        linkedin_url: profileForm.linkedin_url.trim() || null,
-        years_of_experience: profileForm.experience_years.trim() || null,
-        company_name: profileForm.company_name.trim() || null,
-        designation: profileForm.designation.trim() || null,
-        expertise: profileForm.expertise.trim() || null,
-        bio: profileForm.bio.trim() || null,
-      });
+      if (profile?.id) {
+        await apiClient.patch(API_ENDPOINTS.MENTORS.PROFILE_BY_ID(profile.id), {
+          linkedin_url: profileForm.linkedin_url.trim() || null,
+          years_of_experience: profileForm.experience_years.trim() || null,
+          company_name: profileForm.company_name.trim() || null,
+          designation: profileForm.designation.trim() || null,
+          expertise: profileForm.expertise.trim() || null,
+          bio: profileForm.bio.trim() || null,
+        });
+      }
 
       updateUser({
         first_name: userRes.data.first_name,

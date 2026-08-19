@@ -95,7 +95,8 @@ function Mentors() {
 
         if (isMounted) {
           // Only show currently running cohorts
-          setCohorts(cohortsData.filter(c => ["ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS"].includes(c.status)));
+          // Allow all cohort statuses so admin can assign mentors to new/old cohorts
+          setCohorts(cohortsData);
           setAllMentors(mentorsData);
         }
       } catch (err) {
@@ -147,7 +148,7 @@ function Mentors() {
         apiClient.get(API_ENDPOINTS.MENTORS.BASE, { params: { course: selectedCourse.id } })
       ]);
       const data = normalizeListResponse(cohortsRes.data);
-      setCohorts(data.filter(c => ["ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS"].includes(c.status)));
+      setCohorts(data);
       
       // Update selectedCohort with fresh data so UI rerenders
       const updatedCohort = data.find(c => String(c.id) === String(selectedCohort.id));
@@ -179,7 +180,7 @@ function Mentors() {
         apiClient.get(API_ENDPOINTS.MENTORS.BASE, { params: { course: selectedCourse.id } })
       ]);
       const data = normalizeListResponse(cohortsRes.data);
-      setCohorts(data.filter(c => ["ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS"].includes(c.status)));
+      setCohorts(data);
       
       const updatedCohort = data.find(c => String(c.id) === String(selectedCohort.id));
       if (updatedCohort) setSelectedCohort(updatedCohort);
@@ -269,12 +270,12 @@ function Mentors() {
       {selectedCourse && (
         <div className={styles.stepSection}>
           <h2 className={styles.stepTitle}>
-            <span className={styles.stepNum}>2</span> Select Active Cohort
+            <span className={styles.stepNum}>2</span> Select Cohort
           </h2>
           {loadingCohorts ? (
             <SkeletonLoader width="300px" height="40px" borderRadius="8px" />
           ) : cohorts.length === 0 ? (
-            <p className={styles.emptyNote}>No active cohorts for this course.</p>
+            <p className={styles.emptyNote}>No cohorts for this course.</p>
           ) : (
             <select
               className="premium-input"

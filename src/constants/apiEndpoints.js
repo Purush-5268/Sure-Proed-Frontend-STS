@@ -63,10 +63,10 @@ export const API_ENDPOINTS = {
   COHORTS: {
     BASE: "/api/cohorts/",
     BY_ID: (id) => `/api/cohorts/${id}/`,
-    // Mentor-scoped: returns ONLY active cohorts assigned to the authenticated mentor
-    MY_COHORTS: "/api/cohorts/my-cohorts/",
-    // Students enrolled in a specific cohort (via approved applications)
-    STUDENTS: (id) => `/api/cohorts/${id}/students/`,
+    // Mentor-scoped: returns ONLY active cohorts assigned to the authenticated mentor. Backend filters implicitly.
+    MY_COHORTS: "/api/cohorts/",
+    // Students enrolled in a specific cohort
+    STUDENTS: (id) => `/api/students/?cohort=${id}`,
     // Mentor requests cohort assignment from admin
     REQUEST_ASSIGNMENT: "/api/cohorts/request-assignment/",
     // Admin mentor management endpoints
@@ -77,12 +77,9 @@ export const API_ENDPOINTS = {
   // Mentor Profile (authenticated mentor's own profile or admin fetching by user id)
   MENTORS: {
     BASE: "/api/volunteers/mentor-profiles/",
-    PROFILE_ME: "/api/volunteers/mentor-profiles/me/",
     PROFILE_BY_ID: (id) => `/api/volunteers/mentor-profiles/${id}/`,
-    // Filter profile by user UUID: /api/mentor-profiles/?user={user_uuid}
-    // Wait, the user said the exact route is /api/mentor-profiles/ not /api/volunteers/mentor-profiles/.
-    // Let me check the backend urls.py first. I will add exactly what the user stated.
-    PROFILE_BY_USER: (userId) => `/api/mentor-profiles/?user=${userId}`,
+    // Filter profile by user UUID: /api/volunteers/mentor-profiles/?user={user_uuid}
+    PROFILE_BY_USER: (userId) => `/api/volunteers/mentor-profiles/?user=${userId}`,
   },
 
   // Exams & Questions
