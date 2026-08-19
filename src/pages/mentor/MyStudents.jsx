@@ -83,9 +83,10 @@ function MyStudents() {
       // Attempt to send notification via existing notification endpoint if available
       // For now, use mailto as fallback
       await apiClient.post("/api/notifications/", {
-        recipient: messageDialog.studentId,
+        user_id: messageDialog.studentId,
+        title: "Message from Mentor",
         message: messageText.trim(),
-        type: "MENTOR_MESSAGE",
+        notification_type: "INFO",
       }).catch(() => {
         // If notification endpoint doesn't exist, silently continue
         console.warn("Notification API not available. Message not sent to backend.");

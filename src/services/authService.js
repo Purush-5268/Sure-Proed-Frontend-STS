@@ -40,7 +40,10 @@ export const authService = {
 
   // LinkedIn OAuth Connect URL
   async getLinkedInConnectUrl() {
-    const response = await apiClient.get(API_ENDPOINTS.AUTH.LINKEDIN_CONNECT);
+    const redirectUri = window.location.origin + '/login';
+    const response = await apiClient.get(API_ENDPOINTS.AUTH.LINKEDIN_CONNECT, {
+      params: { redirect_uri: redirectUri }
+    });
     return response.data;
   },
 

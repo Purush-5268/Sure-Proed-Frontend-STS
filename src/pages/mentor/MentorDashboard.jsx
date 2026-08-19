@@ -57,15 +57,12 @@ function MentorDashboard() {
         // Base params for cohort filtering if a specific cohort is selected
         const cohortParams = globalCohort ? { cohort: globalCohort } : {};
 
-        const [cohortsRes, attendanceRes, submissionsRes, studentsRes] = await Promise.allSettled([
+        const [cohortsRes, attendanceRes, submissionsRes] = await Promise.allSettled([
           apiClient.get(API_ENDPOINTS.COHORTS.MY_COHORTS),
           apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, {
             params: { conducted: "true", class_date: today, ...cohortParams }
           }),
           apiClient.get(API_ENDPOINTS.SUBMISSIONS.BASE, {
-            params: { ...cohortParams }
-          }),
-          apiClient.get(API_ENDPOINTS.STUDENTS.BASE, {
             params: { ...cohortParams }
           }),
         ]);
@@ -94,10 +91,40 @@ function MentorDashboard() {
           setRecentSubmissions(subs.slice(0, 5));
         }
 
-        if (studentsRes.status === "fulfilled") {
-          const data = studentsRes.value.data;
-          // DRF paginated response has 'count', else use array length
-          setTotalStudents(data?.count !== undefined ? data.count : (Array.isArray(data) ? data.length : 0));
+        // Fetch students for the displayed cohorts to match MyStudents page exactly
+        if (cohortsRes.status === "fulfilled") {
+          const myCohorts = Array.isArray(cohortsRes.value.data?.results) 
+            ? cohortsRes.value.data.results 
+            : (Array.isArray(cohortsRes.value.data) ? cohortsRes.value.data : []);
+            
+          const activeCohorts = globalCohort 
+            ? myCohorts.filter(c => String(c.id) === String(globalCohort))
+            : myCohorts;
+
+          if (activeCohorts.length > 0) {
+            const studentRequests = activeCohorts.map(c =>
+              apiClient.get(API_ENDPOINTS.COHORTS.STUDENTS(c.id))
+            );
+            const studentResults = await Promise.allSettled(studentRequests);
+            
+            let count = 0;
+            const seenIds = new Set();
+            studentResults.forEach(result => {
+              if (result.status === "fulfilled") {
+                const data = result.value.data;
+                const arr = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
+                arr.forEach(student => {
+                  if (!seenIds.has(student.id)) {
+                    seenIds.add(student.id);
+                    count++;
+                  }
+                });
+              }
+            });
+            setTotalStudents(count);
+          } else {
+            setTotalStudents(0);
+          }
         }
 
       } catch (err) {
