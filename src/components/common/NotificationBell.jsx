@@ -39,7 +39,7 @@ function relativeTime(dateStr) {
 }
 
 function NotificationBell() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   const [notifications, setNotifications] = useState([]);
@@ -47,6 +47,8 @@ function NotificationBell() {
   const [loading, setLoading] = useState(false);
   const [pushStatus, setPushStatus] = useState("unsupported");
   const [isPushLoading, setIsPushLoading] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
 
   const dropdownRef = useRef(null);
   const intervalRef = useRef(null);
@@ -78,7 +80,25 @@ function NotificationBell() {
     
     // Initialize push status
     if (pushNotificationService.isSupported()) {
-      setPushStatus(Notification.permission);
+      if (Notification.permission === "default") {
+        Notification.requestPermission().then(perm => {
+          setPushStatus(perm);
+          if (perm === "granted") {
+            pushNotificationService.subscribe().then(success => {
+              if (success) setIsSubscribed(true);
+            });
+          }
+        });
+      } else {
+        setPushStatus(Notification.permission);
+        navigator.serviceWorker.getRegistration().then(reg => {
+          if (reg) {
+            reg.pushManager.getSubscription().then(sub => {
+              setIsSubscribed(!!sub);
+            });
+          }
+        });
+      }
     }
 
     return () => {
@@ -86,20 +106,29 @@ function NotificationBell() {
     };
   }, [isAuthenticated, fetchNotifications]);
 
-  const handleEnablePush = async () => {
+  const handleTogglePush = async () => {
     if (!pushNotificationService.isSupported()) return;
     
     setIsPushLoading(true);
-    
     try {
-      const permission = await Notification.requestPermission();
-      setPushStatus(permission);
-      
-      if (permission === "granted") {
-        await pushNotificationService.subscribe();
+      if (isSubscribed) {
+        await pushNotificationService.unsubscribe();
+        setIsSubscribed(false);
+        setShowWarning(true);
+        setTimeout(() => setShowWarning(false), 5000);
+      } else {
+        const permission = await Notification.requestPermission();
+        setPushStatus(permission);
+        if (permission === "granted") {
+          const success = await pushNotificationService.subscribe();
+          if (success) {
+            setIsSubscribed(true);
+            setShowWarning(false);
+          }
+        }
       }
     } catch (err) {
-      console.error("Failed to enable push notifications", err);
+      console.error("Failed to toggle push notifications", err);
     } finally {
       setIsPushLoading(false);
     }
@@ -135,7 +164,18 @@ function NotificationBell() {
     // Navigate to action_url if provided
     if (notification.action_url) {
       setOpen(false);
-      navigate(notification.action_url);
+      let finalUrl = notification.action_url;
+      if (finalUrl.startsWith('http')) {
+        window.location.href = finalUrl;
+        return;
+      }
+      
+      const rolePrefix = `/${user?.role?.toLowerCase()}`;
+      if (user?.role && !finalUrl.startsWith(rolePrefix) && finalUrl.startsWith('/')) {
+        finalUrl = `${rolePrefix}${finalUrl}`;
+      }
+      
+      navigate(finalUrl);
     }
   };
 
@@ -232,30 +272,47 @@ function NotificationBell() {
           
           {/* Web Push Notification Settings Footer */}
           {pushNotificationService.isSupported() && (
-            <div className={styles.pushFooter} style={{ padding: "10px", borderTop: "1px solid var(--border-color)", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.85rem", backgroundColor: "var(--background-alt)" }}>
-              <span>Browser Notifications</span>
-              {pushStatus === "granted" ? (
-                <span style={{ color: "var(--success-color)", fontWeight: "500", display: "flex", alignItems: "center", gap: "4px" }}><FaCheckCircle /> Enabled</span>
-              ) : pushStatus === "denied" ? (
-                <span style={{ color: "var(--danger-color)" }}>Permission Denied</span>
-              ) : (
-                <button 
-                  onClick={handleEnablePush} 
-                  disabled={isPushLoading}
-                  style={{ 
-                    padding: "4px 8px", 
-                    borderRadius: "4px", 
-                    background: "var(--primary-color)", 
-                    color: "white", 
-                    border: "none", 
-                    cursor: isPushLoading ? "not-allowed" : "pointer",
-                    fontSize: "0.8rem",
-                    fontWeight: "500"
-                  }}
-                >
-                  {isPushLoading ? "Enabling..." : "Enable"}
-                </button>
+            <div className={styles.pushFooter} style={{ padding: "10px", borderTop: "1px solid var(--border-color)", display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.85rem", backgroundColor: "var(--background-alt)" }}>
+              {showWarning && (
+                <div style={{ color: '#b45309', fontSize: '0.8rem', fontStyle: 'italic', background: '#fef3c7', padding: '6px', borderRadius: '4px', borderLeft: '3px solid #f59e0b' }}>
+                  ⚠️ Don't miss out on important live classes and updates! Re-enable to stay informed.
+                </div>
               )}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                <span>Browser Notifications</span>
+                {pushStatus === "granted" && isSubscribed ? (
+                  <button 
+                    onClick={handleTogglePush}
+                    disabled={isPushLoading}
+                    title="Click to disable notifications"
+                    style={{ background: 'transparent', border: '1px solid var(--success-color)', color: 'var(--success-color)', padding: '4px 8px', borderRadius: '4px', cursor: isPushLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}
+                  >
+                    {isPushLoading ? "Disabling..." : <><FaCheckCircle /> Enabled</>}
+                  </button>
+                ) : pushStatus === "denied" ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                    <span style={{ color: "var(--danger-color)", fontWeight: "500" }}>Blocked by Browser</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Click the 🔒 icon in the URL bar to allow</span>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={handleTogglePush} 
+                    disabled={isPushLoading}
+                    style={{ 
+                      padding: "4px 8px", 
+                      borderRadius: "4px", 
+                      background: "var(--primary-color)", 
+                      color: "white", 
+                      border: "none", 
+                      cursor: isPushLoading ? "not-allowed" : "pointer",
+                      fontSize: "0.8rem",
+                      fontWeight: "500"
+                    }}
+                  >
+                    {isPushLoading ? "Enabling..." : "Enable"}
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>

@@ -13,6 +13,7 @@ import styles from "./Dashboard.module.css";
 import { FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi";
 import FeedbackWidget from "../../components/common/FeedbackWidget";
 import AttendanceWarningPopup from "../../components/attendance/AttendanceWarningPopup";
+import { pushNotificationService } from "../../services/pushNotificationService";
 
 function Dashboard() {
   const { user } = useAuth();
@@ -32,6 +33,8 @@ function Dashboard() {
   const [assignmentStats, setAssignmentStats] = useState({ completed: 0, pending: 0, overdue: 0 });
   const [examStats, setExamStats] = useState({ completed: 0, upcoming: 0 });
   const [attendanceHistory, setAttendanceHistory] = useState([]);
+  const [pushStatus, setPushStatus] = useState("Notification" in window ? Notification.permission : "default");
+  const [isPushLoading, setIsPushLoading] = useState(false);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -172,6 +175,40 @@ function Dashboard() {
   // 🚨 ACTIVE DASHBOARD 🚨
   return (
     <div className={styles.dashboardContainer}>
+
+      {/* Push Notification Banner */}
+      {pushNotificationService.isSupported() && (pushStatus === "default" || pushStatus === "denied") && (
+        <div style={{ background: pushStatus === "denied" ? 'var(--danger-color)' : 'var(--primary-color)', color: 'white', padding: '16px 24px', borderRadius: '12px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: `0 4px 12px ${pushStatus === "denied" ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)'}` }}>
+          <div>
+            <h4 style={{ margin: '0 0 4px 0', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '20px' }}>{pushStatus === "denied" ? "⚠️" : "🔔"}</span> 
+              {pushStatus === "denied" ? "Notifications are Blocked!" : "Never Miss a Class!"}
+            </h4>
+            <p style={{ margin: 0, fontSize: '14px', opacity: 0.9 }}>
+              {pushStatus === "denied" 
+                ? "You are missing important live class alerts! Please click the 🔒 icon in your browser's URL bar, change Notifications to 'Allow', and refresh this page."
+                : "Enable browser notifications to receive instant alerts when your live classes start."}
+            </p>
+          </div>
+          {pushStatus === "default" && (
+            <button 
+              onClick={async () => {
+                setIsPushLoading(true);
+                try {
+                  const perm = await Notification.requestPermission();
+                  setPushStatus(perm);
+                  if (perm === "granted") await pushNotificationService.subscribe();
+                } catch (e) { console.error(e); }
+                setIsPushLoading(false);
+              }}
+              disabled={isPushLoading}
+              style={{ padding: '10px 20px', borderRadius: '8px', background: 'white', color: 'var(--primary-color)', border: 'none', fontWeight: 'bold', cursor: isPushLoading ? 'not-allowed' : 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', whiteSpace: 'nowrap', marginLeft: '16px' }}
+            >
+              {isPushLoading ? "Enabling..." : "Enable Notifications"}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Sleek Glass Header */}
       <header className={styles.header}>
