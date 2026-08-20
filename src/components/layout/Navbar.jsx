@@ -24,10 +24,13 @@ function Navbar() {
     return () => { isMounted = false; };
   }, [isAuthenticated, user]);
 
-  const handleLogout = () => {
-    logout();
-    setMobileOpen(false);
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      setMobileOpen(false);
+      navigate("/");
+    }
   };
 
   const getDashboardPath = () => {

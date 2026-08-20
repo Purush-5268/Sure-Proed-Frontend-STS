@@ -183,6 +183,20 @@ function Attendance() {
     }
   };
 
+  const handleEndClass = async (sessionId) => {
+    if (!window.confirm("Are you sure you want to end this class? This will finalize attendance.")) return;
+    try {
+      await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId), { conducted: false });
+      // Refresh history
+      const res = await apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { params: { cohort: selectedCohort.id } });
+      const data = res.data;
+      const arr = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
+      setAttendanceRecords(arr);
+    } catch (err) {
+      alert("Failed to end class.");
+    }
+  };
+
   const presentCount = useMemo(() => Object.values(attendanceState).filter(s => s === "Present").length, [attendanceState]);
   const absentCount = useMemo(() => Object.values(attendanceState).filter(s => s === "Absent").length, [attendanceState]);
 
@@ -353,12 +367,22 @@ function Attendance() {
                             <span className={styles.sessionRecordTitle}>{session.title}</span>
                             <span className={styles.sessionRecordTime}>{session.start_time}</span>
                           </div>
-                          <button
-                            className={styles.downloadBtn}
-                            onClick={() => handleDownload(session.id)}
-                          >
-                            <FiDownload /> Excel
-                          </button>
+                          {session.conducted !== false ? (
+                            <button
+                              className={styles.saveBtn}
+                              onClick={() => handleEndClass(session.id)}
+                              style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                            >
+                              End Class
+                            </button>
+                          ) : (
+                            <button
+                              className={styles.downloadBtn}
+                              onClick={() => handleDownload(session.id)}
+                            >
+                              <FiDownload /> Excel
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>

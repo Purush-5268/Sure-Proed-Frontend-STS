@@ -159,5 +159,9 @@ export const API_ENDPOINTS = {
     BY_ID: (id) => `/api/notifications/${id}/`,
     // Backend exposes: PATCH /api/notifications/{id}/mark_read/
     MARK_READ: (id) => `/api/notifications/${id}/mark_read/`,
+    // Web Push Notifications
+    PUSH_PUBLIC_KEY: "/api/notifications/push/public-key/",
+    PUSH_SUBSCRIBE: "/api/notifications/push/subscribe/",
+    PUSH_UNSUBSCRIBE: "/api/notifications/push/unsubscribe/",
   },
 };

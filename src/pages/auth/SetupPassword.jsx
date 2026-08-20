@@ -134,6 +134,13 @@ function SetupPassword() {
           <div className={styles.redirectLoader}>
             <div className={styles.loadingBar}></div>
           </div>
+          <button 
+            className={styles.submitBtn} 
+            onClick={() => navigate("/login")}
+            style={{ marginTop: '2rem' }}
+          >
+            Go to Login
+          </button>
         </div>
       </div>
     );

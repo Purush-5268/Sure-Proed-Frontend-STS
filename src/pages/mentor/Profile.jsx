@@ -55,7 +55,7 @@ function Profile() {
 
         if (!isMounted) return;
 
-        const profileData = profileRes.data?.results?.[0] || profileRes.data || {};
+        const profileData = profileRes.data?.results?.[0] || (Array.isArray(profileRes.data) ? profileRes.data[0] : profileRes.data) || {};
 
         setForm({
           first_name: userData.first_name || "",
@@ -91,6 +91,8 @@ function Profile() {
       }
     };
     loadProfile();
+    // Expose loadProfile for reload
+    window.__loadMentorProfile = loadProfile;
     return () => { isMounted = false; };
   }, [user]);
 
@@ -139,6 +141,11 @@ function Profile() {
         last_name: userRes.data.last_name,
         phone_number: userRes.data.phone_number,
       });
+
+      // Reload fresh data from backend
+      if (window.__loadMentorProfile) {
+        await window.__loadMentorProfile();
+      }
 
       setSuccess("Profile updated successfully!");
       setTimeout(() => setSuccess(""), 4000);

@@ -13,6 +13,7 @@ import { FiCalendar, FiClock, FiPlus, FiX } from "react-icons/fi";
 
 function ClassSchedule() {
   const [schedules, setSchedules] = useState([]);
+  const [activeSessions, setActiveSessions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,6 +22,12 @@ function ClassSchedule() {
       try {
         const response = await apiClient.get(API_ENDPOINTS.COHORTS.BASE);
         if (isMounted) setSchedules(Array.isArray(response.data?.results) ? response.data.results : (Array.isArray(response.data) ? response.data : []));
+        
+        // Fetch active sessions
+        const activeRes = await apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { params: { conducted: "true" } });
+        const activeData = activeRes.data;
+        const allActive = Array.isArray(activeData?.results) ? activeData.results : (Array.isArray(activeData) ? activeData : []);
+        if (isMounted) setActiveSessions(allActive.filter(s => s.conducted !== false));
       } catch (err) {
         console.error("Failed to load class schedule:", err);
         if (isMounted) setSchedules([]);
@@ -98,6 +105,18 @@ function ClassSchedule() {
     }));
   };
 
+  const handleEndClass = async (sessionId) => {
+    if (!window.confirm("Are you sure you want to end this class?")) return;
+    try {
+      await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId), { conducted: false });
+      // Remove from active sessions
+      setActiveSessions(prev => prev.filter(s => s.id !== sessionId));
+      alert("Class ended successfully. You can download the Excel report in the Attendance tab.");
+    } catch (err) {
+      alert("Failed to end class.");
+    }
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.1 } }
@@ -131,6 +150,7 @@ function ClassSchedule() {
             <Card className={styles.formCard}>
               <h2 className={styles.formTitle}>Schedule Domain Session</h2>
               <form onSubmit={handleScheduleSubmit} className={styles.formGrid}>
+                {/* ... (rest of form) ... */}
                 <div className={styles.fullWidth}>
                   <label className={styles.label}>Meet Title / Topic <span className={styles.required}>*</span></label>
                   <input 
@@ -222,6 +242,43 @@ function ClassSchedule() {
         )}
       </AnimatePresence>
 
+      {activeSessions.length > 0 && (
+        <div className={styles.scheduleList} style={{ marginBottom: '2rem' }}>
+          <h2 className={styles.sectionTitle}>Active Sessions</h2>
+          <div className={styles.grid}>
+            {activeSessions.map(session => (
+              <Card key={session.id} hoverable className={styles.scheduleCard} style={{ borderLeft: '4px solid #ef4444' }}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cohortName}>{session.title || "Live Class"}</h3>
+                  <Badge variant="error">LIVE</Badge>
+                </div>
+                <div className={styles.cardBody}>
+                  <div className={styles.infoRow}>
+                    <FiClock className={styles.icon} />
+                    <span>{session.start_time} — {session.end_time || "Ongoing"}</span>
+                  </div>
+                  {session.meeting_link && (
+                    <div className={styles.infoRow} style={{ marginTop: '0.5rem' }}>
+                      <a href={session.meeting_link} target="_blank" rel="noreferrer" style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: '500' }}>
+                        Join Meet Link
+                      </a>
+                    </div>
+                  )}
+                  <div style={{ marginTop: '1rem' }}>
+                    <button 
+                      onClick={() => handleEndClass(session.id)}
+                      style={{ background: '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
+                    >
+                      End Class
+                    </button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className={styles.scheduleList}>
         <h2 className={styles.sectionTitle}>Cohort Timelines</h2>
         
@@ -254,7 +311,7 @@ function ClassSchedule() {
                 <div className={styles.cardBody}>
                   <div className={styles.infoRow}>
                     <FiCalendar className={styles.icon} />
-                    <span>Course: {item.course?.name || item.course || "General"}</span>
+                    <span>Course: {item.course_name || item.course?.name || item.course || "General"}</span>
                   </div>
                   <div className={styles.timeline}>
                     <div className={styles.timePoint}>

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import apiClient from "../../services/apiClient";
+import apiClient, { fetchAllPages } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./AddMentor.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
@@ -28,10 +28,9 @@ function AddMentor() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch courses for Domain dropdown
-  useState(() => {
-    apiClient.get(API_ENDPOINTS.COURSES.BASE).then(res => {
-      setCourses(res.data?.results || res.data || []);
+  useEffect(() => {
+    fetchAllPages(API_ENDPOINTS.COURSES.BASE).then(res => {
+      setCourses(res || []);
     }).catch(err => console.error(err));
   }, []);
   const [error, setError] = useState("");

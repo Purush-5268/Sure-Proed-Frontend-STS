@@ -24,22 +24,7 @@ function MyCohorts() {
     let isMounted = true;
     const loadCohorts = async () => {
       try {
-        if (!user?.id) return;
-        // Fetch mentor's own profile to get their domain/course
-        const profileRes = await apiClient.get(API_ENDPOINTS.MENTORS.PROFILE_BY_USER(user.id));
-        const profileData = profileRes.data?.results?.[0] || profileRes.data;
-        const courseId = profileData?.course || null;
-
-        if (!courseId) {
-          if (isMounted) setCohorts([]);
-          return;
-        }
-
-        // Fetch ALL active cohorts for that domain/course
-        const response = await apiClient.get(API_ENDPOINTS.COHORTS.BASE, {
-          params: { course: courseId, status: "ACTIVE" }
-        });
-
+        const response = await apiClient.get(API_ENDPOINTS.COHORTS.MY_COHORTS);
         if (isMounted) {
           const data = response.data;
           setCohorts(Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []));

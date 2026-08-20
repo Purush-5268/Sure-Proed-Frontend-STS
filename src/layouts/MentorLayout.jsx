@@ -18,7 +18,7 @@ const mentorLinks = [
   { label: "Dashboard", path: "/mentor/dashboard", icon: <FaChalkboardTeacher /> },
   { label: "My Cohorts", path: "/mentor/cohorts", icon: <FaUsers /> },
   { label: "Class Schedule", path: "/mentor/class-schedule", icon: <FaCalendarAlt /> },
-  { label: "Meeting Links", path: "/mentor/meeting-links", icon: <FaVideo /> },
+  // Meeting Links removed as requested
   { label: "My Students", path: "/mentor/students", icon: <FaUserGraduate /> },
   { label: "Attendance", path: "/mentor/attendance", icon: <FaUserCheck /> },
   { label: "Assignments", path: "/mentor/assignments", icon: <FaTasks /> },

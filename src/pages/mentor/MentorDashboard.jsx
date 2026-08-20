@@ -192,7 +192,7 @@ function MentorDashboard() {
                 <Card className={styles.sectionCard}>
                   <div className={styles.cardHeader}>
                     <h2 className={styles.cardTitle}>Live Classes Today</h2>
-                    <Link to="/mentor/meeting-links" className={styles.viewAll}>View all</Link>
+                    {/* View all link removed */}
                   </div>
                   <AnimatePresence mode="popLayout">
                     {todaySessions.length === 0 ? (
@@ -305,7 +305,7 @@ function MentorDashboard() {
                   <h2 className={styles.cardTitle} style={{ marginBottom: '1rem' }}>Quick Actions</h2>
                   <div className={styles.quickActions}>
                     <QuickAction href="/mentor/attendance" icon={<FiCheckCircle />} label="Mark Attendance" />
-                    <QuickAction href="/mentor/meeting-links" icon={<FiClock />} label="View Meeting Links" />
+
                     <QuickAction href="/mentor/assignments" icon={<FiFileText />} label="Manage Assignments" />
                     <QuickAction href="/mentor/students" icon={<FiUsers />} label="View Students" />
                   </div>

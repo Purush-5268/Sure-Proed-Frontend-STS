@@ -212,6 +212,7 @@ function ForgotPassword() {
                 className={styles.otpInput}
               />
             </div>
+
             <button type="submit" className={`${styles.submitBtn} ${loading ? styles.loadingBtn : ''}`} disabled={loading || otp.length !== 6}>
               <span className={styles.btnText}>{loading ? "Verifying..." : "Verify OTP"}</span>
             </button>

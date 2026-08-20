@@ -34,9 +34,6 @@ function Dashboard() {
   const [attendanceHistory, setAttendanceHistory] = useState([]);
 
   useEffect(() => {
-    if ("Notification" in window && Notification.permission !== "denied") {
-      Notification.requestPermission();
-    }
     const abortController = new AbortController();
     let isMounted = true;
 

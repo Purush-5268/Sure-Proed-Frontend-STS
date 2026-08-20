@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiAlertCircle, FiCheckCircle } from "react-icons/fi";
-import apiClient, { normalizeListResponse } from "../../services/apiClient";
+import apiClient, { normalizeListResponse, fetchAllPages } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { courseService } from "../../services/courseService";
 import { cohortService } from "../../services/cohortService";
@@ -30,12 +30,12 @@ function AddStudent() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [coursesRes, cohortsRes] = await Promise.all([
-          courseService.getCourses(),
-          cohortService.getCohorts(),
+        const [coursesList, cohortsList] = await Promise.all([
+          fetchAllPages(API_ENDPOINTS.COURSES.BASE),
+          fetchAllPages(API_ENDPOINTS.COHORTS.BASE),
         ]);
-        setCourses(normalizeListResponse(coursesRes));
-        setCohorts(normalizeListResponse(cohortsRes));
+        setCourses(coursesList);
+        setCohorts(cohortsList);
       } catch (err) {
         console.error("Failed to load dropdown data", err);
       }
@@ -221,9 +221,9 @@ function AddStudent() {
             >
               <option value="">-- Select Batch --</option>
               {cohorts.filter(c => {
-                 const courseMatched = courses.find(course => course.id === form.domain);
-                 if (!courseMatched) return false;
-                 return c.course?.id === courseMatched.id || c.course === courseMatched.id;
+                 if (!form.domain) return false;
+                 const cohortCourseId = String(c.course?.id || c.course);
+                 return cohortCourseId === String(form.domain);
               }).map(coh => (
                 <option key={coh.id} value={coh.id}>{coh.name}</option>
               ))}

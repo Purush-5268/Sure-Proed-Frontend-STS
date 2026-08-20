@@ -14,6 +14,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaBell, FaCheckDouble, FaInfoCircle, FaCheckCircle, FaExclamationTriangle, FaBolt } from "react-icons/fa";
 import { notificationService } from "../../services/notificationService";
+import { pushNotificationService } from "../../services/pushNotificationService";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./NotificationBell.module.css";
 
@@ -44,6 +45,9 @@ function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [pushStatus, setPushStatus] = useState("unsupported");
+  const [isPushLoading, setIsPushLoading] = useState(false);
+
   const dropdownRef = useRef(null);
   const intervalRef = useRef(null);
 
@@ -71,11 +75,35 @@ function NotificationBell() {
     // Recurring poll — prevent duplicates by clearing before setting
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = setInterval(fetchNotifications, POLL_INTERVAL_MS);
+    
+    // Initialize push status
+    if (pushNotificationService.isSupported()) {
+      setPushStatus(Notification.permission);
+    }
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [isAuthenticated, fetchNotifications]);
+
+  const handleEnablePush = async () => {
+    if (!pushNotificationService.isSupported()) return;
+    
+    setIsPushLoading(true);
+    
+    try {
+      const permission = await Notification.requestPermission();
+      setPushStatus(permission);
+      
+      if (permission === "granted") {
+        await pushNotificationService.subscribe();
+      }
+    } catch (err) {
+      console.error("Failed to enable push notifications", err);
+    } finally {
+      setIsPushLoading(false);
+    }
+  };
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -201,6 +229,35 @@ function NotificationBell() {
               })
             )}
           </div>
+          
+          {/* Web Push Notification Settings Footer */}
+          {pushNotificationService.isSupported() && (
+            <div className={styles.pushFooter} style={{ padding: "10px", borderTop: "1px solid var(--border-color)", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.85rem", backgroundColor: "var(--background-alt)" }}>
+              <span>Browser Notifications</span>
+              {pushStatus === "granted" ? (
+                <span style={{ color: "var(--success-color)", fontWeight: "500", display: "flex", alignItems: "center", gap: "4px" }}><FaCheckCircle /> Enabled</span>
+              ) : pushStatus === "denied" ? (
+                <span style={{ color: "var(--danger-color)" }}>Permission Denied</span>
+              ) : (
+                <button 
+                  onClick={handleEnablePush} 
+                  disabled={isPushLoading}
+                  style={{ 
+                    padding: "4px 8px", 
+                    borderRadius: "4px", 
+                    background: "var(--primary-color)", 
+                    color: "white", 
+                    border: "none", 
+                    cursor: isPushLoading ? "not-allowed" : "pointer",
+                    fontSize: "0.8rem",
+                    fontWeight: "500"
+                  }}
+                >
+                  {isPushLoading ? "Enabling..." : "Enable"}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

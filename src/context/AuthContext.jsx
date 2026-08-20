@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { authService } from "../services/authService";
+import { pushNotificationService } from "../services/pushNotificationService";
 import apiClient from "../services/apiClient";
 import { API_ENDPOINTS } from "../constants/apiEndpoints";
 import {
@@ -147,7 +148,10 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Attempt best-effort push unsubscribe before deleting JWT
+    await pushNotificationService.unsubscribe();
+
     clearAuthStorage();
     authService.logout();
     setUser(null);
