@@ -37,6 +37,16 @@ function Dashboard() {
   const [isPushLoading, setIsPushLoading] = useState(false);
 
   useEffect(() => {
+    // Automatically trigger browser native prompt on load if supported and not denied
+    if (pushNotificationService.isSupported() && Notification.permission === "default") {
+      Notification.requestPermission().then(perm => {
+        setPushStatus(perm);
+        if (perm === "granted") {
+          pushNotificationService.subscribe();
+        }
+      });
+    }
+
     const abortController = new AbortController();
     let isMounted = true;
 

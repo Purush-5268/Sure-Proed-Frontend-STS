@@ -4,6 +4,7 @@ import { courseService } from "../../services/courseService";
 import { attendanceService } from "../../services/attendanceService";
 import { normalizeListResponse } from "../../services/apiClient";
 import apiClient from "../../services/apiClient";
+import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./ScheduleClass.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 
@@ -323,14 +324,14 @@ function ScheduleClass() {
         session_type: request.sessionType,
         group_name: finalGroupName,
         stream_id: request.streamId,
-        lst_batch: automationInfo?.starting_batch,
+        lst_batch: request.lstBatchNumber,
         guest_emails: request.guestEmails
       };
 
       let res;
       if (request.sessionType === "LST") {
         res = await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BASE}generate-lst/`, {
-          lst_batch: automationInfo?.starting_batch,
+          lst_batch: request.lstBatchNumber,
           class_date: request.startTime.split("T")[0],
           start_time: request.startTime.split("T")[1] + ":00",
           end_time: request.endTime.split("T")[1] + ":00",
@@ -341,18 +342,10 @@ function ScheduleClass() {
         res = await attendanceService.scheduleSession(formattedData);
       }
 
-      const expectedCount = res?.data?.total_attendee_count ?? res?.total_attendee_count ?? res?.data?.expected_attendees_count ?? res?.expected_attendees_count ?? 0;
-      setSuccessMessage(`Live class scheduled! Expected Attendees: ${expectedCount}`);
+      setSuccessMessage(`Live class scheduled successfully! Check the radar below for details.`);
 
-      // 🚨 INSTANT UI UPDATE: Push the newly created class directly into the state
-      const newSession = res?.data || res;
-      const resolvedId = newSession?.id || newSession?.session_id; // Fix for LST returning session_id instead of id
-      if (newSession && resolvedId) {
-        newSession.id = resolvedId; // Ensure ID is mapped correctly for React keys
-        setActiveAdminClasses(prev => [newSession, ...prev]);
-      } else {
-        loadActiveClasses(); // Fallback if backend doesn't return the object
-      }
+      // 🚨 Fetch fresh data to ensure we have all fields (like class_date, counts) correctly populated
+      await loadActiveClasses();
 
       setRequest({
         sessionType: "Domain",
@@ -365,6 +358,7 @@ function ScheduleClass() {
         title: "",
       });
     } catch (err) {
+      console.error("SCHEDULING ERROR:", err);
       if (err.customError) {
         setErrorMessage(err.customError);
       } else if (err.response?.status === 403) {
@@ -373,7 +367,7 @@ function ScheduleClass() {
         const serverError = err.response.data ? JSON.stringify(err.response.data) : "Bad Request";
         setErrorMessage(`Validation Error: ${serverError}`);
       } else {
-        setErrorMessage("An unexpected network error occurred while scheduling.");
+        setErrorMessage(`An unexpected network error occurred while scheduling: ${err.message || err.toString()}`);
       }
     } finally {
       setIsLoading(false);
@@ -478,6 +472,7 @@ function ScheduleClass() {
             >
               <option value="Domain">Technical Domain (Specific Group)</option>
               <option value="LST">Life Skills Training (Entire Batch)</option>
+              <option value="Soft Skills">Soft Skills Training</option>
               <option value="Celebration">Universal Celebration (Everyone)</option>
             </select>
           </div>
@@ -515,7 +510,7 @@ function ScheduleClass() {
               <div className="premium-grid-2">
                 <div>
                   <label className="premium-label">LST Batch Number *</label>
-                  <select value={automationInfo?.starting_batch} onChange={(e) => setRequest({ ...request, lstBatchNumber: e.target.value })} required className={`premium-input ${styles.formInput}`}>
+                  <select value={request.lstBatchNumber} onChange={(e) => setRequest({ ...request, lstBatchNumber: e.target.value })} required className={`premium-input ${styles.formInput}`}>
                     <option value="">-- Select Batch --</option>
                     <option value="BATCH_1">Batch 1</option>
                     <option value="BATCH_2">Batch 2</option>
