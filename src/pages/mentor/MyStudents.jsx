@@ -80,16 +80,11 @@ function MyStudents() {
     if (!messageText.trim() || !messageDialog) return;
     setSendingMessage(true);
     try {
-      // Attempt to send notification via existing notification endpoint if available
-      // For now, use mailto as fallback
       await apiClient.post("/api/notifications/", {
         user_id: messageDialog.studentId,
         title: "Message from Mentor",
         message: messageText.trim(),
         notification_type: "INFO",
-      }).catch(() => {
-        // If notification endpoint doesn't exist, silently continue
-        console.warn("Notification API not available. Message not sent to backend.");
       });
       setMessageSent(true);
       setTimeout(() => {
@@ -97,8 +92,9 @@ function MyStudents() {
         setMessageText("");
         setMessageSent(false);
       }, 1500);
-    } catch {
-      setMessageSent(true);
+    } catch (err) {
+      console.error("Failed to send message:", err);
+      alert("Failed to send message. Please try again.");
     } finally {
       setSendingMessage(false);
     }

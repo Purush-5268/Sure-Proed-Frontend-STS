@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import apiClient, { normalizeListResponse } from "../../services/apiClient";
+import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./AddCohort.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
@@ -19,6 +19,7 @@ function AddCohort() {
     meeting_link: "",
     lst_batch: "",
   });
+
   const [loading, setLoading] = useState(false);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [error, setError] = useState("");
@@ -28,11 +29,30 @@ function AddCohort() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [coursesResponse, userResponse] = await Promise.all([
-          apiClient.get(API_ENDPOINTS.COURSES.BASE),
+        const fetchAll = async (url) => {
+          let results = [];
+          let currentUrl = url;
+          while (currentUrl) {
+            const res = await apiClient.get(currentUrl);
+            if (res.data && res.data.results) {
+              results = [...results, ...res.data.results];
+              currentUrl = res.data.next ? res.data.next.replace(apiClient.defaults.baseURL, '') : null;
+            } else if (Array.isArray(res.data)) {
+              results = [...results, ...res.data];
+              currentUrl = null;
+            } else {
+              break;
+            }
+          }
+          return results;
+        };
+
+        const [coursesData, userResponse] = await Promise.all([
+          fetchAll(API_ENDPOINTS.COURSES.BASE),
           apiClient.get(API_ENDPOINTS.USERS.ME),
         ]);
-        setCourses(normalizeListResponse(coursesResponse.data));
+        
+        setCourses(coursesData);
         setCurrentUser(userResponse.data);
       } catch (err) {
         console.error("Failed to load cohort form data:", err);
@@ -54,8 +74,8 @@ function AddCohort() {
     setError("");
     setSuccess("");
 
-    if (!form.code.trim() || !form.name.trim() || !form.course || !form.start_date || !form.end_date) {
-      setError("Please provide the cohort code, name, course, and both dates.");
+    if (!form.code.trim() || !form.course || !form.start_date || !form.end_date) {
+      setError("Please provide the cohort code, course, and both dates.");
       return;
     }
 
@@ -69,7 +89,7 @@ function AddCohort() {
     try {
       const payload = {
         code: form.code.trim(),
-        name: form.name.trim(),
+        name: form.name.trim() || undefined,
         course: form.course,
         start_date: form.start_date,
         end_date: form.end_date,
@@ -82,12 +102,12 @@ function AddCohort() {
 
       await apiClient.post(API_ENDPOINTS.COHORTS.BASE, payload);
       setSuccess("Cohort created successfully.");
-      navigate("/admin/cohorts");
+      setTimeout(() => navigate("/admin/cohorts"), 1000);
     } catch (err) {
       const message =
         err?.response?.data?.detail ||
         err?.response?.data?.message ||
-        "Unable to create the cohort right now.";
+        "Unable to create the cohort right now. Check backend validation.";
       setError(message);
     } finally {
       setLoading(false);
@@ -95,62 +115,61 @@ function AddCohort() {
   };
 
   return (
-    <div style={{ padding: "2rem", width: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+    <div className={styles.container}>
+      <div className={styles.header}>
         <div>
-          <h1 style={{ margin: 0, color: "var(--text-primary)", fontSize: "2rem" }}>Add New Batch / Cohort</h1>
-          <p style={{ color: "var(--text-muted)", margin: "4px 0 0 0" }}>Create a new training group and assign it to a Domain.</p>
+          <h1>Add New Batch / Cohort</h1>
+          <p className="text-secondary">Create a new training group and assign it to a Domain.</p>
         </div>
-        <Link to="/admin/cohorts" style={{ padding: "10px 20px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>← Back to Batches</Link>
+        <Link to="/admin/cohorts" className={styles.backBtn}>← Back to Batches</Link>
       </div>
 
-      <div style={{ backgroundColor: "var(--bg-surface)", padding: "2.5rem", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
-        {error ? <div style={{ color: "#b91c1c", backgroundColor: "#fee2e2", padding: "12px", borderRadius: "8px", marginBottom: "1.5rem", fontWeight: "bold" }}>{error}</div> : null}
-        {success ? <div style={{ color: "#166534", backgroundColor: "var(--bg-nested)", padding: "12px", borderRadius: "8px", marginBottom: "1.5rem", fontWeight: "bold" }}>{success}</div> : null}
+      <div className={styles.card}>
+        {error && <div className={styles.errorAlert}>{error}</div>}
+        {success && <div className={styles.successAlert}>{success}</div>}
 
         {loadingCourses ? (
           <SkeletonLoader variant="form" rows={1} />
         ) : (
-          <form onSubmit={handleSubmit} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Group / Cohort Code *</label>
-              <input type="text" name="code" value={form.code} onChange={handleChange} placeholder="e.g. G15" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <div className={styles.group}>
+              <label>Group / Cohort Code *</label>
+              <input type="text" name="code" value={form.code} onChange={handleChange} placeholder="e.g. G15" required />
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Group / Cohort Name *</label>
-              <input type="text" name="name" value={form.name} onChange={handleChange} placeholder="Enter batch name" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+            <div className={styles.group}>
+              <label>Group / Cohort Name</label>
+              <input type="text" name="name" value={form.name} onChange={handleChange} placeholder="Enter batch name (Optional)" />
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Assign Course / Domain *</label>
-              <select name="course" value={form.course} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
+            <div className={styles.group}>
+              <label>Assign Course / Domain *</label>
+              <select name="course" value={form.course} onChange={handleChange} required>
                 <option value="">-- Select a Domain --</option>
                 {courses.map((course) => (
-                  <option key={course.id} value={course.id}>{course.name}</option>
+                  <option key={course.id} value={course.id}>{course.name || course.title || course.code}</option>
                 ))}
               </select>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Maximum Students *</label>
-              <input type="number" name="max_students" value={form.max_students} onChange={handleChange} min="1" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+            <div className={styles.group}>
+              <label>Maximum Students *</label>
+              <input type="number" name="max_students" value={form.max_students} onChange={handleChange} min="1" required />
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Start Date *</label>
-              <input type="date" name="start_date" value={form.start_date} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+            <div className={styles.group}>
+              <label>Start Date *</label>
+              <input type="date" name="start_date" value={form.start_date} onChange={handleChange} required />
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>End Date *</label>
-              <input type="date" name="end_date" value={form.end_date} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+            <div className={styles.group}>
+              <label>End Date *</label>
+              <input type="date" name="end_date" value={form.end_date} onChange={handleChange} required />
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Status</label>
-              <select name="status" value={form.status} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
+            <div className={styles.group}>
+              <label>Status</label>
+              <select name="status" value={form.status} onChange={handleChange}>
                 <option value="DRAFT">Draft</option>
                 <option value="OPEN">Open for Applications</option>
                 <option value="ACTIVE">Active (In Progress)</option>
@@ -158,25 +177,29 @@ function AddCohort() {
               </select>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>LST Batch Assignment (Optional)</label>
-              <select name="lst_batch" value={form.lst_batch} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
+            <div className={styles.group}>
+              <label>LST Batch Assignment (Optional)</label>
+              <select name="lst_batch" value={form.lst_batch} onChange={handleChange}>
                 <option value="">-- No LST Batch --</option>
                 <option value="BATCH_1">Batch 1</option>
                 <option value="BATCH_2">Batch 2</option>
               </select>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px", gridColumn: "1 / -1" }}>
-              <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Temporary Meeting Link (Optional)</label>
-              <input type="url" name="meeting_link" value={form.meeting_link} onChange={handleChange} placeholder="https://meet.google.com/..." style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+            <div className={styles.full}>
+              <div className={styles.group}>
+                <label>Temporary Meeting Link (Optional)</label>
+                <input type="url" name="meeting_link" value={form.meeting_link} onChange={handleChange} placeholder="https://meet.google.com/..." />
+              </div>
             </div>
 
-            <div style={{ gridColumn: "1 / -1", display: "flex", gap: "1rem", marginTop: "1rem", borderTop: "1px solid #e5e7eb", paddingTop: "1.5rem" }}>
-              <button type="submit" disabled={loading} style={{ padding: "12px 24px", backgroundColor: "#2563eb", color: "white", borderRadius: "8px", border: "none", fontWeight: "bold", cursor: loading ? "not-allowed" : "pointer" }}>
-                {loading ? "Creating..." : "Create Batch"}
-              </button>
-              <Link to="/admin/cohorts" style={{ padding: "12px 24px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>Cancel</Link>
+            <div className={styles.full} style={{ borderTop: "1px solid var(--border-color)", paddingTop: "1.5rem", marginTop: "1rem" }}>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <button type="submit" disabled={loading} className={styles.submitBtn}>
+                  {loading ? "Creating..." : "Create Batch"}
+                </button>
+                <Link to="/admin/cohorts" className={styles.cancelBtn}>Cancel</Link>
+              </div>
             </div>
           </form>
         )}

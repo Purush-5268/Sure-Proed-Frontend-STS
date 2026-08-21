@@ -5,13 +5,12 @@
 }
 
 .card {
-  width: 100%; /* Takes full width instead of 900px */
-  max-width: 100%; /* Prevents it from stretching infinitely on huge monitors */
-  
+  width: 100%;
+  max-width: 100%;
   background: var(--bg-surface);
   border-radius: 12px;
   padding: 40px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Softer, more modern shadow */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .header {
@@ -26,17 +25,19 @@
   color: var(--text-primary);
 }
 
-.header a {
+.backBtn {
   text-decoration: none;
-  background: #2563eb;
-  color: white;
+  background: var(--bg-nested);
+  color: var(--text-secondary);
   padding: 10px 18px;
   border-radius: 8px;
   font-weight: 600;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
 }
 
-.header a:hover {
-  background: #1d4ed8;
+.backBtn:hover {
+  background: var(--border-color);
 }
 
 .form {
@@ -50,47 +51,111 @@
   flex-direction: column;
 }
 
-.group label,
-.full label {
+.group label {
   margin-bottom: 8px;
   font-weight: 600;
   color: var(--text-primary);
+  font-size: 14px;
 }
 
 .group input,
 .group select,
-.full textarea {
+.multiSelect {
   padding: 12px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
   outline: none;
   font-size: 15px;
+  transition: border-color 0.2s;
 }
 
 .group input:focus,
 .group select:focus,
-.full textarea:focus {
-  border-color: #2563eb;
+.multiSelect:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1);
+}
+
+.multiSelect {
+  height: 120px;
+  resize: vertical;
+}
+
+.multiSelect option {
+  padding: 8px;
+  border-radius: 4px;
+}
+.multiSelect option:checked {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+}
+
+.helpText {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 
 .full {
   grid-column: 1 / 3;
-  display: flex;
-  flex-direction: column;
 }
 
-button {
-  grid-column: 1 / 3;
-  padding: 14px;
+.submitBtn {
+  padding: 12px 24px;
   border: none;
-  background: #2563eb;
+  background: var(--primary-color);
   color: white;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
-button:hover {
-  background: #1d4ed8;
+.submitBtn:hover:not(:disabled) {
+  background: var(--primary-color-hover);
+}
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  padding: 12px 24px;
+  background: var(--bg-nested);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.cancelBtn:hover {
+  background: var(--border-color);
+}
+
+.errorAlert {
+  color: #b91c1c;
+  background-color: #fee2e2;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-weight: 600;
+  border-left: 4px solid #b91c1c;
+}
+
+.successAlert {
+  color: #166534;
+  background-color: #dcfce7;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-weight: 600;
+  border-left: 4px solid #166534;
 }

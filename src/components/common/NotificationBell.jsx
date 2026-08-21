@@ -77,7 +77,7 @@ function NotificationBell() {
     // Recurring poll — prevent duplicates by clearing before setting
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = setInterval(fetchNotifications, POLL_INTERVAL_MS);
-    
+
     // Initialize push status
     if (pushNotificationService.isSupported()) {
       if (Notification.permission === "default") {
@@ -108,7 +108,7 @@ function NotificationBell() {
 
   const handleTogglePush = async () => {
     if (!pushNotificationService.isSupported()) return;
-    
+
     setIsPushLoading(true);
     try {
       if (isSubscribed) {
@@ -169,12 +169,12 @@ function NotificationBell() {
         window.location.href = finalUrl;
         return;
       }
-      
+
       const rolePrefix = `/${user?.role?.toLowerCase()}`;
       if (user?.role && !finalUrl.startsWith(rolePrefix) && finalUrl.startsWith('/')) {
         finalUrl = `${rolePrefix}${finalUrl}`;
       }
-      
+
       navigate(finalUrl);
     }
   };
@@ -182,12 +182,13 @@ function NotificationBell() {
   const handleMarkAllRead = async () => {
     const unreadIds = unreadNotifications.map((n) => n.id);
     if (!unreadIds.length) return;
-    // Optimistic UI update
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-    // Persist to backend using individual mark_read calls (no bulk endpoint exists)
     try {
+      // Optimistic update
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+
+      // Persist to backend using the bulk endpoint
       await notificationService.markAllRead(unreadIds);
-    } catch {
+    } catch (err) {
       // Re-fetch to restore accurate state if bulk fails
       fetchNotifications();
     }
@@ -244,9 +245,8 @@ function NotificationBell() {
                 return (
                   <button
                     key={notification.id}
-                    className={`${styles.notificationItem} ${
-                      !notification.is_read ? styles.unread : ""
-                    } ${notification.action_url ? styles.clickable : ""}`}
+                    className={`${styles.notificationItem} ${!notification.is_read ? styles.unread : ""
+                      } ${notification.action_url ? styles.clickable : ""}`}
                     onClick={() => handleNotificationClick(notification)}
                     disabled={!notification.action_url && notification.is_read}
                   >
@@ -269,7 +269,7 @@ function NotificationBell() {
               })
             )}
           </div>
-          
+
           {/* Web Push Notification Settings Footer */}
           {pushNotificationService.isSupported() && (
             <div className={styles.pushFooter} style={{ padding: "10px", borderTop: "1px solid var(--border-color)", display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.85rem", backgroundColor: "var(--background-alt)" }}>
@@ -281,7 +281,7 @@ function NotificationBell() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                 <span>Browser Notifications</span>
                 {pushStatus === "granted" && isSubscribed ? (
-                  <button 
+                  <button
                     onClick={handleTogglePush}
                     disabled={isPushLoading}
                     title="Click to disable notifications"
@@ -295,15 +295,15 @@ function NotificationBell() {
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Click the 🔒 icon in the URL bar to allow</span>
                   </div>
                 ) : (
-                  <button 
-                    onClick={handleTogglePush} 
+                  <button
+                    onClick={handleTogglePush}
                     disabled={isPushLoading}
-                    style={{ 
-                      padding: "4px 8px", 
-                      borderRadius: "4px", 
-                      background: "var(--primary-color)", 
-                      color: "white", 
-                      border: "none", 
+                    style={{
+                      padding: "4px 8px",
+                      borderRadius: "4px",
+                      background: "var(--primary-color)",
+                      color: "white",
+                      border: "none",
                       cursor: isPushLoading ? "not-allowed" : "pointer",
                       fontSize: "0.8rem",
                       fontWeight: "500"

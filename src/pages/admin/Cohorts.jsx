@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import apiClient, { normalizeListResponse } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { cohortService } from "../../services/cohortService";
-import styles from "./Cohorts.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
+import styles from "./Cohorts.module.css";
 
 function Cohorts() {
   const [cohorts, setCohorts] = useState([]);
@@ -31,36 +32,47 @@ function Cohorts() {
   const handleStop = async (id) => {
     if (!window.confirm("Are you sure you want to stop applications? This cohort will no longer be visible to students.")) return;
     try {
-      await cohortService.patchCohort(id, { status: "CLOSED" });
+      await cohortService.patchCohort(id, { status: "CLOSED" }); 
       setCohorts(prev => prev.map(c => c.id === id ? { ...c, status: "CLOSED" } : c));
     } catch (err) {
       alert("❌ Failed to stop applications.");
     }
   };
 
-  const handleBatchChange = async (id, newBatch) => {
-    try {
-      const response = await cohortService.patchCohort(id, { lst_batch: newBatch || null });
-      setCohorts(prev => prev.map(c => c.id === id ? response : c));
-    } catch (err) {
-      alert("❌ Failed to update batch assignment.");
-    }
-  };
-
   const [courses, setCourses] = useState([]);
+  const [activeFilter, setActiveFilter] = useState("ALL");
 
   useEffect(() => {
     let isMounted = true;
     const loadData = async () => {
       try {
-        // Fetch both Cohorts and Courses to map the UUIDs to Names
-        const [cohortsRes, coursesRes] = await Promise.all([
-          apiClient.get(API_ENDPOINTS.COHORTS.BASE),
-          apiClient.get(API_ENDPOINTS.COURSES.BASE)
+        // Helper to fetch all pages sequentially
+        const fetchAll = async (url) => {
+          let results = [];
+          let currentUrl = url;
+          while (currentUrl) {
+            const res = await apiClient.get(currentUrl);
+            if (res.data && res.data.results) {
+              results = [...results, ...res.data.results];
+              currentUrl = res.data.next ? res.data.next.replace(apiClient.defaults.baseURL, '') : null;
+            } else if (Array.isArray(res.data)) {
+              results = [...results, ...res.data];
+              currentUrl = null;
+            } else {
+              break;
+            }
+          }
+          return results;
+        };
+
+        const [allCohorts, allCourses] = await Promise.all([
+          fetchAll(API_ENDPOINTS.COHORTS.BASE),
+          fetchAll(API_ENDPOINTS.COURSES.BASE)
         ]);
+
         if (isMounted) {
-          setCohorts(normalizeListResponse(cohortsRes.data));
-          setCourses(normalizeListResponse(coursesRes.data));
+          setCohorts(allCohorts);
+          setCourses(allCourses);
         }
       } catch (err) {
         console.error("Failed to load data:", err);
@@ -82,6 +94,11 @@ function Cohorts() {
     return course ? (course.name || course.title) : courseId; // Fallback to ID if not found
   };
 
+  const filteredCohorts = cohorts.filter((c) => {
+    if (activeFilter === "ALL") return true;
+    return c.status?.toUpperCase() === activeFilter.toUpperCase();
+  });
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -91,95 +108,107 @@ function Cohorts() {
         </div>
 
         <Link to="/admin/add-cohort" className={styles.addBtn}>
-          + Add Cohort
+          + Create Cohort
         </Link>
+      </div>
+      
+      <div className={styles.filterSection}>
+        <label className={styles.filterLabel}>Status: </label>
+        <select 
+          value={activeFilter} 
+          onChange={(e) => setActiveFilter(e.target.value)}
+          className={styles.statusDropdown}
+        >
+          <option value="ALL">All</option>
+          <option value="DRAFT">Draft</option>
+          <option value="OPEN">Open (Enrollment)</option>
+          <option value="ACTIVE">Active (Pre-Training)</option>
+          <option value="TRAINING">Training</option>
+          <option value="INTERNSHIP">Internship</option>
+          <option value="SOFT SKILLS">Soft Skills</option>
+          <option value="COMPLETED">Completed (Graduated)</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
       </div>
 
       {loading ? (
-        <SkeletonLoader variant="table" rows={5} />
-      ) : cohorts.length === 0 ? (
-        <div className="premium-empty-state">
-          <div className="premium-empty-state-icon">👥</div>
-          <h3>No cohorts found</h3>
-          <p>No cohorts have been created yet. Create one from the button above.</p>
+        <div style={{ padding: "20px 0" }}>
+          <SkeletonLoader variant="table" rows={6} />
         </div>
+      ) : cohorts.length === 0 ? (
+        <p>No cohorts have been created yet. Create one from the button above.</p>
       ) : (
-        <div className="premium-table-container">
-          <table className="premium-table">
-            <thead>
-              <tr>
-                <th>Cohort</th>
-                <th>Course</th>
-                <th>Start Date</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {cohorts.map((cohort) => (
-                <tr key={cohort.id} style={{ borderBottom: "1px solid var(--border-color)" }}>
-                  <td style={{ padding: "12px" }}>
-                    <div>{cohort.name || cohort.code || "N/A"}</div>
-                    <div style={{ marginTop: "6px", fontSize: "12px", color: "var(--text-secondary)" }}>
-                      <label style={{ marginRight: "4px", fontWeight: "600" }}>LST Batch:</label>
-                      <select
-                        value={cohort.lst_batch || ""}
-                        onChange={(e) => handleBatchChange(cohort.id, e.target.value)}
-                        style={{ padding: "2px 4px", fontSize: "12px", borderRadius: "4px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-primary)", color: "var(--text-primary)", cursor: "pointer" }}
-                      >
-                        <option value="">None</option>
-                        <option value="BATCH_1">Batch 1</option>
-                        <option value="BATCH_2">Batch 2</option>
-                      </select>
-                    </div>
-                  </td>
-                  {/* Safely map the UUID to the Course Name */}
-                  <td style={{ padding: "12px", fontWeight: "500", color: "#4338ca" }}>
-                    {cohort.course?.name || getCourseName(cohort.course)}
-                  </td>
-                  <td style={{ padding: "12px" }}>{cohort.start_date || "N/A"}</td>
-                  <td style={{ padding: "12px" }} className={cohort.status === "ACTIVE" ? styles.active : cohort.status === "OPEN" ? styles.upcoming : styles.completed}>
-                    <div style={{ fontWeight: 'bold' }}>{cohort.status || "DRAFT"}</div>
-                    {cohort.status === "OPEN" && cohort.end_date && (
-                      <div style={{ fontSize: '11px', color: "var(--text-muted)", marginTop: '4px' }}>
-                        Closes: {cohort.end_date}
-                      </div>
-                    )}
-                  </td>
-
-                  <td style={{ padding: "12px" }}>
-                    {/* Fixed Flexbox alignment for action buttons */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <Link to={`/admin/cohort-details/${cohort.id}`} style={{ padding: '6px 12px', backgroundColor: '#3b82f6', color: 'white', textDecoration: 'none', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>View</Link>
-                      <Link to={`/admin/edit-cohort/${cohort.id}`} style={{ padding: '6px 12px', backgroundColor: '#fbbf24', color: '#92400e', textDecoration: 'none', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>Edit</Link>
-
-                      {/* Status Management Controls */}
-                      {cohort.status !== "OPEN" && cohort.status !== "ACTIVE" ? (
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                          {publishCohortId === cohort.id ? (
-                            <>
-                              <input
-                                type="date"
-                                value={publishDate}
-                                onChange={(e) => setPublishDate(e.target.value)}
-                                style={{ padding: '4px', fontSize: '12px', borderRadius: '4px', border: "1px solid var(--border-color)" }}
-                              />
-                              <button onClick={() => handlePublish(cohort.id)} style={{ backgroundColor: '#10b981', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>Save</button>
-                              <button onClick={() => setPublishCohortId(null)} style={{ backgroundcolor: "var(--text-muted)", color: 'white', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>Cancel</button>
-                            </>
+        <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Cohort</th>
+                  <th>Status</th>
+                  <th>Course</th>
+                  <th>Students</th>
+                  <th>Applications</th>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <AnimatePresence>
+                  {filteredCohorts.map((cohort) => (
+                    <motion.tr 
+                      key={cohort.id} 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      style={{ borderBottom: "1px solid #e5e7eb" }}
+                    >
+                      <td style={{ padding: "12px" }}>
+                        <strong>{cohort.name || cohort.code || "N/A"}</strong>
+                      </td>
+                      <td style={{ padding: "12px" }}>
+                        <span className={`${styles.statusBadge} ${styles[cohort.status?.toLowerCase()] || ""}`}>
+                          {cohort.status || "UNKNOWN"}
+                        </span>
+                      </td>
+                      <td style={{ padding: "12px", fontWeight: "500", color: "#4338ca" }}>
+                        {cohort.course?.name || getCourseName(cohort.course)}
+                      </td>
+                      <td style={{ padding: "12px" }}>{cohort.students_count || 0}</td>
+                      <td style={{ padding: "12px" }}>{cohort.applications_count || 0}</td>
+                      <td style={{ padding: "12px" }}>{cohort.start_date || "N/A"}</td>
+                      <td style={{ padding: "12px" }}>{cohort.end_date || "N/A"}</td>
+                      <td style={{ padding: "12px" }}>
+                        <div className={styles.actions}>
+                          <Link to={`/admin/cohort-details/${cohort.id}`} className={styles.viewBtn}>View</Link>
+                          <Link to={`/admin/edit-cohort/${cohort.id}`} className={styles.editBtn}>Edit</Link>
+                          
+                          {cohort.status !== "OPEN" && cohort.status !== "ACTIVE" ? (
+                            <div className={styles.statusControls}>
+                              {publishCohortId === cohort.id ? (
+                                <>
+                                  <input 
+                                    type="date" 
+                                    value={publishDate} 
+                                    onChange={(e) => setPublishDate(e.target.value)} 
+                                    className={styles.dateInput}
+                                  />
+                                  <button onClick={() => handlePublish(cohort.id)} className={styles.saveBtn}>Save</button>
+                                  <button onClick={() => setPublishCohortId(null)} className={styles.cancelBtn}>Cancel</button>
+                                </>
+                              ) : (
+                                <button onClick={() => setPublishCohortId(cohort.id)} className={styles.publishBtn}>Publish</button>
+                              )}
+                            </div>
                           ) : (
-                            <button onClick={() => setPublishCohortId(cohort.id)} style={{ backgroundColor: '#3b82f6', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>Publish</button>
+                            <button onClick={() => handleStop(cohort.id)} className={styles.stopBtn}>Stop Applications</button>
                           )}
                         </div>
-                      ) : (
-                        <button onClick={() => handleStop(cohort.id)} style={{ backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>Stop Applications</button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </AnimatePresence>
+              </tbody>
           </table>
         </div>
       )}

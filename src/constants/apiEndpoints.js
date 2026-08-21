@@ -164,4 +164,21 @@ export const API_ENDPOINTS = {
     PUSH_SUBSCRIBE: "/api/notifications/push/subscribe/",
     PUSH_UNSUBSCRIBE: "/api/notifications/push/unsubscribe/",
   },
+
+  // Feedback
+  FEEDBACK: {
+    BASE: "/api/feedback/",
+  },
+
+  // Announcements
+  ANNOUNCEMENTS: {
+    BASE: "/api/announcements/",
+    BY_ID: (id) => `/api/announcements/${id}/`,
+  },
+
+  // Training Sessions (LST/SST)
+  TRAINING_SESSIONS: {
+    BASE: "/api/training-sessions/",
+    BY_ID: (id) => `/api/training-sessions/${id}/`,
+  },
 };

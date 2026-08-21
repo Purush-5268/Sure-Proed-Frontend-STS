@@ -14,6 +14,7 @@ import { FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi";
 import FeedbackWidget from "../../components/common/FeedbackWidget";
 import AttendanceWarningPopup from "../../components/attendance/AttendanceWarningPopup";
 import { pushNotificationService } from "../../services/pushNotificationService";
+import PushNotificationBanner from "../../components/common/PushNotificationBanner";
 
 function Dashboard() {
   const { user } = useAuth();
@@ -33,20 +34,8 @@ function Dashboard() {
   const [assignmentStats, setAssignmentStats] = useState({ completed: 0, pending: 0, overdue: 0 });
   const [examStats, setExamStats] = useState({ completed: 0, upcoming: 0 });
   const [attendanceHistory, setAttendanceHistory] = useState([]);
-  const [pushStatus, setPushStatus] = useState("Notification" in window ? Notification.permission : "default");
-  const [isPushLoading, setIsPushLoading] = useState(false);
 
   useEffect(() => {
-    // Automatically trigger browser native prompt on load if supported and not denied
-    if (pushNotificationService.isSupported() && Notification.permission === "default") {
-      Notification.requestPermission().then(perm => {
-        setPushStatus(perm);
-        if (perm === "granted") {
-          pushNotificationService.subscribe();
-        }
-      });
-    }
-
     const abortController = new AbortController();
     let isMounted = true;
 
@@ -86,7 +75,7 @@ function Dashboard() {
               setAttendanceStats(attData[0]);
               if (attData[0].history) setAttendanceHistory(attData[0].history);
             }
-          }).catch(() => {});
+          }).catch(() => { });
 
           Promise.all([
             assignmentService.getAssignments().catch(() => []),
@@ -103,16 +92,17 @@ function Dashboard() {
           examService.getExams().then(exRes => {
             const exams = exRes.results || exRes || [];
             if (isMounted) setExamStats({ completed: exams.filter(e => e.status === 'COMPLETED').length, upcoming: exams.filter(e => e.status !== 'COMPLETED').length });
-          }).catch(() => {});
+          }).catch(() => { });
         }
 
+        // Fetch scheduled LST/SST/Domain sessions via the central attendance logic
         attendanceService.getAttendanceRecords({ status: "ACTIVE" }).then(sessionsRes => {
           if (sessionsRes) {
             const rawData = sessionsRes.data || sessionsRes;
             const sessionsArray = Array.isArray(rawData) ? rawData : (rawData.results || []);
             if (isMounted) setTodayClasses(sessionsArray);
           }
-        }).catch(() => {});
+        }).catch(() => { });
 
       } catch (err) {
         console.error("Error loading core dashboard data:", err);
@@ -134,7 +124,7 @@ function Dashboard() {
     }
     setTimeout(() => {
       setIsJoining(false);
-      window.open(cls.meeting_link.startsWith('http') ? cls.meeting_link : `https://${cls.meeting_link}`, '_blank');
+      window.open(cls.meeting_link?.startsWith('http') ? cls.meeting_link : `https://${cls.meeting_link}`, '_blank');
     }, 1000);
   };
 
@@ -187,38 +177,7 @@ function Dashboard() {
     <div className={styles.dashboardContainer}>
 
       {/* Push Notification Banner */}
-      {pushNotificationService.isSupported() && (pushStatus === "default" || pushStatus === "denied") && (
-        <div style={{ background: pushStatus === "denied" ? 'var(--danger-color)' : 'var(--primary-color)', color: 'white', padding: '16px 24px', borderRadius: '12px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: `0 4px 12px ${pushStatus === "denied" ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)'}` }}>
-          <div>
-            <h4 style={{ margin: '0 0 4px 0', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '20px' }}>{pushStatus === "denied" ? "⚠️" : "🔔"}</span> 
-              {pushStatus === "denied" ? "Notifications are Blocked!" : "Never Miss a Class!"}
-            </h4>
-            <p style={{ margin: 0, fontSize: '14px', opacity: 0.9 }}>
-              {pushStatus === "denied" 
-                ? "You are missing important live class alerts! Please click the 🔒 icon in your browser's URL bar, change Notifications to 'Allow', and refresh this page."
-                : "Enable browser notifications to receive instant alerts when your live classes start."}
-            </p>
-          </div>
-          {pushStatus === "default" && (
-            <button 
-              onClick={async () => {
-                setIsPushLoading(true);
-                try {
-                  const perm = await Notification.requestPermission();
-                  setPushStatus(perm);
-                  if (perm === "granted") await pushNotificationService.subscribe();
-                } catch (e) { console.error(e); }
-                setIsPushLoading(false);
-              }}
-              disabled={isPushLoading}
-              style={{ padding: '10px 20px', borderRadius: '8px', background: 'white', color: 'var(--primary-color)', border: 'none', fontWeight: 'bold', cursor: isPushLoading ? 'not-allowed' : 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', whiteSpace: 'nowrap', marginLeft: '16px' }}
-            >
-              {isPushLoading ? "Enabling..." : "Enable Notifications"}
-            </button>
-          )}
-        </div>
-      )}
+      <PushNotificationBanner />
 
       {/* Sleek Glass Header */}
       <header className={styles.header}>
@@ -277,108 +236,110 @@ function Dashboard() {
 
         {/* Right Side: Live Radar Widget */}
         <div className={styles.floatingLiveSection} style={{ background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.05), transparent)', border: '1px solid var(--border-color)', borderRadius: '24px', padding: '32px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column' }}>
-          <h3 className={styles.sectionTitle} style={{ fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px', color: 'var(--text-primary)' }}>
-            <span className={styles.radarIcon} style={{ display: 'inline-block', width: '12px', height: '12px', borderRadius: '50%', background: '#ef4444', boxShadow: '0 0 10px #ef4444' }}></span> Live Class Radar
-          </h3>
+          <div style={{ position: 'relative', zIndex: 1, height: '100%' }}>
+            <h3 style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', marginBottom: '20px' }}>
+              <span style={{ width: '12px', height: '12px', background: '#ef4444', borderRadius: '50%', display: 'inline-block' }}></span>
+              Live Class Radar
+            </h3>
 
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto' }}>
-            {todayClasses.length === 0 ? (
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '32px 0' }}>
-                <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.5 }}>📡</div>
-                <div style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Radar is Clear</div>
-                <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '8px' }}>No active or rescheduled sessions detected within your time window.</div>
-              </div>
-            ) : (
-              todayClasses.map((cls, idx) => {
+            {(() => {
+              const now = new Date();
+              const visibleClasses = todayClasses.filter(cls => {
                 const classStart = new Date(`${cls.class_date}T${cls.start_time}`);
                 let classEnd = cls.end_time ? new Date(`${cls.class_date}T${cls.end_time}`) : new Date(classStart.getTime() + 2 * 60 * 60 * 1000);
-                
-                // Smart midnight crossing detection: if end time is mathematically smaller, it's on the next day
-                let isNextDay = false;
                 if (classEnd < classStart) {
                   classEnd = new Date(classEnd.getTime() + 24 * 60 * 60 * 1000);
-                  isNextDay = true;
                 }
-                
-                const now = new Date();
-
-                const windowOpenTime = new Date(classStart.getTime() - 10 * 60 * 1000);
-                const windowCloseTime = new Date(classStart.getTime()); // Closes exactly at start time
-                
-                // Chrome notification trigger
-                if (now >= windowOpenTime && now <= new Date(windowOpenTime.getTime() + 60000) && Notification.permission === "granted" && !cls.notified) {
-                   cls.notified = true;
-                   new Notification(`Live Class: ${cls.title}`, { body: "Join window is now open! Please join before class starts." });
-                }
-                
-                const classOpen = cls.conducted !== false &&
-                  cls.status !== 'COMPLETED' &&
-                  cls.status !== 'ENDED' &&
-                  now >= windowOpenTime &&
-                  now <= windowCloseTime;
-
-                const isEarly = now < windowOpenTime;
-                const isLate = now > windowCloseTime && now <= classEnd && cls.status !== 'COMPLETED' && cls.status !== 'ENDED';
-
                 const hasEnded = cls.status === 'COMPLETED' || cls.status === 'ENDED' || now > classEnd;
+                if (cls.conducted === false) return false;
+                return true;
+              });
 
-                if (hasEnded && (now - classEnd) / 1000 / 60 > 30) return null;
-                if (cls.conducted === false) return null;
-
+              if (visibleClasses.length === 0) {
                 return (
-                  <div key={idx} style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' }}>
-                    {classOpen && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#ef4444' }}></div>}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-primary)' }}>{cls.title || cls.session_type || "Live Session"}</h4>
-                        <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <FiClock /> {classStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {classEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {isNextDay && <span style={{ fontSize: '11px', background: 'var(--bg-nested)', padding: '2px 6px', borderRadius: '4px', marginLeft: '4px' }}>(Next Day)</span>}
-                        </p>
-                      </div>
-
-                      {classOpen ? (
-                        <button onClick={() => handleJoinClass(cls)} disabled={isJoining || !cls.meeting_link} style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: isJoining || !cls.meeting_link ? 'not-allowed' : 'pointer', opacity: isJoining || !cls.meeting_link ? 0.7 : 1, transition: '0.2s', whiteSpace: 'nowrap' }}>
-                          {!isJoining ? 'Join Live' : 'Connecting...'}
-                        </button>
-                      ) : isEarly ? (
-                        <div style={{ textAlign: 'right' }}>
-                          <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🔒 Locked</span>
-                          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Join opens at {windowOpenTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                        </div>
-                      ) : isLate ? (
-                        <div style={{ textAlign: 'right', maxWidth: '200px' }}>
-                          <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🔒 Window Closed</span>
-                          <div style={{ fontSize: '12px', color: '#ef4444' }}>Join time has expired.</div>
-                          <a href="mailto:admin@sureproed.com?subject=Late Join Request" style={{ fontSize: '12px', color: '#0ea5e9', textDecoration: 'none', display: 'block', marginTop: '6px', fontWeight: 'bold' }}>Request Admin Permission</a>
-                        </div>
-                      ) : hasEnded ? (
-                        <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px' }}>Session Ended</span>
-                      ) : null}
-                    </div>
-                    {classOpen && (
-                      <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                        <h5 style={{ margin: '0 0 12px 0', color: 'var(--text-primary)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>📌 Before Joining</h5>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-                          <div style={{ display: 'flex', gap: '8px', color: 'var(--text-secondary)', fontSize: '12.5px', lineHeight: '1.4' }}><span style={{ fontSize: '14px' }}>📷</span> <span>Keep your camera ON during the class.</span></div>
-                          <div style={{ display: 'flex', gap: '8px', color: 'var(--text-secondary)', fontSize: '12.5px', lineHeight: '1.4' }}><span style={{ fontSize: '14px' }}>🎤</span> <span>Keep your microphone available and follow the mentor's instructions.</span></div>
-                          <div style={{ display: 'flex', gap: '8px', color: 'var(--text-secondary)', fontSize: '12.5px', lineHeight: '1.4' }}><span style={{ fontSize: '14px' }}>👀</span> <span>Stay attentive and remain in the class until it ends.</span></div>
-                          <div style={{ display: 'flex', gap: '8px', color: 'var(--text-secondary)', fontSize: '12.5px', lineHeight: '1.4' }}><span style={{ fontSize: '14px' }}>🚫</span> <span>Do not leave the Meet before the class ends, otherwise your attendance may not be recorded correctly.</span></div>
-                          <div style={{ display: 'flex', gap: '8px', color: 'var(--text-secondary)', fontSize: '12.5px', lineHeight: '1.4' }}><span style={{ fontSize: '14px' }}>📶</span> <span>Keep a stable internet connection throughout the session.</span></div>
-                          <div style={{ display: 'flex', gap: '8px', color: 'var(--text-secondary)', fontSize: '12.5px', lineHeight: '1.4' }}><span style={{ fontSize: '14px' }}>🕒</span> <span>Join on time and remain present for the complete class.</span></div>
-                        </div>
-                      </div>
-                    )}
+                  <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>📡</div>
+                    <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0' }}>Radar is Clear</h4>
+                    <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '14px' }}>No active or rescheduled sessions detected within your time window.</p>
                   </div>
-                )
-              })
-            )}
+                );
+              }
+
+              return (
+                <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '500px', overflowY: 'auto' }}>
+                  {visibleClasses.map((cls, idx) => {
+                    const classStart = new Date(`${cls.class_date}T${cls.start_time}`);
+                    let classEnd = cls.end_time ? new Date(`${cls.class_date}T${cls.end_time}`) : new Date(classStart.getTime() + 2 * 60 * 60 * 1000);
+                    if (classEnd < classStart) classEnd = new Date(classEnd.getTime() + 24 * 60 * 60 * 1000);
+                    const windowOpenTime = new Date(classStart.getTime() - 10 * 60 * 1000);
+                    const windowCloseTime = new Date(classStart.getTime()); // Closes exactly at start time
+
+                    if (now >= windowOpenTime && now <= new Date(windowOpenTime.getTime() + 60000) && Notification.permission === "granted" && !cls.notified) {
+                      cls.notified = true;
+                      new Notification(`Live Class: ${cls.title}`, { body: "Join window is now open! Please join before class starts." });
+                    }
+
+                    const classOpen = cls.conducted !== false && cls.status !== 'COMPLETED' && cls.status !== 'ENDED' && now >= windowOpenTime && now <= windowCloseTime;
+                    const isEarly = now < windowOpenTime;
+                    const isLate = now > windowCloseTime && now <= classEnd && cls.status !== 'COMPLETED' && cls.status !== 'ENDED';
+                    const hasEnded = cls.status === 'COMPLETED' || cls.status === 'ENDED' || now > classEnd;
+                    const isNextDay = classEnd < classStart;
+
+                    return (
+                      <div key={idx} style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' }}>
+                        {classOpen && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#ef4444' }}></div>}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div>
+                            <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-primary)' }}>{cls.title || cls.class_type || "Live Session"}</h4>
+                            <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <FiClock /> {classStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {classEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {isNextDay && <span style={{ fontSize: '11px', background: 'var(--bg-nested)', padding: '2px 6px', borderRadius: '4px', marginLeft: '4px' }}>(Next Day)</span>}
+                            </p>
+                          </div>
+
+                          {classOpen ? (
+                            <button onClick={() => handleJoinClass(cls)} disabled={isJoining || !cls.meeting_link} style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: isJoining || !cls.meeting_link ? 'not-allowed' : 'pointer', opacity: isJoining || !cls.meeting_link ? 0.7 : 1, transition: '0.2s', whiteSpace: 'nowrap' }}>
+                              {!isJoining ? 'Join Live' : 'Connecting...'}
+                            </button>
+                          ) : isEarly ? (
+                            <div style={{ textAlign: 'right' }}>
+                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🔒 Locked</span>
+                              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Join opens at {windowOpenTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                            </div>
+                          ) : isLate ? (
+                            <div style={{ textAlign: 'right', maxWidth: '200px' }}>
+                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🔒 Window Closed</span>
+                              <div style={{ fontSize: '12px', color: '#ef4444' }}>Join time has expired.</div>
+                              <a href="mailto:admin@sureproed.com?subject=Late Join Request" style={{ fontSize: '12px', color: '#0ea5e9', textDecoration: 'none', display: 'block', marginTop: '6px', fontWeight: 'bold' }}>Request Admin Permission</a>
+                            </div>
+                          ) : hasEnded ? (
+                            <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px' }}>Session Ended</span>
+                          ) : null}
+                        </div>
+                        {classOpen && (
+                          <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                            <h5 style={{ margin: '0 0 12px 0', color: 'var(--text-primary)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>📌 Before Joining</h5>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                              <div style={{ display: 'flex', gap: '8px', color: 'var(--text-secondary)', fontSize: '12.5px', lineHeight: '1.4' }}><span style={{ fontSize: '14px' }}>📷</span> <span>Keep your camera ON during the class.</span></div>
+                              <div style={{ display: 'flex', gap: '8px', color: 'var(--text-secondary)', fontSize: '12.5px', lineHeight: '1.4' }}><span style={{ fontSize: '14px' }}>🎤</span> <span>Keep your microphone available and follow the mentor's instructions.</span></div>
+                              <div style={{ display: 'flex', gap: '8px', color: 'var(--text-secondary)', fontSize: '12.5px', lineHeight: '1.4' }}><span style={{ fontSize: '14px' }}>👀</span> <span>Stay attentive and remain in the class until it ends.</span></div>
+                              <div style={{ display: 'flex', gap: '8px', color: 'var(--text-secondary)', fontSize: '12.5px', lineHeight: '1.4' }}><span style={{ fontSize: '14px' }}>🚫</span> <span>Do not leave the Meet before the class ends.</span></div>
+                              <div style={{ display: 'flex', gap: '8px', color: 'var(--text-secondary)', fontSize: '12.5px', lineHeight: '1.4' }}><span style={{ fontSize: '14px' }}>📶</span> <span>Keep a stable internet connection throughout the session.</span></div>
+                              <div style={{ display: 'flex', gap: '8px', color: 'var(--text-secondary)', fontSize: '12.5px', lineHeight: '1.4' }}><span style={{ fontSize: '14px' }}>🕒</span> <span>Join on time and remain present for the complete class.</span></div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
 
       {/* Premium Statistics Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginTop: '24px' }}>
-
         {/* Attendance Stats */}
         <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
           <h3 style={{ fontSize: '16px', marginBottom: '16px', color: 'var(--text-primary)' }}>Attendance Overview</h3>

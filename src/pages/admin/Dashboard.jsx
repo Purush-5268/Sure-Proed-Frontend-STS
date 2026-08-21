@@ -8,6 +8,7 @@ import apiClient, { normalizeListResponse, fetchAllPages } from "../../services/
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./Dashboard.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
+import PushNotificationBanner from "../../components/common/PushNotificationBanner";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -160,6 +161,7 @@ function Dashboard() {
 
   return (
     <div className={styles.dashboard}>
+      <PushNotificationBanner />
       <h1>Admin Dashboard</h1>
 
       <p className={styles.subtitle}>

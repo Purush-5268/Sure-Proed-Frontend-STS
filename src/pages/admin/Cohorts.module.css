@@ -171,3 +171,131 @@
     width: 100%;
   }
 }
+.filterSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+}
+
+.filterLabel {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.statusDropdown {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.statusDropdown:hover {
+  border-color: var(--primary-color);
+}
+
+.statusDropdown:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.viewBtn, .editBtn, .saveBtn, .cancelBtn, .publishBtn, .stopBtn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  min-height: 32px;
+}
+
+.viewBtn {
+  background-color: var(--primary-color);
+  color: white;
+}
+.viewBtn:hover {
+  background-color: var(--primary-color-hover);
+}
+
+.editBtn {
+  background-color: #f59e0b;
+  color: #78350f;
+}
+.editBtn:hover {
+  background-color: #fbbf24;
+}
+
+.statusControls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dateInput {
+  padding: 4px 8px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  min-height: 32px;
+  outline: none;
+}
+.dateInput:focus {
+  border-color: var(--primary-color);
+}
+
+.saveBtn {
+  background-color: #10b981;
+  color: white;
+}
+.saveBtn:hover {
+  background-color: #059669;
+}
+
+.cancelBtn {
+  background-color: var(--bg-nested);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+.cancelBtn:hover {
+  background-color: var(--border-color);
+}
+
+.publishBtn {
+  background-color: var(--primary-color);
+  color: white;
+}
+.publishBtn:hover {
+  background-color: var(--primary-color-hover);
+}
+
+.stopBtn {
+  background-color: #ef4444;
+  color: white;
+}
+.stopBtn:hover {
+  background-color: #dc2626;
+}

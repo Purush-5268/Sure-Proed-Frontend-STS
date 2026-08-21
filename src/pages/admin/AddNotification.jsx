@@ -2,18 +2,19 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { courseService } from "../../services/courseService";
 import { cohortService } from "../../services/cohortService";
-import { normalizeListResponse } from "../../services/apiClient";
+import apiClient, { normalizeListResponse } from "../../services/apiClient";
+import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
-// Assuming you have a notificationService, if not you can replace with apiClient logic
 import styles from "./AddNotification.module.css";
 
 function AddNotification() {
   const [courses, setCourses] = useState([]);
   const [cohorts, setCohorts] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
     title: "",
-    audience: "All Users",
-    publishDate: "",
+    audience: "ALL",
+    cohortId: "",
     status: "Published",
     message: ""
   });
@@ -38,10 +39,29 @@ function AddNotification() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`Notification created for ${form.audience}`);
-    // Add real API call here later
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        title: form.title,
+        message: form.message,
+        target_audience: form.audience === "COHORT" ? "COHORT" : form.audience,
+        is_active: form.status === "Published",
+      };
+      
+      if (form.audience === "COHORT" && form.cohortId) {
+        payload.cohort = form.cohortId;
+      }
+
+      await apiClient.post(API_ENDPOINTS.ANNOUNCEMENTS.BASE, payload);
+      alert(`Announcement created successfully!`);
+      setForm({ title: "", audience: "ALL", cohortId: "", status: "Published", message: "" });
+    } catch (err) {
+      alert("❌ Failed to create announcement.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -66,24 +86,26 @@ function AddNotification() {
             <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Target Audience</label>
             <select name="audience" value={form.audience} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
               <optgroup label="Global">
-                <option value="All Users">All Users</option>
-                <option value="All Students">All Students</option>
-                <option value="All Mentors">All Mentors</option>
-                <option value="All Companies">All Companies</option>
-              </optgroup>
-              <optgroup label="Domains / Courses">
-                {courses.map(c => <option key={`course-${c.id}`} value={`Course: ${c.id}`}>{c.name}</option>)}
+                <option value="ALL">All Users</option>
+                <option value="STUDENTS">All Students</option>
+                <option value="MENTORS">All Mentors</option>
+                <option value="VOLUNTEERS">All Volunteers</option>
               </optgroup>
               <optgroup label="Specific Batches">
-                {cohorts.map(c => <option key={`cohort-${c.id}`} value={`Cohort: ${c.id}`}>{c.name}</option>)}
+                <option value="COHORT">Specific Batch...</option>
               </optgroup>
             </select>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Publish Date</label>
-            <input type="date" name="publishDate" value={form.publishDate} onChange={handleChange} required style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
-          </div>
+          {form.audience === "COHORT" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Select Batch *</label>
+              <select name="cohortId" value={form.cohortId} onChange={handleChange} required style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
+                <option value="">-- Choose Batch --</option>
+                {cohorts.map(c => <option key={`cohort-${c.id}`} value={c.id}>{c.name || c.code}</option>)}
+              </select>
+            </div>
+          )}
 
           <div style={{ display: "flex", flexDirection: "column", gap: "6px", gridColumn: "1 / -1" }}>
             <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Status</label>
@@ -99,8 +121,8 @@ function AddNotification() {
           </div>
 
           <div style={{ gridColumn: "1 / -1", display: "flex", gap: "1rem", marginTop: "1rem", borderTop: "1px solid #e5e7eb", paddingTop: "1.5rem" }}>
-            <button type="submit" style={{ padding: "12px 24px", backgroundColor: "#2563eb", color: "white", borderRadius: "8px", border: "none", fontWeight: "bold", cursor: "pointer" }}>
-              Save Notification
+            <button type="submit" disabled={isSubmitting} style={{ padding: "12px 24px", backgroundColor: "#2563eb", color: "white", borderRadius: "8px", border: "none", fontWeight: "bold", cursor: isSubmitting ? "not-allowed" : "pointer", opacity: isSubmitting ? 0.7 : 1 }}>
+              {isSubmitting ? "Saving..." : "Save Announcement"}
             </button>
             <Link to="/admin/notifications" style={{ padding: "12px 24px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>Cancel</Link>
           </div>

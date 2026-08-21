@@ -13,10 +13,10 @@ function Notifications() {
     let isMounted = true;
     const loadNotifications = async () => {
       try {
-        const response = await apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE);
-        if (isMounted) setNotifications(Array.isArray(response.data) ? response.data : []);
+        const response = await apiClient.get(API_ENDPOINTS.ANNOUNCEMENTS.BASE);
+        if (isMounted) setNotifications(Array.isArray(response.data?.results) ? response.data.results : (Array.isArray(response.data) ? response.data : []));
       } catch (err) {
-        console.error("Failed to load notifications:", err);
+        console.error("Failed to load announcements:", err);
         if (isMounted) setNotifications([]);
       } finally {
         if (isMounted) setLoading(false);
@@ -33,12 +33,12 @@ function Notifications() {
     <div className={styles.container}>
       <div className={styles.header}>
         <div>
-          <h1>Notifications</h1>
-          <p>Manage announcements and notifications</p>
+          <h1>Announcements</h1>
+          <p>Manage global broadcasts and batch announcements</p>
         </div>
 
         <Link to="/admin/add-notification" className={styles.addBtn}>
-          + Add Notification
+          + New Announcement
         </Link>
       </div>
 
@@ -55,23 +55,22 @@ function Notifications() {
           <table className="premium-table">
             <thead>
               <tr>
-                <th>Student</th>
-                <th>Course</th>
+                <th>Title</th>
+                <th>Target Audience</th>
                 <th>Status</th>
-                <th>Action</th>
+                <th>Created At</th>
               </tr>
             </thead>
 
             <tbody>
               {notifications.map((item) => (
                 <tr key={item.id}>
-                  <td>{item.student?.user?.first_name || item.student?.user?.email || "Unknown"}</td>
-                  <td>{item.course?.name || item.course || "N/A"}</td>
-                  <td className={item.status === "APPROVED" ? styles.published : styles.draft}>{item.status || "PENDING"}</td>
-                  <td className="actions" style={{ display: "flex", gap: "8px" }}>
-                    <Link to="/admin/notification-details">View</Link>
-                    <Link to="/admin/edit-notification">Edit</Link>
+                  <td>{item.title}</td>
+                  <td>
+                    {item.target_audience === "COHORT" ? `Batch: ${item.cohort?.name || item.cohort?.code || 'Unknown'}` : item.target_audience}
                   </td>
+                  <td className={item.is_active ? styles.published : styles.draft}>{item.is_active ? "Published" : "Draft"}</td>
+                  <td>{new Date(item.created_at).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>

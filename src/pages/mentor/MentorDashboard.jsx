@@ -9,6 +9,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import Card from "../../components/ui/Card";
 import EmptyState from "../../components/ui/EmptyState";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
+import PushNotificationBanner from "../../components/common/PushNotificationBanner";
 import styles from "./MentorDashboard.module.css";
 import { 
   FiUsers, 
@@ -153,6 +154,7 @@ function MentorDashboard() {
 
   return (
     <div className={styles.container}>
+      <PushNotificationBanner />
       <PageHeader
         title={`Welcome, ${welcomeName}`}
         description="Here's what's happening in your teaching workspace today."
