@@ -21,6 +21,8 @@ import ResetPassword from "../pages/auth/ResetPassword";
 import EmailVerification from "../pages/auth/EmailVerification";
 import SetupPassword from "../pages/auth/SetupPassword";
 import NotFound from "../pages/errors/Error404";
+import OfferLetterVerify from "../pages/public/OfferLetterVerify";
+import CohortChat from "../pages/student/CohortChat";
 
 /* Theme Enforcer for Public Pages */
 function ThemeEnforcer() {
@@ -29,7 +31,7 @@ function ThemeEnforcer() {
 
   useEffect(() => {
     const publicPaths = ['/', '/login', '/signup', '/setup-password', '/forgot-password', '/reset-password', '/email-verification'];
-    const isPublic = publicPaths.includes(location.pathname);
+    const isPublic = publicPaths.includes(location.pathname) || location.pathname.startsWith('/verify-offer-letter');
 
     if (isPublic) {
       document.documentElement.setAttribute('data-theme', 'light');
@@ -135,7 +137,7 @@ import Reports from "../pages/admin/Reports";
 import StudentReport from "../pages/admin/StudentReport";
 import CourseReport from "../pages/admin/CourseReport";
 import ExamReport from "../pages/admin/ExamReport";
-import StudentQueries from "../pages/admin/StudentQueries";
+import RequestsSupport from "../pages/admin/RequestsSupport";
 
 /* Cohort Management */
 import Cohorts from "../pages/admin/Cohorts";
@@ -197,9 +199,12 @@ import CreateAssignment from "../pages/mentor/Assignments/CreateAssignment";
 import MentorProfile from "../pages/mentor/Profile";
 import MentorSettings from "../pages/mentor/Settings";
 
+import ScrollToTop from "../components/common/ScrollToTop";
+
 function AppRoutes() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <ThemeEnforcer />
       <SessionExpiredModal />
       <Suspense fallback={<GlobalLoader message="Loading module..." />}>
@@ -213,6 +218,7 @@ function AppRoutes() {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/email-verification" element={<EmailVerification />} />
             <Route path="/setup-password" element={<SetupPassword />} />
+            <Route path="/verify-offer-letter/:hash" element={<OfferLetterVerify />} />
           </Route>
 
           {/* ================= STUDENT MODULE (PROTECTED) ================= */}
@@ -255,6 +261,7 @@ function AppRoutes() {
               <Route path="certificate-verify" element={<CertificateVerify />} />
               {/* 🚨 FIX: Placed directly in the student block WITHOUT nesting /student inside /student */}
               <Route path="settings" element={<StudentSettings />} />
+              <Route path="cohort-chat/:cohortId" element={<CohortChat />} />
             </Route>
           </Route>
 
@@ -352,7 +359,10 @@ function AppRoutes() {
               <Route path="student-report" element={<StudentReport />} />
               <Route path="course-report" element={<CourseReport />} />
               <Route path="exam-report" element={<ExamReport />} />
-              <Route path="student-queries" element={<StudentQueries />} />
+              <Route path="requests-support" element={<RequestsSupport />} />
+
+              {/* Cohort Chat (Admin) */}
+              <Route path="cohort-chat/:cohortId" element={<CohortChat />} />
 
               {/* Settings */}
               <Route path="settings" element={<Settings />} />

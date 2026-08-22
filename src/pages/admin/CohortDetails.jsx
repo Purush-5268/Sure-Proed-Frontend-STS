@@ -103,13 +103,15 @@
 // export default CohortDetails;
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import apiClient, { normalizeListResponse } from "../../services/apiClient";
+import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { applicationService } from "../../services/applicationService";
 import { courseService } from "../../services/courseService";
 import { cohortService } from "../../services/cohortService";
+import { cohortChatService } from "../../services/cohortChatService";
 import styles from "./CohortDetails.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
+import { FiMessageCircle, FiEdit2, FiArrowLeft, FiUser, FiCalendar, FiUsers, FiVideo, FiCheckCircle, FiXCircle } from "react-icons/fi";
 
 function CohortDetails() {
   const { id } = useParams();
@@ -118,9 +120,26 @@ function CohortDetails() {
   const [courseName, setCourseName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  
   const [updatingStage, setUpdatingStage] = useState(false);
-
+  const [bulkGenerating, setBulkGenerating] = useState(false);
   const [updatingBatch, setUpdatingBatch] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [bulkGenStatus, setBulkGenStatus] = useState("");
+
+  const handleBulkGenerateOfferLetters = async () => {
+    if (!window.confirm("Generate Offer Letters for all eligible students in this cohort?")) return;
+    setBulkGenerating(true);
+    setBulkGenStatus("");
+    try {
+      const res = await applicationService.bulkGenerateOfferLetters(cohort.id);
+      setBulkGenStatus(res.message || "Generation queued. Eligible letters are being processed in the background.");
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to bulk generate offer letters.");
+    } finally {
+      setBulkGenerating(false);
+    }
+  };
 
   const handleBatchChange = async (e) => {
     const newBatch = e.target.value;
@@ -136,7 +155,6 @@ function CohortDetails() {
       setUpdatingBatch(false);
     }
   };
-
 
   // Timeline calculation helper
   const calculateTimeline = (startDateStr) => {
@@ -160,8 +178,6 @@ function CohortDetails() {
     };
   };
 
-
-
   const handleStageChange = async (e) => {
     const newStatus = e.target.value;
     if (!newStatus || newStatus === cohort.status) return;
@@ -170,7 +186,6 @@ function CohortDetails() {
     try {
       await apiClient.patch(API_ENDPOINTS.COHORTS.BY_ID(id), { status: newStatus });
       setCohort({ ...cohort, status: newStatus });
-      alert(`Cohort stage updated to ${newStatus}. Note: If this fails, the backend validate_status must be updated to allow this transition.`);
     } catch (err) {
       console.error("Failed to update status:", err);
       const detail = err.response?.data?.detail || err.response?.data?.status?.[0] || err.message;
@@ -181,166 +196,253 @@ function CohortDetails() {
   };
 
   useEffect(() => {
+    let isMounted = true;
     const loadData = async () => {
       try {
         // Fetch Cohort Details
         const cohortRes = await apiClient.get(API_ENDPOINTS.COHORTS.BY_ID(id));
         const cohortData = cohortRes.data;
+        if (!isMounted) return;
         setCohort(cohortData);
 
-        // Fetch Course Name if it's a UUID
+        // Fetch Course Name
         if (cohortData.course && typeof cohortData.course === "string") {
-          const courseRes = await courseService.getCourseById(cohortData.course);
-          setCourseName(courseRes?.name || courseRes?.title || cohortData.course);
+          courseService.getCourseById(cohortData.course).then(courseRes => {
+            if (isMounted) setCourseName(courseRes?.name || courseRes?.title || cohortData.course);
+          });
         } else {
           setCourseName(cohortData.course?.name || "N/A");
         }
 
+        // Fetch Unread Count
+        cohortChatService.getUnreadCount(id).then(res => {
+          if (isMounted && res.unread_count) setUnreadCount(res.unread_count);
+        }).catch(err => console.error("Failed to fetch unread count", err));
 
       } catch (err) {
         console.error("Failed to load details:", err);
-        setError("Unable to load complete cohort details.");
+        if (isMounted) setError("Unable to load complete cohort details.");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     if (id) loadData();
+    return () => { isMounted = false; };
   }, [id]);
 
-  if (loading) return <div style={{ padding: "2rem" }}><SkeletonLoader variant="detail" /></div>;
-  if (error) return <div style={{ padding: "2rem", color: "red" }}><h2>{error}</h2></div>;
-  if (!cohort) return <div style={{ padding: "2rem" }}><h2>No cohort found.</h2></div>;
+  if (loading) return <div className={styles.pageContainer}><SkeletonLoader variant="detail" /></div>;
+  if (error) return <div className={styles.pageContainer}><h2 style={{ color: "var(--status-inactive-text)" }}>{error}</h2></div>;
+  if (!cohort) return <div className={styles.pageContainer}><h2>No cohort found.</h2></div>;
 
-  const mentorNames = (cohort.mentors || []).map(m => `${m.first_name || ""} ${m.last_name || ""}`).join(", ") || "Not assigned";
+  const getStatusClass = (status) => {
+    if (!status) return styles.statusDraft;
+    if (["ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS", "COMPLETED"].includes(status)) return styles.statusActive;
+    if (["CANCELLED", "SUSPENDED"].includes(status)) return styles.statusSuspended;
+    if (["OPEN"].includes(status)) return styles.statusInfo;
+    return styles.statusDraft;
+  };
+
+  const getTimelineStatus = (currentStatus, targetStages) => {
+    const stageOrder = ["DRAFT", "OPEN", "ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS", "COMPLETED", "CANCELLED"];
+    const currentIndex = stageOrder.indexOf(currentStatus);
+    const targetIndex = Math.min(...targetStages.map(s => stageOrder.indexOf(s)));
+    
+    if (currentStatus === "CANCELLED") return "upcoming";
+    if (targetStages.includes(currentStatus)) return "active";
+    if (currentIndex > targetIndex) return "completed";
+    return "upcoming";
+  };
+
+  const mentorName = cohort.active_mentor ? `${cohort.active_mentor.first_name || ""} ${cohort.active_mentor.last_name || ""}`.trim() : "Pending Assignment";
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
-      {/* Top Header Card */}
-      <div style={{ backgroundColor: "var(--bg-surface)", padding: "2rem", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", marginBottom: "2rem", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div>
-          <span style={{ backgroundColor: "#dbeafe", color: "var(--text-primary)", padding: "4px 12px", borderRadius: "999px", fontSize: "12px", fontWeight: "bold" }}>{cohort.status}</span>
-          <h1 style={{ fontSize: "2rem", margin: "10px 0", color: "var(--text-primary)" }}>{cohort.name || cohort.code}</h1>
-          <p style={{ fontSize: "1.1rem", color: "#4338ca", fontWeight: "600", margin: 0 }}>{courseName}</p>
+    <div className={styles.pageContainer}>
+      
+      {/* Header Section */}
+      <div className={styles.headerCard}>
+        <div className={styles.headerLeft}>
+          <div className={`${styles.statusIndicator} ${getStatusClass(cohort.status)}`}>
+            <div className={styles.statusDot}></div>
+            {cohort.status}
+          </div>
+          <h1 className={styles.cohortTitle}>{cohort.name || cohort.code}</h1>
+          <p className={styles.courseSubtitle}>{courseName}</p>
         </div>
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          {/* Admin Manual Stage Override */}
-          <div style={{ marginRight: "1rem", display: "flex", alignItems: "center", gap: "8px" }}>
-            <div style={{ marginRight: "1rem", display: "flex", alignItems: "center", gap: "8px" }}>
-              <label style={{ fontSize: "14px", fontWeight: "bold", color: "var(--text-secondary)" }}>LST Batch:</label>
+
+        <div className={styles.headerActions}>
+          <div className={styles.controlsGroup}>
+            <div className={styles.controlField}>
+              <label className={styles.controlLabel}>LST Batch</label>
               <select
                 value={cohort.lst_batch || ""}
                 onChange={handleBatchChange}
                 disabled={updatingBatch}
-                style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--border-color)", fontWeight: "bold", backgroundColor: "var(--bg-main)" }}
+                className={styles.controlSelect}
+                aria-label="Set LST Batch"
               >
-                <option value="">-- None --</option>
+                <option value="">None</option>
                 <option value="BATCH_1">Batch 1</option>
                 <option value="BATCH_2">Batch 2</option>
               </select>
             </div>
 
-            <label style={{ fontSize: "14px", fontWeight: "bold", color: "var(--text-secondary)" }}>Set Stage:</label>
-            <select
-              value={cohort.status || ""}
-              onChange={handleStageChange}
-              disabled={updatingStage}
-              style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--border-color)", fontWeight: "bold" }}
-            >
-              <option value="DRAFT">DRAFT</option>
-              <option value="OPEN">OPEN (Enrollment)</option>
-              <option value="ACTIVE">ACTIVE (Pre-Training)</option>
-              <option value="TRAINING">TRAINING</option>
-              <option value="INTERNSHIP">INTERNSHIP</option>
-              <option value="SOFT_SKILLS">SOFT SKILLS</option>
-              <option value="COMPLETED">COMPLETED (Graduated)</option>
-              <option value="CANCELLED">CANCELLED</option>
-            </select>
-            {updatingStage && <span style={{ fontSize: "12px", color: "#2563eb" }}>Saving...</span>}
+            <div className={styles.controlField}>
+              <label className={styles.controlLabel}>Stage</label>
+              <select
+                value={cohort.status || ""}
+                onChange={handleStageChange}
+                disabled={updatingStage}
+                className={styles.controlSelect}
+                aria-label="Set Cohort Stage"
+              >
+                <option value="DRAFT">DRAFT</option>
+                <option value="OPEN">OPEN (Enrollment)</option>
+                <option value="ACTIVE">ACTIVE (Pre-Training)</option>
+                <option value="TRAINING">TRAINING</option>
+                <option value="INTERNSHIP">INTERNSHIP</option>
+                <option value="SOFT_SKILLS">SOFT SKILLS</option>
+                <option value="COMPLETED">COMPLETED (Graduated)</option>
+                <option value="CANCELLED">CANCELLED</option>
+              </select>
+            </div>
           </div>
 
-          <Link to={`/admin/edit-cohort/${cohort.id}`} style={{ padding: "10px 20px", backgroundColor: "#fbbf24", color: "#92400e", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>Edit Cohort</Link>
-          <Link to="/admin/cohorts" style={{ padding: "10px 20px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>Back</Link>
+          <Link to={`/admin/cohort-chat/${cohort.id}`} className={`${styles.btn} ${styles.btnPrimary}`} aria-label="Open Cohort Chat">
+            <FiMessageCircle size={18} aria-hidden="true" />
+            Cohort Chat
+            {unreadCount > 0 && <span className={styles.unreadBadge}>{unreadCount}</span>}
+          </Link>
+          
+          <Link to={`/admin/edit-cohort/${cohort.id}`} className={`${styles.btn} ${styles.btnSecondary}`} aria-label="Edit Cohort">
+            <FiEdit2 size={16} aria-hidden="true" />
+            Edit
+          </Link>
+          
+          <Link to="/admin/cohorts" className={`${styles.btn} ${styles.btnTertiary}`} aria-label="Back to Cohorts">
+            <FiArrowLeft size={20} aria-hidden="true" />
+          </Link>
         </div>
       </div>
 
-      {/* Dynamic Timeline Visualizer */}
+      {/* Dynamic Timeline */}
       {cohort.start_date && (
-        <div style={{ backgroundColor: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-color)", marginBottom: "2rem" }}>
-          <h3 style={{ margin: "0 0 1rem 0", color: "var(--text-primary)" }}>Cohort Timeline (Calculated)</h3>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", padding: "20px 0" }}>
-            {/* Connecting Line */}
-            <div style={{ position: "absolute", top: "50%", left: "0", right: "0", height: "4px", backgroundColor: "#e2e8f0", zIndex: 0, transform: "translateY(-50%)" }}></div>
-
+        <div className={styles.timelineSection}>
+          <h3 className={styles.timelineTitle}>Cohort Timeline</h3>
+          <div className={styles.timelineTrack}>
+            <div className={styles.timelineLine}></div>
+            
             {[
-              { label: "Start", date: calculateTimeline(cohort.start_date).start, active: true },
-              { label: "Training Ends", date: calculateTimeline(cohort.start_date).trainingEnd, active: ["TRAINING", "INTERNSHIP", "SOFT_SKILLS", "COMPLETED"].includes(cohort.status) },
-              { label: "Internship Ends", date: calculateTimeline(cohort.start_date).internshipEnd, active: ["INTERNSHIP", "SOFT_SKILLS", "COMPLETED"].includes(cohort.status) },
-              { label: "Graduation", date: calculateTimeline(cohort.start_date).graduation, active: ["COMPLETED"].includes(cohort.status) }
+              { label: "Start", date: calculateTimeline(cohort.start_date).start, status: getTimelineStatus(cohort.status, ["ACTIVE"]) },
+              { label: "Training Ends", date: calculateTimeline(cohort.start_date).trainingEnd, status: getTimelineStatus(cohort.status, ["TRAINING"]) },
+              { label: "Internship Ends", date: calculateTimeline(cohort.start_date).internshipEnd, status: getTimelineStatus(cohort.status, ["INTERNSHIP"]) },
+              { label: "Graduation", date: calculateTimeline(cohort.start_date).graduation, status: getTimelineStatus(cohort.status, ["SOFT_SKILLS", "COMPLETED"]) }
             ].map((milestone, idx) => (
-              <div key={idx} style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", background: "var(--bg-surface)", padding: "0 10px" }}>
-                <div style={{ width: "20px", height: "20px", borderRadius: "50%", backgroundColor: milestone.active ? "#3b82f6" : "#cbd5e1", border: "4px solid var(--bg-surface)" }}></div>
-                <p style={{ margin: "8px 0 0 0", fontSize: "14px", fontWeight: "bold", color: milestone.active ? "var(--text-primary)" : "var(--text-muted)" }}>{milestone.label}</p>
-                <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "var(--text-secondary)" }}>{milestone.date}</p>
+              <div key={idx} className={styles.timelineNode}>
+                <div className={`${styles.timelineDot} ${styles[milestone.status]}`}></div>
+                <p className={`${styles.timelineLabel} ${styles[milestone.status]}`}>{milestone.label}</p>
+                <p className={styles.timelineDate}>{milestone.date}</p>
               </div>
             ))}
           </div>
-          <p style={{ margin: "1rem 0 0 0", fontSize: "13px", color: "#64748b", fontStyle: "italic" }}>
-            * This timeline is automatically calculated from the start date. Changing the current stage dropdown above will update students' view immediately.
+          <p className={styles.timelineHelp}>
+            * This timeline is calculated based on the start date. Transitioning the cohort stage highlights the current progress.
           </p>
         </div>
       )}
 
-      {/* Details Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
-        <div style={{ backgroundColor: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
-          <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: "bold" }}>Assigned Mentor</p>
-          <p style={{ margin: "5px 0 0 0", fontWeight: "600", color: "var(--text-primary)" }}>{cohort.active_mentor ? `${cohort.active_mentor.first_name || ""} ${cohort.active_mentor.last_name || ""}`.trim() : "Pending Assignment"}</p>
+      {/* Metrics Grid */}
+      <div className={styles.metricsGrid}>
+        <div className={styles.metricCard}>
+          <div className={styles.metricHeader}>
+            <FiUser size={16} aria-hidden="true" />
+            <span className={styles.metricLabel}>Assigned Mentor</span>
+          </div>
+          <p className={styles.metricValue}>{mentorName}</p>
         </div>
-        <div style={{ backgroundColor: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
-          <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: "bold" }}>Start & End Dates</p>
-          <p style={{ margin: "5px 0 0 0", fontWeight: "600", color: "var(--text-primary)" }}>{cohort.start_date} ➔ {cohort.end_date || "TBD"}</p>
+
+        <div className={styles.metricCard}>
+          <div className={styles.metricHeader}>
+            <FiCalendar size={16} aria-hidden="true" />
+            <span className={styles.metricLabel}>Duration</span>
+          </div>
+          <p className={styles.metricValue}>{cohort.start_date || "TBD"} ➔ {cohort.end_date || "TBD"}</p>
         </div>
-        <div style={{ backgroundColor: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
-          <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: "bold" }}>Capacity</p>
-          <p style={{ margin: "5px 0 0 0", fontWeight: "600", color: "var(--text-primary)" }}>{cohort.max_students || "Unlimited"}</p>
+
+        <div className={styles.metricCard}>
+          <div className={styles.metricHeader}>
+            <FiUsers size={16} aria-hidden="true" />
+            <span className={styles.metricLabel}>Capacity</span>
+          </div>
+          <p className={styles.metricValue}>{cohort.max_students || "Unlimited"}</p>
         </div>
-        <div style={{ backgroundColor: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
-          <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: "bold" }}>Meeting Link</p>
-          <a href={cohort.meeting_link} target="_blank" rel="noreferrer" style={{ display: "block", margin: "5px 0 0 0", fontWeight: "600", color: "#2563eb", overflow: "hidden", textOverflow: "ellipsis" }}>{cohort.meeting_link || "Not Set"}</a>
+
+        <div className={styles.metricCard}>
+          <div className={styles.metricHeader}>
+            <FiVideo size={16} aria-hidden="true" />
+            <span className={styles.metricLabel}>Meeting Link</span>
+          </div>
+          <p className={styles.metricValue}>
+            {cohort.meeting_link ? (
+              <a href={cohort.meeting_link} target="_blank" rel="noreferrer" title={cohort.meeting_link}>View Meeting</a>
+            ) : "Not Configured"}
+          </p>
         </div>
       </div>
 
-      {/* Student Management Shortcuts */}
-      <div style={{ backgroundColor: "var(--bg-surface)", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", overflow: "hidden", marginBottom: "2rem" }}>
-        <div style={{ padding: "1.5rem", borderBottom: "1px solid var(--border-color)", backgroundColor: "var(--bg-main)" }}>
-          <h2 style={{ margin: 0, fontSize: "1.25rem", color: "var(--text-primary)" }}>Student Management</h2>
-          <p style={{ margin: "5px 0 0 0", fontSize: "13px", color: "var(--text-secondary)" }}>View and manage students enrolled in this cohort from the Student Management panel.</p>
+      {/* Student Management Panel */}
+      <div className={styles.panel}>
+        <div className={styles.panelHeader}>
+          <h2>Student Management</h2>
+          <p>View and manage students enrolled in this cohort, filter by completion status.</p>
         </div>
-        <div style={{ padding: "1.5rem", display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+        <div className={styles.panelBody}>
           <button
             onClick={() => navigate(`/admin/students?cohort=${id}`)}
-            className="premium-btn premium-btn-secondary"
-            style={{ display: "flex", alignItems: "center", gap: "8px" }}
+            className={`${styles.btn} ${styles.btnPrimary}`}
           >
-            👥 View All Enrolled Students
+            <FiUsers size={16} aria-hidden="true" />
+            View All Students
           </button>
           <button
             onClick={() => navigate(`/admin/students?cohort=${id}&status=QUALIFIED`)}
-            className="premium-btn"
-            style={{ backgroundColor: "#059669", color: "white", display: "flex", alignItems: "center", gap: "8px", border: "none" }}
+            className={`${styles.btn} ${styles.btnSuccess}`}
           >
-            ✅ View Passed Students
+            <FiCheckCircle size={16} aria-hidden="true" />
+            Passed
           </button>
           <button
             onClick={() => navigate(`/admin/students?cohort=${id}&status=REJECTED`)}
-            className="premium-btn"
-            style={{ backgroundColor: "#dc2626", color: "white", display: "flex", alignItems: "center", gap: "8px", border: "none" }}
+            className={`${styles.btn} ${styles.btnDanger}`}
           >
-            ❌ View Failed Students
+            <FiXCircle size={16} aria-hidden="true" />
+            Failed
           </button>
         </div>
       </div>
+
+      {/* Offer Letters Panel */}
+      <div className={styles.panel}>
+        <div className={styles.panelHeader}>
+          <h2>Offer Letters</h2>
+          <p>Eligible letters are issued automatically after one calendar month, or can be dispatched manually below.</p>
+        </div>
+        <div className={styles.panelBody}>
+          <button
+            onClick={handleBulkGenerateOfferLetters}
+            disabled={bulkGenerating}
+            className={`${styles.btn} ${styles.btnPrimary}`}
+          >
+            {bulkGenerating ? "⏳ Queuing..." : "📄 Generate Eligible Letters"}
+          </button>
+          {bulkGenStatus && (
+            <div style={{ width: "100%", marginTop: "1rem", color: "var(--status-info-text)", fontSize: "0.9rem", padding: "10px", backgroundColor: "var(--status-info-bg)", borderRadius: "8px" }}>
+              {bulkGenStatus}
+            </div>
+          )}
+        </div>
+      </div>
+
     </div>
   );
 }

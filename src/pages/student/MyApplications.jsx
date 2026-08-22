@@ -98,6 +98,7 @@ function MyApplications() {
   const [pastApplications, setPastApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
+  const [requestingOfferLetterId, setRequestingOfferLetterId] = useState(null);
   const [message, setMessage] = useState(null);
   const [selectedAppModal, setSelectedAppModal] = useState(null);
 
@@ -192,6 +193,20 @@ function MyApplications() {
       alert("Could not delete application. Please try again.");
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleRequestOfferLetter = async (appId) => {
+    try {
+      setRequestingOfferLetterId(appId);
+      await apiClient.post(`${API_ENDPOINTS.APPLICATIONS.BASE}${appId}/request-offer-letter/`);
+      setMessage("✅ Offer Letter requested successfully.");
+      await loadApplications();
+    } catch (err) {
+      console.error("Failed to request offer letter:", err);
+      alert(err.response?.data?.detail || "Could not request offer letter. Please try again.");
+    } finally {
+      setRequestingOfferLetterId(null);
     }
   };
 
@@ -320,6 +335,49 @@ function MyApplications() {
                     <strong>Applied On</strong>
                     <span>{formatDate(activeApp.applied_at || activeApp.created_at)}</span>
                   </div>
+
+                  {isQualified && activeApp.assigned_cohort && (
+                    <div style={{ marginTop: "1rem", padding: "12px", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                      <strong style={{ display: "block", marginBottom: "8px", color: "#1e293b" }}>Offer Letter</strong>
+                      {activeApp.offer_letter_issued && activeApp.offer_letter_file ? (
+                        <div>
+                          <span style={{ color: "#166534", fontWeight: "bold", display: "block", marginBottom: "8px" }}>✅ Offer Letter Issued</span>
+                          <a href={activeApp.offer_letter_file} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", padding: "8px 16px", backgroundColor: "#2563eb", color: "white", textDecoration: "none", borderRadius: "6px", fontSize: "14px", fontWeight: "bold" }}>
+                            View / Download
+                          </a>
+                        </div>
+                      ) : activeApp.offer_letter_request_status === "PENDING" ? (
+                        <span style={{ color: "#d97706", fontWeight: "bold", display: "block" }}>⏳ Offer Letter Request Pending<br/><small style={{color: "#64748b", fontWeight: "normal"}}>Your request has been submitted to the administration.</small></span>
+                      ) : activeApp.offer_letter_request_status === "IN_PROGRESS" ? (
+                        <span style={{ color: "#2563eb", fontWeight: "bold" }}>🔄 Request Being Processed</span>
+                      ) : activeApp.offer_letter_request_status === "RESOLVED" ? (
+                        <span style={{ color: "#166534", fontWeight: "bold", display: "block" }}>✓ Request Approved<br/><small style={{color: "#64748b", fontWeight: "normal"}}>Your offer letter is being prepared.</small></span>
+                      ) : (
+                        <div>
+                          <p style={{ margin: "0 0 8px 0", fontSize: "13px", color: "#475569" }}>
+                            Your Offer Letter will be automatically issued after one calendar month.
+                          </p>
+                          <button
+                            onClick={() => handleRequestOfferLetter(activeApp.id)}
+                            disabled={requestingOfferLetterId === activeApp.id}
+                            style={{
+                              padding: "8px 16px",
+                              backgroundColor: "#475569",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "6px",
+                              cursor: requestingOfferLetterId === activeApp.id ? "not-allowed" : "pointer",
+                              fontWeight: "bold",
+                              fontSize: "13px",
+                              opacity: requestingOfferLetterId === activeApp.id ? 0.7 : 1
+                            }}
+                          >
+                            {requestingOfferLetterId === activeApp.id ? "Requesting..." : "Request Offer Letter"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
                     <button

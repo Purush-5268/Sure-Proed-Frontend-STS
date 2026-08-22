@@ -116,8 +116,19 @@
   align-items: center;
   justify-content: center;
   width: 24px;
+  flex-shrink: 0;
+  overflow: hidden;
   color: var(--text-muted);
   transition: color var(--transition-fast);
+  pointer-events: none;
+}
+
+/* Prevent any SVG child from accidentally rendering visible text */
+.linkIcon svg {
+  display: block;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
 }
 
 .sidebarCollapsed .linkIcon {

@@ -36,11 +36,6 @@ function Reports() {
               description: `${Array.isArray(applicationsResponse.data) ? applicationsResponse.data.length : 0} applications currently recorded.`,
               link: "/admin/applications",
             },
-            {
-              title: "Student Queries",
-              description: `View and resolve student absence warnings and apologies.`,
-              link: "/admin/student-queries",
-            },
           ]);
         }
       } catch (err) {

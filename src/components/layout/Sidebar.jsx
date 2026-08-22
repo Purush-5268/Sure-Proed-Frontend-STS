@@ -40,9 +40,9 @@ function Sidebar({ title, links }) {
             }
             title={isCollapsed ? link.label : ""}
           >
-            <span className={styles.linkIcon}>{link.icon}</span>
+            <span className={styles.linkIcon} aria-hidden="true">{link.icon}</span>
             {!isCollapsed && <span className={styles.linkLabel}>{link.label}</span>}
-            <div className={styles.activeIndicator}></div>
+            <div className={styles.activeIndicator} aria-hidden="true"></div>
           </NavLink>
         ))}
       </nav>

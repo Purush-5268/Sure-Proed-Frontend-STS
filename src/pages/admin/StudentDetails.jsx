@@ -11,14 +11,19 @@ function StudentDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [student, setStudent] = useState(null);
+  const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const loadStudent = async () => {
       try {
-        const response = await apiClient.get(API_ENDPOINTS.STUDENTS.BY_ID(id));
-        setStudent(response.data || null);
+        const [studentRes, appsRes] = await Promise.all([
+          apiClient.get(API_ENDPOINTS.STUDENTS.BY_ID(id)),
+          apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE, { params: { student: id } }).catch(() => ({ data: { results: [] } }))
+        ]);
+        setStudent(studentRes.data || null);
+        setApplications(appsRes.data?.results || appsRes.data || []);
       } catch (err) {
         console.error("Failed to load student:", err);
         setError("Unable to load student details.");
@@ -139,31 +144,35 @@ function StudentDetails() {
           </div>
         </div>
 
-        {/* Course & Cohort (from serializer data) */}
-        <div style={{ backgroundColor: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", marginBottom: "1.5rem", border: "1px solid var(--border-color)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-          <h3 style={{ margin: "0 0 16px 0", fontSize: "16px", color: "var(--text-primary)", borderBottom: "1px solid var(--border-color)", paddingBottom: "8px" }}>
-            <FiBook style={{ marginRight: "8px" }} />Course & Enrollment
-          </h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", fontSize: "14px", color: "var(--text-secondary)" }}>
-            <div><strong>Course:</strong> {courseName}</div>
-            <div><strong>Batch/Cohort:</strong> {cohortCode}</div>
-            <div><strong>Application Status:</strong> {formatStatus(student.application_status)}</div>
-            <div><strong>Exam Result:</strong> <span style={{ color: examStatusColor, fontWeight: "600" }}>{examStatusLabel}</span></div>
-            {app && (
-              <>
-                <div><strong>Application #:</strong> {app.application_number || "N/A"}</div>
-                <div>
-                  <Link
-                    to={`/admin/application-details/${app.id}`}
-                    style={{ color: "var(--primary-color)", fontWeight: "600", textDecoration: "underline" }}
-                  >
-                    View Full Application →
-                  </Link>
+        {/* All Applications & Offer Letters */}
+        {applications.length > 0 && (
+          <div style={{ backgroundColor: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", marginBottom: "1.5rem", border: "1px solid var(--border-color)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+            <h3 style={{ margin: "0 0 16px 0", fontSize: "16px", color: "var(--text-primary)", borderBottom: "1px solid var(--border-color)", paddingBottom: "8px" }}>
+              <FiBook style={{ marginRight: "8px" }} />Applications & Offer Letters
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {applications.map(app => (
+                <div key={app.id} style={{ backgroundColor: "var(--bg-nested)", padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", fontSize: "13px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "8px" }}>
+                    <div><strong>Application:</strong> {app.course?.name || app.course || "General Track"} — {app.assigned_cohort?.code || "Unassigned"}</div>
+                    <div><strong>Status:</strong> {formatStatus(app.status)}</div>
+                    <div>
+                      <strong>Offer Letter:</strong>{" "}
+                      <span style={{ color: app.offer_letter_issued ? "#059669" : "#d97706", fontWeight: "600" }}>
+                        {app.offer_letter_issued ? "Generated" : "Not Generated"}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+                    <Link to={`/admin/application-details/${app.id}`} className="premium-btn premium-btn-primary" style={{ padding: "4px 10px", fontSize: "12px" }}>
+                      Manage Offer Letter & Details
+                    </Link>
+                  </div>
                 </div>
-              </>
-            )}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Skills & Bio */}
         {(student.skills?.length > 0 || student.tagline || student.bio) && (

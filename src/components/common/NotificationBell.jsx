@@ -55,9 +55,8 @@ const ACTION_URL_SLUG_MAP = {
   "community_activities":{ student: "/student/dashboard", admin: "/admin/dashboard", mentor: "/mentor/dashboard" },
   "courses":             { student: "/student/courses", admin: "/admin/courses", mentor: "/mentor/dashboard" },
   "grades":              { student: "/student/dashboard", admin: "/admin/reports", mentor: "/mentor/dashboard" },
-  "profile":             { student: "/student/profile", admin: "/admin/profile-settings", mentor: "/mentor/profile" },
   "screening":           { student: "/student/applications", admin: "/admin/applications", mentor: "/mentor/dashboard" },
-  "support_requests":    { student: "/student/permissions", admin: "/admin/student-queries", mentor: "/mentor/dashboard" },
+  "support_requests":    { student: "/student/permissions", admin: "/admin/requests-support", mentor: "/mentor/dashboard" },
   "timetable":           { student: "/student/class-schedule", admin: "/admin/schedule", mentor: "/mentor/class-schedule" },
   "training":            { student: "/student/cohort", admin: "/admin/cohorts", mentor: "/mentor/cohorts" },
 };
@@ -73,10 +72,10 @@ const getNotificationRoute = (notification, userRole) => {
 
   // ── 1. Title-based routing (highest priority — handles all known notification types) ──
 
-  // Attendance Warnings, Late Joins, Permission Requests
-  if (title.includes("attendance warning") || title.includes("late join") || title.includes("permission") || title.includes("attendance query")) {
+  // Attendance Warnings, Late Joins, Permission Requests, Support Requests
+  if (title.includes("attendance warning") || title.includes("late join") || title.includes("permission") || title.includes("attendance query") || title.includes("request")) {
     if (role === "student") return `/student/permissions`;
-    if (role === "admin") return `/admin/student-queries`;
+    if (role === "admin") return `/admin/requests-support`;
     if (role === "mentor") return `/mentor/attendance`;
   }
 
@@ -95,7 +94,7 @@ const getNotificationRoute = (notification, userRole) => {
   }
 
   // Application status changes (approved, rejected, cohort assigned, qualified, etc.)
-  if (title.includes("application") || title.includes("cohort assigned") || title.includes("qualified") || title.includes("waitlisted")) {
+  if (title.includes("application") || title.includes("cohort assigned") || title.includes("qualified") || title.includes("waitlisted") || title.includes("offer letter")) {
     if (role === "student") return `/student/applications`;
     if (role === "admin") return `/admin/applications`;
   }

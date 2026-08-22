@@ -34,6 +34,7 @@ function Dashboard() {
   const [assignmentStats, setAssignmentStats] = useState({ completed: 0, pending: 0, overdue: 0 });
   const [examStats, setExamStats] = useState({ completed: 0, upcoming: 0 });
   const [attendanceHistory, setAttendanceHistory] = useState([]);
+  const [isSuspended, setIsSuspended] = useState(false);
   const [showLateJoinModal, setShowLateJoinModal] = useState(false);
   const [lateJoinReason, setLateJoinReason] = useState("");
   const [lateJoinClassId, setLateJoinClassId] = useState(null);
@@ -62,8 +63,15 @@ function Dashboard() {
 
         const apps = appRes?.data?.results || appRes?.data || [];
         const courses = Array.isArray(coursesRes) ? coursesRes : (coursesRes?.results || coursesRes?.data || []);
-        const enrolled = apps.find(a => ['COHORT_ASSIGNED', 'IN_PROGRESS', 'COMPLETED'].includes(a.status));
-        if (isMounted && enrolled) setActiveApp(enrolled);
+        
+        // Find active or suspended application
+        const enrolled = apps.find(a => ['COHORT_ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'SUSPENDED'].includes(a.status));
+        if (isMounted && enrolled) {
+          setActiveApp(enrolled);
+          if (enrolled.status === "SUSPENDED") {
+            setIsSuspended(true);
+          }
+        }
 
         const enrollmentStatus = resolveStudentEnrollment(profileObj, apps, courses);
         if (isMounted) setResolvedEnrollment(enrollmentStatus);
@@ -79,11 +87,19 @@ function Dashboard() {
               setAttendanceStats(attData[0]);
               if (attData[0].history) setAttendanceHistory(attData[0].history);
             }
-          }).catch(() => { });
+          }).catch((err) => {
+            if (err.response?.status === 403) setIsSuspended(true);
+          });
 
           Promise.all([
-            assignmentService.getAssignments().catch(() => []),
-            assignmentService.getSubmissions().catch(() => [])
+            assignmentService.getAssignments().catch((err) => {
+              if (err.response?.status === 403) setIsSuspended(true);
+              return [];
+            }),
+            assignmentService.getSubmissions().catch((err) => {
+              if (err.response?.status === 403) setIsSuspended(true);
+              return [];
+            })
           ]).then(([assignRes, subRes]) => {
             const assignments = assignRes.results || assignRes || [];
             const submissions = subRes.results || subRes || [];
@@ -96,7 +112,9 @@ function Dashboard() {
           examService.getExams().then(exRes => {
             const exams = exRes.results || exRes || [];
             if (isMounted) setExamStats({ completed: exams.filter(e => e.status === 'COMPLETED').length, upcoming: exams.filter(e => e.status !== 'COMPLETED').length });
-          }).catch(() => { });
+          }).catch((err) => {
+            if (err.response?.status === 403) setIsSuspended(true);
+          });
         }
 
         // Fetch scheduled LST/SST/Domain sessions via the central attendance logic
@@ -106,7 +124,9 @@ function Dashboard() {
             const sessionsArray = Array.isArray(rawData) ? rawData : (rawData.results || []);
             if (isMounted) setTodayClasses(sessionsArray);
           }
-        }).catch(() => { });
+        }).catch((err) => {
+          if (err.response?.status === 403) setIsSuspended(true);
+        });
 
       } catch (err) {
         console.error("Error loading core dashboard data:", err);
@@ -168,7 +188,7 @@ function Dashboard() {
 
   // 🚨 LOCK SCREEN LOGIC 🚨
   const hasEnrollment = resolvedEnrollment.isEnrolled;
-  const isLocked = !hasEnrollment;
+  const isLocked = !hasEnrollment || isSuspended;
   const isRevoked = profile?.status === "ADMIN_REJECTED";
   const isExisting = resolvedEnrollment.isExistingStudent;
 
@@ -177,17 +197,19 @@ function Dashboard() {
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
         <div style={{ background: 'var(--bg-card)', padding: '40px', borderRadius: '24px', textAlign: 'center', border: '1px solid var(--border-color)', maxWidth: '500px' }}>
           <h2 style={{ color: 'var(--text-primary)', fontSize: '24px', marginBottom: '16px' }}>
-            {isRevoked ? "Access Revoked" : (isExisting ? "Account Pending Verification" : "Welcome to SURE ProEd")}
+            {isSuspended ? "Cohort Access Suspended" : isRevoked ? "Access Revoked" : (isExisting ? "Account Pending Verification" : "Welcome to SURE ProEd")}
           </h2>
           <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '24px' }}>
-            {isRevoked
+            {isSuspended
+              ? "Your access to this cohort is currently suspended. Please contact the administration for assistance."
+              : isRevoked
               ? "Your access has been temporarily revoked by an administrator."
               : (isExisting
                 ? "Please complete your Offer Letter verification in your Profile to restore your cohort access."
                 : "Please complete your Profile and click 'Apply Course' to begin your journey.")}
           </p>
           <div style={{ background: 'var(--bg-nested)', padding: '16px', borderRadius: '12px', color: 'var(--primary-color)' }}>
-            <strong>Status:</strong> {activeApp?.status ? activeApp.status.replace("_", " ") : (profile?.status ? profile.status.replace("_", " ") : "Action Required")}
+            <strong>Status:</strong> {isSuspended ? "SUSPENDED" : activeApp?.status ? activeApp.status.replace("_", " ") : (profile?.status ? profile.status.replace("_", " ") : "Action Required")}
           </div>
         </div>
       </div>
@@ -447,6 +469,15 @@ function Dashboard() {
           <h3 style={{ fontSize: '16px', marginBottom: '16px', color: 'var(--text-primary)' }}>Share Your Experience</h3>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>Your feedback helps us improve SURE ProEd. Let us know how things are going!</p>
           <FeedbackWidget />
+        </div>
+
+        {/* Offer Letters Card */}
+        <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <h3 style={{ fontSize: '16px', marginBottom: '16px', color: 'var(--text-primary)' }}>Offer Letters</h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>View and manage your internship offer letters.</p>
+          <button onClick={() => navigate('/student/applications')} style={{ width: '100%', padding: '10px 16px', backgroundColor: 'var(--brand-color, #2563eb)', color: 'white', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>
+            Go to Applications →
+          </button>
         </div>
 
       </div>

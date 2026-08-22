@@ -2,47 +2,27 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import { useAuth } from "../../context/AuthContext";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./AttendanceHistory.module.css";
 import { FiPieChart, FiClock, FiCalendar } from "react-icons/fi";
 
 function AttendanceHistory() {
+  const { profile } = useAuth();
   const [attendance, setAttendance] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const loadData = async () => {
-      try {
-        const [attRes, sumRes] = await Promise.allSettled([
-          apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE),
-          apiClient.get(API_ENDPOINTS.ATTENDANCE.SUMMARY)
-        ]);
-        
-        if (isMounted) {
-          if (attRes.status === 'fulfilled') {
-            setAttendance(Array.isArray(attRes.value.data) ? attRes.value.data : []);
-          }
-          if (sumRes.status === 'fulfilled') {
-            const data = sumRes.value.data;
-            const sumData = Array.isArray(data?.results) ? data.results[0] : (Array.isArray(data) ? data[0] : data);
-            setSummary(sumData || null);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to load attendance data:", err);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
-    loadData();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    if (profile?.student_dashboard_data) {
+      setSummary(profile.student_dashboard_data);
+      setAttendance(profile.student_dashboard_data.sessions || []);
+      setLoading(false);
+    } else if (profile) {
+      // If profile is loaded but no dashboard data, still stop loading
+      setLoading(false);
+    }
+  }, [profile]);
 
   const formatDate = (value) => {
     if (!value) return "N/A";
@@ -113,23 +93,23 @@ function AttendanceHistory() {
                     </tr>
                   </thead>
                   <tbody>
-                    {attendance.map((item) => (
-                      <tr key={item.id}>
-                        <td>{formatDate(item.class_date)}</td>
+                    {attendance.map((item, index) => (
+                      <tr key={item.id || index}>
+                        <td>{formatDate(item.date)}</td>
                         <td>{item.title || "Class Session"}</td>
-                        <td>{item.start_time ? `${item.start_time} - ${item.end_time || ""}`.trim() : "N/A"}</td>
+                        <td>{item.duration_minutes ? `${item.duration_minutes} min` : "N/A"}</td>
                         <td>
-                          {item.status === "ATTENDANCE_PENDING" ? (
-                            <span style={{ background: '#f59e0b', color: 'white', padding: '4px 8px', borderRadius: '4px' }}>
-                              Generating Meet Link...
+                          {item.status === "PRESENT" ? (
+                            <span style={{ background: '#10b981', color: 'white', padding: '4px 8px', borderRadius: '4px' }}>
+                              PRESENT
                             </span>
-                          ) : item.status === "ATTENDANCE_FAILED" ? (
+                          ) : item.status === "ABSENT" ? (
                             <span style={{ background: '#ef4444', color: 'white', padding: '4px 8px', borderRadius: '4px' }}>
-                              Generation Failed
+                              ABSENT
                             </span>
                           ) : (
-                            <span className={item.conducted === false ? styles.present : styles.absent} style={item.conducted === false ? { background: '#10b981', color: 'white', padding: '4px 8px', borderRadius: '4px'} : { background: '#64748b', color: 'white', padding: '4px 8px', borderRadius: '4px'} }>
-                              {item.conducted === false ? "Conducted / Ended" : "Live / Scheduled"}
+                            <span style={{ background: '#f59e0b', color: 'white', padding: '4px 8px', borderRadius: '4px' }}>
+                              {item.status || "BELOW THRESHOLD"}
                             </span>
                           )}
                         </td>

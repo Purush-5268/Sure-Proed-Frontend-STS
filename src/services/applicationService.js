@@ -54,4 +54,45 @@ export const applicationService = {
     );
     return response.data;
   },
+
+  async generateOfferLetter(id) {
+    const response = await apiClient.post(API_ENDPOINTS.APPLICATIONS.GENERATE_OFFER_LETTER(id));
+    return response.data;
+  },
+
+  async revokeOfferLetter(id, reason = "") {
+    const response = await apiClient.post(API_ENDPOINTS.APPLICATIONS.REVOKE_OFFER_LETTER(id), { reason });
+    return response.data;
+  },
+
+  async bulkGenerateOfferLetters(cohortId) {
+    const response = await apiClient.post(API_ENDPOINTS.APPLICATIONS.BULK_GENERATE_OFFER_LETTERS, { cohort_id: cohortId });
+    return response.data;
+  },
+
+  async requestOfferLetter(id, reason = "") {
+    const response = await apiClient.post(API_ENDPOINTS.APPLICATIONS.REQUEST_OFFER_LETTER(id), { reason });
+    return response.data;
+  },
+
+  async downloadOfferLetter(id) {
+    const response = await apiClient.get(API_ENDPOINTS.APPLICATIONS.DOWNLOAD_OFFER_LETTER(id));
+    return response.data;
+  },
+
+  async verifyOfferLetter(hash) {
+    // We pass the hash as query param
+    const response = await apiClient.get(API_ENDPOINTS.APPLICATIONS.VERIFY_OFFER_LETTER, { params: { hash } });
+    return response.data;
+  },
+
+  async suspendCohort(id) {
+    const response = await apiClient.post(API_ENDPOINTS.APPLICATIONS.SUSPEND(id));
+    return response.data;
+  },
+
+  async unsuspendCohort(id) {
+    const response = await apiClient.post(API_ENDPOINTS.APPLICATIONS.UNSUSPEND(id));
+    return response.data;
+  }
 };

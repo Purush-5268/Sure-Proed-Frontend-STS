@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { FiChevronDown, FiChevronUp, FiCheckCircle, FiXCircle, FiClock, FiFileText, FiVideo, FiShield, FiUsers, FiAward } from "react-icons/fi";
+import { FiChevronDown, FiChevronUp, FiCheckCircle, FiXCircle, FiClock, FiFileText, FiVideo, FiShield, FiUsers, FiAward, FiFile } from "react-icons/fi";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import { applicationService } from "../../services/applicationService";
 import styles from "./ApplicationDetails.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 
@@ -23,7 +24,8 @@ function ApplicationDetails() {
     interview: false,
     cohort: false,
     completion: false,
-    update: false
+    update: false,
+    offerLetter: false
   });
 
   const togglePanel = (panel) => {
@@ -146,6 +148,104 @@ function ApplicationDetails() {
     }
   };
 
+  const handleGenerateOfferLetter = async () => {
+    setSubmitting(true);
+    try {
+      await applicationService.generateOfferLetter(id);
+      alert("Offer letter generated successfully.");
+      loadApplication();
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to generate offer letter.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDownloadOfferLetter = async () => {
+    try {
+      const res = await applicationService.downloadOfferLetter(id);
+      if (res.url) {
+        window.open(res.url, "_blank");
+      }
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to fetch offer letter.");
+    }
+  };
+
+  const handleRevokeOfferLetter = async () => {
+    const reason = window.prompt("Enter a reason for revoking the offer letter (optional):");
+    if (reason === null) return; // User cancelled
+    
+    setSubmitting(true);
+    try {
+      await applicationService.revokeOfferLetter(id, reason);
+      alert("Offer letter revoked successfully.");
+      loadApplication();
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to revoke offer letter.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSuspendApplication = async () => {
+    if (!window.confirm("Suspend this student's application? They will lose active cohort access but historical data is preserved.")) return;
+    
+    setSubmitting(true);
+    try {
+      await apiClient.patch(API_ENDPOINTS.APPLICATIONS.BY_ID(id), { status: "SUSPENDED" });
+      alert("Application suspended successfully.");
+      loadApplication();
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to suspend application.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleReactivateApplication = async (newStatus) => {
+    if (!window.confirm(`Reactivate this application to ${newStatus}?`)) return;
+    
+    setSubmitting(true);
+    try {
+      await apiClient.patch(API_ENDPOINTS.APPLICATIONS.BY_ID(id), { status: newStatus });
+      alert(`Application reactivated to ${newStatus}.`);
+      loadApplication();
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to reactivate application.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSuspendCohort = async () => {
+    if (!window.confirm("Suspend this student's access to this cohort?\n\nTheir account, profile, historical attendance, submissions, examination records, and other historical data will be preserved. Only access to this cohort's active resources will be revoked.")) return;
+    setSubmitting(true);
+    try {
+      await applicationService.suspendCohort(id);
+      alert("Cohort access suspended successfully.");
+      loadApplication();
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to suspend cohort.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleUnsuspendCohort = async () => {
+    if (!window.confirm("Restore this student's access to this cohort?")) return;
+    setSubmitting(true);
+    try {
+      await applicationService.unsuspendCohort(id);
+      alert("Cohort access restored successfully.");
+      loadApplication();
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to restore cohort access.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) return <div className={styles.pageContainer}><SkeletonLoader variant="detail" rows={10} /></div>;
   if (error) return <div className={styles.pageContainer}><p style={{ color: "var(--danger-color)" }}>{error}</p></div>;
   if (!application) return <div className={styles.pageContainer}><p>No application found.</p></div>;
@@ -200,6 +300,64 @@ function ApplicationDetails() {
                     {application.qualified === true ? <span style={{color:"var(--success-color)"}}>Passed</span> : application.qualified === false ? <span style={{color:"var(--danger-color)"}}>Failed</span> : "Pending"}
                   </span>
                 </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* PANEL H: Offer Letter */}
+        <div className={styles.panel} data-expanded={expanded.offerLetter}>
+          <div className={styles.panelHeader} onClick={() => togglePanel('offerLetter')}>
+            <div className={styles.panelTitle}><FiFile /> H. Offer Letter</div>
+            {expanded.offerLetter ? <FiChevronUp /> : <FiChevronDown />}
+          </div>
+          {expanded.offerLetter && (
+            <div className={styles.panelContent}>
+              <div className={styles.grid} style={{ marginBottom: "20px" }}>
+                <div className={styles.gridItem}>
+                  <span className={styles.label}>Status</span>
+                  <span className={styles.value}>
+                    {application.offer_letter_issued ? <span style={{color:"var(--success-color)"}}>Issued</span> : "Not Generated"}
+                  </span>
+                </div>
+                {application.offer_letter_issued && (
+                  <div className={styles.gridItem}>
+                    <span className={styles.label}>Issued On</span>
+                    <span className={styles.value}>{new Date(application.offer_letter_issued_at).toLocaleDateString()}</span>
+                  </div>
+                )}
+                {!application.offer_letter_issued && application.assigned_cohort?.start_date && (
+                  <div className={styles.gridItem}>
+                    <span className={styles.label}>Eligibility</span>
+                    <span className={styles.value}>
+                      {(() => {
+                        const start = new Date(application.assigned_cohort.start_date);
+                        const eligible = new Date(start);
+                        eligible.setMonth(eligible.getMonth() + 1);
+                        if (new Date() >= eligible) {
+                          return <span style={{color:"var(--success-color)"}}>Eligible</span>;
+                        }
+                        return <span style={{color:"var(--warning-color)"}}>Eligible after {eligible.toLocaleDateString()}</span>;
+                      })()}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className={styles.actionRow} style={{ justifyContent: "flex-start" }}>
+                {application.offer_letter_issued ? (
+                  <>
+                    <button onClick={handleDownloadOfferLetter} className="premium-btn premium-btn-primary">
+                      View / Download Offer Letter
+                    </button>
+                    <button onClick={handleRevokeOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting}>
+                      Revoke Offer Letter
+                    </button>
+                  </>
+                ) : (
+                  <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-secondary" disabled={submitting || application.status === "SUSPENDED" || application.status === "DROPPED" || application.status === "CANCELLED"}>
+                    Generate Offer Letter
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -417,6 +575,72 @@ function ApplicationDetails() {
                   <button type="submit" className="premium-btn premium-btn-danger" disabled={submitting}>Force Update Application</button>
                 </div>
               </form>
+              
+              <div style={{ marginTop: "30px", paddingTop: "20px", borderTop: "1px solid var(--border-color)" }}>
+                <h4 style={{ marginBottom: "10px", color: "var(--text-primary)" }}>Core Application Status Management</h4>
+                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "15px" }}>
+                  Use these buttons to quickly change the core application status (e.g., if a student drops out or needs to be reinstated).
+                </p>
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                  {application.status === "SUSPENDED" ? (
+                    <>
+                      <button onClick={() => handleReactivateApplication("IN_PROGRESS")} className="premium-btn premium-btn-primary" disabled={submitting}>
+                        Reactivate (In Progress)
+                      </button>
+                      <button onClick={() => handleReactivateApplication("COHORT_ASSIGNED")} className="premium-btn premium-btn-secondary" disabled={submitting}>
+                        Reactivate (Cohort Assigned)
+                      </button>
+                    </>
+                  ) : (
+                    <button onClick={handleSuspendApplication} className="premium-btn premium-btn-danger" disabled={submitting || application.status === "DROPPED" || application.status === "CANCELLED" || application.status === "REJECTED"}>
+                      Suspend Application
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* PANEL H: Offer Letter */}
+        <div className={styles.panel} data-expanded={expanded.offerLetter}>
+          <div className={styles.panelHeader} onClick={() => togglePanel('offerLetter')}>
+            <div className={styles.panelTitle}><FiFile /> H. Offer Letter Management</div>
+            {expanded.offerLetter ? <FiChevronUp /> : <FiChevronDown />}
+          </div>
+          {expanded.offerLetter && (
+            <div className={styles.panelContent}>
+              <div className={styles.grid} style={{ marginBottom: "20px" }}>
+                <div className={styles.gridItem}>
+                  <span className={styles.label}>Offer Letter Status</span>
+                  <span className={styles.value}>{application.offer_letter_issued ? "Generated" : "Not Generated"}</span>
+                </div>
+                <div className={styles.gridItem}>
+                  <span className={styles.label}>Student Request</span>
+                  <span className={styles.value}>{application.offer_letter_request_status || "Not Requested"}</span>
+                </div>
+                <div className={styles.gridItem}>
+                  <span className={styles.label}>Eligibility Date</span>
+                  <span className={styles.value}>{application.assigned_cohort?.start_date ? new Date(new Date(application.assigned_cohort.start_date).setMonth(new Date(application.assigned_cohort.start_date).getMonth() + 1)).toLocaleDateString() : "N/A"}</span>
+                </div>
+              </div>
+
+              <div className={styles.actionRow} style={{ justifyContent: "flex-start", gap: "10px" }}>
+                {!application.offer_letter_issued ? (
+                  <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-primary" disabled={submitting}>
+                    Generate Offer Letter
+                  </button>
+                ) : (
+                  <>
+                    <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-secondary" disabled={submitting}>
+                      Regenerate Offer Letter
+                    </button>
+                    <button onClick={handleDownloadOfferLetter} className="premium-btn premium-btn-primary" disabled={submitting}>
+                      View / Download Offer Letter
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           )}
         </div>

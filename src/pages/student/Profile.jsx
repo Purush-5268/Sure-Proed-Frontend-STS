@@ -21,7 +21,6 @@ function Profile() {
   const [saving, setSaving] = useState(false);
 
   const [profileStatus, setProfileStatus] = useState("NOT_AVAILABLE");
-  const [uploadedFileUrl, setUploadedFileUrl] = useState(null);
   const [isExistingStudent, setIsExistingStudent] = useState(false);
   const [serverProfile, setServerProfile] = useState(null);
   const [courses, setCourses] = useState([]);
@@ -36,7 +35,7 @@ function Profile() {
     city: "", state: "", country: "", bio: "", tagline: "",
     skills: "", hobbies: "", languages: "", portfolio_url: "",
     linkedin_url: "", github_username: "",
-    courseId: "", courseBatch: "", offerLetter: null, profile_photo: null, resume: null,
+    courseId: "", courseBatch: "", profile_photo: null, resume: null,
   });
 
   useEffect(() => {
@@ -100,10 +99,8 @@ function Profile() {
             
             courseId: profile?.courseId || "",
             courseBatch: profile?.courseBatch || "",
-            offerLetter: null,
           });
           if (profile) {
-            setUploadedFileUrl(profile.uploaded_offer_letter || profile.uploadedOfferLetter || null);
             setVerificationMetadata({
               reviewRequired: profile.review_required || profile.reviewRequired || false,
               automatedResult: profile.automated_verification_result || profile.automatedVerificationResult || "",

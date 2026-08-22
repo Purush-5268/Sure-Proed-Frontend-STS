@@ -45,6 +45,23 @@ export const API_ENDPOINTS = {
     CHECK_COMPLETION: (id) => `/api/applications/${id}/check-completion/`,
     REVOKE_ACCESS: (id) => `/api/applications/${id}/revoke_access/`,
     RESTORE_ACCESS: (id) => `/api/applications/${id}/restore_access/`,
+    GENERATE_OFFER_LETTER: (id) => `/api/applications/${id}/generate-offer-letter/`,
+    REVOKE_OFFER_LETTER: (id) => `/api/applications/${id}/revoke-offer-letter/`,
+    BULK_GENERATE_OFFER_LETTERS: "/api/applications/generate-offer-letters-for-cohort/",
+    REQUEST_OFFER_LETTER: (id) => `/api/applications/${id}/request-offer-letter/`,
+    DOWNLOAD_OFFER_LETTER: (id) => `/api/applications/${id}/download-offer-letter/`,
+    // Legacy: GET /api/applications/verify-offer-letter/?hash=<hash>
+    VERIFY_OFFER_LETTER: "/api/applications/verify-offer-letter/",
+    SUSPEND: (id) => `/api/applications/${id}/suspend/`,
+    UNSUSPEND: (id) => `/api/applications/${id}/unsuspend/`,
+  },
+
+  // UserRequests (support & requests)
+  REQUESTS: {
+    BASE: "/api/requests/",
+    BY_ID: (id) => `/api/requests/${id}/`,
+    UPDATE_STATUS: (id) => `/api/requests/${id}/update-status/`,
+    PENDING_COUNT: "/api/requests/pending-count/",
   },
 
   // Pre-Screening
@@ -63,15 +80,16 @@ export const API_ENDPOINTS = {
   COHORTS: {
     BASE: "/api/cohorts/",
     BY_ID: (id) => `/api/cohorts/${id}/`,
-    // Mentor-scoped: returns ONLY active cohorts assigned to the authenticated mentor. Backend filters implicitly.
     MY_COHORTS: "/api/cohorts/",
-    // Students enrolled in a specific cohort
     STUDENTS: (id) => `/api/students/?cohort=${id}`,
-    // Mentor requests cohort assignment from admin
     REQUEST_ASSIGNMENT: "/api/cohorts/request-assignment/",
-    // Admin mentor management endpoints
     ASSIGN_MENTOR: (id) => `/api/cohorts/${id}/assign_mentor/`,
     REVOKE_MENTOR: (id) => `/api/cohorts/${id}/revoke_mentor/`,
+    // Chat endpoints
+    CHAT_MESSAGES: (id) => `/api/cohorts/${id}/chat/messages/`,
+    CHAT_UNREAD: (id) => `/api/cohorts/${id}/chat/unread-count/`,
+    CHAT_READ: (id) => `/api/cohorts/${id}/chat/read/`,
+    CHAT_DELETE_MESSAGE: (id, msgId) => `/api/cohorts/${id}/chat/messages/${msgId}/`,
   },
 
   // Mentor Profile (authenticated mentor's own profile or admin fetching by user id)

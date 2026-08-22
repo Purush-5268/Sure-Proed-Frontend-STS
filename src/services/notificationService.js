@@ -52,7 +52,7 @@ export const notificationService = {
    * Backend endpoint: PATCH /api/notifications/{id}/mark_read/
    */
   async markRead(id) {
-    const response = await apiClient.patch(API_ENDPOINTS.NOTIFICATIONS.MARK_READ(id));
+    const response = await apiClient.post(API_ENDPOINTS.NOTIFICATIONS.MARK_READ(id));
     return response.data;
   },
 
@@ -63,7 +63,7 @@ export const notificationService = {
    * @param {string[]} ids - array of notification IDs to mark read
    */
   async markAllRead(ids = []) {
-    if (!ids.length) return;
-    await Promise.allSettled(ids.map((id) => notificationService.markRead(id)));
+    const response = await apiClient.post("/api/notifications/mark_all_read/");
+    return response.data;
   },
 };

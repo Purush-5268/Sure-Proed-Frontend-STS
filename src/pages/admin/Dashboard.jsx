@@ -314,10 +314,10 @@ function Dashboard() {
                         <span style={{ fontSize: '12px', color: "var(--text-muted)" }}>{app.student?.user?.email || app.student?.email}</span>
                       </td>
                       <td>
-                        {(app.student?.offer_letter || app.student?.offerLetter) ? (
-                          <a href={app.student?.offer_letter || app.student?.offerLetter} target="_blank" rel="noopener noreferrer" style={{ color: '#4f46e5', textDecoration: 'none', fontWeight: 'bold' }}>View Document</a>
+                        {app.offer_letter_issued ? (
+                          <a href={app.offer_letter_file} target="_blank" rel="noopener noreferrer" style={{ color: '#4f46e5', textDecoration: 'none', fontWeight: 'bold' }}>View Document</a>
                         ) : (
-                          <span style={{ color: "var(--text-muted)" }}>N/A</span>
+                          <span style={{ color: "var(--text-muted)" }}>Not Generated</span>
                         )}
                       </td>
                       <td>
