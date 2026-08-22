@@ -126,7 +126,7 @@ function MyCohort() {
               <div className={styles.infoBox} style={{ gridColumn: '1 / -1' }}>
                 <h3>Course</h3>
                 <p>
-                  <strong>{cohort.course_name || cohort.course?.name || "Unknown Course"}</strong><br/>
+                  <strong>{cohort.course_name || cohort.course?.name || "Unknown Course"}</strong><br />
                   <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
                     ID: {typeof cohort.course === 'string' ? cohort.course : (cohort.course?.id || "N/A")}
                   </span>

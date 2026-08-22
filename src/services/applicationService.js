@@ -60,8 +60,13 @@ export const applicationService = {
     return response.data;
   },
 
-  async revokeOfferLetter(id, reason = "") {
-    const response = await apiClient.post(API_ENDPOINTS.APPLICATIONS.REVOKE_OFFER_LETTER(id), { reason });
+  async revokeOfferLetter(id, data) {
+    const response = await apiClient.post(API_ENDPOINTS.APPLICATIONS.REVOKE_OFFER_LETTER(id), data);
+    return response.data;
+  },
+
+  async restoreOfferLetter(id) {
+    const response = await apiClient.post(API_ENDPOINTS.APPLICATIONS.RESTORE_OFFER_LETTER(id));
     return response.data;
   },
 

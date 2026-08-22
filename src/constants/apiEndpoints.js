@@ -47,6 +47,7 @@ export const API_ENDPOINTS = {
     RESTORE_ACCESS: (id) => `/api/applications/${id}/restore_access/`,
     GENERATE_OFFER_LETTER: (id) => `/api/applications/${id}/generate-offer-letter/`,
     REVOKE_OFFER_LETTER: (id) => `/api/applications/${id}/revoke-offer-letter/`,
+    RESTORE_OFFER_LETTER: (id) => `/api/applications/${id}/restore-offer-letter/`,
     RESET_OFFER_LETTER: (id) => `/api/applications/${id}/reset-offer-letter/`,
     BULK_GENERATE_OFFER_LETTERS: "/api/applications/generate-offer-letters-for-cohort/",
     REQUEST_OFFER_LETTER: (id) => `/api/applications/${id}/request-offer-letter/`,

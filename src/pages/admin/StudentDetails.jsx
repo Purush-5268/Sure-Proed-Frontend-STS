@@ -12,18 +12,31 @@ function StudentDetails() {
   const navigate = useNavigate();
   const [student, setStudent] = useState(null);
   const [applications, setApplications] = useState([]);
+  const [courses, setCourses] = useState({});
+  const [cohorts, setCohorts] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const loadStudent = async () => {
       try {
-        const [studentRes, appsRes] = await Promise.all([
+        const [studentRes, appsRes, coursesRes, cohortsRes] = await Promise.all([
           apiClient.get(API_ENDPOINTS.STUDENTS.BY_ID(id)),
-          apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE, { params: { student: id } }).catch(() => ({ data: { results: [] } }))
+          apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE, { params: { student: id } }).catch(() => ({ data: { results: [] } })),
+          apiClient.get(API_ENDPOINTS.COURSES.BASE).catch(() => ({ data: { results: [] } })),
+          apiClient.get(API_ENDPOINTS.COHORTS.BASE).catch(() => ({ data: { results: [] } }))
         ]);
         setStudent(studentRes.data || null);
         setApplications(appsRes.data?.results || appsRes.data || []);
+        
+        const courseMap = {};
+        (coursesRes.data?.results || coursesRes.data || []).forEach(c => courseMap[c.id] = c);
+        setCourses(courseMap);
+
+        const cohortMap = {};
+        (cohortsRes.data?.results || cohortsRes.data || []).forEach(c => cohortMap[c.id] = c);
+        setCohorts(cohortMap);
+
       } catch (err) {
         console.error("Failed to load student:", err);
         setError("Unable to load student details.");
@@ -151,25 +164,60 @@ function StudentDetails() {
               <FiBook style={{ marginRight: "8px" }} />Applications & Offer Letters
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {applications.map(app => (
-                <div key={app.id} style={{ backgroundColor: "var(--bg-nested)", padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", fontSize: "13px" }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "8px" }}>
-                    <div><strong>Application:</strong> {app.course?.name || app.course || "General Track"} — {app.assigned_cohort?.code || "Unassigned"}</div>
-                    <div><strong>Status:</strong> {formatStatus(app.status)}</div>
+              {(() => {
+                const uniqueApplications = [];
+                const seenIds = new Set();
+                applications.forEach(app => {
+                  if (!seenIds.has(app.id)) {
+                    seenIds.add(app.id);
+                    uniqueApplications.push(app);
+                  }
+                });
+                return uniqueApplications.map(app => (
+                  <div key={app.id} style={{ backgroundColor: "var(--bg-nested)", padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", fontSize: "13px" }}>
+                    <div style={{ marginBottom: "8px", fontSize: "14px", fontWeight: "bold", color: "var(--primary-color)" }}>
+                      {app.application_number || app.id}
+                    </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "6px", marginBottom: "12px", color: "var(--text-primary)" }}>
                     <div>
-                      <strong>Offer Letter:</strong>{" "}
-                      <span style={{ color: app.offer_letter_issued ? "#059669" : "#d97706", fontWeight: "600" }}>
-                        {app.offer_letter_issued ? "Generated" : "Not Generated"}
-                      </span>
+                      {(() => {
+                        const courseId = app.course?.id || app.course;
+                        const c = courses[courseId];
+                        return c ? c.name : "General Track";
+                      })()}
+                    </div>
+                    <div>
+                      <strong>Cohort:</strong> {(() => {
+                        const cohortId = app.assigned_cohort?.id || app.assigned_cohort;
+                        const c = cohorts[cohortId];
+                        if (c) return `${c.code} - ${c.name || c.course_name || "Assigned"}`;
+                        return "Unassigned";
+                      })()}
+                    </div>
+                    <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginTop: "4px" }}>
+                      <div><strong>Status:</strong> {formatStatus(app.status)}</div>
+                      {app.qualified !== null && app.qualified !== undefined && (
+                        <div><strong>Exam:</strong> {app.qualified ? "Passed" : "Not Passed"}</div>
+                      )}
+                      <div>
+                        <strong>Offer Letter:</strong>{" "}
+                        <span style={{ color: app.offer_letter_issued ? "#059669" : "#d97706", fontWeight: "600" }}>
+                          {app.offer_letter_issued ? "GENERATED" : "NOT GENERATED"}
+                        </span>
+                      </div>
+                      {app.offer_letter_request_status && (
+                        <div><strong>Request:</strong> {app.offer_letter_request_status}</div>
+                      )}
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
-                    <Link to={`/admin/application-details/${app.id}`} className="premium-btn premium-btn-primary" style={{ padding: "4px 10px", fontSize: "12px" }}>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <Link to={`/admin/application-details/${app.id}`} className="premium-btn premium-btn-primary" style={{ padding: "6px 12px", fontSize: "12px" }}>
                       Manage Offer Letter & Details
                     </Link>
                   </div>
-                </div>
-              ))}
+                  </div>
+                ));
+              })()}
             </div>
           </div>
         )}

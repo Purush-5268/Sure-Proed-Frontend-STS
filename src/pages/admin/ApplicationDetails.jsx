@@ -16,6 +16,7 @@ function ApplicationDetails() {
   
   // Available Cohorts for Assignment
   const [cohorts, setCohorts] = useState([]);
+  const [courses, setCourses] = useState([]);
 
   // Panel toggles
   const [expanded, setExpanded] = useState({
@@ -37,9 +38,13 @@ function ApplicationDetails() {
       const response = await apiClient.get(API_ENDPOINTS.APPLICATIONS.BY_ID(id));
       setApplication(response.data || null);
       if (response.data?.course) {
-        // Fetch cohorts for this course
-        const cohortsRes = await apiClient.get(API_ENDPOINTS.COHORTS.BASE, { params: { course: response.data.course } });
+        // Fetch cohorts and courses
+        const [cohortsRes, coursesRes] = await Promise.all([
+          apiClient.get(API_ENDPOINTS.COHORTS.BASE, { params: { course: response.data.course } }).catch(() => ({ data: [] })),
+          apiClient.get(API_ENDPOINTS.COURSES.BASE).catch(() => ({ data: [] }))
+        ]);
         setCohorts(cohortsRes.data?.results || cohortsRes.data || []);
+        setCourses(coursesRes.data?.results || coursesRes.data || []);
       }
     } catch (err) {
       console.error("Failed to load application details:", err);
@@ -178,11 +183,26 @@ function ApplicationDetails() {
     
     setSubmitting(true);
     try {
-      await applicationService.revokeOfferLetter(id, reason);
+      await applicationService.revokeOfferLetter(id, { reason });
       alert("Offer letter revoked successfully.");
       loadApplication();
     } catch (err) {
       alert(err.response?.data?.error || "Failed to revoke offer letter.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleRestoreOfferLetter = async () => {
+    if (!window.confirm("Restore this Offer Letter? This will return it to ISSUED state and allow the student to download it again.")) return;
+    
+    setSubmitting(true);
+    try {
+      await applicationService.restoreOfferLetter(id);
+      alert("Offer letter restored successfully.");
+      loadApplication();
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to restore offer letter.");
     } finally {
       setSubmitting(false);
     }
@@ -265,9 +285,16 @@ function ApplicationDetails() {
   if (error) return <div className={styles.pageContainer}><p style={{ color: "var(--danger-color)" }}>{error}</p></div>;
   if (!application) return <div className={styles.pageContainer}><p>No application found.</p></div>;
 
-  const stu = application.student || {};
-  const user = stu.user || {};
-  const fullName = `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "Unknown";
+  const studentDetails = application.student_details || {};
+  const fullName = studentDetails.name || "Unknown";
+  const studentCode = studentDetails.student_code || "No Code";
+  const courseId = application.course?.id || application.course;
+  const courseObj = courses.find(c => c.id === courseId) || {};
+  const courseName = courseObj.name || courseId || "N/A";
+  
+  const currentCohortId = application.assigned_cohort?.id || application.assigned_cohort;
+  const currentCohortObj = cohorts.find(c => c.id === currentCohortId) || {};
+  const currentCohortName = currentCohortObj.name || currentCohortId || "Unassigned";
 
   return (
     <div className={styles.pageContainer}>
@@ -293,11 +320,11 @@ function ApplicationDetails() {
                 </div>
                 <div className={styles.gridItem}>
                   <span className={styles.label}>Student</span>
-                  <span className={styles.value}>{fullName} ({stu.student_code || "No Code"})</span>
+                  <span className={styles.value}>{fullName} ({studentCode})</span>
                 </div>
                 <div className={styles.gridItem}>
                   <span className={styles.label}>Course</span>
-                  <span className={styles.value}>{application.course?.name || application.course || "N/A"}</span>
+                  <span className={styles.value}>{courseName}</span>
                 </div>
                 <div className={styles.gridItem}>
                   <span className={styles.label}>Applied On</span>
@@ -438,9 +465,7 @@ function ApplicationDetails() {
               <div className={styles.grid} style={{ marginBottom: "20px" }}>
                 <div className={styles.gridItem}>
                   <span className={styles.label}>Current Cohort</span>
-                  <span className={styles.value}>
-                    {application.assigned_cohort?.name ? `${application.assigned_cohort.code} - ${application.assigned_cohort.name}` : application.assigned_cohort || "Unassigned"}
-                  </span>
+                  <span className={styles.value}>{currentCohortName}</span>
                 </div>
               </div>
               
@@ -594,9 +619,13 @@ function ApplicationDetails() {
 
               <div className={styles.actionRow} style={{ justifyContent: "flex-start", gap: "10px", flexWrap: "wrap" }}>
                 {!application.offer_letter_issued ? (
+                  <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-primary" disabled={submitting}>
+                    Issue Offer Letter
+                  </button>
+                ) : application.offer_letter_request_status === "REVOKED" ? (
                   <>
-                    <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-primary" disabled={submitting}>
-                      Issue Offer Letter
+                    <button onClick={handleRestoreOfferLetter} className="premium-btn premium-btn-secondary" disabled={submitting}>
+                      Restore / Reaccess
                     </button>
                     <button onClick={handleResetOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting}>
                       Reset Offer Letter
