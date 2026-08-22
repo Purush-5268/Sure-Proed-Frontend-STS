@@ -1,16 +1,38 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { studentService } from "../../services/studentService";
-import { courseService } from "../../services/courseService";
-import { cohortService } from "../../services/cohortService";
-import apiClient, { normalizeListResponse } from "../../services/apiClient";
+import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./Students.module.css";
-import { FiUsers, FiClock, FiCheckCircle, FiAlertCircle, FiXCircle, FiShield, FiArrowLeft } from "react-icons/fi";
+import { FiUsers, FiClock, FiCheckCircle, FiXCircle, FiSearch } from "react-icons/fi";
+
+/**
+ * All Application.Status values from the backend.
+ * Only statuses relevant for the admin filter UI are exposed in the dropdown.
+ */
+const APPLICATION_STATUS_OPTIONS = [
+  { value: "", label: "All Statuses" },
+  { value: "APPLIED", label: "Applied" },
+  { value: "EXAM_PENDING", label: "Exam Pending" },
+  { value: "EXAM_COMPLETED", label: "Exam Completed" },
+  { value: "PRESCREENING_PENDING", label: "Pre-Screening Pending" },
+  { value: "PRESCREENING_COMPLETED", label: "Pre-Screening Completed" },
+  { value: "QUALIFIED", label: "Qualified" },
+  { value: "WAITLISTED", label: "Waitlisted" },
+  { value: "COHORT_ASSIGNED", label: "Cohort Assigned" },
+  { value: "IN_PROGRESS", label: "In Progress" },
+  { value: "COMPLETED", label: "Completed" },
+  { value: "DROPPED", label: "Dropped" },
+  { value: "SUSPENDED", label: "Suspended" },
+  { value: "TRANSFER_COHORT", label: "Transfer Cohort" },
+  { value: "REJECTED", label: "Rejected" },
+  { value: "CANCELLED", label: "Cancelled" },
+];
 
 function Students() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [courses, setCourses] = useState([]);
   const [cohorts, setCohorts] = useState([]);
@@ -24,6 +46,8 @@ function Students() {
   const [selectedCourseId, setSelectedCourseId] = useState(urlCourse || location.state?.preSelectedCourse || "");
   const [selectedCohort, setSelectedCohort] = useState(urlCohort || location.state?.preSelectedCohort || "");
   const [verificationState, setVerificationState] = useState(urlStatus || "");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState(""); // Controlled input before debounce
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -34,19 +58,12 @@ function Students() {
   const [hasNext, setHasNext] = useState(false);
   const [hasPrev, setHasPrev] = useState(false);
 
-  // Dashboard stats
+  // Dashboard stats (page-level)
   const [stats, setStats] = useState({
-    total: 0, eligibleForBulk: "-", reviewRequired: "-", approved: "-", rejected: "-"
+    examCleared: 0, examNotCleared: 0, examPending: 0
   });
 
-  const [selectedStudent, setSelectedStudent] = useState(null); // For the Profile Modal
   const [loading, setLoading] = useState(true);
-  const [applicationsMap, setApplicationsMap] = useState({});
-
-  // Bulk Verification State
-  const [selectedIds, setSelectedIds] = useState(new Set());
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [bulkResult, setBulkResult] = useState(null);
 
   // Load static dropdown data once on mount
   useEffect(() => {
@@ -77,10 +94,18 @@ function Students() {
     if (urlCourse !== null) setSelectedCourseId(urlCourse);
   }, [location.search]);
 
-  // Track previous filter values to safely reset pagination
-  const prevFiltersRef = React.useRef({ selectedCourseId, selectedCohort, verificationState, showSeeded });
+  // Debounce search input → searchQuery
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
-  // Fetch paginated students AND dynamic stats when filters/page change
+  // Track previous filter values to safely reset pagination
+  const prevFiltersRef = React.useRef({ selectedCourseId, selectedCohort, verificationState, showSeeded, searchQuery });
+
+  // Fetch paginated students when filters/page change
   useEffect(() => {
     const abortController = new AbortController();
     const prev = prevFiltersRef.current;
@@ -88,20 +113,14 @@ function Students() {
     const filtersChanged = prev.selectedCourseId !== selectedCourseId
       || prev.selectedCohort !== selectedCohort
       || prev.verificationState !== verificationState
-      || prev.showSeeded !== showSeeded; // Now properly tracking the Seeded button!
+      || prev.showSeeded !== showSeeded
+      || prev.searchQuery !== searchQuery;
 
-    prevFiltersRef.current = { selectedCourseId, selectedCohort, verificationState, showSeeded };
+    prevFiltersRef.current = { selectedCourseId, selectedCohort, verificationState, showSeeded, searchQuery };
 
     if (filtersChanged && page !== 1) {
       setPage(1);
-      setSelectedIds(new Set());
-      setBulkResult(null);
       return () => abortController.abort();
-    }
-
-    if (filtersChanged) {
-      setSelectedIds(new Set());
-      setBulkResult(null);
     }
 
     async function fetchData() {
@@ -113,10 +132,9 @@ function Students() {
         if (selectedCohort) baseParams.cohort = selectedCohort;
         if (verificationState) baseParams.application_status = verificationState;
         if (showSeeded) baseParams.seeded = 'true';
+        if (searchQuery) baseParams.search = searchQuery;
 
-        console.log("🚀 SENDING API REQUEST TO BACKEND WITH PARAMS:", baseParams);
-
-        // Fetch table data
+        // Single API call — the student serializer returns all needed data
         const tableRes = await studentService.getStudentProfiles(baseParams, { signal: abortController.signal });
 
         const studentData = tableRes?.data || tableRes || {};
@@ -127,69 +145,23 @@ function Students() {
         setHasNext(Boolean(studentData?.next));
         setHasPrev(Boolean(studentData?.previous) || page > 1);
 
-        // Fetch applications for the loaded students using available application IDs
-        const appIdsToFetch = new Set();
-        fetchedStudents.forEach(s => {
-          if (s.application_id) appIdsToFetch.add(s.application_id);
-          if (s.active_cohort?.application_id) appIdsToFetch.add(s.active_cohort.application_id);
-          if (s.completed_cohorts?.length > 0) {
-            s.completed_cohorts.forEach(cc => {
-              if (cc.application_id) appIdsToFetch.add(cc.application_id);
-            });
-          }
-        });
-
-        const newAppMap = {};
-        if (appIdsToFetch.size > 0) {
-          const appRes = await Promise.all(
-            Array.from(appIdsToFetch).map(id =>
-              apiClient.get(API_ENDPOINTS.APPLICATIONS.BY_ID(id)).catch(() => null)
-            )
-          );
-          appRes.forEach(res => {
-            if (res?.data?.id) {
-              newAppMap[res.data.id] = res.data;
-            }
-          });
-        }
-        setApplicationsMap(newAppMap);
-
-        // Calculate stats for current page because global backend filtering by qualified is not supported
+        // Calculate page-level exam stats from the serializer data (no extra API calls)
         let currentCleared = 0;
         let currentNotCleared = 0;
         let currentPending = 0;
 
         fetchedStudents.forEach(s => {
-          let resolvedApp = null;
-          if (selectedCourseId) {
-            resolvedApp = Object.values(newAppMap).find(app => app.student?.id === s.id && app.course?.id === selectedCourseId);
-          } else if (selectedCohort) {
-            resolvedApp = Object.values(newAppMap).find(app => app.student?.id === s.id && app.assigned_cohort?.id === selectedCohort);
-          } else if (s.application_id) {
-            resolvedApp = newAppMap[s.application_id];
-          } else if (s.active_cohort?.application_id) {
-            resolvedApp = newAppMap[s.active_cohort.application_id];
-          } else if (s.completed_cohorts?.length > 0) {
-            resolvedApp = newAppMap[s.completed_cohorts[0].application_id];
-          }
-
-          if (resolvedApp) {
-            if (resolvedApp.qualified === true) currentCleared++;
-            else if (resolvedApp.qualified === false) currentNotCleared++;
-            else currentPending++;
-          }
+          const qualified = s.qualified;
+          if (qualified === true) currentCleared++;
+          else if (qualified === false) currentNotCleared++;
+          else if (s.application_status) currentPending++; // Has application but no exam result
         });
 
-        let finalCleared = verificationState === "PASSED" ? (studentData?.count || currentCleared) : currentCleared;
-        let finalNotCleared = verificationState === "NOT_PASSED" ? (studentData?.count || currentNotCleared) : currentNotCleared;
-        let finalPending = verificationState === "PENDING" ? (studentData?.count || currentPending) : currentPending;
-
-        setStats(prev => ({
-          ...prev,
-          examCleared: finalCleared,
-          examNotCleared: finalNotCleared,
-          examPending: finalPending
-        }));
+        setStats({
+          examCleared: currentCleared,
+          examNotCleared: currentNotCleared,
+          examPending: currentPending
+        });
 
       } catch (err) {
         if (err.name !== 'AbortError' && err.code !== 'ERR_CANCELED' && err.name !== 'CanceledError') {
@@ -204,41 +176,27 @@ function Students() {
 
     fetchData();
     return () => abortController.abort();
-  }, [page, selectedCourseId, selectedCohort, verificationState, showSeeded]);
+  }, [page, selectedCourseId, selectedCohort, verificationState, showSeeded, searchQuery]);
 
-  const handleBulkVerify = async () => { };
-
-  // Helper to render exam status natively
+  // ─── Helper: Render exam status badge from serializer data directly ──────
   const renderExamStatusBadge = (student) => {
-    let resolvedApp = null;
-    if (selectedCourseId) {
-      resolvedApp = Object.values(applicationsMap).find(app => app.student?.id === student.id && app.course?.id === selectedCourseId);
-    } else if (selectedCohort) {
-      resolvedApp = Object.values(applicationsMap).find(app => app.student?.id === student.id && app.assigned_cohort?.id === selectedCohort);
-    } else if (student.application_id) {
-      resolvedApp = applicationsMap[student.application_id];
-    } else if (student.active_cohort?.application_id) {
-      resolvedApp = applicationsMap[student.active_cohort.application_id];
-    } else if (student.completed_cohorts?.length > 0) {
-      resolvedApp = applicationsMap[student.completed_cohorts[0].application_id];
-    }
-
     const formatStatus = (s) => {
       if (!s) return "Unknown";
       return s.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
     };
 
-    if (!resolvedApp) {
+    // No application at all
+    if (!student.application_status) {
       if (student.is_official_student) {
-        return <span style={{ color: "#059669", fontWeight: "bold", fontSize: "12px" }}>✅ SEEDED (No App)</span>;
+        return <span style={{ color: "#059669", fontWeight: "bold", fontSize: "12px" }}>✅ Official (No App)</span>;
       }
-      return <span style={{ color: "#d97706", fontWeight: "bold", fontSize: "12px" }}>⏳ NO APPLICATION VISIBLE</span>;
+      return <span style={{ color: "#9ca3af", fontWeight: "bold", fontSize: "12px" }}>— No Application</span>;
     }
 
-    const workflowStatus = formatStatus(resolvedApp.status);
+    const workflowStatus = formatStatus(student.application_status);
     let examResult = <span style={{ color: "#d97706", fontSize: "11px" }}>PENDING</span>;
-    if (resolvedApp.qualified === true) examResult = <span style={{ color: "#059669", fontSize: "11px" }}>PASSED</span>;
-    else if (resolvedApp.qualified === false) examResult = <span style={{ color: "#dc2626", fontSize: "11px" }}>NOT PASSED</span>;
+    if (student.qualified === true) examResult = <span style={{ color: "#059669", fontSize: "11px" }}>PASSED</span>;
+    else if (student.qualified === false) examResult = <span style={{ color: "#dc2626", fontSize: "11px" }}>NOT PASSED</span>;
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -248,28 +206,80 @@ function Students() {
     );
   };
 
-  const renderUserStatusBadge = (status) => {
-    if (status === "Active & Password Reset") {
-      return <span style={{ color: "#059669", fontWeight: "bold", fontSize: "12px", backgroundColor: "#d1fae5", padding: "4px 8px", borderRadius: "6px", border: "1px solid #10b981" }}>🟢 Active & Password Reset</span>;
+  // ─── Helper: Render account type badge ──────────────────────────────────
+  const renderAccountTypeBadge = (student) => {
+    // Determine if this is a seeded/imported account (never logged in, email not verified)
+    const neverLoggedIn = student.last_login === null || student.last_login === undefined;
+    const emailNotVerified = student.is_email_verified === false;
+    const isSeeded = neverLoggedIn && emailNotVerified && !student.application_status;
+
+    if (student.is_official_student) {
+      return (
+        <span style={{ display: "inline-block", fontWeight: "600", color: "#059669", backgroundColor: "#d1fae5", padding: "4px 8px", borderRadius: "6px", fontSize: "12px" }}>
+          Official Student
+        </span>
+      );
     }
-    if (status === "Pending Password Reset") {
+    if (isSeeded) {
+      return (
+        <span style={{ display: "inline-block", fontWeight: "600", color: "#6d28d9", backgroundColor: "#ede9fe", padding: "4px 8px", borderRadius: "6px", fontSize: "12px" }}>
+          🌱 Seeded Account
+        </span>
+      );
+    }
+    return (
+      <span style={{ display: "inline-block", fontWeight: "600", color: "var(--accent-color)", backgroundColor: "var(--bg-nested)", padding: "4px 8px", borderRadius: "6px", fontSize: "12px" }}>
+        Candidate
+      </span>
+    );
+  };
+
+  // ─── Helper: Derive user status for the seeded view ─────────────────────
+  const renderUserStatusBadge = (student) => {
+    const isActive = student.user?.is_active !== false;
+    const hasLoggedIn = student.last_login !== null && student.last_login !== undefined;
+    const emailVerified = student.is_email_verified === true;
+
+    if (isActive && hasLoggedIn) {
+      return <span style={{ color: "#059669", fontWeight: "bold", fontSize: "12px", backgroundColor: "#d1fae5", padding: "4px 8px", borderRadius: "6px", border: "1px solid #10b981" }}>🟢 Active & Logged In</span>;
+    }
+    if (isActive && emailVerified && !hasLoggedIn) {
+      return <span style={{ color: "#2563eb", fontWeight: "bold", fontSize: "12px", backgroundColor: "#dbeafe", padding: "4px 8px", borderRadius: "6px", border: "1px solid #3b82f6" }}>🔵 Verified, Pending Login</span>;
+    }
+    if (isActive && !emailVerified) {
       return <span style={{ color: "#d97706", fontWeight: "bold", fontSize: "12px", backgroundColor: "#fef3c7", padding: "4px 8px", borderRadius: "6px", border: "1px solid #f59e0b" }}>⏳ Pending Password Reset</span>;
     }
-    if (status === "Deactivated") {
+    if (!isActive) {
       return <span style={{ color: "#dc2626", fontWeight: "bold", fontSize: "12px", backgroundColor: "#fee2e2", padding: "4px 8px", borderRadius: "6px", border: "1px solid #ef4444" }}>🔴 Deactivated</span>;
     }
-    return <span style={{ color: "#9ca3af", fontWeight: "bold", fontSize: "12px" }}>{status || "Unknown"}</span>;
+    return <span style={{ color: "#9ca3af", fontWeight: "bold", fontSize: "12px" }}>Unknown</span>;
+  };
+
+  // ─── Helper: Get course display name from serializer data ───────────────
+  const getCourseName = (student) => {
+    // Priority chain: active_cohort > current_application > fallback
+    if (student.active_cohort?.course_name) return student.active_cohort.course_name;
+    if (student.current_application?.course?.name) return student.current_application.course.name;
+    return null;
+  };
+
+  // ─── Helper: Get cohort/batch display from serializer data ──────────────
+  const getCohortCode = (student) => {
+    if (student.active_cohort?.cohort_code) return student.active_cohort.cohort_code;
+    if (student.current_application?.assigned_cohort?.code) return student.current_application.assigned_cohort.code;
+    // Has application but no cohort assigned yet
+    if (student.application_status && !student.active_cohort) return null;
+    return null;
   };
 
   const totalStudentsCount = totalCount;
-  // Stats are already calculated above.
 
   return (
     <div className="premium-page-container">
       <div className="premium-page-header">
         <div>
           <h1 className="premium-title">{showSeeded ? "Seeded Students Dashboard" : "Student Management Dashboard"}</h1>
-          <p className="premium-subtitle">{showSeeded ? "Monitor newly imported accounts pending login." : "Filter and review students."}</p>
+          <p className="premium-subtitle">{showSeeded ? "Monitor admin-created accounts pending first login." : "Filter and review all students."}</p>
         </div>
         <div style={{ display: "flex", gap: "1rem" }}>
           <button
@@ -288,36 +298,38 @@ function Students() {
         </div>
       </div>
 
+      {/* Stats Cards — page-level statistics */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
-        <div style={{ minHeight: "100px", background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", display: "flex", flexDirection: "column", gap: "12px", transition: "transform 0.2s, box-shadow 0.2s", cursor: "default" }} className="hover:shadow-md hover:-translate-y-1">
+        <div style={{ minHeight: "100px", background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", display: "flex", flexDirection: "column", gap: "12px", transition: "transform 0.2s, box-shadow 0.2s", cursor: "default" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-secondary)", fontSize: "14px", fontWeight: "bold" }}>
             <FiUsers /> Total Students
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ fontSize: "28px", fontWeight: "bold" }}>{totalStudentsCount}</div>
-            <span className="text-sm text-gray-500" style={{ color: "#6b7280", fontSize: "13px", marginTop: "2px" }}>Showing {students.length} of {totalCount || '...'} total enrolled</span>
+            <span style={{ color: "#6b7280", fontSize: "13px", marginTop: "2px" }}>
+              {showSeeded ? "Seeded accounts matching filters" : `Showing ${students.length} of ${totalCount || '...'} matching filters`}
+            </span>
           </div>
         </div>
-        <div style={{ minHeight: "100px", background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #10b981", display: "flex", flexDirection: "column", gap: "12px", transition: "transform 0.2s, box-shadow 0.2s", cursor: "default" }} className="hover:shadow-md hover:-translate-y-1">
+        <div style={{ minHeight: "100px", background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #10b981", display: "flex", flexDirection: "column", gap: "12px", transition: "transform 0.2s, box-shadow 0.2s", cursor: "default" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#047857", fontSize: "14px", fontWeight: "bold" }}>
             <FiCheckCircle /> Exam Cleared
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ fontSize: "28px", fontWeight: "bold" }}>{stats.examCleared}</div>
-            <span className="text-sm text-gray-500" style={{ color: "#6b7280", fontSize: "13px", marginTop: "2px" }}>On this current page</span>
+            <span style={{ color: "#6b7280", fontSize: "13px", marginTop: "2px" }}>On this page ({students.length} students)</span>
           </div>
         </div>
-        <div style={{ minHeight: "100px", background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #ef4444", display: "flex", flexDirection: "column", gap: "12px", transition: "transform 0.2s, box-shadow 0.2s", cursor: "default" }} className="hover:shadow-md hover:-translate-y-1">
+        <div style={{ minHeight: "100px", background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #ef4444", display: "flex", flexDirection: "column", gap: "12px", transition: "transform 0.2s, box-shadow 0.2s", cursor: "default" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#b91c1c", fontSize: "14px", fontWeight: "bold" }}>
             <FiXCircle /> Exam Not Cleared
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ fontSize: "28px", fontWeight: "bold" }}>{stats.examNotCleared}</div>
-            <span className="text-sm text-gray-500" style={{ color: "#6b7280", fontSize: "13px", marginTop: "2px" }}>On this current page</span>
+            <span style={{ color: "#6b7280", fontSize: "13px", marginTop: "2px" }}>On this page ({students.length} students)</span>
           </div>
         </div>
-        {/* 🚨 PENDING EXAM CARD */}
-        <div style={{ minHeight: "100px", background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #f59e0b", display: "flex", flexDirection: "column", gap: "12px", transition: "transform 0.2s, box-shadow 0.2s", cursor: "default" }} className="hover:shadow-md hover:-translate-y-1">
+        <div style={{ minHeight: "100px", background: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderBottom: "4px solid #f59e0b", display: "flex", flexDirection: "column", gap: "12px", transition: "transform 0.2s, box-shadow 0.2s", cursor: "default" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#b45309", fontSize: "14px", fontWeight: "bold" }}>
             <FiClock /> Exam Pending
           </div>
@@ -325,12 +337,25 @@ function Students() {
             <div style={{ fontSize: "28px", fontWeight: "bold" }}>
               {stats.examPending}
             </div>
-            <span className="text-sm text-gray-500" style={{ color: "#6b7280", fontSize: "13px", marginTop: "2px" }}>On this current page</span>
+            <span style={{ color: "#6b7280", fontSize: "13px", marginTop: "2px" }}>On this page ({students.length} students)</span>
           </div>
         </div>
       </div>
 
-
+      {/* Search Bar */}
+      <div style={{ marginBottom: "1rem" }}>
+        <div style={{ position: "relative" }}>
+          <FiSearch style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", fontSize: "16px" }} />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search by name, email, or student code..."
+            className="premium-input"
+            style={{ paddingLeft: "38px", width: "100%" }}
+          />
+        </div>
+      </div>
 
       {/* Server-side Filters */}
       <div className="premium-card premium-flex-row" style={{ marginBottom: "1rem", display: "flex", gap: "1rem", flexWrap: "wrap" }}>
@@ -352,11 +377,12 @@ function Students() {
         >
           <option value="">All Batches</option>
           {cohorts.filter(c => {
-            if (!selectedCourseId) return true; // Show all if no course selected
+            if (!selectedCourseId) return true;
+            // Cohort serializer returns `course` as a UUID string
             const cId = c.course?.id || c.course || c.course_id;
             return String(cId) === String(selectedCourseId);
           }).map(coh => (
-            <option key={coh.id} value={coh.code || coh.id}>
+            <option key={coh.id} value={coh.id}>
               {coh.code || coh.name || "Batch"}
             </option>
           ))}
@@ -368,14 +394,9 @@ function Students() {
           className="premium-input"
           style={{ flex: 1, minWidth: "200px" }}
         >
-          <option value="">All Statuses</option>
-          <option value="APPLIED">Applied</option>
-          <option value="EXAM_PENDING">Exam Pending</option>
-          <option value="QUALIFIED">Qualified</option>
-          <option value="COHORT_ASSIGNED">Cohort Assigned</option>
-          <option value="IN_PROGRESS">In Progress</option>
-          <option value="COMPLETED">Completed</option>
-          <option value="REJECTED">Rejected</option>
+          {APPLICATION_STATUS_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
         </select>
       </div>
 
@@ -383,6 +404,8 @@ function Students() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
         <div style={{ fontSize: "14px", color: "var(--text-secondary)" }}>
           Total Students: <strong>{totalCount}</strong>
+          {searchQuery && <span style={{ marginLeft: "8px", color: "var(--text-muted)" }}>· Search: "{searchQuery}"</span>}
+          {showSeeded && <span style={{ marginLeft: "8px", color: "#6d28d9", fontWeight: "600" }}>· 🌱 Seeded Only</span>}
         </div>
       </div>
 
@@ -401,31 +424,39 @@ function Students() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="5" style={{ padding: "2rem", textAlign: "center" }}><div className="skeleton-shimmer" style={{ height: "40px", borderRadius: "8px", width: "100%" }}></div></td></tr>
+              <tr><td colSpan={showSeeded ? 6 : 5} style={{ padding: "2rem", textAlign: "center" }}><div className="skeleton-shimmer" style={{ height: "40px", borderRadius: "8px", width: "100%" }}></div></td></tr>
             ) : students.length === 0 ? (
               <tr>
-                <td colSpan="5" style={{ padding: 0 }}>
+                <td colSpan={showSeeded ? 6 : 5} style={{ padding: 0 }}>
                   <div className="premium-empty-state" style={{ border: "none", padding: "4rem", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                     <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>🔍 📭</div>
                     <h3 style={{ color: "var(--text-primary)", fontSize: "1.25rem", margin: "0 0 0.5rem 0" }}>Zero Students Found</h3>
-                    <p style={{ color: "var(--text-muted)", fontSize: "0.95rem", margin: 0 }}>No students match your current Course, Batch, and Status filters.</p>
+                    <p style={{ color: "var(--text-muted)", fontSize: "0.95rem", margin: 0 }}>
+                      {showSeeded
+                        ? "No seeded/imported accounts match your current filters."
+                        : "No students match your current Course, Batch, and Status filters."
+                      }
+                    </p>
                   </div>
                 </td>
               </tr>
             ) : (
               students.map(student => {
-                // Safely parse name for the beautiful table cell layout
-                const name = student.user?.first_name || student.first_name || null;
-                const displayFullName = student.user?.first_name || student.user?.last_name
-                  ? `${student.user.first_name || ''} ${student.user.last_name || ''}`.trim()
-                  : (student.first_name || student.last_name ? `${student.first_name || ''} ${student.last_name || ''}`.trim() : null);
+                // Name resolution using the serializer's flattened user fields
+                const firstName = student.first_name || student.user?.first_name || "";
+                const lastName = student.last_name || student.user?.last_name || "";
+                const displayFullName = `${firstName} ${lastName}`.trim();
+                const hasName = Boolean(firstName || lastName);
+
+                const courseName = getCourseName(student);
+                const cohortCode = getCohortCode(student);
 
                 return (
                   <tr key={student.id} style={{ borderBottom: "1px solid var(--border-color)", transition: "background-color 0.2s" }} className="premium-table-row">
                     <td style={{ padding: "1.25rem 1rem" }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <strong style={{ color: 'var(--text-primary, #111827)', fontSize: '15px' }}>
-                          {name ? displayFullName : "Name Pending / Seeded"}
+                          {hasName ? displayFullName : "Name Pending"}
                         </strong>
                         <span style={{ color: 'var(--text-secondary, #6B7280)', fontSize: '13px', marginTop: '2px' }}>
                           {student.student_code || "No Code"}
@@ -434,28 +465,29 @@ function Students() {
                     </td>
                     <td style={{ padding: "1.25rem 1rem" }}>
                       <span style={{ display: "inline-block", fontWeight: "600", color: "var(--accent-color)", backgroundColor: "var(--bg-nested)", padding: "4px 8px", borderRadius: "6px", fontSize: "13px", marginBottom: "4px" }}>
-                        {student.active_cohort?.course_name || student.current_application?.course?.name || student.course_name || "Not Assigned"}
+                        {courseName || "No Course"}
                       </span>
                       <span style={{ display: "block", fontSize: "12px", color: "var(--text-secondary)", fontWeight: "600" }}>
-                        {student.cohort_code || student.active_cohort?.cohort_code || "Not Assigned"}
+                        {cohortCode
+                          ? cohortCode
+                          : (student.application_status ? "Cohort Pending" : "Not Assigned")
+                        }
                       </span>
                     </td>
                     <td style={{ padding: "1.25rem 1rem" }}>
-                      <span style={{ display: "inline-block", fontWeight: "600", color: student.is_official_student ? "#059669" : "var(--accent-color)", backgroundColor: student.is_official_student ? "#d1fae5" : "var(--bg-nested)", padding: "4px 8px", borderRadius: "6px", fontSize: "12px", marginBottom: "4px" }}>
-                        {student.is_official_student ? "Seeded / Issued" : "Candidate"}
-                      </span>
+                      {renderAccountTypeBadge(student)}
                     </td>
                     <td style={{ padding: "1.25rem 1rem" }}>
                       {renderExamStatusBadge(student)}
                     </td>
                     {showSeeded && (
                       <td style={{ padding: "1.25rem 1rem" }}>
-                        {renderUserStatusBadge(student.user_status)}
+                        {renderUserStatusBadge(student)}
                       </td>
                     )}
                     <td style={{ padding: "1.25rem 1rem" }}>
                       <button
-                        onClick={() => setSelectedStudent(student)}
+                        onClick={() => navigate(`/admin/student-details/${student.id}`)}
                         className="premium-btn"
                         style={{ backgroundColor: "var(--bg-nested)", border: "1px solid var(--border-color)", color: "var(--text-primary)", padding: "6px 12px", height: "auto", fontSize: "13px" }}
                       >
@@ -490,71 +522,6 @@ function Students() {
           Next Page &rarr;
         </button>
       </div>
-
-      {/* 🚨 FULL STUDENT PROFILE MODAL 🚨 */}
-      {selectedStudent && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
-          <div style={{ backgroundColor: "var(--bg-surface)", padding: "2rem", borderRadius: "12px", width: "90%", maxWidth: "600px", maxHeight: "90vh", overflowY: "auto", position: "relative" }}>
-            <button onClick={() => setSelectedStudent(null)} style={{ position: "absolute", top: "1.5rem", right: "1.5rem", background: "none", border: "none", fontSize: "1.5rem", cursor: "pointer", color: "var(--text-muted)" }}>✖</button>
-            <div style={{ marginBottom: "1.5rem" }}>
-              <button onClick={() => setSelectedStudent(null)} className="premium-btn" style={{ background: "transparent", color: "var(--text-secondary)", border: "none", padding: 0, display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                <FiArrowLeft /> Back to Students
-              </button>
-            </div>
-            <h2 style={{ marginTop: 0, marginBottom: "0.5rem" }}>
-              {`${selectedStudent.user?.first_name || selectedStudent.first_name || selectedStudent.user?.firstName || selectedStudent.firstName || ""} ${selectedStudent.user?.last_name || selectedStudent.last_name || selectedStudent.user?.lastName || selectedStudent.lastName || ""}`.trim() || "Student"}
-            </h2>
-            <p style={{ color: "var(--text-muted)", margin: "0 0 1.5rem 0" }}>{selectedStudent.user?.email || selectedStudent.email || "No Email"} | {selectedStudent.student_code}</p>
-
-            <div style={{ backgroundColor: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", marginBottom: "1.5rem", border: "1px solid var(--border-color)", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-              <h3 style={{ margin: "0 0 16px 0", fontSize: "16px", color: "var(--text-primary)", borderBottom: "1px solid rgba(0,0,0,0.1)", paddingBottom: "8px" }}>Profile Details</h3>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", fontSize: "14px", color: "var(--text-secondary)" }}>
-                <div><strong>Phone:</strong> {selectedStudent.user?.phone_number || selectedStudent.phone_number || "N/A"}</div>
-                <div><strong>Location:</strong> {selectedStudent.city ? `${selectedStudent.city}, ${selectedStudent.state || ""}` : "N/A"}</div>
-                <div style={{ gridColumn: "1 / -1" }}><strong>Skills:</strong> {selectedStudent.skills?.join(", ") || selectedStudent.tagline || "N/A"}</div>
-              </div>
-            </div>
-
-            <div style={{ backgroundColor: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", marginBottom: "1.5rem", border: "1px solid var(--border-color)", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-              <h3 style={{ margin: "0 0 16px 0", fontSize: "16px", color: "var(--text-primary)", borderBottom: "1px solid rgba(0,0,0,0.1)", paddingBottom: "8px" }}>Academic Details</h3>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", fontSize: "14px", color: "var(--text-secondary)" }}>
-                <div style={{ gridColumn: "1 / -1" }}><strong>College:</strong> {selectedStudent.college || "N/A"}</div>
-                <div><strong>Degree:</strong> {selectedStudent.degree || "N/A"}</div>
-                <div><strong>Graduation Year:</strong> {selectedStudent.graduation_year || "N/A"}</div>
-                {/* Rely on the new flattened backend data for blazing fast rendering */}
-                <div><strong>Course:</strong> {selectedStudent.course_name || "Not Assigned"}</div>
-                <div><strong>Batch:</strong> {selectedStudent.cohort_code || "Not Assigned"}</div>
-              </div>
-            </div>
-
-            {/* Empty for now, but kept structure in case we want to add more things here */}
-
-            <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-              {selectedStudent.status === "PENDING_ADMIN_REVIEW" && (
-                <button onClick={async () => {
-                  try {
-                    await studentService.verifyStudent(selectedStudent.id, "APPROVE");
-                    setStudents(prev => prev.map(s => s.id === selectedStudent.id ? { ...s, status: "ADMIN_APPROVED" } : s));
-                    setSelectedStudent({ ...selectedStudent, status: "ADMIN_APPROVED" });
-                  } catch (e) { alert("Failed to approve: " + (e.response?.data?.detail || e.message)); }
-                }} style={{ flex: 1, padding: "10px", backgroundColor: "#10b981", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>Approve Manually</button>
-              )}
-              {selectedStudent.status === "PENDING_ADMIN_REVIEW" && (
-                <button onClick={async () => {
-                  const reason = window.prompt("Enter rejection reason:");
-                  if (reason !== null) {
-                    try {
-                      await studentService.verifyStudent(selectedStudent.id, "REJECT", reason);
-                      setStudents(prev => prev.map(s => s.id === selectedStudent.id ? { ...s, status: "ADMIN_REJECTED", rejection_reason: reason } : s));
-                      setSelectedStudent({ ...selectedStudent, status: "ADMIN_REJECTED", rejection_reason: reason });
-                    } catch (e) { alert("Failed to reject: " + (e.response?.data?.detail || e.message)); }
-                  }
-                }} style={{ flex: 1, padding: "10px", backgroundColor: "#ef4444", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>Reject Manually</button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

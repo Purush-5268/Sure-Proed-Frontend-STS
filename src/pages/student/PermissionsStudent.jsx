@@ -23,8 +23,15 @@ function PermissionsStudent() {
         apiClient.get(API_ENDPOINTS.ATTENDANCE.WARNINGS),
         apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE)
       ]);
-      setWarnings(warnRes.data || []);
-      setApplications(appRes.data || []);
+      // Safely handle DRF paginated responses
+      const rawWarnings = warnRes.data?.results ?? warnRes.data ?? [];
+      const safeWarnings = Array.isArray(rawWarnings) ? rawWarnings : [];
+      
+      const rawApps = appRes.data?.results ?? appRes.data ?? [];
+      const safeApps = Array.isArray(rawApps) ? rawApps : [];
+
+      setWarnings(safeWarnings);
+      setApplications(safeApps);
     } catch (err) {
       console.error(err);
     } finally {
@@ -52,7 +59,7 @@ function PermissionsStudent() {
     }
   };
 
-  const isRestricted = applications.some(app => app.is_restricted);
+  const isRestricted = (applications || []).some(app => app?.is_restricted);
 
   if (loading) return <div className={styles.container}>Loading permissions...</div>;
 
@@ -71,10 +78,10 @@ function PermissionsStudent() {
       )}
 
       <div className={styles.list}>
-        {warnings.length === 0 ? (
+        {(warnings || []).length === 0 ? (
           <p>You have no pending warnings.</p>
         ) : (
-          warnings.map(w => (
+          (warnings || []).map(w => (
             <div key={w.id} className={styles.card}>
               <div className={styles.cardHeader}>
                 <h3>Low Attendance Warning</h3>

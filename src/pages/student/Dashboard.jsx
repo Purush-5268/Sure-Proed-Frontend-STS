@@ -34,6 +34,10 @@ function Dashboard() {
   const [assignmentStats, setAssignmentStats] = useState({ completed: 0, pending: 0, overdue: 0 });
   const [examStats, setExamStats] = useState({ completed: 0, upcoming: 0 });
   const [attendanceHistory, setAttendanceHistory] = useState([]);
+  const [showLateJoinModal, setShowLateJoinModal] = useState(false);
+  const [lateJoinReason, setLateJoinReason] = useState("");
+  const [lateJoinClassId, setLateJoinClassId] = useState(null);
+  const [isSubmittingLateJoin, setIsSubmittingLateJoin] = useState(false);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -126,6 +130,30 @@ function Dashboard() {
       setIsJoining(false);
       window.open(cls.meeting_link?.startsWith('http') ? cls.meeting_link : `https://${cls.meeting_link}`, '_blank');
     }, 1000);
+  };
+
+  const handleRequestPermission = async () => {
+    if (!lateJoinReason.trim() || !lateJoinClassId) {
+      alert("Please provide a reason for joining late.");
+      return;
+    }
+    setIsSubmittingLateJoin(true);
+    try {
+      await attendanceService.requestPermission(lateJoinClassId, lateJoinReason);
+      alert("Permission request submitted successfully.");
+      setShowLateJoinModal(false);
+      setLateJoinReason("");
+      
+      // Update local state to reflect the pending warning
+      setTodayClasses(prev => prev.map(cls => 
+        cls.id === lateJoinClassId ? { ...cls, warning_state: 'APOLOGIZED' } : cls
+      ));
+    } catch (error) {
+      console.error("Permission request failed", error);
+      alert(error.response?.data?.detail || "Failed to submit permission request.");
+    } finally {
+      setIsSubmittingLateJoin(false);
+    }
   };
 
   if (isLoading) {
@@ -309,7 +337,18 @@ function Dashboard() {
                             <div style={{ textAlign: 'right', maxWidth: '200px' }}>
                               <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🔒 Window Closed</span>
                               <div style={{ fontSize: '12px', color: '#ef4444' }}>Join time has expired.</div>
-                              <a href="mailto:admin@sureproed.com?subject=Late Join Request" style={{ fontSize: '12px', color: '#0ea5e9', textDecoration: 'none', display: 'block', marginTop: '6px', fontWeight: 'bold' }}>Request Admin Permission</a>
+                              {cls.warning_state ? (
+                                <span style={{ fontSize: '12px', color: cls.warning_state === 'ACCEPTED' ? '#10b981' : cls.warning_state === 'REJECTED' ? '#ef4444' : '#f59e0b', fontWeight: 'bold', display: 'block', marginTop: '6px' }}>
+                                  Status: {cls.warning_state === 'APOLOGIZED' ? 'Pending Approval' : cls.warning_state}
+                                </span>
+                              ) : (
+                                <button 
+                                  onClick={() => { setLateJoinClassId(cls.id); setShowLateJoinModal(true); }}
+                                  style={{ fontSize: '12px', color: '#0ea5e9', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginTop: '6px', fontWeight: 'bold' }}
+                                >
+                                  Request Late Join Permission
+                                </button>
+                              )}
                             </div>
                           ) : hasEnded ? (
                             <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px' }}>Session Ended</span>
@@ -413,6 +452,28 @@ function Dashboard() {
       </div>
 
       <AttendanceWarningPopup />
+      {showLateJoinModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'var(--bg-card)', padding: '32px', borderRadius: '24px', width: '90%', maxWidth: '400px', boxShadow: '0 24px 48px rgba(0,0,0,0.1)', border: '1px solid var(--border-color)', position: 'relative' }}>
+            <button onClick={() => setShowLateJoinModal(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'var(--bg-nested)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-secondary)' }}>✕</button>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '20px', color: 'var(--text-primary)' }}>Request Late Join</h3>
+            <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>Please provide a reason for joining late. This will be reviewed by your mentor.</p>
+            <textarea
+              value={lateJoinReason}
+              onChange={(e) => setLateJoinReason(e.target.value)}
+              placeholder="E.g., I had an emergency..."
+              style={{ width: '100%', minHeight: '100px', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-nested)', color: 'var(--text-primary)', fontSize: '14px', resize: 'none', marginBottom: '20px', fontFamily: 'inherit' }}
+            />
+            <button 
+              onClick={handleRequestPermission} 
+              disabled={isSubmittingLateJoin || !lateJoinReason.trim()}
+              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--brand-color, #2563eb)', color: '#fff', fontWeight: 'bold', fontSize: '15px', cursor: isSubmittingLateJoin || !lateJoinReason.trim() ? 'not-allowed' : 'pointer', opacity: isSubmittingLateJoin || !lateJoinReason.trim() ? 0.7 : 1, transition: '0.2s' }}
+            >
+              {isSubmittingLateJoin ? 'Submitting...' : 'Submit Request'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -8,8 +8,10 @@ const normalizeProfile = (profile = {}) => {
   
   // Fix mixed-content issues by stripping absolute HTTP backend origins for media URLs
   let photoUrl = profile.profile_photo || "";
-  if (photoUrl && photoUrl.includes("106.51.129.34:8000")) {
-    photoUrl = new URL(photoUrl).pathname; // Extract only the /media/... part
+  if (photoUrl && photoUrl.startsWith("http")) {
+    try {
+      photoUrl = new URL(photoUrl).pathname; // Extract only the /media/... part
+    } catch (e) {}
   }
 
   return {

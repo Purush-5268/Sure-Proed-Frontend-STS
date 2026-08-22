@@ -38,6 +38,133 @@ function relativeTime(dateStr) {
   return `${days}d ago`;
 }
 
+/**
+ * Maps every known backend action_url slug and notification title to a valid
+ * frontend route. Never navigates to /api/ URLs. Always provides a safe fallback.
+ *
+ * Known backend action_url values (from notify_user() calls across the codebase):
+ *   "application_tracker", "assignments", "certificates", "community_activities",
+ *   "courses", "grades", "profile", "screening", "support_requests", "timetable",
+ *   "training", "/attendance/{id}/", job.apply_url (external HTTP)
+ */
+const ACTION_URL_SLUG_MAP = {
+  // Slug → { student, admin, mentor } route mapping
+  "application_tracker": { student: "/student/applications", admin: "/admin/applications", mentor: "/mentor/dashboard" },
+  "assignments":         { student: "/student/assignments", admin: "/admin/assignments", mentor: "/mentor/assignments" },
+  "certificates":        { student: "/student/certificates", admin: "/admin/certificates", mentor: "/mentor/dashboard" },
+  "community_activities":{ student: "/student/dashboard", admin: "/admin/dashboard", mentor: "/mentor/dashboard" },
+  "courses":             { student: "/student/courses", admin: "/admin/courses", mentor: "/mentor/dashboard" },
+  "grades":              { student: "/student/dashboard", admin: "/admin/reports", mentor: "/mentor/dashboard" },
+  "profile":             { student: "/student/profile", admin: "/admin/profile-settings", mentor: "/mentor/profile" },
+  "screening":           { student: "/student/applications", admin: "/admin/applications", mentor: "/mentor/dashboard" },
+  "support_requests":    { student: "/student/permissions", admin: "/admin/student-queries", mentor: "/mentor/dashboard" },
+  "timetable":           { student: "/student/class-schedule", admin: "/admin/schedule", mentor: "/mentor/class-schedule" },
+  "training":            { student: "/student/cohort", admin: "/admin/cohorts", mentor: "/mentor/cohorts" },
+};
+
+const getNotificationRoute = (notification, userRole) => {
+  const title = (notification.title || "").toLowerCase();
+  const rawActionUrl = notification.action_url || "";
+  const actionUrl = rawActionUrl.toLowerCase();
+  const role = (userRole || "").toLowerCase();
+  
+  const rolePrefix = `/${role}`;
+  const fallback = `${rolePrefix}/dashboard`;
+
+  // ── 1. Title-based routing (highest priority — handles all known notification types) ──
+
+  // Attendance Warnings, Late Joins, Permission Requests
+  if (title.includes("attendance warning") || title.includes("late join") || title.includes("permission") || title.includes("attendance query")) {
+    if (role === "student") return `/student/permissions`;
+    if (role === "admin") return `/admin/student-queries`;
+    if (role === "mentor") return `/mentor/attendance`;
+  }
+
+  // Class Scheduled / LST / SST / Training Sessions
+  if (title.includes("scheduled") || title.includes("lst") || title.includes("sst") || title.includes("class ")) {
+    if (role === "student") return `/student/class-schedule`;
+    if (role === "admin") return `/admin/schedule`;
+    if (role === "mentor") return `/mentor/class-schedule`;
+  }
+
+  // Announcements
+  if (title.includes("announcement")) {
+    if (role === "student") return `/student/dashboard`;
+    if (role === "admin") return `/admin/dashboard`;
+    if (role === "trustee") return `/trustee/commercial/announcements`;
+  }
+
+  // Application status changes (approved, rejected, cohort assigned, qualified, etc.)
+  if (title.includes("application") || title.includes("cohort assigned") || title.includes("qualified") || title.includes("waitlisted")) {
+    if (role === "student") return `/student/applications`;
+    if (role === "admin") return `/admin/applications`;
+  }
+
+  // Exam results / screening
+  if (title.includes("exam") || title.includes("screening") || title.includes("test result")) {
+    if (role === "student") return `/student/applications`;
+    if (role === "admin") return `/admin/exams`;
+  }
+
+  // Certificates
+  if (title.includes("certificate")) {
+    if (role === "student") return `/student/certificates`;
+    if (role === "admin") return `/admin/certificates`;
+  }
+
+  // Assignments
+  if (title.includes("assignment")) {
+    if (role === "student") return `/student/assignments`;
+    if (role === "admin") return `/admin/assignments`;
+    if (role === "mentor") return `/mentor/assignments`;
+  }
+
+  // Cohort suspension / transfer
+  if (title.includes("suspend") || title.includes("transfer cohort") || title.includes("revoke")) {
+    if (role === "student") return `/student/applications`;
+    if (role === "admin") return `/admin/applications`;
+  }
+
+  // Profile completion / GitHub linked / LinkedIn
+  if (title.includes("profile") || title.includes("github") || title.includes("linkedin")) {
+    if (role === "student") return `/student/profile`;
+    if (role === "admin") return `/admin/students`;
+  }
+
+  // Community activities
+  if (title.includes("community") || title.includes("activity")) {
+    if (role === "student") return `/student/dashboard`;
+    if (role === "admin") return `/admin/dashboard`;
+  }
+
+  // ── 2. action_url slug-based routing ──
+
+  // External URLs (job listings, etc.) — pass through directly
+  if (rawActionUrl.startsWith("http")) {
+    return rawActionUrl;
+  }
+
+  // Match against known backend slugs
+  const cleanSlug = rawActionUrl.replace(/^\/+|\/+$/g, "").toLowerCase();
+  const slugRoutes = ACTION_URL_SLUG_MAP[cleanSlug];
+  if (slugRoutes) {
+    return slugRoutes[role] || fallback;
+  }
+
+  // ── 3. Safety: NEVER navigate to /api/ or backend-only paths ──
+  if (rawActionUrl.startsWith("/api/") || rawActionUrl.includes("/attendance/") || rawActionUrl.includes("/students/") || rawActionUrl.includes("/applications/")) {
+    return fallback;
+  }
+
+  // ── 4. If action_url looks like a valid frontend path (starts with /role/), use it ──
+  if (rawActionUrl.startsWith(rolePrefix + "/")) {
+    return rawActionUrl;
+  }
+
+  // ── 5. Safe fallback — always the role's dashboard ──
+  return fallback;
+};
+
 function NotificationBell() {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
@@ -150,31 +277,24 @@ function NotificationBell() {
   const unreadCount = unreadNotifications.length;
 
   const handleNotificationClick = async (notification) => {
-    // Mark as read via backend — backend is authoritative
+    // Immediately clear it from the UI list
+    setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
+
+    // Mark as read via backend if unread
     if (!notification.is_read) {
       try {
         await notificationService.markRead(notification.id);
-        setNotifications((prev) =>
-          prev.map((n) => (n.id === notification.id ? { ...n, is_read: true } : n))
-        );
       } catch {
         // Continue navigation even if mark-read fails
       }
     }
-    // Navigate to action_url if provided
-    if (notification.action_url) {
-      setOpen(false);
-      let finalUrl = notification.action_url;
-      if (finalUrl.startsWith('http')) {
-        window.location.href = finalUrl;
-        return;
-      }
-
-      const rolePrefix = `/${user?.role?.toLowerCase()}`;
-      if (user?.role && !finalUrl.startsWith(rolePrefix) && finalUrl.startsWith('/')) {
-        finalUrl = `${rolePrefix}${finalUrl}`;
-      }
-
+    // Navigate using the centralized router
+    setOpen(false);
+    const finalUrl = getNotificationRoute(notification, user?.role);
+    
+    if (finalUrl.startsWith('http')) {
+      window.location.href = finalUrl;
+    } else {
       navigate(finalUrl);
     }
   };

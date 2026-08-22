@@ -428,7 +428,8 @@ function Exam() {
           cheat_count: 5,
           cheat_logs: [{ type: "EXAM_ABANDONED", message: "Exam session closed prematurely by navigating away or closing window.", timestamp: new Date().toISOString() }],
         });
-        const beaconUrl = `${apiClient.defaults.baseURL || "http://127.0.0.1:8000"}/api/exams/${targetId}/submit/`;
+        const baseUrl = apiClient.defaults.baseURL || import.meta.env.VITE_API_URL || "";
+        const beaconUrl = `${baseUrl}/api/exams/${targetId}/submit/`;
         navigator.sendBeacon(beaconUrl, new Blob([payload], { type: "application/json" }));
       } catch (err) { }
 

@@ -47,17 +47,19 @@ function Cohorts() {
     const loadData = async () => {
       try {
         // Helper to fetch all pages sequentially
-        const fetchAll = async (url) => {
+        const fetchAll = async (endpoint) => {
           let results = [];
-          let currentUrl = url;
-          while (currentUrl) {
-            const res = await apiClient.get(currentUrl);
-            if (res.data && res.data.results) {
-              results = [...results, ...res.data.results];
-              currentUrl = res.data.next ? res.data.next.replace(apiClient.defaults.baseURL, '') : null;
-            } else if (Array.isArray(res.data)) {
-              results = [...results, ...res.data];
-              currentUrl = null;
+          let page = 1;
+          while (true) {
+            const res = await apiClient.get(endpoint, { params: { page } });
+            const data = res.data;
+            if (data && data.results) {
+              results = [...results, ...data.results];
+              if (!data.next) break;
+              page += 1;
+            } else if (Array.isArray(data)) {
+              results = [...results, ...data];
+              break;
             } else {
               break;
             }
