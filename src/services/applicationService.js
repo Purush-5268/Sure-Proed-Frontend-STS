@@ -65,6 +65,11 @@ export const applicationService = {
     return response.data;
   },
 
+  async resetOfferLetter(id) {
+    const response = await apiClient.post(API_ENDPOINTS.APPLICATIONS.RESET_OFFER_LETTER(id));
+    return response.data;
+  },
+
   async bulkGenerateOfferLetters(cohortId) {
     const response = await apiClient.post(API_ENDPOINTS.APPLICATIONS.BULK_GENERATE_OFFER_LETTERS, { cohort_id: cohortId });
     return response.data;

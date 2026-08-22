@@ -96,7 +96,11 @@ const getNotificationRoute = (notification, userRole) => {
   // Application status changes (approved, rejected, cohort assigned, qualified, etc.)
   if (title.includes("application") || title.includes("cohort assigned") || title.includes("qualified") || title.includes("waitlisted") || title.includes("offer letter")) {
     if (role === "student") return `/student/applications`;
-    if (role === "admin") return `/admin/applications`;
+    // If it's an offer letter request, admin should go to requests support. Otherwise applications.
+    if (role === "admin") {
+      if (title.includes("request")) return `/admin/requests-support`;
+      return `/admin/applications`;
+    }
   }
 
   // Exam results / screening
@@ -206,17 +210,8 @@ function NotificationBell() {
 
     // Initialize push status
     if (pushNotificationService.isSupported()) {
-      if (Notification.permission === "default") {
-        Notification.requestPermission().then(perm => {
-          setPushStatus(perm);
-          if (perm === "granted") {
-            pushNotificationService.subscribe().then(success => {
-              if (success) setIsSubscribed(true);
-            });
-          }
-        });
-      } else {
-        setPushStatus(Notification.permission);
+      setPushStatus(Notification.permission);
+      if (Notification.permission === "granted") {
         navigator.serviceWorker.getRegistration().then(reg => {
           if (reg) {
             reg.pushManager.getSubscription().then(sub => {

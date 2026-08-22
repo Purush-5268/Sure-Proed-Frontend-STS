@@ -188,6 +188,21 @@ function ApplicationDetails() {
     }
   };
 
+  const handleResetOfferLetter = async () => {
+    if (!window.confirm("This will permanently remove the current Offer Letter file, reset the Offer Letter status to NOT_GENERATED, remove existing Offer Letter requests for this application, and allow a fresh Offer Letter request. Continue?")) return;
+    
+    setSubmitting(true);
+    try {
+      await applicationService.resetOfferLetter(id);
+      alert("Offer letter and requests reset successfully.");
+      loadApplication();
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to reset offer letter.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleSuspendApplication = async () => {
     if (!window.confirm("Suspend this student's application? They will lose active cohort access but historical data is preserved.")) return;
     
@@ -305,65 +320,7 @@ function ApplicationDetails() {
           )}
         </div>
 
-        {/* PANEL H: Offer Letter */}
-        <div className={styles.panel} data-expanded={expanded.offerLetter}>
-          <div className={styles.panelHeader} onClick={() => togglePanel('offerLetter')}>
-            <div className={styles.panelTitle}><FiFile /> H. Offer Letter</div>
-            {expanded.offerLetter ? <FiChevronUp /> : <FiChevronDown />}
-          </div>
-          {expanded.offerLetter && (
-            <div className={styles.panelContent}>
-              <div className={styles.grid} style={{ marginBottom: "20px" }}>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Status</span>
-                  <span className={styles.value}>
-                    {application.offer_letter_issued ? <span style={{color:"var(--success-color)"}}>Issued</span> : "Not Generated"}
-                  </span>
-                </div>
-                {application.offer_letter_issued && (
-                  <div className={styles.gridItem}>
-                    <span className={styles.label}>Issued On</span>
-                    <span className={styles.value}>{new Date(application.offer_letter_issued_at).toLocaleDateString()}</span>
-                  </div>
-                )}
-                {!application.offer_letter_issued && application.assigned_cohort?.start_date && (
-                  <div className={styles.gridItem}>
-                    <span className={styles.label}>Eligibility</span>
-                    <span className={styles.value}>
-                      {(() => {
-                        const start = new Date(application.assigned_cohort.start_date);
-                        const eligible = new Date(start);
-                        eligible.setMonth(eligible.getMonth() + 1);
-                        if (new Date() >= eligible) {
-                          return <span style={{color:"var(--success-color)"}}>Eligible</span>;
-                        }
-                        return <span style={{color:"var(--warning-color)"}}>Eligible after {eligible.toLocaleDateString()}</span>;
-                      })()}
-                    </span>
-                  </div>
-                )}
-              </div>
-              <div className={styles.actionRow} style={{ justifyContent: "flex-start" }}>
-                {application.offer_letter_issued ? (
-                  <>
-                    <button onClick={handleDownloadOfferLetter} className="premium-btn premium-btn-primary">
-                      View / Download Offer Letter
-                    </button>
-                    <button onClick={handleRevokeOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting}>
-                      Revoke Offer Letter
-                    </button>
-                  </>
-                ) : (
-                  <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-secondary" disabled={submitting || application.status === "SUSPENDED" || application.status === "DROPPED" || application.status === "CANCELLED"}>
-                    Generate Offer Letter
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* PANEL B: Screening */}
+        {/* PANEL B: Screening & Exam Result */}
         <div className={styles.panel} data-expanded={expanded.screening}>
           <div className={styles.panelHeader} onClick={() => togglePanel('screening')}>
             <div className={styles.panelTitle}><FiClock /> B. Screening & Exam Result</div>
@@ -621,22 +578,43 @@ function ApplicationDetails() {
                 </div>
                 <div className={styles.gridItem}>
                   <span className={styles.label}>Eligibility Date</span>
-                  <span className={styles.value}>{application.assigned_cohort?.start_date ? new Date(new Date(application.assigned_cohort.start_date).setMonth(new Date(application.assigned_cohort.start_date).getMonth() + 1)).toLocaleDateString() : "N/A"}</span>
+                  <span className={styles.value}>
+                    {application.assigned_cohort?.start_date ? (() => {
+                        const start = new Date(application.assigned_cohort.start_date);
+                        const eligible = new Date(start);
+                        eligible.setMonth(eligible.getMonth() + 1);
+                        if (new Date() >= eligible) {
+                          return <span style={{color:"var(--success-color)", fontWeight: "bold"}}>Eligible</span>;
+                        }
+                        return <span style={{color:"var(--warning-color)", fontWeight: "bold"}}>Eligible after {eligible.toLocaleDateString()}</span>;
+                      })() : "N/A"}
+                  </span>
                 </div>
               </div>
 
-              <div className={styles.actionRow} style={{ justifyContent: "flex-start", gap: "10px" }}>
+              <div className={styles.actionRow} style={{ justifyContent: "flex-start", gap: "10px", flexWrap: "wrap" }}>
                 {!application.offer_letter_issued ? (
-                  <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-primary" disabled={submitting}>
-                    Generate Offer Letter
-                  </button>
+                  <>
+                    <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-primary" disabled={submitting}>
+                      Issue Offer Letter
+                    </button>
+                    <button onClick={handleResetOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting}>
+                      Reset Offer Letter
+                    </button>
+                  </>
                 ) : (
                   <>
                     <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-secondary" disabled={submitting}>
                       Regenerate Offer Letter
                     </button>
                     <button onClick={handleDownloadOfferLetter} className="premium-btn premium-btn-primary" disabled={submitting}>
-                      View / Download Offer Letter
+                      View / Download
+                    </button>
+                    <button onClick={handleRevokeOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting}>
+                      Revoke Offer Letter
+                    </button>
+                    <button onClick={handleResetOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting}>
+                      Reset Offer Letter
                     </button>
                   </>
                 )}
