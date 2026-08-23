@@ -170,7 +170,7 @@ function ApplicationDetails() {
     try {
       const res = await applicationService.downloadOfferLetter(id);
       if (res.url) {
-        window.open(res.url, "_blank");
+        window.open(`${res.url}?t=${Date.now()}`, "_blank");
       }
     } catch (err) {
       alert(err.response?.data?.error || "Failed to fetch offer letter.");
@@ -618,7 +618,7 @@ function ApplicationDetails() {
               </div>
 
               <div className={styles.actionRow} style={{ justifyContent: "flex-start", gap: "10px", flexWrap: "wrap" }}>
-                {!application.offer_letter_issued ? (
+                {!application.offer_letter_issued || application.offer_letter_request_status === "NOT_REQUESTED" ? (
                   <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-primary" disabled={submitting}>
                     Issue Offer Letter
                   </button>
@@ -639,7 +639,7 @@ function ApplicationDetails() {
                     <button onClick={handleDownloadOfferLetter} className="premium-btn premium-btn-primary" disabled={submitting}>
                       View / Download
                     </button>
-                    <button onClick={handleRevokeOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting}>
+                    <button onClick={handleRevokeOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting || application.offer_letter_status === 'REVOKED'}>
                       Revoke Offer Letter
                     </button>
                     <button onClick={handleResetOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting}>

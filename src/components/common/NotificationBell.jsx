@@ -79,8 +79,8 @@ const getNotificationRoute = (notification, userRole) => {
     if (role === "mentor") return `/mentor/attendance`;
   }
 
-  // Class Scheduled / LST / SST / Training Sessions
-  if (title.includes("scheduled") || title.includes("lst") || title.includes("sst") || title.includes("class ")) {
+  // Class Scheduled / LST / SST / Training Sessions / Meets
+  if (title.includes("scheduled") || title.includes("lst") || title.includes("sst") || title.includes("class ") || title.includes("meet")) {
     if (role === "student") return `/student/class-schedule`;
     if (role === "admin") return `/admin/schedule`;
     if (role === "mentor") return `/mentor/class-schedule`;

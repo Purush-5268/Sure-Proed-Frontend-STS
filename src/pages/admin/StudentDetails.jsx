@@ -27,7 +27,8 @@ function StudentDetails() {
           apiClient.get(API_ENDPOINTS.COHORTS.BASE).catch(() => ({ data: { results: [] } }))
         ]);
         setStudent(studentRes.data || null);
-        setApplications(appsRes.data?.results || appsRes.data || []);
+        const apps = appsRes.data?.results || appsRes.data || [];
+        setApplications(apps.filter(a => a.student === id || a.student?.id === id));
         
         const courseMap = {};
         (coursesRes.data?.results || coursesRes.data || []).forEach(c => courseMap[c.id] = c);
