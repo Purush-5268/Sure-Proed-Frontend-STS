@@ -1,502 +1,704 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import apiClient from "../../services/apiClient";
-import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./Exam.module.css";
+import { useAuth } from "../../context/AuthContext";
+import {
+  startInternalExam,
+  autosaveExam,
+  submitInternalExam,
+  autosaveModuleTest,
+  submitModuleTest,
+  fetchAuthoritativeExamContext,
+} from "../../services/examService";
+import { SureProEdLogo } from "../../components/common/SureProEdLogo";
+import JitsiExamRoom from "../../components/exams/JitsiExamRoom";
+import {
+  FiClock,
+  FiShield,
+  FiAlertTriangle,
+  FiAlertCircle,
+  FiVideo,
+} from "react-icons/fi";
+
+const ACTIVE_SESSION_KEY = "sure_active_exam_session";
+const RECOVERY_KEY = "sure_exam_recovery_v1";
+
+const userIdentity = (user) => String(user?.id || user?.email || "");
+
+const readExamRecovery = (user) => {
+  try {
+    const raw = localStorage.getItem(RECOVERY_KEY);
+    if (!raw) return null;
+    const recovery = JSON.parse(raw);
+    const currentUser = userIdentity(user);
+    if (recovery.user_identity && currentUser && recovery.user_identity !== currentUser) return null;
+    return recovery;
+  } catch {
+    return null;
+  }
+};
+
+const persistExamRecovery = (session, answers, user, options = {}) => {
+  if (!session) return;
+  const recoveredSession = { ...session, saved_answers: answers };
+  try {
+    sessionStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify(recoveredSession));
+    localStorage.setItem(
+      RECOVERY_KEY,
+      JSON.stringify({
+        user_identity: userIdentity(user),
+        attempt_id: session.attempt_id || session.id,
+        assessment_type: session.assessment_type || "PRESCREENING",
+        expires_at: session.expires_at || null,
+        answers,
+        exam_session: recoveredSession,
+        pending_submission: Boolean(options.pendingSubmission),
+        saved_at: new Date().toISOString(),
+      })
+    );
+  } catch {
+    // Browser storage may be disabled. Django autosave remains authoritative.
+  }
+};
+
+const clearExamRecovery = () => {
+  try {
+    sessionStorage.removeItem(ACTIVE_SESSION_KEY);
+    sessionStorage.removeItem("sure_exam_tab_switch_count");
+    localStorage.removeItem(RECOVERY_KEY);
+  } catch {
+    // Storage cleanup is best effort.
+  }
+};
 
 function Exam() {
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useAuth();
 
-  // State
-  const [examSession, setExamSession] = useState(location.state?.examSession || null);
+  // Session & Questions State
+  const [examSession, setExamSession] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [questionStates, setQuestionStates] = useState({}); // { [qId]: 'ANSWERED' | 'NOT_ANSWERED' | 'MARKED' | 'ANSWERED_MARKED' | 'NOT_VISITED' }
+  const [questionStates, setQuestionStates] = useState({}); // NOT_VISITED, NOT_ANSWERED, ANSWERED, MARKED, ANSWERED_MARKED
+
+  // Zoom Controls (80% - 130%)
+  const [zoomLevel, setZoomLevel] = useState(100);
+
+  // Authoritative Timers & Statuses
+  const [timeLeft, setTimeLeft] = useState(2700);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [autosaveStatus, setAutosaveStatus] = useState("SAVED"); // SAVED, SAVING, OFFLINE
+  const [isOnline, setIsOnline] = useState(true);
 
-  // Security / Proctoring
-  const [cheatCount, setCheatCount] = useState(0);
-  const [cheatLogs, setCheatLogs] = useState([]);
-  const [securityModalText, setSecurityModalText] = useState(null);
+  // Modals & Banners
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showQuestionPaperModal, setShowQuestionPaperModal] = useState(false);
+  const [showInstructionsModal, setShowInstructionsModal] = useState(false);
+  const [fullscreenWarning, setFullscreenWarning] = useState(false);
+  const [securityNotification, setSecurityNotification] = useState(null);
+  const [submitError, setSubmitError] = useState(null);
+  const [mediaWarning, setMediaWarning] = useState(null);
 
-  // Timer
-  const [timeLeft, setTimeLeft] = useState(null);
+  // Tab Switch Anti-Cheat Tracking (Exceeding 5 switches triggers auto-submit)
+  const [tabSwitchCount, setTabSwitchCount] = useState(() => {
+    try {
+      return Number(sessionStorage.getItem("sure_exam_tab_switch_count")) || 0;
+    } catch {
+      return 0;
+    }
+  });
+  const tabSwitchCountRef = useRef(tabSwitchCount);
+  const [showTabSwitchWarningModal, setShowTabSwitchWarningModal] = useState(false);
 
-  const syncTimerRef = useRef(null);
+  useEffect(() => {
+    tabSwitchCountRef.current = tabSwitchCount;
+    try {
+      sessionStorage.setItem("sure_exam_tab_switch_count", String(tabSwitchCount));
+    } catch {
+      // Session storage is optional in privacy-restricted browsers.
+    }
+  }, [tabSwitchCount]);
+
+  // Proctoring Telemetry
   const isSubmittedRef = useRef(false);
-  const answersRef = useRef(answers);
-  const examSessionRef = useRef(examSession);
+  const handleFinalSubmitRef = useRef(null);
+  const autosaveTimerRef = useRef(null);
+  const latestAnswersRef = useRef({});
+  const queuedSecurityEventsRef = useRef([]);
+  const activeAttemptIdRef = useRef(null);
+  const expiresAtRef = useRef(null);
+  const retryAutosaveTimerRef = useRef(null);
+  const triggerAutosaveRef = useRef(null);
+  const scheduleAutosaveRef = useRef(null);
+  const recoverySyncAttemptRef = useRef("");
+  const needsRecoverySyncRef = useRef(false);
 
-  useEffect(() => { answersRef.current = answers; }, [answers]);
-  useEffect(() => { examSessionRef.current = examSession; }, [examSession]);
+  // Sync ref with state
+  useEffect(() => {
+    latestAnswersRef.current = answers;
+  }, [answers]);
 
-  // Load Exam Session on Mount
+  // Network Online / Offline Listeners
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      const deadline = expiresAtRef.current ? new Date(expiresAtRef.current).getTime() : null;
+      if (deadline && Date.now() >= deadline) {
+        handleFinalSubmitRef.current?.({ autoSubmit: true, reason: "RECONNECTED_AFTER_EXPIRY" });
+      } else if (activeAttemptIdRef.current) {
+        triggerAutosaveRef.current?.(latestAnswersRef.current);
+      }
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      setAutosaveStatus("OFFLINE");
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  // 1. Initialize / Recover Exam Session
   useEffect(() => {
     let isMounted = true;
-
-    const getDomainFallbackQuestions = (domainStr) => {
-      const domain = (domainStr || "").toLowerCase();
-
-      if (domain.includes("ui") || domain.includes("ux") || domain.includes("design") || domain.includes("frontend")) {
-        return [
-          { id: "uiux_1", domain: "UI/UX Design", subject: "UI Design", question: "What does UI stand for in digital product design?", options: ["User Interface", "User Integration", "Universal Interaction", "Unified Image"], correct_answer: "User Interface", marks: 1.0 },
-          { id: "uiux_2", domain: "UI/UX Design", subject: "Wireframing", question: "What is a wireframe in UI/UX design workflow?", options: ["A low-fidelity visual guide representing page layout structure", "A high-resolution 3D animation", "A database relationship diagram", "A CSS stylesheet file"], correct_answer: "A low-fidelity visual guide representing page layout structure", marks: 1.0 },
-          { id: "uiux_3", domain: "UI/UX Design", subject: "Design Tools", question: "Which software tool is widely standard for UI/UX prototyping and design systems?", options: ["Figma", "Docker", "Postman", "Jenkins"], correct_answer: "Figma", marks: 1.0 },
-          { id: "uiux_4", domain: "UI/UX Design", subject: "UX Design", question: "What is the primary focus of User Experience (UX) design?", options: ["Overall feel, usability, and satisfaction of the user journey", "Writing backend SQL queries", "Configuring web servers", "Compiling C++ binaries"], correct_answer: "Overall feel, usability, and satisfaction of the user journey", marks: 1.0 },
-          { id: "uiux_5", domain: "UI/UX Design", subject: "Information Architecture", question: "What does Information Architecture (IA) organize in digital products?", options: ["Structuring and organizing content logically for seamless navigation", "Managing server memory heaps", "Setting up OAuth authentication", "Minifying JavaScript bundles"], correct_answer: "Structuring and organizing content logically for seamless navigation", marks: 1.0 },
-        ];
-      }
-
-      if (domain.includes("java") || domain.includes("oops") || domain.includes("backend")) {
-        return [
-          { id: "java_1", domain: "Java Development", subject: "OOP", question: "Which principle of OOP allows a class to inherit properties from another class?", options: ["Inheritance", "Polymorphism", "Encapsulation", "Abstraction"], correct_answer: "Inheritance", marks: 1.0 },
-          { id: "java_2", domain: "Java Development", subject: "JVM", question: "What converts Java bytecode into machine-readable code?", options: ["Java Virtual Machine (JVM)", "JDK Compiler", "Eclipse IDE", "Maven"], correct_answer: "Java Virtual Machine (JVM)", marks: 1.0 },
-          { id: "java_3", domain: "Java Development", subject: "Keywords", question: "Which keyword is used to prevent method overriding in Java?", options: ["final", "static", "abstract", "private"], correct_answer: "final", marks: 1.0 },
-          { id: "java_4", domain: "Java Development", subject: "Multithreading", question: "Which interface must be implemented to create a thread in Java?", options: ["Runnable", "Callable", "Serializable", "Cloneable"], correct_answer: "Runnable", marks: 1.0 },
-          { id: "java_5", domain: "Java Development", subject: "Collections", question: "Which collection class allows unique elements only in Java?", options: ["HashSet", "ArrayList", "LinkedList", "Vector"], correct_answer: "HashSet", marks: 1.0 },
-        ];
-      }
-
-      if (domain.includes("data") || domain.includes("analytic") || domain.includes("sql")) {
-        return [
-          { id: "da_1", domain: "Data Analytics", subject: "Pandas", question: "Which Python library is primarily used for data manipulation and analysis?", options: ["Pandas", "Matplotlib", "Scikit-Learn", "Flask"], correct_answer: "Pandas", marks: 1.0 },
-          { id: "da_2", domain: "Data Analytics", subject: "SQL", question: "Which SQL clause is used to aggregate rows into summary groups?", options: ["GROUP BY", "ORDER BY", "HAVING", "WHERE"], correct_answer: "GROUP BY", marks: 1.0 },
-          { id: "da_3", domain: "Data Analytics", subject: "Visualization", question: "Which chart type is best suited for displaying numeric frequency distributions?", options: ["Histogram", "Pie Chart", "Line Plot", "Scatter Plot"], correct_answer: "Histogram", marks: 1.0 },
-          { id: "da_4", domain: "Data Analytics", subject: "Data Cleaning", question: "Which function in Pandas fills missing null values in a DataFrame?", options: ["fillna()", "dropna()", "isna()", "isnull()"], correct_answer: "fillna()", marks: 1.0 },
-          { id: "da_5", domain: "Data Analytics", subject: "Statistics", question: "Which metric calculates the correlation coefficient ranging from -1 to +1?", options: ["Pearson Correlation", "Spearman RMSE", "R-Squared", "Cosine Distance"], correct_answer: "Pearson Correlation", marks: 1.0 },
-        ];
-      }
-
-      if (domain.includes("ai") || domain.includes("machine") || domain.includes("learning") || domain.includes("ml")) {
-        return [
-          { id: "aiml_1", domain: "Artificial Intelligence", subject: "Algorithms", question: "Which algorithm is used for supervised classification using decision trees ensembles?", options: ["Random Forest", "K-Means", "DBSCAN", "PCA"], correct_answer: "Random Forest", marks: 1.0 },
-          { id: "aiml_2", domain: "Artificial Intelligence", subject: "Neural Nets", question: "Which activation function outputs values in the range (0, 1)?", options: ["Sigmoid", "ReLU", "Tanh", "Softmax"], correct_answer: "Sigmoid", marks: 1.0 },
-          { id: "aiml_3", domain: "Artificial Intelligence", subject: "Model Fitting", question: "What phenomenon occurs when a model performs well on training data but poorly on test data?", options: ["Overfitting", "Underfitting", "Generalization", "Bias Error"], correct_answer: "Overfitting", marks: 1.0 },
-          { id: "aiml_4", domain: "Artificial Intelligence", subject: "Metrics", question: "What metric calculates the harmonic mean of Precision and Recall?", options: ["F1-Score", "ROC-AUC", "MAE", "Accuracy"], correct_answer: "F1-Score", marks: 1.0 },
-          { id: "aiml_5", domain: "Artificial Intelligence", subject: "Optimization", question: "Which optimization algorithm updates model weights based on loss gradients?", options: ["Gradient Descent", "K-Nearest Neighbors", "PCA", "Naive Bayes"], correct_answer: "Gradient Descent", marks: 1.0 },
-        ];
-      }
-
-      if (domain.includes("med") || domain.includes("coding")) {
-        return [
-          { id: "mcq_1", domain: "Medical Coding", subject: "ICD-10", question: "What does ICD stand for in medical coding?", options: ["International Classification of Diseases", "Internal Clinical Diagnosis", "Integrated Coding System", "International Charting Document"], correct_answer: "International Classification of Diseases", marks: 1.0 },
-          { id: "mcq_2", domain: "Medical Coding", subject: "CPT", question: "CPT codes are maintained by which organization?", options: ["American Medical Association (AMA)", "World Health Organization (WHO)", "Centers for Medicare & Medicaid Services (CMS)", "FDA"], correct_answer: "American Medical Association (AMA)", marks: 1.0 },
-          { id: "mcq_3", domain: "Medical Coding", subject: "HIPAA", question: "Which regulation protects patient health information privacy in healthcare IT?", options: ["HIPAA Privacy Rule", "GDPR", "FERPA", "SOX"], correct_answer: "HIPAA Privacy Rule", marks: 1.0 },
-          { id: "mcq_4", domain: "Medical Coding", subject: "Anatomy", question: "What is the primary function of red blood cells (erythrocytes)?", options: ["Transport oxygen", "Fight infections", "Blood clotting", "Produce antibodies"], correct_answer: "Transport oxygen", marks: 1.0 },
-          { id: "mcq_5", domain: "Medical Coding", subject: "HCPCS", question: "Level II HCPCS codes primarily cover which of the following?", options: ["Ambulance services & durable medical equipment", "Surgical procedures", "Inpatient hospital stays", "Lab tests"], correct_answer: "Ambulance services & durable medical equipment", marks: 1.0 },
-        ];
-      }
-
-      if (domain.includes("vlsi") || domain.includes("embedded") || domain.includes("integrated")) {
-        return [
-          { id: "vlsi_1", domain: "Integrated VLSI", subject: "Digital Logic", question: "Which logic gate outputs 1 only when both inputs are equal?", options: ["XNOR Gate", "XOR Gate", "NAND Gate", "NOR Gate"], correct_answer: "XNOR Gate", marks: 1.0 },
-          { id: "vlsi_2", domain: "Integrated VLSI", subject: "Verilog", question: "Which keyword defines a procedural block executed on clock edges in Verilog?", options: ["always", "initial", "assign", "module"], correct_answer: "always", marks: 1.0 },
-          { id: "vlsi_3", domain: "Integrated VLSI", subject: "CMOS", question: "In CMOS technology, what pair of transistors is used to construct a static inverter?", options: ["PMOS pull-up and NMOS pull-down", "Two NMOS transistors", "Two PMOS transistors", "BJT NPN and PNP"], correct_answer: "PMOS pull-up and NMOS pull-down", marks: 1.0 },
-        ];
-      }
-
-      return [
-        { id: "fs_1", domain: "Full Stack", subject: "React & JS", question: "What is the virtual DOM in React?", options: ["A lightweight copy of the real DOM in memory", "A physical hardware component", "A CSS styling framework", "A database engine"], correct_answer: "A lightweight copy of the real DOM in memory", marks: 1.0 },
-        { id: "fs_2", domain: "Full Stack", subject: "JavaScript", question: "Which keyword declares a block-scoped variable in ES6?", options: ["let", "var", "global", "dim"], correct_answer: "let", marks: 1.0 },
-        { id: "fs_3", domain: "Full Stack", subject: "Node.js", question: "What event loop mechanism handles asynchronous I/O operations in Node.js?", options: ["libuv", "V8 Engine", "React Fiber", "Redux Thunk"], correct_answer: "libuv", marks: 1.0 },
-        { id: "fs_4", domain: "Full Stack", subject: "Python", question: "Which built-in data type in Python is immutable?", options: ["Tuple", "List", "Dictionary", "Set"], correct_answer: "Tuple", marks: 1.0 },
-        { id: "fs_5", domain: "Full Stack", subject: "SQL", question: "Which SQL clause is used to filter aggregated group records?", options: ["HAVING", "WHERE", "ORDER BY", "GROUP BY"], correct_answer: "HAVING", marks: 1.0 },
-      ];
-    };
 
     const initExam = async () => {
       try {
         setLoading(true);
+        setError(null);
 
-        // Always fetch fresh session details with exact assigned questions_detail from backend
-        let res = await apiClient.post(API_ENDPOINTS.EXAMS.START).catch((err) => err.response || null);
+        let session = location.state?.examSession;
+        const localRecovery = readExamRecovery(user);
 
-        if (res?.data?.error) {
-          setError(res.data.error);
-          return;
+        // Attempt recovery from sessionStorage if state is missing (e.g. reload)
+        if (!session || !session.questions || session.questions.length === 0) {
+          try {
+            const cached = sessionStorage.getItem(ACTIVE_SESSION_KEY);
+            if (cached) {
+              session = JSON.parse(cached);
+            }
+          } catch (e) {
+            console.warn("Could not read sessionStorage:", e);
+          }
         }
 
-        const sessionData = res?.data?.exam || res?.data || location.state?.examSession;
+        if ((!session || !session.questions || session.questions.length === 0) && localRecovery?.exam_session) {
+          session = localRecovery.exam_session;
+        }
 
-        if (isMounted && sessionData && !sessionData.error) {
-          setExamSession(sessionData);
+        // If still missing session or questions, call startInternalExam from authoritative backend
+        if (!session || !session.questions || session.questions.length === 0) {
+          const authContext = await fetchAuthoritativeExamContext();
+          const targetExamId =
+            authContext?.latestExam?.id || location.state?.examId;
 
-          let qList = sessionData.questions_detail || [];
-          if ((!qList || qList.length === 0 || typeof qList[0] === "string") && sessionData.questions) {
-            if (Array.isArray(sessionData.questions) && sessionData.questions.length > 0 && typeof sessionData.questions[0] === "object") {
-              qList = sessionData.questions;
-            }
+          if (!targetExamId) {
+            throw new Error("No active exam configuration found. Please return to instructions.");
           }
 
-          setQuestions(qList);
+          const startRes = await startInternalExam(targetExamId, {
+            application_id: authContext?.activeApp?.id,
+            course_id: authContext?.courseId,
+            schedule_id: authContext?.latestSchedule?.id,
+            difficulty: authContext?.examConfig?.difficulty || "MEDIUM",
+            total_questions: authContext?.examConfig?.total_questions || 10,
+            duration_minutes: authContext?.examConfig?.duration_minutes || 45,
+          });
 
-          const savedAnswers = sessionData.answers || {};
-          setAnswers(savedAnswers);
-
-          const savedStates = sessionData.question_states || {};
-          setQuestionStates(savedStates);
-
-          setCheatCount(sessionData.cheat_count || 0);
-          setCheatLogs(sessionData.cheat_logs || []);
-
-          // Dynamic duration & timer calculation directly from Admin live sessionData
-          let durationMins = Number(sessionData.duration_minutes) || 5;
-          let remainingSecs = durationMins * 60;
-          if (sessionData.started_at) {
-            const startMs = new Date(sessionData.started_at).getTime();
-            const elapsedSecs = Math.floor((Date.now() - startMs) / 1000);
-            remainingSecs = Math.max(0, durationMins * 60 - elapsedSecs);
+          if (!startRes.success || !startRes.questions || startRes.questions.length === 0) {
+            throw new Error(startRes.error || "Unable to start or resume exam from server.");
           }
-          setTimeLeft(remainingSecs);
 
-          // Mark first question as NOT_ANSWERED if NOT_VISITED
-          if (qList.length > 0) {
-            const firstId = qList[0].id;
-            if (!savedStates[firstId]) {
-              setQuestionStates((prev) => ({ ...prev, [firstId]: "NOT_ANSWERED" }));
+          const candidateName =
+            user?.first_name && user?.last_name
+              ? `${user.first_name} ${user.last_name}`
+              : user?.name || user?.email?.split("@")[0] || "Candidate";
+
+          const candidateId =
+            user?.student_id ||
+            user?.id?.substring(0, 8)?.toUpperCase() ||
+            "STU-" + (user?.email?.split("@")[0] || "EXAM");
+
+          session = {
+            id: targetExamId,
+            assessment_type: "PRESCREENING",
+            attempt_id: startRes.attempt_id,
+            application_id: authContext?.activeApp?.id,
+            schedule_id: authContext?.latestSchedule?.id,
+            course_id: authContext?.courseId,
+            course_name: authContext?.courseName || "Screening Assessment",
+            domain: authContext?.courseName || "Screening Assessment",
+            student_name: candidateName,
+            student_id: candidateId,
+            student_email: user?.email || "",
+            total_questions: startRes.questions.length,
+            duration_minutes: Number(startRes.duration_minutes) || 45,
+            pass_percentage: authContext?.examConfig?.pass_percentage || 60.0,
+            difficulty: authContext?.examConfig?.difficulty || "MIXED",
+            start_time: startRes.start_time,
+            expires_at: startRes.expires_at,
+            paper_code: startRes.paper_code || "A",
+            paper_label: startRes.paper_label || "Paper A",
+            proctoring: startRes.proctoring,
+            questions: startRes.questions,
+            saved_answers: startRes.saved_answers || {},
+          };
+
+          try {
+            sessionStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify(session));
+          } catch (storageErr) {
+            console.warn("Storage warning:", storageErr);
+          }
+        }
+
+        if (isMounted && session && session.questions) {
+          setExamSession(session);
+          setQuestions(session.questions);
+          activeAttemptIdRef.current = session.attempt_id || session.id;
+          expiresAtRef.current = session.expires_at || null;
+
+          // Restore saved answers returned by backend
+          const sameAttempt =
+            localRecovery &&
+            String(localRecovery.attempt_id || "") === String(session.attempt_id || session.id || "");
+          const beforeDeadline = !session.expires_at || Date.now() < new Date(session.expires_at).getTime();
+          const initialAnswers =
+            sameAttempt && beforeDeadline
+              ? localRecovery.answers || {}
+              : session.saved_answers || {};
+          needsRecoverySyncRef.current = Boolean(sameAttempt && beforeDeadline);
+          setAnswers(initialAnswers);
+          latestAnswersRef.current = initialAnswers;
+          persistExamRecovery(session, initialAnswers, user, {
+            pendingSubmission: Boolean(localRecovery?.pending_submission),
+          });
+
+          // Compute initial tile states
+          const initStates = {};
+          session.questions.forEach((q, idx) => {
+            const hasAns = initialAnswers[q.id] !== undefined && initialAnswers[q.id] !== null;
+            if (hasAns) {
+              initStates[q.id] = "ANSWERED";
+            } else if (idx === 0) {
+              initStates[q.id] = "NOT_ANSWERED";
+            } else {
+              initStates[q.id] = "NOT_VISITED";
             }
+          });
+          setQuestionStates(initStates);
+
+          // Calculate authoritative time left based on expires_at
+          if (session.expires_at) {
+            const remainingSecs = Math.max(
+              0,
+              Math.floor((new Date(session.expires_at).getTime() - Date.now()) / 1000)
+            );
+            setTimeLeft(remainingSecs);
+          } else {
+            const durationSecs = (Number(session.duration_minutes) || 45) * 60;
+            setTimeLeft(durationSecs);
           }
         }
       } catch (err) {
-        console.error("Failed to initialize exam session:", err);
+        console.error("[Exam Mount] Initialization error:", err);
+        if (isMounted) {
+          setError(
+            err.message ||
+            "Failed to load examination questions from server. Please contact your proctor or administrator."
+          );
+        }
       } finally {
         if (isMounted) setLoading(false);
       }
     };
 
     initExam();
+
     return () => {
       isMounted = false;
     };
-  }, [location.state]);
+  }, [location.state, user]);
 
-  // Submit Exam API Handler
-  const handleFinalSubmit = useCallback(async () => {
-    if (submitting) return;
-    setSubmitting(true);
-    isSubmittedRef.current = true;
+  // 2. Proctoring Deterrents & Telemetry Logger (Telemetry only - does NOT auto-fail)
+  const logSecurityTelemetry = useCallback((eventType, detail = "") => {
+    if (isSubmittedRef.current) return;
 
-    try {
-      const targetId = examSession?.id || "active_session";
-      const res = await apiClient
-        .post(API_ENDPOINTS.EXAMS.SUBMIT(targetId), {
-          answers,
-          question_states: questionStates,
-          cheat_logs: cheatLogs,
-          cheat_count: cheatCount,
-        })
-        .catch((err) => {
-          console.warn("API submit endpoint error, switching to resilient client evaluation:", err);
-          return null;
-        });
+    const event = {
+      type: eventType,
+      detail: detail,
+      timestamp: new Date().toISOString(),
+    };
 
-      let evaluated = res?.data?.exam || res?.data;
+    queuedSecurityEventsRef.current.push(event);
 
-      // Resilient Client-Side Evaluation Fallback
-      if (!evaluated || typeof evaluated !== "object" || evaluated.percentage === undefined) {
-        let totalMarks = 0;
-        let obtainedMarks = 0;
+    // Provide soft notification for user awareness
+    let label = "Security event recorded";
+    if (eventType === "FULLSCREEN_EXIT") label = "Exited full-screen mode";
+    if (eventType === "TAB_SWITCH") label = "Tab switch / window focus loss detected";
+    if (eventType === "CONTEXT_MENU") label = "Right-click context menu is disabled";
+    if (eventType === "COPY_PASTE") label = "Copy and paste is disabled";
+    if (eventType === "DEVTOOLS_ATTEMPT") label = "Developer shortcut is disabled";
 
-        (questions || []).forEach((q) => {
-          const qMarks = Number(parseFloat(q.marks)) || 1.0;
-          totalMarks += qMarks;
-          const userAns = answers[q.id];
+    setSecurityNotification(`${label}. This interaction is recorded as telemetry for proctor review.`);
 
-          if (userAns !== undefined && userAns !== null) {
-            const cleanUser = String(userAns).replace(/^(?:[A-D][.\):]|Option\s+[A-D][:.]?)\s*/i, "").trim().toLowerCase();
-            const cleanCorrect = String(q.correct_answer || "").replace(/^(?:[A-D][.\):]|Option\s+[A-D][:.]?)\s*/i, "").trim().toLowerCase();
+    setTimeout(() => {
+      setSecurityNotification((curr) => (curr && curr.includes(label) ? null : curr));
+    }, 4500);
 
-            if (cleanUser === cleanCorrect || String(userAns).trim().toLowerCase() === String(q.correct_answer).trim().toLowerCase()) {
-              obtainedMarks += qMarks;
-            }
+    // Schedule telemetry flush with autosave
+    scheduleAutosaveRef.current?.(latestAnswersRef.current);
+  }, []);
+
+  const handleJitsiEvent = useCallback((event) => {
+    logSecurityTelemetry(event.type, event.detail);
+    if (event.type === "JITSI_ERROR" || event.type === "JITSI_LEFT") {
+      setMediaWarning("The live proctoring room disconnected. Reconnect before continuing.");
+    } else if (event.type === "JITSI_JOINED") {
+      setMediaWarning(null);
+    }
+  }, [logSecurityTelemetry]);
+
+  // Proctoring Listeners & Anti-Cheat Protection
+  useEffect(() => {
+    if (loading || submitting) return;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden && !isSubmittedRef.current) {
+        const newCount = tabSwitchCountRef.current + 1;
+
+        tabSwitchCountRef.current = newCount;
+        setTabSwitchCount(newCount);
+
+        logSecurityTelemetry(
+          "TAB_SWITCH",
+          `Tab switch / window focus loss detected. Violation #${newCount} of 5`
+        );
+
+        // 5th tab switch = automatic exam submission
+        if (newCount >= 5) {
+          console.warn(
+            "[Proctoring] Maximum tab switches reached. Auto submitting exam."
+          );
+
+          setShowTabSwitchWarningModal(false);
+
+          if (handleFinalSubmitRef.current) {
+            handleFinalSubmitRef.current({
+              autoSubmit: true,
+              reason: "MAX_TAB_SWITCHES_EXCEEDED",
+            });
+          } else {
+            console.error(
+              "[Proctoring] handleFinalSubmitRef is not connected to the submit function."
+            );
           }
-        });
-
-        const pct = totalMarks > 0 ? Math.round((obtainedMarks / totalMarks) * 100) : 0;
-        const isDisqualified = (cheatCount >= 5);
-        const passPct = Number(parseFloat(examSession?.pass_percentage)) || 40.0;
-        const isQualified = (pct >= passPct) && (!isDisqualified);
-
-        evaluated = {
-          id: examSession?.id || `SESSION-${Date.now()}`,
-          domain: examSession?.domain || examSession?.course_name || "Screening Track",
-          total_marks: Math.round(totalMarks),
-          marks_obtained: Math.round(obtainedMarks),
-          percentage: pct,
-          qualified: isQualified,
-          cheat_count: cheatCount,
-          cheat_logs: cheatLogs,
-          status: "EVALUATED",
-          submitted_at: new Date().toISOString(),
-        };
-
-        const courseId = location.state?.selectedCourse || examSession?.course_id || "default_med";
-        if (isDisqualified) {
-          localStorage.setItem(`sure_exam_disqualified_${courseId}`, "true");
+        } else {
+          // Warning only for tab switches 1–4
+          setShowTabSwitchWarningModal(true);
         }
       }
+    };
 
-      // Always sync local applications storage with final evaluation result
-      const isQualified = evaluated?.qualified === true || (evaluated?.percentage != null && Number(evaluated.percentage) >= (examSession?.pass_percentage || 40.0));
-      const pctScore = evaluated?.percentage != null ? evaluated.percentage : 0;
-      const courseId = location.state?.selectedCourse || examSession?.course_id || "default_med";
+    const handleWindowBlur = () => {
+      logSecurityTelemetry("WINDOW_BLUR", "Browser window focus lost");
+    };
+
+    const handleContextMenu = (e) => {
+      e.preventDefault();
+      logSecurityTelemetry("CONTEXT_MENU", "Right click attempted");
+    };
+
+    const handleCopy = (e) => {
+      e.preventDefault();
+      logSecurityTelemetry("COPY_PASTE", "Copy command prevented");
+    };
+
+    const handlePaste = (e) => {
+      e.preventDefault();
+      logSecurityTelemetry("COPY_PASTE", "Paste command prevented");
+    };
+
+    const handleCut = (e) => {
+      e.preventDefault();
+      logSecurityTelemetry("COPY_PASTE", "Cut command prevented");
+    };
+
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        setFullscreenWarning(true);
+        logSecurityTelemetry("FULLSCREEN_EXIT", "Candidate exited fullscreen");
+      } else {
+        setFullscreenWarning(false);
+      }
+    };
+
+    const handleKeyDown = (e) => {
+      if (
+        e.key === "F12" ||
+        (e.ctrlKey && e.shiftKey && ["I", "i", "J", "j", "C", "c"].includes(e.key)) ||
+        (e.ctrlKey && ["u", "U", "s", "S", "p", "P"].includes(e.key))
+      ) {
+        e.preventDefault();
+        logSecurityTelemetry("DEVTOOLS_ATTEMPT", `Key prevented: ${e.key}`);
+      }
+    };
+
+    const handleBeforeUnload = (e) => {
+      if (!isSubmittedRef.current) {
+        e.preventDefault();
+        e.returnValue = "Your exam is currently in progress. Are you sure you want to leave?";
+        return e.returnValue;
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleWindowBlur);
+    document.addEventListener("contextmenu", handleContextMenu);
+    document.addEventListener("copy", handleCopy);
+    document.addEventListener("paste", handlePaste);
+    document.addEventListener("cut", handleCut);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleWindowBlur);
+      document.removeEventListener("contextmenu", handleContextMenu);
+      document.removeEventListener("copy", handleCopy);
+      document.removeEventListener("paste", handlePaste);
+      document.removeEventListener("cut", handleCut);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [loading, submitting, logSecurityTelemetry]);
+
+  // 3. Debounced Autosave Implementation
+  const triggerAutosave = useCallback(async (currentAnswers) => {
+    const attemptId = activeAttemptIdRef.current || examSession?.attempt_id || examSession?.id;
+    if (!attemptId || isSubmittedRef.current) return;
+    const isModuleTest = examSession?.assessment_type === "MODULE_TEST";
+    const assessmentId = isModuleTest
+      ? examSession?.module_test_id || examSession?.id
+      : examSession?.exam_id || examSession?.id;
+
+    setAutosaveStatus("SAVING");
+    const eventsToSend = [...queuedSecurityEventsRef.current];
+    queuedSecurityEventsRef.current = [];
+
+    try {
+      const saveFunction = isModuleTest ? autosaveModuleTest : autosaveExam;
+      const res = await saveFunction(assessmentId, {
+        attempt_id: attemptId,
+        answers: currentAnswers,
+        security_events: eventsToSend,
+      });
+
+      if (res.success) {
+        setAutosaveStatus("SAVED");
+        setIsOnline(true);
+        if (res.expires_at) {
+          expiresAtRef.current = res.expires_at;
+        }
+      } else {
+        setAutosaveStatus("OFFLINE");
+        setIsOnline(false);
+        queuedSecurityEventsRef.current = [...eventsToSend, ...queuedSecurityEventsRef.current];
+        if (retryAutosaveTimerRef.current) clearTimeout(retryAutosaveTimerRef.current);
+        retryAutosaveTimerRef.current = setTimeout(() => {
+          triggerAutosaveRef.current?.(latestAnswersRef.current);
+        }, 4000);
+      }
+    } catch (err) {
+      console.warn("[Autosave] Network warning:", err);
+      setAutosaveStatus("OFFLINE");
+      setIsOnline(false);
+      queuedSecurityEventsRef.current = [...eventsToSend, ...queuedSecurityEventsRef.current];
+      if (retryAutosaveTimerRef.current) clearTimeout(retryAutosaveTimerRef.current);
+      retryAutosaveTimerRef.current = setTimeout(() => {
+        triggerAutosaveRef.current?.(latestAnswersRef.current);
+      }, 4000);
+    }
+  }, [examSession]);
+
+  const scheduleAutosave = useCallback(
+    (updatedAnswers) => {
+      latestAnswersRef.current = updatedAnswers;
+      persistExamRecovery(examSession, updatedAnswers, user);
+      setAutosaveStatus("SAVING");
+
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+
+      autosaveTimerRef.current = setTimeout(() => {
+        triggerAutosave(updatedAnswers);
+      }, 1000); // 1-second debounce
+    },
+    [examSession, triggerAutosave, user]
+  );
+
+  useEffect(() => {
+    triggerAutosaveRef.current = triggerAutosave;
+    scheduleAutosaveRef.current = scheduleAutosave;
+  }, [scheduleAutosave, triggerAutosave]);
+
+  // Clean up timers on unmount
+  useEffect(() => {
+    return () => {
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+      if (retryAutosaveTimerRef.current) clearTimeout(retryAutosaveTimerRef.current);
+    };
+  }, []);
+
+  // 4. Final Submission Handler
+  const handleFinalSubmit = useCallback(
+    async (options = {}) => {
+      if (isSubmittedRef.current || submitting) return;
+
+      isSubmittedRef.current = true;
+      setSubmitting(true);
+      setShowSubmitModal(false);
+      setSubmitError(null);
+
+      const attemptId = activeAttemptIdRef.current || examSession?.attempt_id || examSession?.id;
+      const currentAnswers = latestAnswersRef.current;
+      const events = [...queuedSecurityEventsRef.current];
+      persistExamRecovery(examSession, currentAnswers, user, {
+        pendingSubmission: Boolean(options.autoSubmit),
+      });
 
       try {
-        const localApps = JSON.parse(localStorage.getItem("sure_student_applications") || "[]");
-        const targetAppId = examSession?.application_id || examSession?.application?.id || location.state?.applicationId;
-        const updatedLocalApps = localApps.map((a) => {
-          const matchById = targetAppId && a.id === targetAppId;
-          const matchByCourse = courseId && (a.course_id === courseId || a.course?.id === courseId);
-          if (matchById || matchByCourse || localApps.length === 1) {
-            return {
-              ...a,
-              status: isQualified ? "QUALIFIED" : "REJECTED",
-              qualified: isQualified,
-              qualification_score: pctScore,
-              score: pctScore,
-              exam_status: "EVALUATED",
-              exam_taken: true,
-            };
-          }
-          return a;
-        });
-        localStorage.setItem("sure_student_applications", JSON.stringify(updatedLocalApps));
-      } catch (e) {
-        console.warn("Failed to update local application state:", e);
-      }
-
-      // Exit fullscreen if active
-      if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => { });
-      }
-
-      navigate("/student/exam-result", { state: { examResult: evaluated, questions } });
-    } catch (err) {
-      console.error("Local evaluation fallback exception:", err);
-      if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => { });
-      }
-      navigate("/student/exam-result", {
-        state: {
-          examResult: {
-            percentage: 0,
-            qualified: false,
-            cheat_count: cheatCount,
-            status: "EVALUATED",
-          },
+        const isModuleTest = examSession?.assessment_type === "MODULE_TEST";
+        const assessmentId = isModuleTest
+          ? examSession?.module_test_id || examSession?.id
+          : examSession?.exam_id || examSession?.id;
+        const submitFunction = isModuleTest ? submitModuleTest : submitInternalExam;
+        const submitRes = await submitFunction(assessmentId, {
+          attempt_id: attemptId,
+          application_id: examSession?.application_id,
+          schedule_id: examSession?.schedule_id,
+          course_id: examSession?.course_id,
+          course_name: examSession?.course_name,
+          pass_percentage: examSession?.pass_percentage || 60,
           questions,
-        },
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  }, [submitting, examSession, answers, questionStates, cheatLogs, cheatCount, questions, location.state, navigate]);
+          answers: currentAnswers,
+          duration_taken_seconds: Math.max(
+            0,
+            (Number(examSession?.duration_minutes) || 45) * 60 - timeLeft
+          ),
+          security_events: events,
+          auto_submitted: Boolean(options.autoSubmit),
+          submission_reason: options.reason || "CANDIDATE_SUBMIT",
+        });
 
-  // Countdown Timer Hook
+        // Clean up session storage
+        clearExamRecovery();
+
+        navigate("/student/exam-result", {
+          state: {
+            examResult: submitRes?.exam || {
+              status: "EVALUATED",
+              total_questions: questions.length,
+              submitted_at: new Date().toISOString(),
+            },
+            questions,
+            answers: currentAnswers,
+            courseName: examSession?.course_name,
+            assessmentType: examSession?.assessment_type || "PRESCREENING",
+          },
+        });
+      } catch (err) {
+        console.error("[Exam Submit] Error during final submission:", err);
+        setSubmitError(
+          err?.message ||
+          "Network error while submitting exam. Your answers are saved locally. Click retry below to complete submission."
+        );
+        isSubmittedRef.current = false;
+        setSubmitting(false);
+      }
+    },
+    [examSession, navigate, questions, submitting, timeLeft, user]
+  );
+
+  useEffect(() => {
+    handleFinalSubmitRef.current = handleFinalSubmit;
+  }, [handleFinalSubmit]);
+
+  useEffect(() => {
+    const attemptId = examSession?.attempt_id || examSession?.id;
+    if (!attemptId || recoverySyncAttemptRef.current === String(attemptId)) return;
+    recoverySyncAttemptRef.current = String(attemptId);
+    if (expiresAtRef.current && Date.now() >= new Date(expiresAtRef.current).getTime()) {
+      handleFinalSubmitRef.current?.({ autoSubmit: true, reason: "RECOVERED_AFTER_EXPIRY" });
+    } else if (needsRecoverySyncRef.current && navigator.onLine !== false) {
+      needsRecoverySyncRef.current = false;
+      triggerAutosaveRef.current?.(latestAnswersRef.current);
+    }
+  }, [examSession]);
+
+  // 5. Authoritative Countdown Timer Hook
   useEffect(() => {
     if (loading || !examSession || submitting) return;
 
     const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
+      if (expiresAtRef.current) {
+        const remaining = Math.max(
+          0,
+          Math.floor((new Date(expiresAtRef.current).getTime() - Date.now()) / 1000)
+        );
+        setTimeLeft(remaining);
+        if (remaining <= 0 && !isSubmittedRef.current) {
           clearInterval(timer);
-          handleFinalSubmit(); // Auto-submit when timer expires
-          return 0;
+          handleFinalSubmit({ autoSubmit: true, reason: "TIME_EXPIRED" });
         }
-        return prev - 1;
-      });
+      } else {
+        setTimeLeft((prev) => {
+          if (prev <= 1 && !isSubmittedRef.current) {
+            clearInterval(timer);
+            handleFinalSubmit({ autoSubmit: true, reason: "TIME_EXPIRED" });
+            return 0;
+          }
+          return prev - 1;
+        });
+      }
     }, 1000);
 
     return () => clearInterval(timer);
   }, [loading, examSession, submitting, handleFinalSubmit]);
 
-  // Periodic Background Progress Sync
-  useEffect(() => {
-    if (loading || !examSession?.id || submitting) return;
-
-    syncTimerRef.current = setInterval(() => {
-      apiClient
-        .post(API_ENDPOINTS.EXAMS.SYNC(examSession.id), {
-          answers,
-          question_states: questionStates,
-          cheat_logs: cheatLogs,
-          cheat_count: cheatCount,
-        })
-        .catch((err) => console.warn("Background sync warning:", err));
-    }, 15000);
-
-    return () => {
-      if (syncTimerRef.current) clearInterval(syncTimerRef.current);
-    };
-  }, [loading, examSession, answers, questionStates, cheatLogs, cheatCount, submitting]);
-
-  // Ref to track auto-submission state without infinite re-entrancy loops
-  const isAutoSubmittingRef = useRef(false);
-
-  // Anti-Cheating & Security Listeners
-  const logSecurityViolation = useCallback((type, message) => {
-    if (isAutoSubmittingRef.current) return;
-
-    const violationEvent = {
-      type,
-      message,
-      timestamp: new Date().toISOString(),
-    };
-
-    setCheatCount((prev) => {
-      const nextCount = prev + 1;
-      if (nextCount >= 5 && !isAutoSubmittingRef.current) {
-        isAutoSubmittingRef.current = true;
-        const courseId = location.state?.selectedCourse || examSession?.course_id || "default_med";
-        localStorage.setItem(`sure_exam_disqualified_${courseId}`, "true");
-
-        // Immediately submit without browser alert loop
-        setTimeout(() => {
-          handleFinalSubmit();
-        }, 50);
-      }
-      return nextCount;
-    });
-
-    setCheatLogs((prev) => [...prev, violationEvent]);
-    setSecurityModalText(message);
-  }, [location.state, examSession, handleFinalSubmit]);
-
-  useEffect(() => {
-    if (loading || submitting || isAutoSubmittingRef.current) return;
-
-    // 1. Fullscreen exit detection
-    const handleFullscreenChange = () => {
-      if (!document.fullscreenElement && !isAutoSubmittingRef.current) {
-        logSecurityViolation("FULLSCREEN_EXIT", "Security Alert: Full-screen mode was exited! Please stay in full-screen mode during the exam.");
-      }
-    };
-
-    // 2. Tab switch / Window focus loss
-    const handleVisibilityChange = () => {
-      if (document.hidden && !isAutoSubmittingRef.current) {
-        logSecurityViolation("TAB_SWITCH", "Security Alert: Tab switch or browser minimize detected! This activity is logged as a cheating violation.");
-      }
-    };
-
-    const handleWindowBlur = () => {
-      if (!isAutoSubmittingRef.current) {
-        logSecurityViolation("WINDOW_BLUR", "Security Alert: Browser lost focus. Switching applications is strictly prohibited.");
-      }
-    };
-
-    // 3. Disable Right Click, Copy, Cut, Paste, Select
-    const handleContextMenu = (e) => e.preventDefault();
-    const handleCopyCutPaste = (e) => e.preventDefault();
-
-    // 4. Disable inspection keyboard shortcuts
-    const handleKeyDown = (e) => {
-      if (
-        e.key === "F12" ||
-        (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) ||
-        (e.ctrlKey && (e.key === "u" || e.key === "c" || e.key === "v" || e.key === "a"))
-      ) {
-        e.preventDefault();
-        logSecurityViolation("KEYBOARD_SHORTCUT", `Keyboard shortcut '${e.key}' blocked.`);
-      }
-    };
-
-    // 5. Auto-Submit & Reject on tab close, page navigation, or URL edit
-    const handleBeforeUnload = (e) => {
-      if (isSubmittedRef.current || isAutoSubmittingRef.current) return;
-
-      isAutoSubmittingRef.current = true;
-      isSubmittedRef.current = true;
-
-      const session = examSessionRef.current;
-      const targetId = session?.id || "active_session";
-      const courseId = location.state?.selectedCourse || session?.course_id;
-
-      if (courseId) {
-        localStorage.setItem(`sure_exam_disqualified_${courseId}`, "true");
-      }
-
-      try {
-        const payload = JSON.stringify({
-          answers: answersRef.current || {},
-          cheat_count: 5,
-          cheat_logs: [{ type: "EXAM_ABANDONED", message: "Exam session closed prematurely by navigating away or closing window.", timestamp: new Date().toISOString() }],
-        });
-        const baseUrl = apiClient.defaults.baseURL || import.meta.env.VITE_API_URL || "";
-        const beaconUrl = `${baseUrl}/api/exams/${targetId}/submit/`;
-        navigator.sendBeacon(beaconUrl, new Blob([payload], { type: "application/json" }));
-      } catch (err) { }
-
-      try {
-        const localApps = JSON.parse(localStorage.getItem("sure_student_applications") || "[]");
-        const targetAppId = session?.application_id || session?.application?.id || location.state?.applicationId;
-        const updatedLocalApps = localApps.map((a) => {
-          const matchById = targetAppId && a.id === targetAppId;
-          const matchByCourse = courseId && (a.course_id === courseId || a.course?.id === courseId);
-          if (matchById || matchByCourse) {
-            return {
-              ...a,
-              status: "REJECTED",
-              qualified: false,
-              qualification_score: 0,
-              score: 0,
-              exam_status: "EVALUATED",
-            };
-          }
-          return a;
-        });
-        localStorage.setItem("sure_student_applications", JSON.stringify(updatedLocalApps));
-      } catch (err) { }
-
-      e.preventDefault();
-      e.returnValue = "Leaving or closing the exam will result in immediate REJECTION and disqualification.";
-      return e.returnValue;
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("blur", handleWindowBlur);
-    document.addEventListener("contextmenu", handleContextMenu);
-    document.addEventListener("copy", handleCopyCutPaste);
-    document.addEventListener("cut", handleCopyCutPaste);
-    document.addEventListener("paste", handleCopyCutPaste);
-    document.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("blur", handleWindowBlur);
-      document.removeEventListener("contextmenu", handleContextMenu);
-      document.removeEventListener("copy", handleCopyCutPaste);
-      document.removeEventListener("cut", handleCopyCutPaste);
-      document.removeEventListener("paste", handleCopyCutPaste);
-      document.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [loading, submitting, logSecurityViolation]);
+  // Zoom Handlers
+  const handleZoomIn = () => setZoomLevel((prev) => Math.min(prev + 10, 130));
+  const handleZoomOut = () => setZoomLevel((prev) => Math.max(prev - 10, 80));
+  const handleZoomReset = () => setZoomLevel(100);
 
   // Question Navigation & Option Selection
   const activeQuestion = questions[currentIndex];
   const activeQId = activeQuestion?.id;
 
-  const handleSelectOption = (optionValue) => {
-    if (!activeQId) return;
-    setAnswers((prev) => ({ ...prev, [activeQId]: optionValue }));
+  const handleSelectOption = (optionKey) => {
+    if (!activeQId || timeLeft <= 0 || submitting) return;
 
-    // If marked, set to ANSWERED_MARKED else ANSWERED
+    const updatedAnswers = { ...answers, [activeQId]: optionKey };
+    setAnswers(updatedAnswers);
+
     const currentState = questionStates[activeQId];
     if (currentState === "MARKED" || currentState === "ANSWERED_MARKED") {
       setQuestionStates((prev) => ({ ...prev, [activeQId]: "ANSWERED_MARKED" }));
     } else {
       setQuestionStates((prev) => ({ ...prev, [activeQId]: "ANSWERED" }));
     }
+
+    scheduleAutosave(updatedAnswers);
   };
 
   const handleSaveAndNext = () => {
@@ -515,7 +717,26 @@ function Exam() {
       const nextIdx = currentIndex + 1;
       setCurrentIndex(nextIdx);
       const nextId = questions[nextIdx].id;
-      if (!questionStates[nextId]) {
+      if (!questionStates[nextId] || questionStates[nextId] === "NOT_VISITED") {
+        setQuestionStates((prev) => ({ ...prev, [nextId]: "NOT_ANSWERED" }));
+      }
+    }
+  };
+
+  const handleSaveAndMarkForReview = () => {
+    if (activeQId) {
+      if (answers[activeQId]) {
+        setQuestionStates((prev) => ({ ...prev, [activeQId]: "ANSWERED_MARKED" }));
+      } else {
+        setQuestionStates((prev) => ({ ...prev, [activeQId]: "MARKED" }));
+      }
+    }
+
+    if (currentIndex < questions.length - 1) {
+      const nextIdx = currentIndex + 1;
+      setCurrentIndex(nextIdx);
+      const nextId = questions[nextIdx].id;
+      if (!questionStates[nextId] || questionStates[nextId] === "NOT_VISITED") {
         setQuestionStates((prev) => ({ ...prev, [nextId]: "NOT_ANSWERED" }));
       }
     }
@@ -534,101 +755,170 @@ function Exam() {
       const nextIdx = currentIndex + 1;
       setCurrentIndex(nextIdx);
       const nextId = questions[nextIdx].id;
-      if (!questionStates[nextId]) {
+      if (!questionStates[nextId] || questionStates[nextId] === "NOT_VISITED") {
         setQuestionStates((prev) => ({ ...prev, [nextId]: "NOT_ANSWERED" }));
       }
     }
   };
 
   const handleClearResponse = () => {
-    if (!activeQId) return;
-    setAnswers((prev) => {
-      const copy = { ...prev };
-      delete copy[activeQId];
-      return copy;
-    });
+    if (!activeQId || timeLeft <= 0 || submitting) return;
+
+    const copy = { ...answers };
+    delete copy[activeQId];
+    setAnswers(copy);
+
     setQuestionStates((prev) => ({ ...prev, [activeQId]: "NOT_ANSWERED" }));
+    scheduleAutosave(copy);
+  };
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
   };
 
   const handleTileClick = (index) => {
-    // Set current active state before jumping
-    if (activeQId && !questionStates[activeQId]) {
+    if (activeQId && (!questionStates[activeQId] || questionStates[activeQId] === "NOT_VISITED")) {
       setQuestionStates((prev) => ({ ...prev, [activeQId]: "NOT_ANSWERED" }));
     }
 
     setCurrentIndex(index);
     const targetId = questions[index].id;
-    if (!questionStates[targetId]) {
+    if (!questionStates[targetId] || questionStates[targetId] === "NOT_VISITED") {
       setQuestionStates((prev) => ({ ...prev, [targetId]: "NOT_ANSWERED" }));
     }
   };
 
-  // Re-enter Fullscreen Helper
   const reEnterFullscreen = async () => {
-    setSecurityModalText(null);
     try {
       if (document.documentElement.requestFullscreen) {
         await document.documentElement.requestFullscreen();
       }
+      setFullscreenWarning(false);
     } catch (e) {
-      console.warn("Fullscreen request error:", e);
+      console.warn("Fullscreen permission error:", e);
     }
   };
 
-  // Palette State Counters
-  const getCounts = () => {
-    let answered = 0;
-    let notAnswered = 0;
-    let marked = 0;
-    let ansMarked = 0;
-    let notVisited = 0;
-
-    questions.forEach((q) => {
-      const state = questionStates[q.id] || "NOT_VISITED";
-      if (state === "ANSWERED") answered++;
-      else if (state === "NOT_ANSWERED") notAnswered++;
-      else if (state === "MARKED") marked++;
-      else if (state === "ANSWERED_MARKED") ansMarked++;
-      else notVisited++;
-    });
-
-    return { answered, notAnswered, marked, ansMarked, notVisited };
+  // Counts for Navigator Summary
+  const counts = {
+    answered: 0,
+    notAnswered: 0,
+    marked: 0,
+    ansMarked: 0,
+    notVisited: 0,
   };
 
-  const counts = getCounts();
+  questions.forEach((q) => {
+    const state = questionStates[q.id] || "NOT_VISITED";
+    if (state === "ANSWERED") counts.answered++;
+    else if (state === "NOT_ANSWERED") counts.notAnswered++;
+    else if (state === "MARKED") counts.marked++;
+    else if (state === "ANSWERED_MARKED") counts.ansMarked++;
+    else counts.notVisited++;
+  });
 
-  // Format Timer String MM:SS
   const formatTime = (secs) => {
-    const mins = Math.floor(secs / 60);
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
     const s = secs % 60;
-    return `${mins.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+    if (h > 0) {
+      return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
+
+  // Watermark text composed of candidate ID and attempt ID
+  const watermarkCandidate =
+    examSession?.student_name ||
+    user?.first_name ||
+    user?.email?.split("@")[0] ||
+    "Candidate";
+  const watermarkId = examSession?.student_id || user?.student_id || "STUDENT";
+  const watermarkAttempt = examSession?.attempt_id ? String(examSession.attempt_id).substring(0, 8) : "INT-ATTEMPT";
+  const watermarkText = `${watermarkCandidate} • ${watermarkId} • ID: ${watermarkAttempt} • PROCTOR AUDIT`;
 
   if (loading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", backgroundColor: "var(--bg-main)", fontFamily: "sans-serif" }}>
-        <div style={{ backgroundColor: "var(--bg-card)", padding: "3rem", borderRadius: "16px", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)", textAlign: "center", maxWidth: "450px", border: "1px solid var(--border-color)" }}>
-          <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>⏳</div>
-          <h2 style={{ color: "var(--text-primary)", margin: "0 0 0.5rem 0" }}>Initializing Screening Exam Portal</h2>
-          <p style={{ color: "var(--text-secondary)", fontSize: "14px", margin: 0 }}>Setting up secure anti-cheat environment and loading domain question set...</p>
-        </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          backgroundColor: "#f8fafc",
+          fontFamily: "sans-serif",
+        }}
+      >
+        <div
+          style={{
+            width: "44px",
+            height: "44px",
+            border: "4px solid #cbd5e1",
+            borderTopColor: "#1e40af",
+            borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+            marginBottom: "16px",
+          }}
+        />
+        <h3 style={{ color: "#0f172a", margin: 0, fontWeight: 800 }}>
+          Initializing Internal Examination Portal...
+        </h3>
+        <p style={{ color: "#64748b", marginTop: "6px", fontSize: "14px" }}>
+          Retrieving authoritative randomized questions & active session from server
+        </p>
       </div>
     );
   }
 
-  if (!questions || questions.length === 0) {
+  if (error || !questions || questions.length === 0) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", backgroundColor: "var(--bg-main)", fontFamily: "sans-serif" }}>
-        <div style={{ backgroundColor: "var(--bg-card)", padding: "3rem", borderRadius: "16px", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)", textAlign: "center", maxWidth: "450px", border: "1px solid var(--border-color)" }}>
-          <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>⚠️</div>
-          <h2 style={{ color: "var(--danger-color)", margin: "0 0 0.5rem 0" }}>No Questions Available</h2>
-          <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginBottom: "1.5rem" }}>Questions could not be loaded for your test domain.</p>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          backgroundColor: "#f8fafc",
+          fontFamily: "sans-serif",
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "white",
+            padding: "3rem",
+            borderRadius: "12px",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.06)",
+            textAlign: "center",
+            maxWidth: "480px",
+            border: "1.5px solid #cbd5e1",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
+            <FiAlertTriangle style={{ fontSize: "2.5rem", color: "#dc2626" }} />
+          </div>
+          <h2 style={{ color: "#dc2626", margin: "0 0 0.5rem 0", fontSize: "20px" }}>
+            Examination Session Unavailable
+          </h2>
+          <p style={{ color: "#475569", fontSize: "14px", marginBottom: "1.5rem", lineHeight: "1.5" }}>
+            {error || "Unable to retrieve examination session from server."}
+          </p>
           <button
             type="button"
-            onClick={() => navigate("/student/dashboard")}
-            style={{ padding: "10px 20px", backgroundColor: "var(--primary-color)", color: "var(--btn-text, #ffffff)", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}
+            onClick={() => navigate("/student/exam-instructions")}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: "#1e40af",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
           >
-            Back to Dashboard
+            Return to Instructions
           </button>
         </div>
       </div>
@@ -636,146 +926,305 @@ function Exam() {
   }
 
   return (
-    <div className={styles.ntaExamPortal}>
-      {/* Top Header Bar */}
-      <header className={styles.header}>
-        <div className={styles.headerLeft}>
-          <div className={styles.ntaLogo}>SURE TRUST Screening Exam</div>
-          <span className={styles.domainBadge}>
-            Track: {examSession?.course_name || examSession?.domain || "General"}
-          </span>
-        </div>
+    <div className={styles.examContainer} onContextMenu={(e) => e.preventDefault()}>
+      {/* DYNAMIC VISIBLE WATERMARK LAYER FOR TRACEABILITY & DETERRENCE */}
+      <div className={styles.watermarkContainer} aria-hidden="true" data-testid="exam-watermark">
+        {[1, 2, 3, 4, 5, 6].map((rowIdx) => (
+          <div key={rowIdx} className={styles.watermarkRow}>
+            <span className={styles.watermarkItem}>{watermarkText}</span>
+            <span className={styles.watermarkItem}>{watermarkText}</span>
+            <span className={styles.watermarkItem}>{watermarkText}</span>
+          </div>
+        ))}
+      </div>
 
-        <div className={styles.headerCenter}>
-          <div className={styles.candidateDetails}>
-            <span>Candidate Name: <strong>{examSession?.student_name || examSession?.student_email || user?.name || user?.email?.split('@')[0] || "Student Candidate"}</strong></span>
-            <span>Subject Domain: <strong>{activeQuestion?.subject || activeQuestion?.domain || examSession?.domain || "Screening Test"}</strong></span>
+      <JitsiExamRoom
+        session={examSession?.proctoring}
+        mode="candidate"
+        onEvent={handleJitsiEvent}
+      />
+
+      {/* ================= 1. TOP HEADER ================= */}
+      <header className={styles.topNavbar}>
+        <div className={styles.navLeft}>
+          <SureProEdLogo size={36} showText={false} />
+          <div className={styles.courseTitleBadge}>
+            {examSession?.course_name || examSession?.domain || "Screening Examination"}
           </div>
         </div>
 
-        <div className={styles.headerRight}>
-          <div className={`${styles.timerBox} ${timeLeft < 300 ? styles.timerWarning : ""}`}>
-            <span className={styles.timerLabel}>Time Left:</span>
-            <span className={styles.timerClock}>{formatTime(timeLeft)}</span>
+        <div className={styles.navCenter}>
+          {/* Autosave Status Indicator */}
+          <div
+            className={`${styles.autosaveBadge} ${autosaveStatus === "SAVED"
+                ? styles.autosaveSaved
+                : autosaveStatus === "SAVING"
+                  ? styles.autosaveSaving
+                  : styles.autosaveOffline
+              }`}
+            data-testid="autosave-status"
+          >
+            <span
+              className={`${styles.autosaveDot} ${autosaveStatus === "SAVED"
+                  ? styles.dotSaved
+                  : autosaveStatus === "SAVING"
+                    ? styles.dotSaving
+                    : styles.dotOffline
+                }`}
+            />
+            <span>
+              {autosaveStatus === "SAVED"
+                ? "Answers Saved"
+                : autosaveStatus === "SAVING"
+                  ? "Saving..."
+                  : "Offline - Retrying..."}
+            </span>
+          </div>
+
+          {/* Network Connection Pill */}
+          <div
+            className={`${styles.networkPill} ${isOnline ? styles.networkOnline : styles.networkOffline
+              }`}
+          >
+            <span>{isOnline ? "Online" : "Offline"}</span>
+          </div>
+        </div>
+
+        <div className={styles.navRight}>
+          {/* Live Proctoring Webcam Feed */}
+          <div className={styles.proctorFeedCard} title="Live Automated Proctoring: Active">
+            <FiVideo />
+            <div className={styles.proctorMeta}>
+              <span className={styles.proctorLiveBadge}>JITSI</span>
+              <span className={styles.proctorSubText}>ROOM {examSession?.proctoring?.room_code || "—"}</span>
+            </div>
+          </div>
+
+          {/* Candidate Profile Details */}
+          <div className={styles.candidateCard}>
+            <div className={styles.candidateAvatar}>
+              {(examSession?.student_name || "S")[0].toUpperCase()}
+            </div>
+            <div className={styles.candidateMeta}>
+              <span className={styles.candidateName}>
+                {examSession?.student_name || "Candidate"}
+              </span>
+              <span className={styles.candidateId}>
+                ID: {examSession?.student_id || "STU-EXAM"}
+              </span>
+            </div>
+          </div>
+
+          {/* Countdown Timer (Synchronized with server expires_at) */}
+          <div
+            className={`${styles.timerBadge} ${timeLeft < 300 ? styles.timerWarning : ""}`}
+            data-testid="server-timer"
+          >
+            <FiClock style={{ fontSize: "15px" }} />
+            <span>{formatTime(timeLeft)}</span>
           </div>
         </div>
       </header>
 
-      {/* Security Violation Alert Modal */}
-      {securityModalText && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.securityModal}>
-            <div className={styles.warningIcon}>⚠️</div>
-            <h2>Security Warning</h2>
-            <p>{securityModalText}</p>
-            <div className={styles.violationCount}>
-              Total Cheating Violations Recorded: <strong>{cheatCount}</strong>
-            </div>
-            <button type="button" className={styles.warningButton} onClick={reEnterFullscreen}>
-              Return to Exam (Full-Screen)
-            </button>
-          </div>
+      {/* FULLSCREEN ALERT NOTIFICATION BANNER */}
+      {fullscreenWarning && (
+        <div className={styles.proctorNotice} data-testid="fullscreen-alert">
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <FiAlertTriangle /> <strong>Proctored Session Notice:</strong> You have exited full-screen mode. Please return to full-screen immediately to maintain session integrity.
+          </span>
+          <button type="button" onClick={reEnterFullscreen}>
+            Re-enter Full Screen
+          </button>
         </div>
       )}
 
-      {/* Confirmation Submit Modal */}
-      {showSubmitModal && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.submitModal}>
-            <h2>Confirm Exam Submission</h2>
-            <p>Are you sure you want to submit your examination?</p>
-
-            <div className={styles.summaryGrid}>
-              <div className={`${styles.summaryItem} ${styles.bgGreen}`}>
-                <span>Answered</span>
-                <strong>{counts.answered}</strong>
-              </div>
-              <div className={`${styles.summaryItem} ${styles.bgRed}`}>
-                <span>Not Answered</span>
-                <strong>{counts.notAnswered}</strong>
-              </div>
-              <div className={`${styles.summaryItem} ${styles.bgPurple}`}>
-                <span>Marked for Review</span>
-                <strong>{counts.marked}</strong>
-              </div>
-              <div className={`${styles.summaryItem} ${styles.bgPurpleStar}`}>
-                <span>Answered & Marked</span>
-                <strong>{counts.ansMarked}</strong>
-              </div>
-              <div className={`${styles.summaryItem} ${styles.bgGray}`}>
-                <span>Not Visited</span>
-                <strong>{counts.notVisited}</strong>
-              </div>
-            </div>
-
-            <div className={styles.modalActions}>
-              <button
-                type="button"
-                className={styles.cancelBtn}
-                onClick={() => setShowSubmitModal(false)}
-                disabled={submitting}
-              >
-                Resume Examination
-              </button>
-              <button
-                type="button"
-                className={styles.confirmSubmitBtn}
-                onClick={handleFinalSubmit}
-                disabled={submitting}
-              >
-                {submitting ? "Submitting..." : "Yes, Submit Now"}
-              </button>
-            </div>
-          </div>
+      {/* MEDIA DISCONNECT PROCTORING WARNING BANNER */}
+      {mediaWarning && (
+        <div className={styles.proctorNotice} style={{ background: "#fef2f2", borderColor: "#fca5a5", color: "#991b1b" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <FiAlertCircle /> <strong>Proctoring Notice:</strong> {mediaWarning}
+          </span>
+          <button
+            type="button"
+            style={{ background: "#dc2626" }}
+            onClick={() => setMediaWarning(null)}
+          >
+            Dismiss
+          </button>
         </div>
       )}
 
-      {/* Main Examination Workspace */}
-      <div className={styles.mainLayout}>
-        {/* Left Section: Question & Options */}
-        <section className={styles.questionPanel}>
-          <div className={styles.questionHeader}>
-            <span className={styles.qNumLabel}>
-              Question No. {currentIndex + 1} of {questions.length}
-            </span>
-            <span className={styles.marksLabel}>Marks: +1.0 | -0.0</span>
-          </div>
+      {/* PROCTORING TELEMETRY TOAST NOTIFICATION */}
+      {securityNotification && !fullscreenWarning && (
+        <div className={styles.proctorNotice} style={{ background: "#fef3c7", borderColor: "#fde68a", color: "#92400e" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <FiShield /> {securityNotification}
+          </span>
+          <button
+            type="button"
+            style={{ background: "#d97706" }}
+            onClick={() => setSecurityNotification(null)}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
-          <div className={styles.questionContent}>
-            <h3 className={styles.questionText}>{activeQuestion?.question}</h3>
+      {/* SUBMISSION NETWORK ERROR RECOVERY BANNER */}
+      {submitError && (
+        <div className={styles.proctorNotice} style={{ background: "#fee2e2", borderColor: "#fca5a5", color: "#991b1b" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <FiAlertTriangle /> {submitError}
+          </span>
+          <button
+            type="button"
+            style={{ background: "#dc2626" }}
+            onClick={() => handleFinalSubmit()}
+            disabled={submitting}
+          >
+            {submitting ? "Retrying..." : "Retry Submission"}
+          </button>
+        </div>
+      )}
 
-            <div className={styles.optionsList}>
-              {((activeQuestion?.options && activeQuestion.options.length > 0) ? activeQuestion.options : ["Option A", "Option B", "Option C", "Option D"]).map((optionStr, optIdx) => {
-                const optKey = String.fromCharCode(65 + optIdx); // A, B, C, D
-                const rawVal = String(optionStr || "").trim();
-                const strippedVal = rawVal.replace(/^(?:[A-D][.\):]|Option\s+[A-D][:.]?)\s+/i, "").trim();
-                const cleanText = strippedVal || rawVal || `Choice ${optKey}`;
+      {/* ================= 2. SECOND INFO BAR ================= */}
+      <div className={styles.infoBar}>
+        <div className={styles.infoLeft}>
+          <span className={styles.infoSectionBadge}>Section: Technical & Aptitude</span>
+          <span>Paper: {examSession?.paper_label || "Paper A"}</span>
+        </div>
 
-                const isSelected = answers[activeQId] === optionStr || answers[activeQId] === optKey || answers[activeQId] === cleanText;
+        <div className={styles.infoRight}>
+          <span className={styles.marksTag}>
+            Marks: +{activeQuestion?.marks || 1.0} | Negative: -{activeQuestion?.negativeMarks || 0.0}
+          </span>
+        </div>
+      </div>
+
+      {/* ================= 3. MAIN TWO-COLUMN LAYOUT ================= */}
+      <main className={styles.mainLayout}>
+        {/* LEFT COLUMN: QUESTION CONTENT & OPTIONS (76%) */}
+        <section className={styles.questionArea}>
+          <div className={styles.questionScrollable}>
+            <div className={styles.questionTitleRow}>
+              <div className={styles.questionHeaderLeft}>
+                <span className={styles.questionNumberHeader}>
+                  Question {currentIndex + 1} of {questions.length}
+                </span>
+                <span className={styles.questionTypeText}>Multiple Choice (Single Answer)</span>
+              </div>
+
+              {/* Zoom Controls */}
+              <div className={styles.zoomControls}>
+                <button
+                  type="button"
+                  className={styles.zoomBtn}
+                  onClick={handleZoomOut}
+                  disabled={zoomLevel <= 80}
+                  title="Decrease text size"
+                >
+                  A-
+                </button>
+                <span className={styles.zoomLabel}>{zoomLevel}%</span>
+                <button
+                  type="button"
+                  className={styles.zoomBtn}
+                  onClick={handleZoomIn}
+                  disabled={zoomLevel >= 130}
+                  title="Increase text size"
+                >
+                  A+
+                </button>
+                <button
+                  type="button"
+                  className={styles.zoomBtn}
+                  onClick={handleZoomReset}
+                  title="Reset text size"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            {/* Question Body */}
+            <div
+              className={styles.questionBody}
+              style={{
+                fontSize: `${(22 * zoomLevel) / 100}px`,
+                fontWeight: 500,
+                lineHeight: 1.5,
+                marginBottom: "20px",
+              }}
+              data-testid="active-question-text"
+            >
+              {activeQuestion?.questionText}
+            </div>
+
+            {/* MCQ Options (Rendered exactly in backend-provided order) */}
+            <div className={styles.optionsContainer}>
+              {(activeQuestion?.options || []).map((opt) => {
+                const optKey = opt.key || "A";
+                const isSelected = answers[activeQId] === optKey;
 
                 return (
-                  <label
-                    key={optIdx}
-                    className={`${styles.optionCard} ${isSelected ? styles.optionSelected : ""}`}
+                  <div
+                    key={optKey}
+                    className={`${styles.optionCard} ${isSelected ? styles.optionCardSelected : ""}`}
+                    style={{
+                      padding: "14px 18px",
+                      minHeight: "55px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "14px",
+                    }}
+                    onClick={() => handleSelectOption(optKey)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") handleSelectOption(optKey);
+                    }}
+                    data-testid={`option-${optKey}`}
                   >
-                    <input
-                      type="radio"
-                      name={`question_${activeQId}`}
-                      value={optionStr}
-                      checked={isSelected}
-                      onChange={() => handleSelectOption(optionStr)}
-                    />
-                    <span className={styles.optionKey}>{optKey}.</span>
-                    <span className={styles.optionVal}>{cleanText}</span>
-                  </label>
+                    <div
+                      className={`${styles.optionCircle} ${isSelected ? styles.optionCircleActive : ""
+                        }`}
+                    >
+                      {optKey}
+                    </div>
+                    <div
+                      className={styles.optionLabelText}
+                      style={{
+                        fontSize: `${(18 * zoomLevel) / 100}px`,
+                        fontWeight: 500,
+                        lineHeight: 1.45,
+                        flex: 1,
+                      }}
+                    >
+                      {opt.text}
+                    </div>
+                  </div>
                 );
               })}
             </div>
           </div>
 
-          {/* Bottom Toolbar Controls */}
-          <footer className={styles.toolbar}>
-            <div className={styles.toolbarLeft}>
+          {/* Bottom Action Bar */}
+          <footer className={styles.bottomActionBar}>
+            <div className={styles.actionGroupLeft}>
+              <button
+                type="button"
+                className={styles.btnSaveNext}
+                onClick={handleSaveAndNext}
+              >
+                Save & Next
+              </button>
+              <button
+                type="button"
+                className={styles.btnSaveReview}
+                onClick={handleSaveAndMarkForReview}
+              >
+                Save & Mark for Review
+              </button>
               <button
                 type="button"
                 className={styles.btnMarkReview}
@@ -787,164 +1236,336 @@ function Exam() {
                 type="button"
                 className={styles.btnClear}
                 onClick={handleClearResponse}
+                disabled={!answers[activeQId]}
               >
                 Clear Response
               </button>
             </div>
 
-            <div className={styles.toolbarRight}>
+            <div className={styles.actionGroupRight}>
               <button
                 type="button"
-                className={styles.btnSaveNext}
-                onClick={handleSaveAndNext}
+                className={styles.btnPrevious}
+                onClick={handlePrevious}
+                disabled={currentIndex === 0}
               >
-                Save & Next
-              </button>
-              <button
-                type="button"
-                className={styles.btnSubmit}
-                onClick={() => setShowSubmitModal(true)}
-              >
-                Submit Exam
+                ← Previous
               </button>
             </div>
           </footer>
         </section>
 
-        {/* Right Section: Question Palette Sidebar */}
-        <aside className={styles.sidebar}>
-          <div className={styles.profileBox}>
-            <div className={styles.avatarCircle}>
-              {examSession?.student_name ? examSession.student_name.charAt(0).toUpperCase() : "S"}
+        {/* RIGHT COLUMN: QUESTION NAVIGATOR (24%) */}
+        <aside className={styles.sidebarNavigator}>
+          <div className={styles.sidebarTitle}>Question Navigator</div>
+
+          {/* Summary Status Legend */}
+          <div className={styles.summaryBox}>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryItem}>
+                <span className={`${styles.summaryBadge} ${styles.badgeAnswered}`}>
+                  {counts.answered}
+                </span>
+                <span>Answered</span>
+              </div>
+              <div className={styles.summaryItem}>
+                <span className={`${styles.summaryBadge} ${styles.badgeNotAnswered}`}>
+                  {counts.notAnswered}
+                </span>
+                <span>Not Answered</span>
+              </div>
             </div>
-            <div className={styles.profileMeta}>
-              <strong>{examSession?.student_name || "Student"}</strong>
-              <small>Candidate</small>
+
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryItem}>
+                <span className={`${styles.summaryBadge} ${styles.badgeNotVisited}`}>
+                  {counts.notVisited}
+                </span>
+                <span>Not Visited</span>
+              </div>
+              <div className={styles.summaryItem}>
+                <span className={`${styles.summaryBadge} ${styles.badgeMarked}`}>
+                  {counts.marked}
+                </span>
+                <span>Marked for Review</span>
+              </div>
+            </div>
+
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryItem} style={{ gridColumn: "1 / -1" }}>
+                <span className={`${styles.summaryBadge} ${styles.badgeAnsMarked}`}>
+                  {counts.ansMarked}
+                </span>
+                <span>Answered & Marked for Review (Evaluated)</span>
+              </div>
             </div>
           </div>
 
-          {/* 1. TOP: Choose Question Panel */}
-          <div style={{ background: "var(--bg-card)", padding: "16px", borderRadius: "12px", border: "1px solid var(--border-color)", marginBottom: "16px", boxShadow: "0 2px 6px rgba(0,0,0,0.05)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-              <h4 style={{ margin: 0, fontSize: "0.85rem", fontWeight: 700, textTransform: "uppercase", color: "var(--text-primary)", letterSpacing: "0.5px" }}>
-                Choose a Question
-              </h4>
-              <span style={{ fontSize: "0.78rem", background: "rgba(2, 132, 199, 0.15)", color: "var(--info-color, #0ea5e9)", fontWeight: 700, padding: "2px 8px", borderRadius: "12px" }}>
-                {questions.length} Questions
-              </span>
-            </div>
-
-            {/* 5 Columns Flex Wrap Square Buttons Grid */}
+          {/* Question Grid Tiles - 8-Column Grid matching NTA/TCS reference */}
+          <div className={styles.tilesSection}>
             <div
+              className={styles.tilesGrid}
               style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "8px",
-                justifyContent: "flex-start",
-                alignItems: "flex-start",
-                maxHeight: "260px",
-                overflowY: "auto",
-                padding: "4px 2px",
-                boxSizing: "border-box"
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '5px 4px',
+                width: '100%',
+                boxSizing: 'border-box',
+                alignContent: 'start',
+                justifyContent: 'flex-start',
               }}
             >
               {questions.map((q, idx) => {
                 const state = questionStates[q.id] || "NOT_VISITED";
                 const isCurrent = idx === currentIndex;
 
-                // Color mappings
-                let bg = "var(--bg-surface)";
-                let text = "var(--text-primary)";
-                let border = "var(--border-color)";
-
+                let tileClass = styles.tileNotVisited;
                 if (state === "ANSWERED") {
-                  bg = "#16a34a";
-                  text = "#ffffff";
-                  border = "#15803d";
+                  tileClass = styles.tileAnswered;
                 } else if (state === "NOT_ANSWERED") {
-                  bg = "#dc2626";
-                  text = "#ffffff";
-                  border = "#b91c1c";
+                  tileClass = styles.tileNotAnswered;
                 } else if (state === "MARKED") {
-                  bg = "#8b5cf6";
-                  text = "#ffffff";
-                  border = "#7c3aed";
+                  tileClass = styles.tileMarked;
                 } else if (state === "ANSWERED_MARKED") {
-                  bg = "#7c3aed";
-                  text = "#ffffff";
-                  border = "#6d28d9";
+                  tileClass = styles.tileAnsMarked;
                 }
+
+                const numStr = String(idx + 1).padStart(2, "0");
 
                 return (
                   <button
-                    key={q.id || idx}
+                    key={q.id}
                     type="button"
-                    onClick={() => handleTileClick(idx)}
+                    className={`${styles.navTile} ${tileClass} ${
+                      isCurrent ? styles.navTileCurrent : ""
+                    }`}
                     style={{
-                      width: "42px",
-                      height: "42px",
-                      minWidth: "42px",
-                      minHeight: "42px",
-                      maxWidth: "42px",
-                      maxHeight: "42px",
-                      borderRadius: "8px",
-                      background: bg,
-                      color: text,
-                      border: isCurrent ? "3px solid #0284c7" : `1px solid ${border}`,
-                      boxShadow: isCurrent ? "0 0 0 2px #38bdf8" : "none",
-                      fontWeight: 700,
-                      fontSize: "0.92rem",
-                      cursor: "pointer",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      margin: 0,
-                      padding: 0,
-                      boxSizing: "border-box",
-                      flexShrink: 0,
-                      position: "relative"
+                      flex: '0 0 calc((100% - 28px) / 8)',
+                      width: 'calc((100% - 28px) / 8)',
+                      minWidth: 0,
+                      boxSizing: 'border-box',
                     }}
+                    onClick={() => handleTileClick(idx)}
+                    title={`Question ${idx + 1}: ${state}`}
+                    data-testid={`question-tile-${idx + 1}`}
                   >
-                    {idx + 1}
-                    {state === "ANSWERED_MARKED" && (
-                      <span style={{ position: "absolute", top: "1px", right: "3px", fontSize: "0.55rem" }}>★</span>
-                    )}
+                    {numStr}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* 2. LOWER: Question Legend */}
-          <div style={{ background: "var(--bg-card)", padding: "14px", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
-            <h4 style={{ margin: "0 0 10px 0", fontSize: "0.78rem", fontWeight: 700, textTransform: "uppercase", color: "var(--text-secondary)", letterSpacing: "0.5px" }}>
-              Question Legend
-            </h4>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px 10px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.78rem", color: "var(--text-primary)" }}>
-                <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#16a34a", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "0.75rem" }}>{counts.answered}</span>
-                <span>Answered</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.78rem", color: "var(--text-primary)" }}>
-                <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#dc2626", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "0.75rem" }}>{counts.notAnswered}</span>
-                <span>Not Answered</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.78rem", color: "var(--text-primary)" }}>
-                <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "var(--bg-surface)", color: "var(--text-primary)", border: "1px solid var(--border-color)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "0.75rem" }}>{counts.notVisited}</span>
-                <span>Not Visited</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.78rem", color: "var(--text-primary)" }}>
-                <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#8b5cf6", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "0.75rem" }}>{counts.marked}</span>
-                <span>Marked</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.78rem", color: "var(--text-primary)", gridColumn: "span 2" }}>
-                <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "#7c3aed", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "0.75rem" }}>{counts.ansMarked}</span>
-                <span>Ans & Marked</span>
-              </div>
+          {/* Sidebar Footer Buttons */}
+          <div className={styles.sidebarFooter}>
+            <div className={styles.auxRow}>
+              <button
+                type="button"
+                className={styles.btnAux}
+                onClick={() => setShowQuestionPaperModal(true)}
+              >
+                Question Paper
+              </button>
+              <button
+                type="button"
+                className={styles.btnAux}
+                onClick={() => setShowInstructionsModal(true)}
+              >
+                Instructions
+              </button>
             </div>
+
+            <button
+              type="button"
+              className={styles.btnFinalSubmit}
+              onClick={() => setShowSubmitModal(true)}
+              disabled={submitting}
+              data-testid="btn-submit-exam"
+            >
+              {submitting ? "Submitting..." : "Submit Examination"}
+            </button>
           </div>
         </aside>
-      </div>
+      </main>
+
+      {/* SUBMIT CONFIRMATION MODAL */}
+      {showSubmitModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalCard}>
+            <h3 className={styles.modalHeading}>Submit Examination Confirmation</h3>
+            <p style={{ fontSize: "14px", color: "#475569", margin: "0 0 12px 0" }}>
+              Are you sure you want to finish and submit your screening examination? You will not be
+              able to change your answers after submission.
+            </p>
+
+            <table className={styles.modalSummaryTable}>
+              <tbody>
+                <tr>
+                  <td><strong>Total Questions:</strong></td>
+                  <td>{questions.length}</td>
+                </tr>
+                <tr>
+                  <td><strong>Answered Questions:</strong></td>
+                  <td style={{ color: "#16a34a", fontWeight: "bold" }}>
+                    {counts.answered + counts.ansMarked}
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Unanswered / Not Visited:</strong></td>
+                  <td style={{ color: "#ea580c", fontWeight: "bold" }}>
+                    {counts.notAnswered + counts.notVisited}
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Marked for Review:</strong></td>
+                  <td style={{ color: "#9333ea", fontWeight: "bold" }}>
+                    {counts.marked}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div className={styles.modalBtnGroup}>
+              <button
+                type="button"
+                className={styles.btnClear}
+                onClick={() => setShowSubmitModal(false)}
+                disabled={submitting}
+              >
+                Continue Exam
+              </button>
+              <button
+                type="button"
+                className={styles.btnFinalSubmit}
+                style={{ width: "auto", padding: "8px 22px" }}
+                onClick={() => handleFinalSubmit({ autoSubmit: false, reason: "CANDIDATE_SUBMIT" })}
+                disabled={submitting}
+                data-testid="btn-confirm-final-submit"
+              >
+                {submitting ? "Submitting..." : "Yes, Submit Final Exam"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QUESTION PAPER PREVIEW MODAL */}
+      {showQuestionPaperModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalCard} style={{ maxWidth: "680px", maxHeight: "85vh", display: "flex", flexDirection: "column" }}>
+            <h3 className={styles.modalHeading}>Examination Question Paper Summary</h3>
+            <div style={{ flex: 1, overflowY: "auto", paddingRight: "8px" }}>
+              {questions.map((q, idx) => (
+                <div
+                  key={q.id}
+                  style={{
+                    padding: "10px 0",
+                    borderBottom: "1px solid #e2e8f0",
+                    fontSize: "14px",
+                  }}
+                >
+                  <strong style={{ color: "#1e40af" }}>Q{idx + 1}: </strong>
+                  <span>{q.questionText}</span>
+                  <div style={{ fontSize: "12px", color: "#64748b", marginTop: "4px" }}>
+                    Status: <strong>{questionStates[q.id] || "NOT_VISITED"}</strong>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className={styles.modalBtnGroup} style={{ marginTop: "12px" }}>
+              <button
+                type="button"
+                className={styles.btnFinalSubmit}
+                style={{ width: "auto", padding: "8px 20px" }}
+                onClick={() => setShowQuestionPaperModal(false)}
+              >
+                Close Question Paper
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* INSTRUCTIONS MODAL */}
+      {showInstructionsModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalCard} style={{ maxWidth: "600px" }}>
+            <h3 className={styles.modalHeading}>Examination Instructions</h3>
+            <ul style={{ fontSize: "13.5px", color: "#334155", lineHeight: "1.6", paddingLeft: "20px" }}>
+              <li>Each question carries marks as indicated on the top right bar.</li>
+              <li>Your answers are automatically saved to the server as you answer.</li>
+              <li>When the timer expires, your answers will submit automatically.</li>
+              <li>Full-screen mode and window focus are continuously monitored.</li>
+              <li>Do not use right-click or keyboard inspect shortcuts during the exam.</li>
+            </ul>
+            <div className={styles.modalBtnGroup}>
+              <button
+                type="button"
+                className={styles.btnFinalSubmit}
+                style={{ width: "auto", padding: "8px 20px" }}
+                onClick={() => setShowInstructionsModal(false)}
+              >
+                Back to Test
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB SWITCH ANTI-CHEAT WARNING MODAL */}
+      {showTabSwitchWarningModal && !submitting && (
+        <div className={styles.modalOverlay} style={{ zIndex: 99999 }}>
+          <div
+            className={styles.modalCard}
+            style={{
+              maxWidth: "480px",
+              textAlign: "center",
+              borderTop: "5px solid #dc2626",
+              padding: "28px 24px",
+            }}
+          >
+            <div style={{ fontSize: "40px", marginBottom: "10px" }}>⚠️</div>
+            <h3 style={{ color: "#dc2626", fontSize: "20px", fontWeight: 800, margin: "0 0 8px 0" }}>
+              Tab Switch Warning
+            </h3>
+            <p style={{ fontSize: "14.5px", color: "#334155", lineHeight: 1.5, margin: "0 0 16px 0" }}>
+              Switching tabs or navigating away from the examination window is strictly prohibited.
+            </p>
+            <div
+              style={{
+                background: "#fef2f2",
+                border: "1.5px solid #fecaca",
+                borderRadius: "8px",
+                padding: "12px",
+                marginBottom: "20px",
+              }}
+            >
+              <p style={{ margin: 0, fontWeight: 800, color: "#991b1b", fontSize: "15px" }}>
+                Violation Count: {tabSwitchCount} / 5
+              </p>
+              <p style={{ margin: "6px 0 0 0", fontSize: "12.5px", color: "#b91c1c" }}>
+                {5 - tabSwitchCount > 0
+                  ? `You have ${5 - tabSwitchCount} warning(s) remaining before your exam is automatically submitted.`
+                  : "Maximum tab switches exceeded. Submitting examination."}
+              </p>
+            </div>
+            <button
+              type="button"
+              className={styles.btnFinalSubmit}
+              style={{
+                background: "#dc2626",
+                width: "100%",
+                padding: "12px 20px",
+                fontSize: "14.5px",
+                fontWeight: 700,
+              }}
+              onClick={() => setShowTabSwitchWarningModal(false)}
+            >
+              I Understand, Resume Test
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

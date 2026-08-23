@@ -22,6 +22,8 @@ const adminLinks = [
   { label: "Schedule Class", path: "/admin/schedule", icon: <FaCalendarAlt /> },
   { label: "Attendance", path: "/admin/attendance", icon: <FaUserCheck /> },
   { label: "Exams", path: "/admin/exams", icon: <FaClipboardList /> },
+  { label: "Question Banks", path: "/admin/question-banks", icon: <FaBook /> },
+  { label: "Exam Proctoring", path: "/admin/exam-proctoring", icon: <FaShieldAlt /> },
   { label: "Certificates", path: "/admin/certificates", icon: <FaCertificate /> },
   { label: "Requests & Support", path: "/admin/requests-support", icon: <FaHeadset /> },
   { label: "Notifications", path: "/admin/notifications", icon: <FaBell /> },

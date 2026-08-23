@@ -84,9 +84,6 @@ import CertificateView from "../pages/student/CertificateView";
 import CertificateVerify from "../pages/student/CertificateVerify";
 
 /* Exams */
-import ExamInstructions from "../pages/exams/ExamInstructions";
-import Exam from "../pages/exams/Exam";
-import ExamResult from "../pages/exams/ExamResult";
 
 /* Admin */
 const Dashboard = lazy(() => import("../pages/admin/Dashboard"));
@@ -127,10 +124,6 @@ import ApproveApplication from "../pages/admin/ApproveApplication";
 import RejectApplication from "../pages/admin/RejectApplication";
 
 /* Exam Management */
-import Exams from "../pages/admin/Exams";
-import ExamDetails from "../pages/admin/ExamDetails";
-import AddExam from "../pages/admin/AddExam";
-import EditExam from "../pages/admin/EditExam";
 
 /* Reports */
 import Reports from "../pages/admin/Reports";
@@ -201,6 +194,21 @@ import MentorSettings from "../pages/mentor/Settings";
 
 import ScrollToTop from "../components/common/ScrollToTop";
 
+/* Exams */
+const ExamInstructions = lazy(() => import("../pages/exams/ExamInstructions"));
+const Exam = lazy(() => import("../pages/exams/Exam"));
+const ExamResult = lazy(() => import("../pages/exams/ExamResult"));
+const ProctorDashboard = lazy(() => import("../pages/exams/ProctorDashboard"));
+
+/* Exam Management */
+const Exams = lazy(() => import("../pages/admin/Exams"));
+const ExamDetails = lazy(() => import("../pages/admin/ExamDetails"));
+const AddExam = lazy(() => import("../pages/admin/AddExam"));
+const EditExam = lazy(() => import("../pages/admin/EditExam"));
+const ExamReport = lazy(() => import("../pages/admin/ExamReport"));
+const QuestionBanks = lazy(() => import("../pages/admin/QuestionBanks"));
+const ModuleTests = lazy(() => import("../pages/student/ModuleTests"));
+
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -223,6 +231,9 @@ function AppRoutes() {
 
           {/* ================= STUDENT MODULE (PROTECTED) ================= */}
           <Route element={<ProtectedRoute allowedRoles={["STUDENT"]} redirectTo="/login" />}>
+            <Route path="/student/exam" element={<Exam />} />
+            <Route path="/student/exam-result" element={<ExamResult />} />
+            
             <Route path="/student" element={<StudentLayout />}>
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<StudentDashboard />} />
@@ -237,12 +248,11 @@ function AppRoutes() {
               <Route path="application-success" element={<ApplicationSuccess />} />
               <Route path="application-status" element={<ApplicationStatus />} />
 
-              <Route path="exam-instructions" element={<ExamInstructions />} />
-              <Route path="exam" element={<Exam />} />
-              <Route path="exam-result" element={<ExamResult />} />
-
               <Route path="cohort" element={<MyCohort />} />
               <Route path="cohorts" element={<MyCohort />} />
+              <Route path="cohort/:cohortId/module-tests" element={<ModuleTests />} />
+              
+              <Route path="exam-instructions" element={<ExamInstructions />} />
               <Route path="class-schedule" element={<ClassSchedule />} />
               <Route path="mentor-details" element={<MentorDetails />} />
               <Route path="course/:id" element={<CourseDetails />} />
@@ -311,8 +321,13 @@ function AppRoutes() {
               {/* Exams */}
               <Route path="exams" element={<Exams />} />
               <Route path="exam-details" element={<ExamDetails />} />
+              <Route path="exam-details/:examId" element={<ExamDetails />} />
               <Route path="add-exam" element={<AddExam />} />
               <Route path="edit-exam" element={<EditExam />} />
+              <Route path="edit-exam/:examId" element={<EditExam />} />
+              <Route path="exam-report" element={<ExamReport />} />
+              <Route path="question-banks" element={<QuestionBanks />} />
+              <Route path="exam-proctoring" element={<ProctorDashboard />} />
 
               {/* Cohorts */}
               <Route path="cohorts" element={<Cohorts />} />

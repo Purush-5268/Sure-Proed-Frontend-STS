@@ -1,66 +1,889 @@
 .page {
   min-height: 100vh;
-  background: transparent;
+  background: #f1f5f9;
+  background: radial-gradient(circle at 50% 0%, #f8fafc 0%, #edf2f7 100%);
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 40px 20px;
+  padding: 48px 24px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: #0f172a;
+}
+
+.container {
+  width: 100%;
+  max-width: 920px;
 }
 
 .card {
-  width: 100%;
-  max-width: 800px;
-  background: var(--bg-surface);
-  border-radius: 18px;
-  padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 44px 48px;
+  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08), 0 0 0 1px #e2e8f0;
 }
 
-.card h1 {
+/* Institutional Masthead Header */
+.headerWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  color: #1e3a8a;
-  margin-bottom: 10px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 24px;
+}
+
+.brandLogo {
+  margin-bottom: 14px;
+}
+
+.portalBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.portalBadgeIcon {
+  font-size: 13px;
+  color: #2563eb;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
-  text-align: center;
-  color: var(--text-secondary);
-  margin-bottom: 35px;
-  line-height: 1.6;
+  color: #64748b;
+  font-size: 14px;
+  margin: 0;
+  max-width: 600px;
+  line-height: 1.5;
 }
 
-.section {
-  margin-bottom: 30px;
+/* Candidate Verification Card */
+.candidateAuthCard {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 22px;
+  margin-bottom: 28px;
 }
 
-.section h2 {
-  color: #2563eb;
-  margin-bottom: 15px;
+.candidateAuthHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 10px;
 }
 
-.section ul {
-  padding-left: 20px;
+.authLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.section li {
-  margin-bottom: 12px;
-  color: var(--text-primary);
-  line-height: 1.6;
+.authStatusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  letter-spacing: 0.04em;
 }
 
-.startButton {
-  width: 100%;
-  padding: 15px;
-  border: none;
-  border-radius: 10px;
-  background: #2563eb;
-  color: white;
-  font-size: 16px;
+.pillIcon {
+  font-size: 12px;
+}
+
+.candidateAuthGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.authField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.authFieldLabel {
+  font-size: 11px;
   font-weight: 600;
-  cursor: pointer;
-  transition: 0.3s;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.startButton:hover {
-  background: #1d4ed8;
+.authFieldValue {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.authFieldValueHighlight {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1d4ed8;
+}
+
+/* Section Title */
+.sectionTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.sectionIcon {
+  font-size: 16px;
+  color: #2563eb;
+}
+
+.sectionTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* Parameters Grid */
+.paramsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.paramCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.paramCard:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+}
+
+.paramLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.paramValue {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.paramValueSmall {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.paramSubtext {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* Schedule Card */
+.scheduleCard {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 22px;
+  margin-bottom: 28px;
+}
+
+.scheduleCardActive {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.scheduleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.scheduleTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scheduleIcon {
+  font-size: 15px;
+  color: #2563eb;
+}
+
+.statusBadge {
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.statusScheduled {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+}
+
+.statusActive {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.statusCompleted {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+.scheduleDetailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  font-size: 13px;
+  color: #334155;
+}
+
+.schedMetaLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.meetingLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #2563eb;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.meetingLink:hover {
+  text-decoration: underline;
+}
+
+.meetInstructionBox {
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  font-size: 12.5px;
+  color: #1e40af;
+  line-height: 1.5;
+}
+
+.meetInstructionBoxJoined {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+/* Device Readiness Card */
+.deviceCheckCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px 22px;
+  margin-bottom: 28px;
+}
+
+.deviceCheckCardActive {
+  border-color: #bbf7d0;
+  box-shadow: 0 0 0 1px #bbf7d0;
+}
+
+.deviceCheckCardError {
+  border-color: #fca5a5;
+}
+
+.deviceCheckHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.deviceCheckTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.deviceSectionIcon {
+  font-size: 16px;
+  color: #2563eb;
+}
+
+.btnDeviceTest {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnDeviceTest:hover:not(:disabled) {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+.btnDeviceTest:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.deviceGrid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+  align-items: center;
+}
+
+@media (max-width: 680px) {
+  .deviceGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.videoPreviewWrap {
+  width: 100%;
+  height: 140px;
+  background: #0f172a;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid #334155;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.videoPreviewWrapActive {
+  border-color: #22c55e;
+}
+
+.videoPreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.liveBadge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.liveBadgeDot {
+  width: 6px;
+  height: 6px;
+  background: #22c55e;
+  border-radius: 50%;
+  animation: pulseDot 1.4s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.videoPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 16px;
+  color: #94a3b8;
+}
+
+.placeholderIcon {
+  font-size: 24px;
+  color: #64748b;
+}
+
+.placeholderTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.placeholderSub {
+  font-size: 10px;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+.deviceStatusList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.deviceStatusItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.deviceLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.deviceIcon {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.statusPillActive {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.statusPillInactive {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+}
+
+.audioWaveVisualizerBox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
+.equalizerWave {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  padding: 2px 0;
+}
+
+.equalizerBar {
+  flex: 1;
+  max-width: 8px;
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+  border-radius: 4px;
+  min-height: 6px;
+  transition: height 0.05s ease-out;
+}
+
+.audioMeterContainer {
+  width: 100%;
+  height: 8px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.audioMeterBar {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #059669 60%, #eab308 90%, #ef4444 100%);
+  border-radius: 9999px;
+  transition: width 0.06s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.audioFeedbackRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+}
+
+.audioFeedbackText {
+  font-weight: 600;
+  color: #166534;
+}
+
+.audioDbText {
+  font-weight: 700;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}
+
+.deviceNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  line-height: 1.4;
+}
+
+.deviceNoticeIcon {
+  font-size: 14px;
+  color: #2563eb;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+/* Examination Regulations Section */
+.section {
+  margin-bottom: 32px;
+}
+
+.rulesList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ruleItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  transition: border-color 0.15s ease;
+}
+
+.ruleItem:hover {
+  border-color: #cbd5e1;
+}
+
+.ruleIconWrap {
+  width: 28px;
+  height: 28px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ruleContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ruleContent strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ruleContent p {
+  margin: 0;
+  font-size: 12.5px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+/* Action Area */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 24px;
+}
+
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #1e3a8a;
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  color: #ffffff;
+  padding: 12px 28px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+  transition: all 0.15s ease;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  box-shadow: 0 6px 16px rgba(30, 58, 138, 0.28);
+  transform: translateY(-1px);
+}
+
+.primaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.secondaryButton:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* Banners */
+.alertBanner {
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alertBannerHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.alertIcon {
+  font-size: 16px;
+}
+
+.alertIconSuccess {
+  font-size: 18px;
+  color: #16a34a;
+}
+
+.alertIconWarning {
+  font-size: 16px;
+  color: #d97706;
+}
+
+.alertIconNotice {
+  font-size: 16px;
+  color: #2563eb;
+}
+
+.alertText {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.warningBanner {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+.dangerBanner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.successBanner {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.noticeBanner {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+
+.bannerBtnGroup {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.btnPrimaryBanner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #1e40af;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btnSecondaryBanner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btnBannerAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+
+.btnSpinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

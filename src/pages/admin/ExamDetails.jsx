@@ -80,7 +80,7 @@ function ExamDetails() {
         </div>
 
         <div className={styles.buttons}>
-          <Link to="/admin/edit-exam">
+          <Link to="/admin/edit-exam" className="premium-btn">
             Edit Exam
           </Link>
         </div>

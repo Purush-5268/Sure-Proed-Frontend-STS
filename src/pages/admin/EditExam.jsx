@@ -135,7 +135,7 @@ function EditExam() {
           />
 
           <div className={styles.buttons}>
-            <button type="submit">
+            <button type="submit" className="premium-btn">
               Update Exam
             </button>
           </div>

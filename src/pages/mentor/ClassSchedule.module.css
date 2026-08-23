@@ -82,7 +82,7 @@
   padding: 0.75rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md, 0.375rem);
-  background: var(--bg-primary);
+  background: var(--bg-nested);
   color: var(--text-primary);
   font-size: 0.875rem;
   width: 100%;

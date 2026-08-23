@@ -101,23 +101,23 @@ function Settings() {
             <form onSubmit={handleSubmit} className={styles.form}>
               <div className={styles.formGroup}>
                 <label>Current Password</label>
-                <input type="password" name="current_password" value={form.current_password} onChange={handleChange} className={styles.input} />
+                <input type="password" name="current_password" value={form.current_password} onChange={handleChange} className="premium-input" />
               </div>
               
               <div className={styles.formGroup}>
                 <label>New Password</label>
-                <input type="password" name="new_password" value={form.new_password} onChange={handleChange} className={styles.input} />
+                <input type="password" name="new_password" value={form.new_password} onChange={handleChange} className="premium-input" />
               </div>
               
               <div className={styles.formGroup}>
                 <label>Confirm Password</label>
-                <input type="password" name="confirm_password" value={form.confirm_password} onChange={handleChange} className={styles.input} />
+                <input type="password" name="confirm_password" value={form.confirm_password} onChange={handleChange} className="premium-input" />
               </div>
 
               {message && <div className={styles.successMessage}>{message}</div>}
               {error && <div className={styles.errorMessage}>{error}</div>}
 
-              <button type="submit" disabled={loading} className={styles.primaryButton}>
+              <button type="submit" disabled={loading} className="premium-btn">
                 {loading ? "Updating..." : "Update Password"}
               </button>
             </form>

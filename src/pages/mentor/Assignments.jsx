@@ -20,7 +20,7 @@ function Assignments() {
     const loadAssignments = async () => {
       try {
         const response = await apiClient.get(API_ENDPOINTS.ASSIGNMENTS.BASE);
-        if (isMounted) setAssignments(Array.isArray(response.data) ? response.data : []);
+        if (isMounted) setAssignments(Array.isArray(response.data?.results) ? response.data.results : (Array.isArray(response.data) ? response.data : []));
       } catch (err) {
         console.error("Failed to load mentor assignments:", err);
         if (isMounted) setAssignments([]);
@@ -93,7 +93,7 @@ function Assignments() {
                     <h3 className={styles.title}>{item.title}</h3>
                     {getStatusBadge(item.status)}
                   </div>
-                  <span className={styles.cohortTag}>{item.cohort?.name || item.cohort || "All Cohorts"}</span>
+                  <span className={styles.cohortTag}>{item.cohort_name || item.cohort || "All Cohorts"}</span>
                 </div>
                 
                 <div className={styles.cardBody}>
@@ -103,11 +103,11 @@ function Assignments() {
                   </div>
                   <div className={styles.statInfo}>
                     <FiUsers className={styles.icon} />
-                    <span>45 Submissions</span>
+                    <span>{item.submission_count || 0} Submissions</span>
                   </div>
                   <div className={styles.statInfo}>
                     <FiCheckCircle className={styles.icon} />
-                    <span>20 Graded</span>
+                    <span>{item.evaluated_count || 0} Graded</span>
                   </div>
                 </div>
 

@@ -155,7 +155,6 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./AddExam.module.css";
-import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function AddExam() {
   const navigate = useNavigate();
@@ -171,6 +170,10 @@ function AddExam() {
     pass_percentage: "60",
     status: "PENDING",
     total_marks: "100",
+    proctoring_enabled: true,
+    proctoring_required: true,
+    proctoring_room_count: "4",
+    proctoring_capacity_per_room: "50",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -194,8 +197,8 @@ function AddExam() {
   }, []);
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = event.target;
+    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
 
   const handleSubmit = async (event) => {
@@ -218,6 +221,10 @@ function AddExam() {
         pass_percentage: Number(form.pass_percentage) || 60,
         status: form.status,
         total_marks: Number(form.total_marks) || 100,
+        proctoring_enabled: form.proctoring_enabled,
+        proctoring_required: form.proctoring_required,
+        proctoring_room_count: Number(form.proctoring_room_count) || 4,
+        proctoring_capacity_per_room: Number(form.proctoring_capacity_per_room) || 50,
       };
 
       await apiClient.post(API_ENDPOINTS.EXAMS.BASE, payload);
@@ -243,7 +250,7 @@ function AddExam() {
       <div className="premium-card">
         <div className={styles.header}>
           <h1>Add New Exam</h1>
-          <Link to="/admin/exams">Back</Link>
+          <Link to="/admin/exams" className="premium-btn">Back</Link>
         </div>
 
         {error ? <p style={{ color: "#b91c1c", fontWeight: "bold" }}>{error}</p> : null}
@@ -297,8 +304,26 @@ function AddExam() {
             </select>
           </div>
 
+          <div className={styles.group}>
+            <label>Proctoring Rooms</label>
+            <input type="number" name="proctoring_room_count" value={form.proctoring_room_count} onChange={handleChange} min="1" max="26" />
+          </div>
+
+          <div className={styles.group}>
+            <label>Planning Limit per Room</label>
+            <input type="number" name="proctoring_capacity_per_room" value={form.proctoring_capacity_per_room} onChange={handleChange} min="1" max="500" />
+          </div>
+
+          <div className={styles.group}>
+            <label><input type="checkbox" name="proctoring_enabled" checked={form.proctoring_enabled} onChange={handleChange} /> Embedded Jitsi enabled</label>
+          </div>
+
+          <div className={styles.group}>
+            <label><input type="checkbox" name="proctoring_required" checked={form.proctoring_required} onChange={handleChange} /> Live connection required</label>
+          </div>
+
           <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-            <button type="submit" disabled={loading} style={{ cursor: loading ? "not-allowed" : "pointer" }}>
+            <button type="submit" disabled={loading} className="premium-btn" style={{ cursor: loading ? "not-allowed" : "pointer" }}>
               {loading ? "Saving..." : "Add Exam"}
             </button>
             <Link to="/admin/exams" style={{ padding: "12px 24px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold", display: "flex", alignItems: "center" }}>

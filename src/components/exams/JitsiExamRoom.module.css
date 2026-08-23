@@ -1,0 +1,89 @@
+.card {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  width: 250px;
+  height: 205px;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 2px solid #dc2626;
+  border-radius: 10px;
+  background: #0f172a;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.32);
+}
+
+.proctorCard {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  height: 620px;
+  border-color: #2563eb;
+}
+
+.header {
+  min-height: 32px;
+  padding: 6px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #fff;
+  background: #111827;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.header span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.header strong { font-size: 9px; letter-spacing: .05em; }
+.connected { color: #4ade80; }
+.connecting { color: #facc15; }
+.disconnected, .error { color: #fca5a5; }
+
+.frame {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: #020617;
+}
+
+.frame iframe { display: block; }
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #cbd5e1;
+  font-size: 12px;
+}
+
+.error {
+  padding: 6px 8px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  color: #fee2e2;
+  background: #991b1b;
+  font-size: 10px;
+}
+
+@media (max-width: 760px) {
+  .card {
+    left: 8px;
+    bottom: 8px;
+    width: 190px;
+    height: 155px;
+  }
+
+  .proctorCard {
+    width: 100%;
+    height: 480px;
+  }
+}

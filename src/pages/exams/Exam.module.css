@@ -1,95 +1,1128 @@
-.examPage {
-  min-height: 100vh;
-  background: transparent;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px 20px;
-}
+/* =========================================================
+   SURE TRUST ONLINE EXAMINATION PORTAL - NTA / JEE REFERENCE STYLE
+   ========================================================= */
 
-.examCard {
-  width: 100%;
-  max-width: 800px;
-  background: var(--bg-surface);
-  border-radius: 18px;
-  padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-}
-
-.topBar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-}
-
-.topBar h2 {
-  color: #1e3a8a;
-  margin: 0;
-}
-
-.timer {
-  background: #2563eb;
-  color: #ffffff;
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-weight: 700;
-}
-
-.questionSection h3 {
-  margin-bottom: 25px;
-  color: var(--text-primary);
-}
-
-.options {
+.examContainer {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  height: 100vh;
+  width: 100vw;
+  background-color: #f8fafc;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #0f172a;
+  overflow: hidden;
+  user-select: none;
 }
 
-.option {
+/* ================= 1. TOP HEADER ================= */
+.topNavbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border-bottom: 2px solid #e2e8f0;
+  padding: 6px 20px;
+  height: 62px;
+  flex-shrink: 0;
+  z-index: 50;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.navLeft {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px;
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: 0.3s;
 }
 
-.option:hover {
-  background: #eff6ff;
-  border-color: #2563eb;
-}
-
-.option input {
-  cursor: pointer;
-}
-
-.buttons {
-  margin-top: 35px;
+.navCenter {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
 
-.buttons button {
-  padding: 12px 26px;
-  border: none;
-  border-radius: 8px;
-  background: #2563eb;
+.courseTitleBadge {
+  background: #1e40af;
   color: #ffffff;
-  font-size: 15px;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  max-width: 440px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 1px 3px rgba(30, 64, 175, 0.2);
+}
+
+.difficultyPill {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.diffEasy {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.diffMedium {
+  background: #fef9c3;
+  color: #854d0e;
+  border: 1px solid #fde047;
+}
+
+.diffHard {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.candidateCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  padding: 4px 12px;
+  border-radius: 8px;
+}
+
+/* LIVE PROCTORING WEBCAM FEED IN TOP NAVBAR */
+.proctorFeedCard {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  padding: 3px 8px;
+  border-radius: 8px;
+}
+
+.proctorVideoWrap {
+  position: relative;
+  width: 42px;
+  height: 32px;
+  background: #0f172a;
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.proctorVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.proctorLiveDot {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  background: #ef4444;
+  border-radius: 50%;
+  animation: proctorPulse 1s infinite;
+}
+
+@keyframes proctorPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+}
+
+.proctorMeta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.proctorLiveBadge {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #15803d;
+  letter-spacing: 0.04em;
+}
+
+.proctorSubText {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.02em;
+}
+
+.candidateAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1e40af;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.candidateMeta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.candidateName {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.candidateId {
+  font-size: 11px;
+  color: #64748b;
   font-weight: 600;
+}
+
+.timerBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0284c7;
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  box-shadow: 0 2px 4px rgba(2, 132, 199, 0.25);
+}
+
+.timerWarning {
+  background: #dc2626 !important;
+  animation: pulseAlert 1.2s infinite;
+}
+
+@keyframes pulseAlert {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.75;
+  }
+}
+
+.violationPill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #be123c;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+/* ================= 2. SECOND INFO BAR ================= */
+.infoBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f1f5f9;
+  border-bottom: 1.5px solid #cbd5e1;
+  padding: 6px 20px;
+  font-size: 13px;
+  color: #334155;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.infoLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.infoSectionBadge {
+  background: #2563eb;
+  color: white;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.infoRight {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.marksTag {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* ================= 3. MAIN TWO-COLUMN LAYOUT ================= */
+.mainLayout {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 100px);
+  overflow: hidden;
+  padding: 10px 14px;
+  gap: 12px;
+  background: #f1f5f9;
+}
+
+/* LEFT / QUESTION AREA (75–80%) */
+.questionArea {
+  flex: 76;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.questionScrollable {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 26px;
+  display: flex;
+  flex-direction: column;
+  transition: font-size 0.15s ease;
+}
+
+.questionTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+}
+
+.questionHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.questionNumberHeader {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.questionTypeText {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* ZOOM CONTROLS FOR QUESTION CONTENT */
+.zoomControls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 2px 6px;
+}
+
+.zoomBtn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #334155;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.12s ease;
 }
 
-.buttons button:hover:not(:disabled) {
-  background: #1d4ed8;
+.zoomBtn:hover:not(:disabled) {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
 }
 
-.buttons button:disabled {
-  background: #9ca3af;
+.zoomBtn:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
+}
+
+.zoomLabel {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #64748b;
+  min-width: 36px;
+  text-align: center;
+}
+
+.questionBody {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #0f172a;
+  margin-bottom: 20px;
+  white-space: pre-line;
+}
+
+.codeBox {
+  background: #0f172a;
+  color: #f8fafc;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-size: 14.5px;
+  padding: 16px 20px;
+  border-radius: 6px;
+  margin: 14px 0 22px 0;
+  overflow-x: auto;
+  border: 1px solid #334155;
+  line-height: 1.55;
+}
+
+/* MCQ OPTIONS */
+.optionsContainer {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  margin-bottom: 20px !important;
+  width: 100% !important;
+}
+
+.optionCard {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 14px 18px !important;
+  min-height: 55px !important;
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.optionCard:hover {
+  background: #f8fafc !important;
+  border-color: #94a3b8 !important;
+}
+
+.optionCardSelected {
+  background: #eff6ff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 1.5px #2563eb !important;
+}
+
+.optionCircle {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  border: 2px solid #94a3b8 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: #475569 !important;
+  background: #ffffff !important;
+  flex-shrink: 0 !important;
+  transition: all 0.15s ease !important;
+}
+
+.optionCircleActive {
+  border-color: #2563eb !important;
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+
+.optionLabelText {
+  font-size: 15px;
+  color: #1e293b;
+  font-weight: 500;
+  line-height: 1.45;
+  flex: 1;
+}
+
+/* BOTTOM ACTION BAR */
+.bottomActionBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  border-top: 1.5px solid #cbd5e1;
+  padding: 10px 20px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.actionGroupLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.actionGroupRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btnSaveNext {
+  background: #16a34a;
+  color: #ffffff;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 5px;
+  font-size: 13.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnSaveNext:hover {
+  background: #15803d;
+}
+
+.btnSaveReview {
+  background: #7e22ce;
+  color: #ffffff;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnSaveReview:hover {
+  background: #6b21a8;
+}
+
+.btnMarkReview {
+  background: #ea580c;
+  color: #ffffff;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnMarkReview:hover {
+  background: #c2410c;
+}
+
+.btnClear {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #475569;
+  padding: 9px 16px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnClear:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.btnClear:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btnPrevious {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #334155;
+  padding: 9px 18px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnPrevious:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.btnPrevious:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ================= 4. RIGHT SIDEBAR: QUESTION NAVIGATOR ================= */
+.sidebarNavigator {
+  flex: 26 !important;
+  min-width: 320px !important;
+  max-width: 360px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+}
+
+.sidebarTitle {
+  padding: 10px 14px;
+  font-size: 13.5px;
+  font-weight: 900;
+  color: #1e40af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #f8fafc;
+  border-bottom: 1.5px solid #e2e8f0;
+}
+
+/* SUMMARY STATUS BOXES (MATCHING NTA / JEE REFERENCE) */
+.summaryBox {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #f8fafc;
+  border-bottom: 1.5px solid #e2e8f0;
+}
+
+.summaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.summaryItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.summaryBadge {
+  min-width: 24px;
+  height: 22px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.badgeNotVisited {
+  background: linear-gradient(180deg, #ffffff 0%, #f1f3f5 50%, #e2e6ea 100%);
+  border: 1.5px solid #94a3b8;
+  color: #334155;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.badgeNotAnswered {
+  background: linear-gradient(135deg, #c2410c 0%, #ea580c 25%, #f97316 100%);
+  color: #ffffff;
+  border-radius: 3px;
+  clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
+}
+
+.badgeAnswered {
+  background: linear-gradient(135deg, #15803d 0%, #22c55e 25%, #16a34a 100%);
+  color: #ffffff;
+  border-radius: 3px;
+  clip-path: polygon(0% 0%, 100% 15%, 100% 85%, 0% 100%);
+}
+
+.badgeMarked {
+  background: linear-gradient(135deg, #7e22ce 0%, #9333ea 50%, #a855f7 100%);
+  color: #ffffff;
+  border-radius: 50%;
+}
+
+.badgeAnsMarked {
+  background: linear-gradient(135deg, #6b21a8 0%, #7e22ce 100%);
+  color: #ffffff;
+  border-radius: 50%;
+  position: relative;
+}
+
+.badgeAnsMarked::after {
+  content: "✓";
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  font-size: 8px;
+  color: #a3e635;
+  font-weight: 900;
+}
+
+/* QUESTION TILES GRID CONTAINER - compact eight-column question palette */
+.tilesSection {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 10px 8px !important;
+  background: #ffffff !important;
+}
+
+.tilesGrid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-content: start !important;
+  gap: 5px 4px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.tilesGrid > button {
+  flex: 0 0 calc((100% - 28px) / 8) !important;
+  width: calc((100% - 28px) / 8) !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.navTile {
+  height: 34px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.12s ease !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  font-variant-numeric: tabular-nums !important;
+  user-select: none !important;
+  outline: none !important;
+}
+
+.navTile:hover {
+  transform: scale(1.08) !important;
+  z-index: 5 !important;
+}
+
+/* 1. NOT VISITED (Light grey rounded 3D button - matching 04-08 in pic 1) */
+.tileNotVisited {
+  background: linear-gradient(180deg, #ffffff 0%, #f1f3f5 50%, #e2e6ea 100%) !important;
+  border: 1.5px solid #94a3b8 !important;
+  border-radius: 4px !important;
+  color: #334155 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.tileNotVisited:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #e8ecf0 100%) !important;
+  border-color: #64748b !important;
+}
+
+/* 2. ANSWERED (Green polygon/trapezoid - matching 01, 02 in pic 1) */
+.tileAnswered {
+  background: linear-gradient(135deg, #15803d 0%, #22c55e 25%, #16a34a 100%) !important;
+  border: 1.5px solid #15803d !important;
+  border-radius: 4px !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(21, 128, 61, 0.35) !important;
+}
+
+.tileAnswered:hover {
+  box-shadow: 0 2px 4px rgba(21, 128, 61, 0.5) !important;
+  filter: brightness(1.08) !important;
+}
+
+/* 3. NOT ANSWERED (Orange polygon/trapezoid - NTA standard) */
+.tileNotAnswered {
+  background: linear-gradient(135deg, #c2410c 0%, #ea580c 25%, #f97316 100%) !important;
+  border: 1.5px solid #c2410c !important;
+  border-radius: 4px !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(194, 65, 12, 0.35) !important;
+}
+
+.tileNotAnswered:hover {
+  box-shadow: 0 2px 4px rgba(194, 65, 12, 0.5) !important;
+  filter: brightness(1.08) !important;
+}
+
+/* 4. MARKED FOR REVIEW (Purple circle) */
+.tileMarked {
+  background: linear-gradient(135deg, #7e22ce 0%, #9333ea 50%, #a855f7 100%) !important;
+  border: 1.5px solid #6b21a8 !important;
+  border-radius: 4px !important;
+  color: #ffffff !important;
+  box-shadow: 0 1.5px 3px rgba(126, 34, 206, 0.4) !important;
+}
+
+.tileMarked:hover {
+  box-shadow: 0 2px 5px rgba(126, 34, 206, 0.6) !important;
+  filter: brightness(1.08) !important;
+}
+
+/* 5. ANSWERED & MARKED FOR REVIEW (Purple circle with green badge) */
+.tileAnsMarked {
+  background: linear-gradient(135deg, #6b21a8 0%, #7e22ce 100%) !important;
+  border: 1.5px solid #581c87 !important;
+  border-radius: 4px !important;
+  color: #ffffff !important;
+  position: relative !important;
+  box-shadow: 0 1.5px 3px rgba(107, 33, 168, 0.4) !important;
+}
+
+.tileAnsMarked::after {
+  content: "✓" !important;
+  position: absolute !important;
+  bottom: -1px !important;
+  right: -1px !important;
+  width: 13px !important;
+  height: 13px !important;
+  background: #16a34a !important;
+  border: 1px solid #ffffff !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  line-height: 1 !important;
+}
+
+/* CURRENT ACTIVE QUESTION HIGHLIGHT (matching 03 in pic 1) */
+.navTileCurrent {
+  box-shadow: 0 0 0 2px #0f172a !important;
+  border-color: #0f172a !important;
+  z-index: 10 !important;
+}
+
+.tileAnswered.navTileCurrent {
+  box-shadow: 0 0 0 2px #0f172a !important;
+}
+
+.tileNotAnswered.navTileCurrent {
+  box-shadow: 0 0 0 2px #0f172a !important;
+}
+
+/* SIDEBAR FOOTER ACTION BUTTONS */
+.sidebarFooter {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #f8fafc;
+  border-top: 1.5px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.auxRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.btnAux {
+  padding: 7px 10px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.btnAux:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.btnFinalSubmit {
+  width: 100%;
+  padding: 10px;
+  background: #16a34a;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(22, 163, 74, 0.25);
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.btnFinalSubmit:hover:not(:disabled) {
+  background: #15803d;
+}
+
+.btnFinalSubmit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ================= 5. MODALS ================= */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modalCard {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 24px 28px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+  animation: modalPop 0.18s ease-out;
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modalHeading {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 10px 0;
+}
+
+.modalSummaryTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  font-size: 13.5px;
+}
+
+.modalSummaryTable td {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.modalSummaryTable tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.modalBtnGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+/* WATERMARK OVERLAY */
+.watermarkContainer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  opacity: 0.055;
+  user-select: none;
+}
+
+.watermarkRow {
+  display: flex;
+  justify-content: space-around;
+  gap: 40px;
+  transform: rotate(-18deg);
+  white-space: nowrap;
+}
+
+.watermarkItem {
+  font-size: 17px !important;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* AUTOSAVE BADGES */
+.autosaveBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.autosaveSaved {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.autosaveSaving {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+
+.autosaveOffline {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+.autosaveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.dotSaved {
+  background: #22c55e;
+}
+
+.dotSaving {
+  background: #3b82f6;
+  animation: pulseAlert 0.8s infinite;
+}
+
+.dotOffline {
+  background: #f59e0b;
+}
+
+/* NETWORK PILL */
+.networkPill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.networkOnline {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.networkOffline {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* PROCTOR NOTIFICATION BANNER */
+.proctorNotice {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #9f1239;
+  padding: 8px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  animation: modalPop 0.2s ease-out;
+}
+
+.proctorNotice button {
+  background: #be123c;
+  color: #ffffff;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .mainLayout {
+    flex-direction: column;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .sidebarNavigator {
+    max-width: 100%;
+    min-width: 100%;
+  }
+
+  .topNavbar {
+    padding: 6px 10px;
+  }
+
+  .courseTitleBadge {
+    max-width: 180px;
+  }
 }

@@ -145,7 +145,7 @@ function AttendanceHistory() {
                     <span style={{ fontSize: "12px", color: "#ef4444", fontWeight: "bold" }}>
                       ❌ Failed
                     </span>
-                  ) : (!record.conducted || record.conducted === 'false' || record.conducted === false) ? (
+                  ) : (record.conducted || record.conducted === 'true' || String(record.status).toUpperCase() === 'COMPLETED') ? (
                     <button
                       onClick={() => handleDownloadExcel(record.id, record.title, record.class_date)}
                       style={{

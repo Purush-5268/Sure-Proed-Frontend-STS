@@ -374,7 +374,7 @@ function Exams() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
+      <div className="premium-card">
         <div className={styles.header}>
           <div>
             <h1 style={{ fontSize: "1.65rem", fontWeight: 700, color: "var(--text-primary)" }}>
@@ -385,21 +385,13 @@ function Exams() {
             </p>
           </div>
 
-          <Link to="/admin/reports" className={styles.addButton}>
+          <Link to="/admin/reports" className="premium-btn">
             📊 View Full Reports & Analytics
           </Link>
         </div>
 
         {/* Admin Configuration Settings Panel */}
-        <div
-          style={{
-            background: "var(--bg-nested)",
-            border: "1px solid var(--border-color)",
-            borderRadius: "10px",
-            padding: "20px",
-            marginBottom: "24px",
-          }}
-        >
+        <div className="premium-card" style={{ marginBottom: "24px" }}>
           <h3 style={{ margin: 0, fontSize: "1.05rem", color: "var(--text-primary)", fontWeight: 600 }}>
             ⚙️ Exam Parameter Configuration
           </h3>
@@ -492,7 +484,8 @@ function Exams() {
               <button
                 type="submit"
                 disabled={savingConfig}
-                style={{ width: "100%", background: "var(--primary-color)", color: "var(--btn-text, #ffffff)", padding: "9px 14px", border: "none", borderRadius: "6px", fontWeight: 600, cursor: "pointer", fontSize: "0.85rem" }}
+                className="premium-btn"
+                style={{ width: "100%" }}
               >
                 {savingConfig ? "Saving..." : "Save Settings"}
               </button>
@@ -534,8 +527,8 @@ function Exams() {
             <p style={{ margin: 0, color: "var(--text-secondary)", fontWeight: 500 }}>No matching student exam sessions found.</p>
           </div>
         ) : (
-          <div className={styles.tableWrapper}>
-            <table className={styles.table}>
+          <div className="premium-table-container">
+            <table className="premium-table">
               <thead>
                 <tr>
                   <th style={{ minWidth: "240px" }}>Candidate Profile</th>

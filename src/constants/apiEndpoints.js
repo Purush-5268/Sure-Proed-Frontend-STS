@@ -103,17 +103,43 @@ export const API_ENDPOINTS = {
   },
 
   // Exams & Questions
+  // Assignments & Submissions
   EXAMS: {
     BASE: "/api/exams/",
     BY_ID: (id) => `/api/exams/${id}/`,
     SUBMIT: (id) => `/api/exams/${id}/submit/`,
+    START_INTERNAL: (id) => `/api/exams/${id}/start-internal/`,
+    AUTOSAVE: (id) => `/api/exams/${id}/autosave/`,
+    CONFIGURE_PROCTORING: (id) => `/api/exams/${id}/configure-proctoring/`,
+    PROCTORING_ROOMS: (id) => `/api/exams/${id}/proctoring-rooms/`,
+    ASSIGN_PROCTOR: (id) => `/api/exams/${id}/assign-proctor/`,
+    RESET: (id) => `/api/exams/${id}/reset/`,
+  },
+  MODULE_TESTS: {
+    BASE: "/api/module-tests/",
+    BY_ID: (id) => `/api/module-tests/${id}/`,
+    SUBMISSIONS: "/api/module-test-submissions/",
+    SUBMISSION_BY_ID: (id) => `/api/module-test-submissions/${id}/`,
+    START: (id) => `/api/module-tests/${id}/start/`,
+    AUTOSAVE: (id) => `/api/module-tests/${id}/autosave/`,
+    SUBMIT: (id) => `/api/module-tests/${id}/submit/`,
+    CONFIGURE_PROCTORING: (id) => `/api/module-tests/${id}/configure-proctoring/`,
+    PROCTORING_ROOMS: (id) => `/api/module-tests/${id}/proctoring-rooms/`,
+    ASSIGN_PROCTOR: (id) => `/api/module-tests/${id}/assign-proctor/`,
+  },
+  QUESTION_BANKS: {
+    BASE: "/api/question-banks/",
+    BY_ID: (id) => `/api/question-banks/${id}/`,
+    PAPER: (id, setCode = "A") => `/api/question-banks/${id}/paper/${setCode}/`,
+    GENERATE: "/api/question-banks/generate/",
+    PUBLISH: (id) => `/api/question-banks/${id}/publish/`,
+    REGENERATE: (id) => `/api/question-banks/${id}/regenerate/`,
+    CLOSE: (id) => `/api/question-banks/${id}/close/`,
   },
   QUESTIONS: {
     BASE: "/api/questions/",
     BY_ID: (id) => `/api/questions/${id}/`,
   },
-
-  // Assignments & Submissions
   ASSIGNMENTS: {
     BASE: "/api/assignments/",
     BY_ID: (id) => `/api/assignments/${id}/`,
