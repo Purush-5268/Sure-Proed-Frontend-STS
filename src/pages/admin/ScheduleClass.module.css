@@ -17,6 +17,7 @@
     color: var(--text-primary) !important;
     border: 1px solid var(--border-color) !important;
     border-radius: 8px !important;
+    color-scheme: dark light;
 }
 
 /* The elegant highlight effect when selecting a box */

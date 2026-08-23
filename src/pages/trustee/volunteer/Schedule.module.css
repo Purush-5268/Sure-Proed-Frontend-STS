@@ -127,6 +127,18 @@
   border-radius: var(--radius-sm);
 }
 
+.formInput {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  color-scheme: dark light;
+}
+
 .emailTag {
   background: var(--bg-surface);
   border: 1px solid #cbd5e1;

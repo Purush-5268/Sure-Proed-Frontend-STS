@@ -80,7 +80,8 @@ function VolunteerSchedule() {
         await attendanceService.scheduleSession(payload);
       } else if (sessionType === "LST") {
         const payload = {
-          batch_number: lstBatchNumber || null,
+          lst_batch: lstBatchNumber || "GENERAL",
+          title: "Life Skills Training",
           class_date: start.toISOString().split("T")[0],
           start_time: start.toTimeString().split(" ")[0],
           end_time: end.toTimeString().split(" ")[0],

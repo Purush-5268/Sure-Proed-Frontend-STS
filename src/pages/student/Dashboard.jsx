@@ -109,8 +109,9 @@ function Dashboard() {
             if (isMounted) setAssignmentStats({ completed, pending: pending > 0 ? pending : 0, overdue: 0 });
           });
 
-          examService.getExams().then(exRes => {
-            const exams = exRes.results || exRes || [];
+          apiClient.get(API_ENDPOINTS.EXAMS.BASE).then(exRes => {
+            const rawData = exRes.data || exRes;
+            const exams = rawData.results || rawData || [];
             if (isMounted) setExamStats({ completed: exams.filter(e => e.status === 'COMPLETED').length, upcoming: exams.filter(e => e.status !== 'COMPLETED').length });
           }).catch((err) => {
             if (err.response?.status === 403) setIsSuspended(true);
