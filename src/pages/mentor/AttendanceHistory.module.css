@@ -53,3 +53,95 @@
 .table tr:hover {
   background: var(--bg-main);
 }
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-radius: var(--radius-lg, 12px);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.closeButton:hover {
+  color: var(--text-primary);
+}
+
+.modalBody {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.absenteeList {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0 0;
+}
+
+.absenteeItem {
+  padding: 8px 12px;
+  background: var(--bg-nested);
+  margin-bottom: 8px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  border-left: 3px solid #ef4444;
+}
+
+.statsRow {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.statCard {
+  flex: 1;
+  background: var(--bg-nested);
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.statCard.absent {
+  border-bottom: 3px solid #ef4444;
+}
+
+.statCard.present {
+  border-bottom: 3px solid #10b981;
+}

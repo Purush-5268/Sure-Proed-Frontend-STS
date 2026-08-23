@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
   STUDENTS: {
     BASE: "/api/students/",
     BY_ID: (id) => `/api/students/${id}/`,
+    DOWNLOAD_RESUME: (id) => `/api/students/${id}/download-resume/`,
     BULK_VERIFY: "/api/students/bulk_verify/",
     VERIFY: (id) => `/api/students/${id}/verify/`,
     STATISTICS: "/api/students/statistics/",
@@ -40,8 +41,14 @@ export const API_ENDPOINTS = {
   // Applications
   APPLICATIONS: {
     BASE: "/api/applications/",
+    CURRENT_JOURNEY: "/api/applications/current-journey/",
     BY_ID: (id) => `/api/applications/${id}/`,
     ASSIGN_COHORT: (id) => `/api/applications/${id}/assign-cohort/`,
+    TRANSFER_COHORT: (id) => `/api/applications/${id}/transfer-cohort/`,
+    TRANSFER_COURSE_COHORT: (id) => `/api/applications/${id}/transfer-course-cohort/`,
+    REPAIR_STATE: (id) => `/api/applications/${id}/repair-state/`,
+    ROLE_VERIFICATION: (id) => `/api/applications/${id}/role-verification/`,
+    JOURNEY: (id) => `/api/applications/${id}/journey/`,
     CHECK_COMPLETION: (id) => `/api/applications/${id}/check-completion/`,
     REVOKE_ACCESS: (id) => `/api/applications/${id}/revoke_access/`,
     RESTORE_ACCESS: (id) => `/api/applications/${id}/restore_access/`,
@@ -76,6 +83,11 @@ export const API_ENDPOINTS = {
     BASE: "/api/pre-screening-interview/",
     BY_ID: (id) => `/api/pre-screening-interview/${id}/`,
     UPDATE_STATUS: (id) => `/api/pre-screening-interview/${id}/update-status/`,
+  },
+  PRE_SCREENINGS: {
+    BASE: "/api/pre-screenings/",
+    BY_ID: (id) => `/api/pre-screenings/${id}/`,
+    UPDATE_STATUS: (id) => `/api/pre-screenings/${id}/update-status/`,
   },
 
   // Cohorts
@@ -143,10 +155,12 @@ export const API_ENDPOINTS = {
   ASSIGNMENTS: {
     BASE: "/api/assignments/",
     BY_ID: (id) => `/api/assignments/${id}/`,
+    SUBMISSIONS: (id) => `/api/assignments/${id}/submissions/`,
   },
   SUBMISSIONS: {
     BASE: "/api/submissions/",
     BY_ID: (id) => `/api/submissions/${id}/`,
+    REQUEST_AUTOGRADE: (id) => `/api/submissions/${id}/request-autograde/`,
   },
 
   // Attendance
@@ -167,7 +181,10 @@ export const API_ENDPOINTS = {
   CERTIFICATES: {
     BASE: "/api/certificates/",
     BY_ID: (id) => `/api/certificates/${id}/`,
+    DOWNLOAD: (id) => `/api/certificates/${id}/download/`,
+    METADATA: "/api/certificates/metadata/",
     VERIFY: "/api/certificates/verify/",
+    VERIFICATION_PROFILE: "/api/certificates/verification-profile/",
   },
 
   // Companies

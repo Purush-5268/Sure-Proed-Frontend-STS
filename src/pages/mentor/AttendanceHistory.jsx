@@ -8,6 +8,8 @@ import SkeletonLoader from "../../components/common/SkeletonLoader";
 function AttendanceHistory() {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [viewRecord, setViewRecord] = useState(null);
+
   const handleDownloadExcel = async (sessionId, sessionTitle, sessionDate) => {
     try {
       const response = await attendanceService.downloadExcel(sessionId);
@@ -146,17 +148,30 @@ function AttendanceHistory() {
                       ❌ Failed
                     </span>
                   ) : (record.conducted || record.conducted === 'true' || String(record.status).toUpperCase() === 'COMPLETED') ? (
-                    <button
-                      onClick={() => handleDownloadExcel(record.id, record.title, record.class_date)}
-                      style={{
-                        background: "#10b981", color: "white", border: "none",
-                        padding: "8px 14px", borderRadius: "6px", cursor: "pointer",
-                        fontWeight: "bold", fontSize: "12px", display: "inline-flex",
-                        alignItems: "center", justifyContent: "center", transition: "all 0.2s ease"
-                      }}
-                    >
-                      ⬇️ Excel
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={() => setViewRecord(record)}
+                        style={{
+                          background: "#3b82f6", color: "white", border: "none",
+                          padding: "8px 14px", borderRadius: "6px", cursor: "pointer",
+                          fontWeight: "bold", fontSize: "12px", display: "inline-flex",
+                          alignItems: "center", justifyContent: "center", transition: "all 0.2s ease"
+                        }}
+                      >
+                        👁️ View
+                      </button>
+                      <button
+                        onClick={() => handleDownloadExcel(record.id, record.title, record.class_date)}
+                        style={{
+                          background: "#10b981", color: "white", border: "none",
+                          padding: "8px 14px", borderRadius: "6px", cursor: "pointer",
+                          fontWeight: "bold", fontSize: "12px", display: "inline-flex",
+                          alignItems: "center", justifyContent: "center", transition: "all 0.2s ease"
+                        }}
+                      >
+                        ⬇️ Excel
+                      </button>
+                    </div>
                   ) : (
                     <span style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: "bold" }}>
                       ⏳ Ongoing
@@ -167,6 +182,59 @@ function AttendanceHistory() {
             ))}
           </tbody>
         </table>
+      )}
+
+      {viewRecord && (
+        <div className={styles.modalOverlay} onClick={() => setViewRecord(null)}>
+          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>Session Attendance</h2>
+              <button className={styles.closeButton} onClick={() => setViewRecord(null)}>✕</button>
+            </div>
+            <div className={styles.modalBody}>
+              {(() => {
+                const expected = viewRecord.google_meet_attendance_data?.expected_students || {};
+                const allStudents = Object.values(expected);
+                const absentStudents = allStudents.filter(s => s.status === "ABSENT");
+                const presentStudents = allStudents.filter(s => s.status === "PRESENT");
+
+                if (allStudents.length === 0) {
+                  return <p>Detailed absentee list is not available for this session yet.</p>;
+                }
+
+                return (
+                  <>
+                    <div className={styles.statsRow}>
+                      <div className={`${styles.statCard} ${styles.present}`}>
+                        <h3>{presentStudents.length}</h3>
+                        <span>Present</span>
+                      </div>
+                      <div className={`${styles.statCard} ${styles.absent}`}>
+                        <h3>{absentStudents.length}</h3>
+                        <span>Absent</span>
+                      </div>
+                    </div>
+                    
+                    {absentStudents.length > 0 ? (
+                      <>
+                        <h4 style={{ margin: '0 0 10px 0', fontSize: '1rem' }}>Absent Students</h4>
+                        <ul className={styles.absenteeList}>
+                          {absentStudents.map((s, i) => (
+                            <li key={i} className={styles.absenteeItem}>
+                              {s.first_name || s.email}
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : (
+                      <p style={{ textAlign: 'center', color: '#10b981', fontWeight: 'bold' }}>Everyone was present! 🎉</p>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

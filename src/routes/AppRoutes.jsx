@@ -31,7 +31,7 @@ function ThemeEnforcer() {
 
   useEffect(() => {
     const publicPaths = ['/', '/login', '/signup', '/setup-password', '/forgot-password', '/reset-password', '/email-verification'];
-    const isPublic = publicPaths.includes(location.pathname) || location.pathname.startsWith('/verify-offer-letter');
+    const isPublic = publicPaths.includes(location.pathname) || location.pathname.startsWith('/verify-offer-letter') || location.pathname.startsWith('/certificate/verify');
 
     if (isPublic) {
       document.documentElement.setAttribute('data-theme', 'light');
@@ -129,7 +129,6 @@ import RejectApplication from "../pages/admin/RejectApplication";
 import Reports from "../pages/admin/Reports";
 import StudentReport from "../pages/admin/StudentReport";
 import CourseReport from "../pages/admin/CourseReport";
-import ExamReport from "../pages/admin/ExamReport";
 import RequestsSupport from "../pages/admin/RequestsSupport";
 
 /* Cohort Management */
@@ -227,6 +226,7 @@ function AppRoutes() {
             <Route path="/email-verification" element={<EmailVerification />} />
             <Route path="/setup-password" element={<SetupPassword />} />
             <Route path="/verify-offer-letter/:hash" element={<OfferLetterVerify />} />
+            <Route path="/certificate/verify/:code" element={<CertificateVerify />} />
           </Route>
 
           {/* ================= STUDENT MODULE (PROTECTED) ================= */}
@@ -250,7 +250,7 @@ function AppRoutes() {
 
               <Route path="cohort" element={<MyCohort />} />
               <Route path="cohorts" element={<MyCohort />} />
-              <Route path="cohort/:cohortId/module-tests" element={<ModuleTests />} />
+              <Route path="module-tests" element={<ModuleTests />} />
               
               <Route path="exam-instructions" element={<ExamInstructions />} />
               <Route path="class-schedule" element={<ClassSchedule />} />
@@ -407,6 +407,7 @@ function AppRoutes() {
               <Route path="assignment-feedback" element={<MentorAssignmentFeedback />} />
               <Route path="profile" element={<MentorProfile />} />
               <Route path="settings" element={<MentorSettings />} />
+              <Route path="exam-proctoring" element={<ProctorDashboard />} />
             </Route>
           </Route>
 
