@@ -246,6 +246,17 @@
 .tabList {
   display: flex;
   gap: var(--space-xl);
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 4px;
+}
+
+.tabList::-webkit-scrollbar {
+  height: 4px;
+}
+.tabList::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
 }
 
 .tabBtn {
@@ -279,4 +290,43 @@
   height: 2px;
   background-color: var(--primary-color);
   border-radius: 2px 2px 0 0;
+}
+
+/* --- Responsive Header & Mobile Tweaks --- */
+.profileHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.profileHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.profileHeaderRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .profileHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .profileHeaderLeft {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+  .profileHeaderRight {
+    align-items: center;
+    width: 100%;
+  }
 }

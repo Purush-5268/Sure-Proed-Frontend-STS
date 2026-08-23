@@ -168,11 +168,7 @@ function ApplicationDetails() {
 
   const handleDownloadOfferLetter = async () => {
     try {
-      const res = await applicationService.downloadOfferLetter(id);
-      if (res.url) {
-        // Fetch the file securely passing Auth tokens instead of opening directly
-        await applicationService.downloadPrivateFile(res.url, `Offer_Letter_${id}.pdf`);
-      }
+      await applicationService.downloadOfferLetter(id);
     } catch (err) {
       alert(err.response?.data?.error || "Failed to fetch offer letter.");
     }

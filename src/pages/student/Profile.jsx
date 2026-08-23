@@ -221,8 +221,8 @@ function Profile() {
 
   return (
     <div className="premium-page-container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+      <div className={styles.profileHeader}>
+        <div className={styles.profileHeaderLeft}>
           <div style={{ position: 'relative' }}>
             {serverProfile?.profile_photo ? (
               <img 
@@ -259,7 +259,7 @@ function Profile() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '16px' }}>
+        <div className={styles.profileHeaderRight}>
           {profileStatus === 'ADMIN_APPROVED' ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#059669', background: '#ecfdf5', padding: '8px 16px', borderRadius: '20px', fontWeight: 'bold' }}>
               <FiCheckCircle size={20} />
@@ -464,7 +464,7 @@ function Profile() {
                 <div className="premium-section">
                   <h3 style={{ marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px' }}><FiShield /> Integrations & Admin Data</h3>
                   
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+                  <div className="premium-grid-2" style={{ marginBottom: '24px' }}>
                     <div style={{ padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontWeight: 'bold' }}><FiLinkedin color="#0a66c2" size={20}/> LinkedIn Status</div>
                       {serverProfile?.is_linkedin_connected ? (
@@ -494,7 +494,7 @@ function Profile() {
                     </div>
                   </div>
 
-                  <h4 style={{ marginBottom: "16px", color: "var(--text-primary)" }}>Read-Only Admin Information</h4>
+                  <h4 className="premium-h4">Read-Only Admin Information</h4>
                   <div className="premium-grid-2">
                     <div className="premium-form-group">
                       <label className="premium-label">Student Code</label>

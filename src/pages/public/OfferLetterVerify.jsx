@@ -29,9 +29,17 @@ function OfferLetterVerify() {
     const verifyDocument = async () => {
       if (!hash) return;
       try {
-        // Use the public endpoint: /api/offer-letters/verify/{uuid}/
-        const response = await apiClient.get(`/api/offer-letters/verify/${hash}/`);
-        const data = response.data;
+        // Use native fetch to avoid triggering the global apiClient 401 interceptor (which redirects to login)
+        const baseUrl = (import.meta.env.VITE_API_URL || "").replace(/\/api\/?$/, "");
+        const response = await fetch(`${baseUrl}/api/offer-letters/verify/${hash}/`);
+        
+        if (!response.ok) {
+           const data = await response.json().catch(() => ({}));
+           throw { response: { data } };
+        }
+        
+        const data = await response.json();
+        
         if (!data.valid) {
           if (data.status === "SUSPENDED") {
             setSuspended(true);
@@ -111,6 +119,15 @@ function OfferLetterVerify() {
                 <span style={{ fontSize: '12px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 'bold' }}>Cohort Start Date</span>
                 <strong style={{ fontSize: '16px', color: 'var(--text-primary)' }}>{verificationResult.start_date || "N/A"}</strong>
               </div>
+              
+              {(verificationResult.internship_phase || verificationResult.phase) && (
+                <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '12px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 'bold' }}>Current Internship Phase</span>
+                  <strong style={{ fontSize: '16px', color: '#047857', background: '#d1fae5', padding: '4px 8px', borderRadius: '4px', width: 'fit-content' }}>
+                    {verificationResult.internship_phase || verificationResult.phase}
+                  </strong>
+                </div>
+              )}
             </div>
 
             <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', fontSize: '13px', color: '#475569', textAlign: 'center', border: '1px dashed #cbd5e1' }}>

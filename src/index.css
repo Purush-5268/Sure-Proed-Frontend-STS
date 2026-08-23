@@ -908,3 +908,8 @@ select.premium-input {
 
   --border-color: #3f3f46;
 }
+@media (max-width: 768px) {
+  .premium-grid-2, .premium-grid-3, .premium-grid-4 {
+    grid-template-columns: 1fr !important;
+  }
+}
