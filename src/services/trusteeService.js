@@ -38,39 +38,39 @@ export const removeStudent = (studentId) =>
 
 // ── Announcements ──
 export const getAnnouncements = () =>
-  apiClient.get(API_ENDPOINTS.TRUSTEE.ANNOUNCEMENTS).then((r) => r.data);
+  apiClient.get(API_ENDPOINTS.ANNOUNCEMENTS.BASE).then((r) => r.data);
 
 export const createAnnouncement = (data) =>
-  apiClient.post(API_ENDPOINTS.TRUSTEE.ANNOUNCEMENTS, data).then((r) => r.data);
+  apiClient.post(API_ENDPOINTS.ANNOUNCEMENTS.BASE, data).then((r) => r.data);
 
 export const updateAnnouncement = (id, data) =>
-  apiClient.put(API_ENDPOINTS.TRUSTEE.ANNOUNCEMENT_BY_ID(id), data).then((r) => r.data);
+  apiClient.put(API_ENDPOINTS.ANNOUNCEMENTS.BY_ID(id), data).then((r) => r.data);
 
 export const deleteAnnouncement = (id) =>
-  apiClient.delete(API_ENDPOINTS.TRUSTEE.ANNOUNCEMENT_BY_ID(id)).then((r) => r.data);
+  apiClient.delete(API_ENDPOINTS.ANNOUNCEMENTS.BY_ID(id)).then((r) => r.data);
 
 // ── Achievements ──
 export const getAchievements = () =>
-  apiClient.get(API_ENDPOINTS.TRUSTEE.ACHIEVEMENTS).then((r) => r.data);
+  apiClient.get("/api/achievements/").then((r) => r.data);
 
 export const createAchievement = (data) =>
-  apiClient.post(API_ENDPOINTS.TRUSTEE.ACHIEVEMENTS, data).then((r) => r.data);
+  apiClient.post("/api/achievements/", data).then((r) => r.data);
 
 export const updateAchievement = (id, data) =>
-  apiClient.put(API_ENDPOINTS.TRUSTEE.ACHIEVEMENT_BY_ID(id), data).then((r) => r.data);
+  apiClient.put(`/api/achievements/${id}/`, data).then((r) => r.data);
 
 export const deleteAchievement = (id) =>
-  apiClient.delete(API_ENDPOINTS.TRUSTEE.ACHIEVEMENT_BY_ID(id)).then((r) => r.data);
+  apiClient.delete(`/api/achievements/${id}/`).then((r) => r.data);
 
 // ── Commercial Updates ──
 export const getUpdates = () =>
-  apiClient.get(API_ENDPOINTS.TRUSTEE.UPDATES).then((r) => r.data);
+  apiClient.get("/api/updates/").then((r) => r.data);
 
 export const createUpdate = (data) =>
-  apiClient.post(API_ENDPOINTS.TRUSTEE.UPDATES, data).then((r) => r.data);
+  apiClient.post("/api/updates/", data).then((r) => r.data);
 
 export const updateUpdate = (id, data) =>
-  apiClient.put(API_ENDPOINTS.TRUSTEE.UPDATE_BY_ID(id), data).then((r) => r.data);
+  apiClient.put(`/api/updates/${id}/`, data).then((r) => r.data);
 
 export const deleteUpdate = (id) =>
-  apiClient.delete(API_ENDPOINTS.TRUSTEE.UPDATE_BY_ID(id)).then((r) => r.data);
+  apiClient.delete(`/api/updates/${id}/`).then((r) => r.data);

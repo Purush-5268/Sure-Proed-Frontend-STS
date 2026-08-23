@@ -15,8 +15,6 @@ import styles from "./TrusteeLayout.module.css";
 function TrusteeLayout() {
   const { user } = useAuth();
   
-  // Wait for the auth context to determine the real trusteeType
-  const trusteeType = user?.trusteeType;
 
   const volunteerLinks = [
     { label: "Command Center", path: "/trustee/volunteer/dashboard", icon: <FaTachometerAlt /> },
@@ -33,19 +31,17 @@ function TrusteeLayout() {
     { label: "Updates", path: "/trustee/commercial/updates", icon: <FaBriefcase /> },
   ];
 
-  const isHigherLevel = trusteeType === "COMMERCIAL";
+  const isHigherLevel = user?.role === "TRUSTEE";
+  const isAdvisor = user?.admin_category === "ADVISORY";
   const activeLinks = isHigherLevel ? higherLevelTrusteeLinks : volunteerLinks;
   
-  let layoutTitle = "Volunteer Ops";
-  if (trusteeType === "COMMERCIAL") layoutTitle = "Commercial Ops";
-
-  if (user?.role !== "TRUSTEE") {
-    return <Navigate to="/login" replace />;
+  let layoutTitle = "Volunteer Dashboard";
+  if (isHigherLevel) {
+    layoutTitle = isAdvisor ? "Advisor Dashboard" : "Trustee Dashboard";
   }
 
-  // Prevent routing errors if trusteeType is not yet loaded
-  if (!trusteeType) {
-    return <div>Loading Trustee Profile...</div>;
+  if (!user || (user.role !== "TRUSTEE" && user.role !== "VOLUNTEER")) {
+    return <Navigate to="/login" replace />;
   }
 
   const location = useLocation();
@@ -57,7 +53,7 @@ function TrusteeLayout() {
   }
 
   // Route Protection: Prevent cross-trustee manual URL navigation
-  if (trusteeType === "VOLUNTEER" && currentPath.includes("/commercial/")) {
+  if (user?.role === "VOLUNTEER" && currentPath.includes("/commercial/")) {
     return <Navigate to="/trustee/volunteer/dashboard" replace />;
   }
   

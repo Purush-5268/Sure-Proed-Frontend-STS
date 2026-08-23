@@ -246,8 +246,8 @@ function CohortChat() {
     }
 
     try {
-      const url = cohortChatService.buildWebSocketUrl(cohortId, token);
-      const ws = new WebSocket(url);
+      const url = cohortChatService.buildWebSocketUrl(cohortId);
+      const ws = new WebSocket(url, ["Bearer", token]);
       wsRef.current = ws;
       setWsStatus(reconnectCount.current === 0 ? "CONNECTING" : "RECONNECTING");
 

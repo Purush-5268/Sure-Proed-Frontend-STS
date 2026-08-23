@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  getStreams,
-  createSession,
-} from "../../../services/trusteeService";
+import apiClient from "../../../services/apiClient";
+import { API_ENDPOINTS } from "../../../constants/apiEndpoints";
+import { attendanceService } from "../../../services/attendanceService";
 import styles from "./Schedule.module.css";
 
 function VolunteerSchedule() {
@@ -23,15 +22,16 @@ function VolunteerSchedule() {
   const [newGuestEmail, setNewGuestEmail] = useState("");
 
   useEffect(() => {
-    const fetchStreams = async () => {
+    const fetchCohorts = async () => {
       try {
-        const data = await getStreams();
-        setStreams(data);
+        const response = await apiClient.get(API_ENDPOINTS.COHORTS.BASE);
+        const cohorts = Array.isArray(response.data?.results) ? response.data.results : (Array.isArray(response.data) ? response.data : []);
+        setStreams(cohorts);
       } catch (err) {
-        console.warn("Could not load streams:", err);
+        console.warn("Could not load cohorts:", err);
       }
     };
-    fetchStreams();
+    fetchCohorts();
   }, []);
 
   const handleAddGuestEmail = (e) => {
@@ -56,20 +56,42 @@ function VolunteerSchedule() {
     const end = new Date(endTime);
     const duration = Math.round((end.getTime() - start.getTime()) / 60000);
 
-    const payload = {
-      startTime: start.toISOString(),
-      endTime: end.toISOString(),
-      expectedDurationMinutes: duration,
-      sessionType,
-      streamId: sessionType === "Domain" ? streamId || null : null,
-      groupName: sessionType === "Domain" ? groupName : null,
-      lstBatchNumber: sessionType === "LST" ? lstBatchNumber : null,
-      guestEmails,
-    };
-
     setIsSubmitting(true);
     try {
-      await createSession(payload);
+      if (sessionType === "Domain") {
+        if (!streamId) {
+          alert("Please select a domain/cohort.");
+          setIsSubmitting(false);
+          return;
+        }
+
+        const selectedCohort = streams.find(c => String(c.id) === streamId);
+
+        const payload = {
+          title: groupName || "Domain Session",
+          frontend_cohort_id: streamId,
+          stream_id: selectedCohort?.course?.id || selectedCohort?.course,
+          class_date: start.toISOString().split("T")[0],
+          start_time: start.toTimeString().split(" ")[0],
+          end_time: end.toTimeString().split(" ")[0],
+          session_type: "Domain",
+          guest_emails: guestEmails.join(",")
+        };
+        await attendanceService.scheduleSession(payload);
+      } else if (sessionType === "LST") {
+        const payload = {
+          batch_number: lstBatchNumber || null,
+          class_date: start.toISOString().split("T")[0],
+          start_time: start.toTimeString().split(" ")[0],
+          end_time: end.toTimeString().split(" ")[0],
+        };
+        await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BASE}generate-lst/`, payload);
+      } else {
+        alert("Only LST and Domain sessions are supported for scheduling at this time.");
+        setIsSubmitting(false);
+        return;
+      }
+
       alert("Class Scheduled Successfully! Link is generating.");
       navigate("/trustee/volunteer/dashboard");
     } catch (err) {
@@ -114,7 +136,7 @@ function VolunteerSchedule() {
                   <option value="">Select a domain...</option>
                   {streams.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.streamName}
+                      {s.name || `Cohort #${s.id}`}
                     </option>
                   ))}
                 </select>

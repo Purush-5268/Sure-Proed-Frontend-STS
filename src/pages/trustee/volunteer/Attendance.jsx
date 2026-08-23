@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getAttendanceHierarchy } from "../../../services/trusteeService";
+
 import { attendanceService } from "../../../services/attendanceService";
 import SkeletonLoader from "../../../components/common/SkeletonLoader";
 import styles from "./Attendance.module.css";
@@ -15,14 +15,39 @@ function VolunteerAttendance() {
 
   const loadData = async () => {
     try {
-      const hierarchyData = await getAttendanceHierarchy().catch(() => []);
-      const res = await attendanceService.getAttendanceRecords({ status: "ACTIVE" });
+      // We fetch ALL records, or just ACTIVE if desired. For history we need all.
+      const res = await attendanceService.getAttendanceRecords();
       const sessionsData = res.results || res || [];
       
-      setHierarchy(hierarchyData || []);
-      setActiveSessions(
-        sessionsData.filter((s) => s.conducted !== false)
-      );
+      const active = sessionsData.filter((s) => s.conducted !== false);
+      const past = sessionsData.filter((s) => s.conducted === false);
+      
+      // Build hierarchy: Domain/Type -> Group/Batch -> Sessions
+      const hierarchyMap = {};
+      
+      past.forEach((session) => {
+        const domainName = session.course?.name || session.class_type || "General";
+        const groupName = session.lst_batch ? `Batch ${session.lst_batch}` : (session.title || "Main Group");
+        
+        if (!hierarchyMap[domainName]) {
+          hierarchyMap[domainName] = { domainName, groupsMap: {} };
+        }
+        
+        if (!hierarchyMap[domainName].groupsMap[groupName]) {
+          hierarchyMap[domainName].groupsMap[groupName] = { groupName, sessions: [] };
+        }
+        
+        hierarchyMap[domainName].groupsMap[groupName].sessions.push(session);
+      });
+      
+      // Convert map to array
+      const builtHierarchy = Object.values(hierarchyMap).map((d) => ({
+        domainName: d.domainName,
+        groups: Object.values(d.groupsMap)
+      }));
+      
+      setHierarchy(builtHierarchy);
+      setActiveSessions(active);
     } catch (err) {
       console.warn("Could not load attendance data:", err);
     } finally {
@@ -246,7 +271,7 @@ function VolunteerAttendance() {
                     <div key={session.id} className={styles.sessionItem}>
                       <div>
                         <p className={styles.sessionDate}>
-                          {new Date(session.startTime).toLocaleDateString(
+                          {new Date(session.class_date || session.startTime).toLocaleDateString(
                             undefined,
                             {
                               weekday: "long",
@@ -257,14 +282,13 @@ function VolunteerAttendance() {
                           )}
                         </p>
                         <p className={styles.sessionDetails}>
-                          {new Date(session.startTime).toLocaleTimeString()} •
-                          Duration: {session.expectedDurationMinutes} mins
+                          {session.start_time} - {session.end_time}
                         </p>
                       </div>
                       <button
                         className={styles.btnDownload}
                         onClick={() =>
-                          handleDownloadExcel(session.id, session.startTime)
+                          handleDownloadExcel(session.id, session.class_date)
                         }
                       >
                         Download Excel

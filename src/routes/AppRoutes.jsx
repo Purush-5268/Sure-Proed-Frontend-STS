@@ -412,7 +412,7 @@ function AppRoutes() {
           </Route>
 
           {/* ================= TRUSTEE MODULE (PROTECTED) ================= */}
-          <Route element={<ProtectedRoute allowedRoles={["TRUSTEE"]} redirectTo="/login" />}>
+          <Route element={<ProtectedRoute allowedRoles={["TRUSTEE", "VOLUNTEER"]} redirectTo="/login" />}>
             <Route path="/trustee" element={<TrusteeLayout />}>
               {/* 
                 The index and dashboard paths are handled directly by TrusteeLayout.jsx 

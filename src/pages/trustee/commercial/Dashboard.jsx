@@ -1,10 +1,36 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
+import { getAnnouncements, getUpdates } from "../../../services/trusteeService";
 import styles from "./Dashboard.module.css";
 
 function CommercialDashboard() {
   const { user } = useAuth();
-  const userName = user?.firstName || user?.first_name || "Partner";
+  const roleName = user?.admin_category === "ADVISORY" ? "Advisor" : "Trustee";
+  const userName = user?.firstName || user?.first_name || roleName;
+
+  const [announcementsCount, setAnnouncementsCount] = useState(0);
+  const [updatesCount, setUpdatesCount] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [announcementsRes, updatesRes] = await Promise.all([
+          getAnnouncements().catch(() => ({ results: [] })),
+          getUpdates().catch(() => ({ results: [] })),
+        ]);
+        
+        const announcementsArray = announcementsRes.results || announcementsRes || [];
+        const updatesArray = updatesRes.results || updatesRes || [];
+        
+        setAnnouncementsCount(announcementsArray.length);
+        setUpdatesCount(updatesArray.length);
+      } catch (err) {
+        console.warn("Error fetching commercial stats:", err);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -12,17 +38,17 @@ function CommercialDashboard() {
         <div className={styles.heroContent}>
           <h1>Welcome, {userName}</h1>
           <p>
-            Higher-Level Operations Dashboard. Manage organization-wide
+            {roleName} Operations Dashboard. Manage organization-wide
             announcements, showcase achievements, and track organization updates.
           </p>
         </div>
         <div className={styles.heroStats}>
           <div className={styles.statBox}>
-            <span className={styles.statNumber}>12</span>
+            <span className={styles.statNumber}>{announcementsCount}</span>
             <span className={styles.statLabel}>Active Announcements</span>
           </div>
           <div className={styles.statBox}>
-            <span className={styles.statNumber}>8</span>
+            <span className={styles.statNumber}>{updatesCount}</span>
             <span className={styles.statLabel}>Recent Updates</span>
           </div>
         </div>

@@ -28,7 +28,7 @@ function Announcements() {
   const fetchAnnouncements = async () => {
     try {
       const data = await getAnnouncements();
-      setAnnouncements(data || []);
+      setAnnouncements(data.results || data || []);
     } catch (err) {
       console.warn("Error fetching announcements:", err);
       // Fallback dummy data if backend missing for demo

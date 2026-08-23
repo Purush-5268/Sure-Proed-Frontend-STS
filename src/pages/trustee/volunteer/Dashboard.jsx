@@ -144,7 +144,8 @@ function VolunteerDashboard() {
                   <tr>
                     <th>Class Details</th>
                     <th>Date / Time</th>
-                    <th>Actions</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: "right" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>

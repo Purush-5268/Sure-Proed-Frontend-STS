@@ -105,8 +105,8 @@ export function AuthProvider({ children }) {
           phone_number: data.user.phone_number || "",
           phoneNumber: data.user.phone_number || "",
           role: data.user.role || "STUDENT",
+          admin_category: data.user.admin_category || null,
           is_active: data.user.is_active,
-          trusteeType: data.user.trustee_type || null,
           permissions: data.user.permissions || [],
         };
       } else {
@@ -122,8 +122,8 @@ export function AuthProvider({ children }) {
             phone_number: profile.phone_number || "",
             phoneNumber: profile.phone_number || "",
             role: profile.role || "STUDENT",
+            admin_category: profile.admin_category || null,
             is_active: profile.is_active,
-            trusteeType: profile.trustee_type || null,
             permissions: profile.permissions || [],
           };
         } else {

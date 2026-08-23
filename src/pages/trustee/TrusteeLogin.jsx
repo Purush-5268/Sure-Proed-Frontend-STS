@@ -22,23 +22,12 @@ function TrusteeLogin() {
       const userRole = res?.user?.role;
 
       if (userRole === "TRUSTEE") {
-        const trusteeType = res?.user?.trustee_type || res?.user?.trusteeType;
-
-        if (!trusteeType) {
-          setError("Authentication failed: Your Trustee profile type (VOLUNTEER, ADVISOR, or TRUSTEE) is missing. Please contact an administrator.");
-          return;
-        }
-
-        if (trusteeType === "ADVISOR" || trusteeType === "TRUSTEE") {
-          navigate("/trustee/commercial/dashboard");
-        } else if (trusteeType === "VOLUNTEER") {
-          navigate("/trustee/volunteer/dashboard");
-        } else {
-          setError(`Authentication failed: Invalid Trustee profile type '${trusteeType}'.`);
-        }
+        navigate("/trustee/commercial/dashboard");
+      } else if (userRole === "VOLUNTEER") {
+        navigate("/trustee/volunteer/dashboard");
       } else {
         setError(
-          `Login successful, but your account role is '${userRole}'. Trustee privileges required.`
+          `Login successful, but your account role is '${userRole}'. Trustee or Volunteer privileges required.`
         );
       }
     } catch (err) {

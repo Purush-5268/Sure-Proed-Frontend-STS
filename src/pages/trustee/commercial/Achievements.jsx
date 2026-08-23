@@ -29,7 +29,7 @@ function Achievements() {
   const fetchAchievements = async () => {
     try {
       const data = await getAchievements();
-      setAchievements(data || []);
+      setAchievements(data?.results || data || []);
     } catch (err) {
       console.warn("Error fetching achievements:", err);
       setAchievements([

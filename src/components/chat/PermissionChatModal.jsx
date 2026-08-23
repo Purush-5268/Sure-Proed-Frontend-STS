@@ -24,11 +24,28 @@ function PermissionChatModal({ warningId, onClose }) {
 
     // 2. Initialize WebSocket Connection
     const token = getAccessToken();
-    const wsHost = window.location.protocol === "https:" ? "wss" : "ws";
-    const host = process.env.NODE_ENV === "development" ? "106.51.129.34:8000" : window.location.host;
-    const wsUrl = `${wsHost}://${host}/ws/chat/${warningId}/?token=${token}`;
+    const apiBase = import.meta.env.VITE_API_URL || "http://106.51.129.34:8000";
+    let wsProtocol = "ws";
+    let wsHost = apiBase;
     
-    wsRef.current = new WebSocket(wsUrl);
+    if (apiBase.startsWith("https://")) {
+      wsProtocol = "wss";
+      wsHost = apiBase.replace("https://", "");
+    } else if (apiBase.startsWith("http://")) {
+      wsProtocol = "ws";
+      wsHost = apiBase.replace("http://", "");
+    } else {
+      wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+      wsHost = window.location.host;
+    }
+    
+    if (wsHost.endsWith("/")) {
+      wsHost = wsHost.slice(0, -1);
+    }
+
+    const wsUrl = `${wsProtocol}://${wsHost}/ws/chat/${warningId}/`;
+    
+    wsRef.current = new WebSocket(wsUrl, ["Bearer", token]);
 
     wsRef.current.onopen = () => {
       console.log("WebSocket connected");

@@ -66,11 +66,28 @@ export const cohortChatService = {
    * Requires a JWT access token (from localStorage / AuthContext).
    * URL: ws(s)://host/ws/cohort-chat/{cohort_id}/?token=<jwt>
    */
-  buildWebSocketUrl(cohortId, accessToken) {
-    const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const apiBase = import.meta.env.VITE_API_BASE_URL || window.location.origin;
-    // Strip any http(s) prefix from base
-    const wsBase = apiBase.replace(/^https?:\/\//, "");
-    return `${wsProtocol}://${wsBase}/ws/cohort-chat/${cohortId}/?token=${encodeURIComponent(accessToken)}`;
+  buildWebSocketUrl(cohortId) {
+    const apiBase = import.meta.env.VITE_API_URL || "http://106.51.129.34:8000";
+    
+    let wsProtocol = "ws";
+    let wsHost = apiBase;
+    
+    if (apiBase.startsWith("https://")) {
+      wsProtocol = "wss";
+      wsHost = apiBase.replace("https://", "");
+    } else if (apiBase.startsWith("http://")) {
+      wsProtocol = "ws";
+      wsHost = apiBase.replace("http://", "");
+    } else {
+      wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+      wsHost = window.location.host;
+    }
+    
+    // Remove trailing slash if any
+    if (wsHost.endsWith("/")) {
+      wsHost = wsHost.slice(0, -1);
+    }
+
+    return `${wsProtocol}://${wsHost}/ws/cohort-chat/${cohortId}/`;
   }
 };

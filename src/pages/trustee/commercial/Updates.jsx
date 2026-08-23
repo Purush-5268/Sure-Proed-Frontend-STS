@@ -28,7 +28,7 @@ function Updates() {
   const fetchUpdates = async () => {
     try {
       const data = await getUpdates();
-      setUpdates(data || []);
+      setUpdates(data?.results || data || []);
     } catch (err) {
       console.warn("Error fetching updates:", err);
       setUpdates([
