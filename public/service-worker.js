@@ -9,7 +9,7 @@ self.addEventListener("push", function (event) {
       icon: "/Sure-icon.png",
       badge: "/Sure-icon.png",
       data: {
-        url: new URL(data.action_url || "/", self.location.origin).href,
+        url: new URL(`/?notification_action=${data.action_url || "/"}`, self.location.origin).href,
       },
     };
 

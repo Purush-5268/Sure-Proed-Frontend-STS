@@ -140,8 +140,8 @@ function Cohorts() {
       ) : cohorts.length === 0 ? (
         <p>No cohorts have been created yet. Create one from the button above.</p>
       ) : (
-        <div className={styles.tableWrapper}>
-            <table className={styles.table}>
+        <div className="premium-table-container">
+            <table className="premium-table">
               <thead>
                 <tr>
                   <th>Cohort</th>
@@ -168,9 +168,9 @@ function Cohorts() {
                       <td style={{ padding: "12px" }}>
                         <strong>{cohort.name || cohort.code || "N/A"}</strong>
                       </td>
-                      <td style={{ padding: "12px" }}>
-                        <span className={`${styles.statusBadge} ${styles[cohort.status?.toLowerCase()] || ""}`}>
-                          {cohort.status || "UNKNOWN"}
+                      <td>
+                        <span className="premium-badge" style={{ backgroundColor: "var(--bg-nested)", color: "var(--text-primary)", border: "1px solid var(--border-color)" }}>
+                          {cohort.status || "DRAFT"}
                         </span>
                       </td>
                       <td style={{ padding: "12px", fontWeight: "500", color: "#4338ca" }}>

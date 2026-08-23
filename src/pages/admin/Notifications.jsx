@@ -59,6 +59,7 @@ function Notifications() {
                 <th>Target Audience</th>
                 <th>Status</th>
                 <th>Created At</th>
+                <th>Actions</th>
               </tr>
             </thead>
 
@@ -71,6 +72,11 @@ function Notifications() {
                   </td>
                   <td className={item.is_active ? styles.published : styles.draft}>{item.is_active ? "Published" : "Draft"}</td>
                   <td>{new Date(item.created_at).toLocaleDateString()}</td>
+                  <td>
+                    <Link to={`/admin/edit-notification/${item.id}`} className="premium-btn premium-btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }}>
+                      Edit
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

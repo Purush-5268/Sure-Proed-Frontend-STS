@@ -342,9 +342,12 @@ function MyApplications() {
                       {activeApp.offer_letter_issued && activeApp.offer_letter_file ? (
                         <div>
                           <span style={{ color: "#166534", fontWeight: "bold", display: "block", marginBottom: "8px" }}>✅ Offer Letter Issued</span>
-                          <a href={activeApp.offer_letter_file} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", padding: "8px 16px", backgroundColor: "#2563eb", color: "white", textDecoration: "none", borderRadius: "6px", fontSize: "14px", fontWeight: "bold" }}>
+                          <button 
+                            onClick={() => applicationService.downloadPrivateFile(activeApp.offer_letter_file, `Offer_Letter_${activeApp.application_number || activeApp.id}.pdf`)}
+                            style={{ display: "inline-block", padding: "8px 16px", backgroundColor: "#2563eb", color: "white", textDecoration: "none", borderRadius: "6px", fontSize: "14px", fontWeight: "bold", border: "none", cursor: "pointer" }}
+                          >
                             View / Download
-                          </a>
+                          </button>
                         </div>
                       ) : activeApp.offer_letter_request_status === "PENDING" ? (
                         <span style={{ color: "#d97706", fontWeight: "bold", display: "block" }}>⏳ Offer Letter Request Pending<br/><small style={{color: "#64748b", fontWeight: "normal"}}>Your request has been submitted to the administration.</small></span>

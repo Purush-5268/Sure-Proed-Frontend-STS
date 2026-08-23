@@ -17,6 +17,7 @@ function EditStudent() {
     degree: "",
     specialization: "",
     status: "AVAILABLE",
+    user_id: null,
   });
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
@@ -38,6 +39,7 @@ function EditStudent() {
           degree: student.degree || "",
           specialization: student.specialization || "",
           status: student.status || "AVAILABLE",
+          user_id: user.id || null,
         });
       } catch (err) {
         console.error("Failed to load student for editing:", err);
@@ -71,12 +73,15 @@ function EditStudent() {
       };
 
       await apiClient.patch(API_ENDPOINTS.STUDENTS.BY_ID(id), payload);
-      await apiClient.patch(API_ENDPOINTS.USERS.BY_ID((await apiClient.get(API_ENDPOINTS.USERS.ME)).data.id), {
-        first_name: form.first_name.trim(),
-        last_name: form.last_name.trim(),
-        email: form.email.trim(),
-        phone_number: form.phone_number.trim() || null,
-      });
+      
+      if (form.user_id) {
+        await apiClient.patch(API_ENDPOINTS.USERS.BY_ID(form.user_id), {
+          first_name: form.first_name.trim(),
+          last_name: form.last_name.trim(),
+          email: form.email.trim(),
+          phone_number: form.phone_number.trim() || null,
+        });
+      }
       navigate("/admin/students");
     } catch (err) {
       const message = err?.response?.data?.detail || "Unable to update the student.";

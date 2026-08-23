@@ -104,5 +104,27 @@ export const applicationService = {
   async unsuspendCohort(id) {
     const response = await apiClient.post(API_ENDPOINTS.APPLICATIONS.UNSUSPEND(id));
     return response.data;
+  },
+
+  async downloadPrivateFile(url, filename = "document.pdf") {
+    // Determine the actual path if the backend returned an absolute URL
+    let fetchUrl = url;
+    if (url.startsWith("http")) {
+      const urlObj = new URL(url);
+      fetchUrl = urlObj.pathname + urlObj.search;
+    }
+
+    const response = await apiClient.get(fetchUrl, {
+      responseType: "blob",
+    });
+
+    // Create a local blob URL and trigger download/open
+    const blobUrl = window.URL.createObjectURL(new Blob([response.data], { type: response.headers["content-type"] || "application/pdf" }));
+    
+    // Instead of forcing download, open it in a new tab securely using the local blob
+    window.open(blobUrl, "_blank");
+    
+    // Optional: revoke the URL after a delay to free memory
+    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
   }
 };

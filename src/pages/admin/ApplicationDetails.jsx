@@ -170,7 +170,8 @@ function ApplicationDetails() {
     try {
       const res = await applicationService.downloadOfferLetter(id);
       if (res.url) {
-        window.open(`${res.url}?t=${Date.now()}`, "_blank");
+        // Fetch the file securely passing Auth tokens instead of opening directly
+        await applicationService.downloadPrivateFile(res.url, `Offer_Letter_${id}.pdf`);
       }
     } catch (err) {
       alert(err.response?.data?.error || "Failed to fetch offer letter.");

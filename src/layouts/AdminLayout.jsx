@@ -21,7 +21,6 @@ const adminLinks = [
   { label: "Cohorts", path: "/admin/cohorts", icon: <FaLayerGroup /> },
   { label: "Schedule Class", path: "/admin/schedule", icon: <FaCalendarAlt /> },
   { label: "Attendance", path: "/admin/attendance", icon: <FaUserCheck /> },
-  { label: "Assignments", path: "/admin/assignments", icon: <FaTasks /> },
   { label: "Exams", path: "/admin/exams", icon: <FaClipboardList /> },
   { label: "Certificates", path: "/admin/certificates", icon: <FaCertificate /> },
   { label: "Requests & Support", path: "/admin/requests-support", icon: <FaHeadset /> },
@@ -31,6 +30,7 @@ const adminLinks = [
   { label: "Trustees", path: "/admin/trustees", icon: <FaShieldAlt /> },
   { label: "Companies", path: "/admin/companies", icon: <FaBuilding /> },
   { label: "Courses", path: "/admin/courses", icon: <FaBook /> },
+  { label: "Assignments", path: "/admin/assignments", icon: <FaTasks /> },
   { label: "Settings", path: "/admin/settings", icon: <FaCog /> },
 ];
 

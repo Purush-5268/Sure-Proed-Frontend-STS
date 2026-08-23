@@ -182,16 +182,44 @@ function NotificationBell() {
 
   const dropdownRef = useRef(null);
   const intervalRef = useRef(null);
+  const seenIdsRef = useRef(new Set());
 
   const fetchNotifications = useCallback(async () => {
     if (!isAuthenticated) return;
     try {
       const data = await notificationService.getNotifications();
       setNotifications(data);
+
+      // --- LOCAL FALLBACK FOR PUSH NOTIFICATIONS ---
+      // If the browser granted permission but the backend push subscription (isSubscribed) 
+      // isn't working (e.g., local dev missing VAPID keys), we manually trigger standard
+      // HTML5 Notifications when our polling detects new unread messages.
+      if (Notification.permission === "granted" && !isSubscribed) {
+        const newNotifs = data.filter(n => !n.is_read && !seenIdsRef.current.has(n.id));
+        newNotifs.forEach(n => {
+          const fallbackNotif = new Notification(n.title || "New Notification", {
+            body: n.message || "You have a new update.",
+            icon: "/favicon.ico"
+          });
+          
+          fallbackNotif.onclick = () => {
+            window.focus();
+            const finalUrl = getNotificationRoute(n, user?.role);
+            if (finalUrl.startsWith('http')) window.location.href = finalUrl;
+            else navigate(finalUrl);
+            fallbackNotif.close();
+          };
+          
+          seenIdsRef.current.add(n.id);
+        });
+        
+        // Add all fetched IDs to seen set to prevent future spam
+        data.forEach(n => seenIdsRef.current.add(n.id));
+      }
     } catch {
       // Fail silently — bell should never break the page
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isSubscribed, user?.role, navigate]);
 
   // Start polling only when authenticated. Stop and clean up on unmount or logout.
   useEffect(() => {
@@ -226,6 +254,25 @@ function NotificationBell() {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [isAuthenticated, fetchNotifications]);
+
+  // Handle incoming push notification click redirects
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get("notification_action");
+    
+    if (action) {
+      // Remove query param to prevent loops
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      const finalUrl = getNotificationRoute({ action_url: action, title: action.replace(/_/g, " ") }, user.role);
+      if (finalUrl.startsWith('http')) {
+        window.location.href = finalUrl;
+      } else {
+        navigate(finalUrl);
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleTogglePush = async () => {
     if (!pushNotificationService.isSupported()) return;
@@ -352,6 +399,15 @@ function NotificationBell() {
               <div className={styles.emptyState}>
                 <FaBell className={styles.emptyIcon} />
                 <p>You're all caught up!</p>
+                {pushNotificationService.isSupported() && pushStatus === "default" && (
+                   <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-nested)', borderRadius: '8px', border: '1px solid var(--border-color)', textAlign: 'left' }}>
+                     <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: 'var(--text-primary)' }}>Stay Updated 🚀</h4>
+                     <p style={{ margin: '0 0 12px 0', fontSize: '12px', color: 'var(--text-secondary)' }}>Enable browser notifications to instantly know when a student requests support, misses a class, or when a new cohort session begins.</p>
+                     <button onClick={handleTogglePush} disabled={isPushLoading} className="premium-btn premium-btn-primary" style={{ width: '100%', padding: '8px', fontSize: '13px', justifyContent: 'center' }}>
+                       {isPushLoading ? "Enabling..." : "Enable Notifications"}
+                     </button>
+                   </div>
+                )}
               </div>
             ) : (
               notifications.map((notification) => {

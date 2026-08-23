@@ -307,7 +307,7 @@ function AttendanceManagement() {
                     <td style={{ verticalAlign: "middle" }}>{joinedStudents}</td>
                     <td style={{ verticalAlign: "middle" }}>{absentStudents}</td>
 
-                    <td className="actions" style={{ verticalAlign: "middle", padding: "8px 16px" }}>
+                    <td className="actions" style={{ verticalAlign: "middle", padding: "8px 16px", whiteSpace: "nowrap", minWidth: "200px" }}>
                       {item.status === "ATTENDANCE_PENDING" ? (
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                           <span style={{ color: "#f59e0b", fontWeight: "bold", fontSize: "12px", border: "1px solid #f59e0b", padding: "4px 8px", borderRadius: "4px", backgroundColor: "rgba(245, 158, 11, 0.1)" }}>

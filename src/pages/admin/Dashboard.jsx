@@ -40,23 +40,18 @@ function Dashboard() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [selectedCohort, setSelectedCohort] = useState(null);
 
-  const handleApprove = async (appId) => {
-    try {
-      await applicationService.patchApplication(appId, { status: "ACCEPTED" });
-      setAllApps((prev) => prev.map((app) => (app.id === appId ? { ...app, status: "ACCEPTED" } : app)));
-    } catch (err) {
-      alert("❌ Failed to approve student.");
-    }
-  };
-
   const handleToggleAccess = async (appId, currentStatus) => {
-    const newStatus = currentStatus === "ACCEPTED" ? "REMOVED" : "ACCEPTED";
-    if (newStatus === "REMOVED" && !window.confirm("Are you sure you want to revoke this student's login access?")) return;
+    // If they are suspended, restore them to COHORT_ASSIGNED. Otherwise, suspend them.
+    const isSuspended = currentStatus === "SUSPENDED";
+    const newStatus = isSuspended ? "COHORT_ASSIGNED" : "SUSPENDED";
+    
+    if (!isSuspended && !window.confirm("Are you sure you want to suspend this student's access?")) return;
+    
     try {
       await applicationService.patchApplication(appId, { status: newStatus });
       setAllApps((prev) => prev.map((app) => (app.id === appId ? { ...app, status: newStatus } : app)));
     } catch (err) {
-      alert(`❌ Failed to ${newStatus === "REMOVED" ? "remove" : "restore"} student.`);
+      alert(`❌ Failed to ${isSuspended ? "restore" : "suspend"} student.`);
     }
   };
 
@@ -322,19 +317,28 @@ function Dashboard() {
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: '8px' }}>
-                          {app.status === "PENDING" && (
-                            <button onClick={() => handleApprove(app.id)} className="premium-btn premium-btn-primary" style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}>
-                              Accept
+                          <Link 
+                            to={`/admin/application-details/${app.id}`} 
+                            className="premium-btn premium-btn-primary" 
+                            style={{ height: '32px', padding: '0 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center' }}
+                          >
+                            Manage
+                          </Link>
+                          {app.status === "SUSPENDED" ? (
+                            <button 
+                              onClick={() => handleToggleAccess(app.id, app.status)} 
+                              className="premium-btn premium-btn-secondary" 
+                              style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}
+                            >
+                              Restore
                             </button>
-                          )}
-                          {app.status === "ACCEPTED" && (
-                            <button onClick={() => handleToggleAccess(app.id, app.status)} className="premium-btn premium-btn-danger" style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}>
+                          ) : (
+                            <button 
+                              onClick={() => handleToggleAccess(app.id, app.status)} 
+                              className="premium-btn premium-btn-danger" 
+                              style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}
+                            >
                               Remove
-                            </button>
-                          )}
-                          {app.status === "REMOVED" && (
-                            <button onClick={() => handleToggleAccess(app.id, app.status)} className="premium-btn premium-btn-secondary" style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}>
-                              Accept Back
                             </button>
                           )}
                         </div>

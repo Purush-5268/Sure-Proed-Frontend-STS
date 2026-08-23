@@ -149,21 +149,7 @@ function Exams() {
     return str.toLowerCase();
   };
 
-  // Exact DB mapping for known exam records
-  const EXAM_ID_MAP = {
-    "d6638370-fb80-4936-be81-8810c17a5bdf": { name: "Abhishek Chauhan", email: "abhishekchauhan65157@gmail.com", course: "Medical Coding" },
-    "970c95d7-ab00-4278-9a01-195c81da4c93": { name: "Abhishek Chauhan", email: "abhishekchauhan65157@gmail.com", course: "Six-Month Application-Based Full-Stack & QA Automation Internship" },
-    "bd4b3198-a90c-40d7-8826-ae1ee345b37c": { name: "Brady Hill", email: "user_49719@example.com", course: "6-Month Project-based Actuarial Internship" },
-    "65aa7241-2074-4fe0-bb9e-2176ea6107c0": { name: "Alyssa Williamson", email: "user_02684@example.com", course: "6-Month Project-based Actuarial Internship" },
-    "686124c3-1544-4dfe-b8b7-0523df73df74": { name: "Misty Serrano", email: "user_05254@example.com", course: "6-Month Project-based Actuarial Internship" },
-    "b68ded86-bf39-4860-b527-0e26df22fc13": { name: "Tracy Rodriguez", email: "user_61908@example.com", course: "6-Month Project-based Actuarial Internship" },
-    "057a2e27-0bf0-447b-a2e4-81b41fb8df81": { name: "Misty Velez", email: "user_61950@example.com", course: "6-Month Project-based Actuarial Internship" },
-    "33ebd0ef-3f22-471c-a4df-473f771aa8ec": { name: "Allison Dodson", email: "user_73242@example.com", course: "6-Month Project-based Actuarial Internship" },
-    "a61885ed-a90d-4aa3-a93e-875b47ba3685": { name: "Christopher Jones", email: "user_96365@example.com", course: "6-Month Project-based Actuarial Internship" },
-    "cde18738-c29e-426d-847f-c6c213cc8feb": { name: "Jason Alvarez", email: "user_34047@example.com", course: "6-Month Project-based Actuarial Internship" },
-    "168fa262-698e-4cf9-b2e6-bbe11eb53ad6": { name: "Marc Mitchell", email: "user_35906@example.com", course: "6-Month Project-based Actuarial Internship" },
-    "62fae934-d856-4c47-a13c-6c5a481fed47": { name: "Debbie Johnson", email: "user_51250@example.com", course: "6-Month Project-based Actuarial Internship" },
-  };
+  // Exact DB mapping for known exam records removed in favor of backend API source of truth
 
   useEffect(() => {
     let isMounted = true;
@@ -266,20 +252,12 @@ function Exams() {
           let email = cleanEmail(e.student_email);
           let courseName = e.course_name || e.domain;
 
-          // Check direct EXAM_ID_MAP ground truth first
-          if (e.id && EXAM_ID_MAP[e.id]) {
-            const mapInfo = EXAM_ID_MAP[e.id];
-            name = mapInfo.name;
-            email = mapInfo.email;
-            courseName = mapInfo.course;
-          } else {
-            // Resolve from application
-            if (e.application && appsMap[e.application]) {
-              const app = appsMap[e.application];
-              if (app.student_name) name = app.student_name;
-              if (app.student_email) email = app.student_email;
-              if (app.course_name) courseName = app.course_name;
-            }
+          // Resolve from application
+          if (e.application && appsMap[e.application]) {
+            const app = appsMap[e.application];
+            if (app.student_name) name = app.student_name;
+            if (app.student_email) email = app.student_email;
+            if (app.course_name) courseName = app.course_name;
           }
 
           return {
