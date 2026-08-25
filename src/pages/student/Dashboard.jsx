@@ -343,7 +343,7 @@ function Dashboard() {
                           <div>
                             <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-primary)' }}>{cls.title || cls.class_type || "Live Session"}</h4>
                             <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <FiClock /> {classStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {classEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {isNextDay && <span style={{ fontSize: '11px', background: 'var(--bg-nested)', padding: '2px 6px', borderRadius: '4px', marginLeft: '4px' }}>(Next Day)</span>}
+                              <FiClock /> {classStart.toLocaleDateString([], { month: 'short', day: 'numeric' })} • {classStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {classEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {isNextDay && <span style={{ fontSize: '11px', background: 'var(--bg-nested)', padding: '2px 6px', borderRadius: '4px', marginLeft: '4px' }}>(Next Day)</span>}
                             </p>
                           </div>
 

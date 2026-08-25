@@ -149,8 +149,8 @@ function AttendanceDetails() {
           <div>
             <label>Meet Start Time</label>
             <p>
-              {sessionData.class_start_time
-                ? new Date(sessionData.class_start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              {sessionData.start_time
+                ? new Date(`${sessionData.class_date}T${sessionData.start_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 : "Not available yet"}
             </p>
           </div>
@@ -158,8 +158,8 @@ function AttendanceDetails() {
           <div>
             <label>Meet End Time</label>
             <p>
-              {sessionData.class_end_time
-                ? new Date(sessionData.class_end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              {sessionData.end_time
+                ? new Date(`${sessionData.class_date}T${sessionData.end_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 : "Not available yet"}
             </p>
           </div>

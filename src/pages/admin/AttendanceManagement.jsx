@@ -291,13 +291,13 @@ function AttendanceManagement() {
                     <td style={{ verticalAlign: "middle" }}>{getCohortName(item.cohort, item.title)}</td>
                     <td style={{ verticalAlign: "middle" }}>{getCohortBatch(item.cohort, item.title)}</td>
                     <td style={{ verticalAlign: "middle", whiteSpace: "nowrap" }}>
-                      {item.class_start_time
-                        ? new Date(item.class_start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                      {item.start_time
+                        ? new Date(`${item.class_date}T${item.start_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                         : "Not available yet"}
                     </td>
                     <td style={{ verticalAlign: "middle", whiteSpace: "nowrap" }}>
-                      {item.class_end_time
-                        ? new Date(item.class_end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                      {item.end_time
+                        ? new Date(`${item.class_date}T${item.end_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                         : "Not available yet"}
                     </td>
                     <td style={{ verticalAlign: "middle" }}>{totalStudents}</td>
