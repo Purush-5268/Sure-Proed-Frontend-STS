@@ -1,17 +1,153 @@
-.page { padding: 26px; color: #172033; }
-.page header h1 { margin: 0 0 5px; }
-.page header p { margin: 0 0 20px; color: #64748b; }
-.error { margin-bottom: 14px; padding: 12px; color: #991b1b; background: #fee2e2; border-radius: 8px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-.grid article { padding: 20px; border: 1px solid #dbe3ef; border-radius: 12px; background: #fff; box-shadow: 0 7px 20px rgba(15, 23, 42, .05); }
-.module { color: #1d4ed8; font-size: 11px; font-weight: 850; text-transform: uppercase; }
-.grid h2 { margin: 7px 0; font-size: 18px; }
-.grid p { color: #64748b; font-size: 13px; line-height: 1.5; }
-.grid dl { display: flex; gap: 16px; }
-.grid dl div { display: flex; flex-direction: column; }
-.grid dt { color: #64748b; font-size: 10px; text-transform: uppercase; }
-.grid dd { margin: 2px 0 0; font-weight: 800; }
-.grid button { width: 100%; padding: 10px; color: #fff; background: #2563eb; border: 0; border-radius: 7px; font-weight: 800; cursor: pointer; }
-.pass, .fail { padding: 9px; border-radius: 7px; font-weight: 800; font-size: 12px; }
-.pass { color: #166534; background: #dcfce7; }
-.fail { color: #991b1b; background: #fee2e2; }
+/* ═══ Module Tests — Premium Visual System ═══ */
+
+.page {
+  padding: 26px;
+  color: var(--text-primary);
+  animation: studentFadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.page header h1 {
+  margin: 0 0 5px;
+  color: var(--text-primary);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.page header p {
+  margin: 0 0 20px;
+  color: var(--text-secondary);
+}
+
+.error {
+  margin-bottom: 14px;
+  padding: 12px;
+  color: var(--status-inactive-text);
+  background: var(--status-inactive-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--student-glass-border, var(--border-color));
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.grid article {
+  padding: 20px;
+  border: 1px solid var(--student-glass-border, var(--border-color));
+  border-radius: var(--radius-lg);
+  background: var(--student-glass-bg, var(--bg-card));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--student-card-shadow);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.grid article::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--student-btn-gradient);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.grid article:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--student-card-hover-shadow);
+  border-color: var(--primary-color);
+}
+
+.grid article:hover::before {
+  opacity: 1;
+}
+
+.module {
+  color: var(--primary-color);
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.grid h2 {
+  margin: 7px 0;
+  font-size: 18px;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.grid p {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.grid dl {
+  display: flex;
+  gap: 16px;
+}
+
+.grid dl div {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid dt {
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.grid dd {
+  margin: 2px 0 0;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.grid button {
+  width: 100%;
+  padding: 10px;
+  color: #fff;
+  background: var(--student-btn-gradient, var(--primary-color));
+  border: 0;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.grid button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--student-glow-primary);
+}
+
+.grid button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.pass, .fail {
+  padding: 9px;
+  border-radius: var(--radius-md);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.pass {
+  color: var(--status-active-text);
+  background: var(--status-active-bg);
+}
+
+.fail {
+  color: var(--status-inactive-text);
+  background: var(--status-inactive-bg);
+}

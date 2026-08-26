@@ -7,9 +7,9 @@
   flex-direction: column;
   height: 100vh;
   width: 100vw;
-  background-color: #f8fafc;
+  background-color: var(--bg-nested);
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #0f172a;
+  color: var(--text-primary);
   overflow: hidden;
   user-select: none;
 }
@@ -19,8 +19,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #ffffff;
-  border-bottom: 2px solid #e2e8f0;
+  background: var(--bg-card);
+  border-bottom: 2px solid var(--border-color);
   padding: 6px 20px;
   height: 62px;
   flex-shrink: 0;
@@ -42,7 +42,7 @@
 
 .courseTitleBadge {
   background: #1e40af;
-  color: #ffffff;
+  color: var(--bg-card);
   padding: 6px 16px;
   border-radius: 6px;
   font-size: 14.5px;
@@ -65,8 +65,8 @@
 }
 
 .diffEasy {
-  background: #dcfce7;
-  color: #15803d;
+  background: var(--status-active-bg, #dcfce7);
+  color: var(--status-active-text, #166534);
   border: 1px solid #86efac;
 }
 
@@ -77,8 +77,8 @@
 }
 
 .diffHard {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--status-inactive-bg, #fee2e2);
+  color: var(--status-inactive-text, #ef4444);
   border: 1px solid #fca5a5;
 }
 
@@ -92,8 +92,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #f8fafc;
-  border: 1.5px solid #cbd5e1;
+  background: var(--bg-nested);
+  border: 1.5px solid var(--text-muted);
   padding: 4px 12px;
   border-radius: 8px;
 }
@@ -103,8 +103,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #f8fafc;
-  border: 1.5px solid #cbd5e1;
+  background: var(--bg-nested);
+  border: 1.5px solid var(--text-muted);
   padding: 3px 8px;
   border-radius: 8px;
 }
@@ -113,7 +113,7 @@
   position: relative;
   width: 42px;
   height: 32px;
-  background: #0f172a;
+  background: var(--text-primary);
   border-radius: 5px;
   overflow: hidden;
   display: flex;
@@ -134,7 +134,7 @@
   right: 3px;
   width: 6px;
   height: 6px;
-  background: #ef4444;
+  background: var(--status-inactive-text, #ef4444);
   border-radius: 50%;
   animation: proctorPulse 1s infinite;
 }
@@ -162,14 +162,14 @@
 .proctorLiveBadge {
   font-size: 10.5px;
   font-weight: 800;
-  color: #15803d;
+  color: var(--status-active-text, #166534);
   letter-spacing: 0.04em;
 }
 
 .proctorSubText {
   font-size: 9.5px;
   font-weight: 700;
-  color: #64748b;
+  color: var(--text-secondary);
   letter-spacing: 0.02em;
 }
 
@@ -178,7 +178,7 @@
   height: 32px;
   border-radius: 50%;
   background: #1e40af;
-  color: #ffffff;
+  color: var(--bg-card);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -195,12 +195,12 @@
 .candidateName {
   font-size: 12.5px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .candidateId {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-secondary);
   font-weight: 600;
 }
 
@@ -209,7 +209,7 @@
   align-items: center;
   gap: 6px;
   background: #0284c7;
-  color: #ffffff;
+  color: var(--bg-card);
   padding: 6px 14px;
   border-radius: 6px;
   font-size: 15px;
@@ -240,7 +240,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background: #fff1f2;
+  background: var(--bg-card)1f2;
   border: 1px solid #fecdd3;
   color: #be123c;
   padding: 4px 10px;
@@ -254,11 +254,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #f1f5f9;
-  border-bottom: 1.5px solid #cbd5e1;
+  background: var(--bg-nested);
+  border-bottom: 1.5px solid var(--text-muted);
   padding: 6px 20px;
   font-size: 13px;
-  color: #334155;
+  color: var(--text-secondary);
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -270,7 +270,7 @@
 }
 
 .infoSectionBadge {
-  background: #2563eb;
+  background: var(--primary-color);
   color: white;
   padding: 3px 10px;
   border-radius: 4px;
@@ -285,9 +285,9 @@
 }
 
 .marksTag {
-  background: #f0fdf4;
+  background: var(--status-active-bg, #dcfce7);
   border: 1px solid #86efac;
-  color: #166534;
+  color: var(--status-active-text, #166534);
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 12px;
@@ -301,7 +301,7 @@
   overflow: hidden;
   padding: 10px 14px;
   gap: 12px;
-  background: #f1f5f9;
+  background: var(--bg-nested);
 }
 
 /* LEFT / QUESTION AREA (75–80%) */
@@ -309,8 +309,8 @@
   flex: 76;
   display: flex;
   flex-direction: column;
-  background: #ffffff;
-  border: 1.5px solid #cbd5e1;
+  background: var(--bg-card);
+  border: 1.5px solid var(--text-muted);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
@@ -329,7 +329,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--border-color);
   padding-bottom: 10px;
   margin-bottom: 16px;
 }
@@ -343,14 +343,14 @@
 .questionNumberHeader {
   font-size: 18px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .questionTypeText {
   font-size: 12px;
   font-weight: 700;
-  color: #2563eb;
-  background: #eff6ff;
+  color: var(--primary-color);
+  background: var(--primary-light);
   border: 1px solid #bfdbfe;
   padding: 2px 8px;
   border-radius: 4px;
@@ -361,28 +361,28 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
+  background: var(--bg-nested);
+  border: 1px solid var(--text-muted);
   border-radius: 6px;
   padding: 2px 6px;
 }
 
 .zoomBtn {
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
+  background: var(--bg-card);
+  border: 1px solid var(--text-muted);
   border-radius: 4px;
   padding: 2px 8px;
   font-size: 12px;
   font-weight: 800;
-  color: #334155;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.12s ease;
 }
 
 .zoomBtn:hover:not(:disabled) {
-  background: #eff6ff;
+  background: var(--primary-light);
   border-color: #93c5fd;
-  color: #1d4ed8;
+  color: var(--primary-color);
 }
 
 .zoomBtn:disabled {
@@ -393,7 +393,7 @@
 .zoomLabel {
   font-size: 11.5px;
   font-weight: 700;
-  color: #64748b;
+  color: var(--text-secondary);
   min-width: 36px;
   text-align: center;
 }
@@ -402,21 +402,21 @@
   font-size: 17px;
   font-weight: 500;
   line-height: 1.5;
-  color: #0f172a;
+  color: var(--text-primary);
   margin-bottom: 20px;
   white-space: pre-line;
 }
 
 .codeBox {
-  background: #0f172a;
-  color: #f8fafc;
+  background: var(--text-primary);
+  color: var(--bg-nested);
   font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
   font-size: 14.5px;
   padding: 16px 20px;
   border-radius: 6px;
   margin: 14px 0 22px 0;
   overflow-x: auto;
-  border: 1px solid #334155;
+  border: 1px solid var(--text-secondary);
   line-height: 1.55;
 }
 
@@ -435,49 +435,49 @@
   gap: 14px !important;
   padding: 14px 18px !important;
   min-height: 55px !important;
-  background: #ffffff !important;
-  border: 1.5px solid #cbd5e1 !important;
+  background: var(--bg-card) !important;
+  border: 1.5px solid var(--text-muted) !important;
   border-radius: 8px !important;
   cursor: pointer !important;
   transition: all 0.15s ease !important;
 }
 
 .optionCard:hover {
-  background: #f8fafc !important;
-  border-color: #94a3b8 !important;
+  background: var(--bg-nested) !important;
+  border-color: var(--text-muted) !important;
 }
 
 .optionCardSelected {
-  background: #eff6ff !important;
-  border-color: #2563eb !important;
-  box-shadow: 0 0 0 1.5px #2563eb !important;
+  background: var(--primary-light) !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 1.5px var(--primary-color) !important;
 }
 
 .optionCircle {
   width: 32px !important;
   height: 32px !important;
   border-radius: 50% !important;
-  border: 2px solid #94a3b8 !important;
+  border: 2px solid var(--text-muted) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   font-size: 14px !important;
   font-weight: 800 !important;
-  color: #475569 !important;
-  background: #ffffff !important;
+  color: var(--text-secondary) !important;
+  background: var(--bg-card) !important;
   flex-shrink: 0 !important;
   transition: all 0.15s ease !important;
 }
 
 .optionCircleActive {
-  border-color: #2563eb !important;
-  background: #2563eb !important;
-  color: #ffffff !important;
+  border-color: var(--primary-color) !important;
+  background: var(--primary-color) !important;
+  color: var(--bg-card) !important;
 }
 
 .optionLabelText {
   font-size: 15px;
-  color: #1e293b;
+  color: var(--text-primary);
   font-weight: 500;
   line-height: 1.45;
   flex: 1;
@@ -488,8 +488,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #f8fafc;
-  border-top: 1.5px solid #cbd5e1;
+  background: var(--bg-nested);
+  border-top: 1.5px solid var(--text-muted);
   padding: 10px 20px;
   gap: 10px;
   flex-shrink: 0;
@@ -509,7 +509,7 @@
 
 .btnSaveNext {
   background: #16a34a;
-  color: #ffffff;
+  color: var(--bg-card);
   border: none;
   padding: 9px 20px;
   border-radius: 5px;
@@ -520,12 +520,12 @@
 }
 
 .btnSaveNext:hover {
-  background: #15803d;
+  background: var(--status-active-text, #166534);
 }
 
 .btnSaveReview {
   background: #7e22ce;
-  color: #ffffff;
+  color: var(--bg-card);
   border: none;
   padding: 9px 16px;
   border-radius: 5px;
@@ -541,7 +541,7 @@
 
 .btnMarkReview {
   background: #ea580c;
-  color: #ffffff;
+  color: var(--bg-card);
   border: none;
   padding: 9px 16px;
   border-radius: 5px;
@@ -552,13 +552,13 @@
 }
 
 .btnMarkReview:hover {
-  background: #c2410c;
+  background: var(--status-pending-text, #9a3412);
 }
 
 .btnClear {
-  background: #ffffff;
-  border: 1.5px solid #cbd5e1;
-  color: #475569;
+  background: var(--bg-card);
+  border: 1.5px solid var(--text-muted);
+  color: var(--text-secondary);
   padding: 9px 16px;
   border-radius: 5px;
   font-size: 13px;
@@ -568,9 +568,9 @@
 }
 
 .btnClear:hover:not(:disabled) {
-  background: #f1f5f9;
-  border-color: #94a3b8;
-  color: #0f172a;
+  background: var(--bg-nested);
+  border-color: var(--text-muted);
+  color: var(--text-primary);
 }
 
 .btnClear:disabled {
@@ -579,9 +579,9 @@
 }
 
 .btnPrevious {
-  background: #ffffff;
-  border: 1.5px solid #cbd5e1;
-  color: #334155;
+  background: var(--bg-card);
+  border: 1.5px solid var(--text-muted);
+  color: var(--text-secondary);
   padding: 9px 18px;
   border-radius: 5px;
   font-size: 13px;
@@ -591,8 +591,8 @@
 }
 
 .btnPrevious:hover:not(:disabled) {
-  background: #f1f5f9;
-  border-color: #94a3b8;
+  background: var(--bg-nested);
+  border-color: var(--text-muted);
 }
 
 .btnPrevious:disabled {
@@ -607,8 +607,8 @@
   max-width: 360px !important;
   display: flex !important;
   flex-direction: column !important;
-  background: #ffffff !important;
-  border: 1.5px solid #cbd5e1 !important;
+  background: var(--bg-card) !important;
+  border: 1.5px solid var(--text-muted) !important;
   border-radius: 8px !important;
   overflow: hidden !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
@@ -621,8 +621,8 @@
   color: #1e40af;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: #f8fafc;
-  border-bottom: 1.5px solid #e2e8f0;
+  background: var(--bg-nested);
+  border-bottom: 1.5px solid var(--border-color);
 }
 
 /* SUMMARY STATUS BOXES (MATCHING NTA / JEE REFERENCE) */
@@ -631,8 +631,8 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: #f8fafc;
-  border-bottom: 1.5px solid #e2e8f0;
+  background: var(--bg-nested);
+  border-bottom: 1.5px solid var(--border-color);
 }
 
 .summaryRow {
@@ -648,7 +648,7 @@
   gap: 6px;
   font-size: 11.5px;
   font-weight: 700;
-  color: #334155;
+  color: var(--text-secondary);
 }
 
 .summaryBadge {
@@ -663,36 +663,36 @@
 }
 
 .badgeNotVisited {
-  background: linear-gradient(180deg, #ffffff 0%, #f1f3f5 50%, #e2e6ea 100%);
-  border: 1.5px solid #94a3b8;
-  color: #334155;
+  background: linear-gradient(180deg, var(--bg-card) 0%, #f1f3f5 50%, #e2e6ea 100%);
+  border: 1.5px solid var(--text-muted);
+  color: var(--text-secondary);
   border-radius: 4px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .badgeNotAnswered {
-  background: linear-gradient(135deg, #c2410c 0%, #ea580c 25%, #f97316 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--status-pending-text, #9a3412) 0%, #ea580c 25%, #f97316 100%);
+  color: var(--bg-card);
   border-radius: 3px;
   clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
 }
 
 .badgeAnswered {
-  background: linear-gradient(135deg, #15803d 0%, #22c55e 25%, #16a34a 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--status-active-text, #166534) 0%, #22c55e 25%, #16a34a 100%);
+  color: var(--bg-card);
   border-radius: 3px;
   clip-path: polygon(0% 0%, 100% 15%, 100% 85%, 0% 100%);
 }
 
 .badgeMarked {
   background: linear-gradient(135deg, #7e22ce 0%, #9333ea 50%, #a855f7 100%);
-  color: #ffffff;
+  color: var(--bg-card);
   border-radius: 50%;
 }
 
 .badgeAnsMarked {
   background: linear-gradient(135deg, #6b21a8 0%, #7e22ce 100%);
-  color: #ffffff;
+  color: var(--bg-card);
   border-radius: 50%;
   position: relative;
 }
@@ -712,7 +712,7 @@
   flex: 1 !important;
   overflow-y: auto !important;
   padding: 10px 8px !important;
-  background: #ffffff !important;
+  background: var(--bg-card) !important;
 }
 
 .tilesGrid {
@@ -755,24 +755,24 @@
 
 /* 1. NOT VISITED (Light grey rounded 3D button - matching 04-08 in pic 1) */
 .tileNotVisited {
-  background: linear-gradient(180deg, #ffffff 0%, #f1f3f5 50%, #e2e6ea 100%) !important;
-  border: 1.5px solid #94a3b8 !important;
+  background: linear-gradient(180deg, var(--bg-card) 0%, #f1f3f5 50%, #e2e6ea 100%) !important;
+  border: 1.5px solid var(--text-muted) !important;
   border-radius: 4px !important;
-  color: #334155 !important;
+  color: var(--text-secondary) !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
 }
 
 .tileNotVisited:hover {
-  background: linear-gradient(180deg, #ffffff 0%, #e8ecf0 100%) !important;
-  border-color: #64748b !important;
+  background: linear-gradient(180deg, var(--bg-card) 0%, #e8ecf0 100%) !important;
+  border-color: var(--text-secondary) !important;
 }
 
 /* 2. ANSWERED (Green polygon/trapezoid - matching 01, 02 in pic 1) */
 .tileAnswered {
-  background: linear-gradient(135deg, #15803d 0%, #22c55e 25%, #16a34a 100%) !important;
-  border: 1.5px solid #15803d !important;
+  background: linear-gradient(135deg, var(--status-active-text, #166534) 0%, #22c55e 25%, #16a34a 100%) !important;
+  border: 1.5px solid var(--status-active-text, #166534) !important;
   border-radius: 4px !important;
-  color: #ffffff !important;
+  color: var(--bg-card) !important;
   box-shadow: 0 1px 2px rgba(21, 128, 61, 0.35) !important;
 }
 
@@ -783,10 +783,10 @@
 
 /* 3. NOT ANSWERED (Orange polygon/trapezoid - NTA standard) */
 .tileNotAnswered {
-  background: linear-gradient(135deg, #c2410c 0%, #ea580c 25%, #f97316 100%) !important;
-  border: 1.5px solid #c2410c !important;
+  background: linear-gradient(135deg, var(--status-pending-text, #9a3412) 0%, #ea580c 25%, #f97316 100%) !important;
+  border: 1.5px solid var(--status-pending-text, #9a3412) !important;
   border-radius: 4px !important;
-  color: #ffffff !important;
+  color: var(--bg-card) !important;
   box-shadow: 0 1px 2px rgba(194, 65, 12, 0.35) !important;
 }
 
@@ -800,7 +800,7 @@
   background: linear-gradient(135deg, #7e22ce 0%, #9333ea 50%, #a855f7 100%) !important;
   border: 1.5px solid #6b21a8 !important;
   border-radius: 4px !important;
-  color: #ffffff !important;
+  color: var(--bg-card) !important;
   box-shadow: 0 1.5px 3px rgba(126, 34, 206, 0.4) !important;
 }
 
@@ -814,7 +814,7 @@
   background: linear-gradient(135deg, #6b21a8 0%, #7e22ce 100%) !important;
   border: 1.5px solid #581c87 !important;
   border-radius: 4px !important;
-  color: #ffffff !important;
+  color: var(--bg-card) !important;
   position: relative !important;
   box-shadow: 0 1.5px 3px rgba(107, 33, 168, 0.4) !important;
 }
@@ -827,30 +827,30 @@
   width: 13px !important;
   height: 13px !important;
   background: #16a34a !important;
-  border: 1px solid #ffffff !important;
+  border: 1px solid var(--bg-card) !important;
   border-radius: 50% !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   font-size: 9px !important;
   font-weight: 900 !important;
-  color: #ffffff !important;
+  color: var(--bg-card) !important;
   line-height: 1 !important;
 }
 
 /* CURRENT ACTIVE QUESTION HIGHLIGHT (matching 03 in pic 1) */
 .navTileCurrent {
-  box-shadow: 0 0 0 2px #0f172a !important;
-  border-color: #0f172a !important;
+  box-shadow: 0 0 0 2px var(--text-primary) !important;
+  border-color: var(--text-primary) !important;
   z-index: 10 !important;
 }
 
 .tileAnswered.navTileCurrent {
-  box-shadow: 0 0 0 2px #0f172a !important;
+  box-shadow: 0 0 0 2px var(--text-primary) !important;
 }
 
 .tileNotAnswered.navTileCurrent {
-  box-shadow: 0 0 0 2px #0f172a !important;
+  box-shadow: 0 0 0 2px var(--text-primary) !important;
 }
 
 /* SIDEBAR FOOTER ACTION BUTTONS */
@@ -859,8 +859,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: #f8fafc;
-  border-top: 1.5px solid #e2e8f0;
+  background: var(--bg-nested);
+  border-top: 1.5px solid var(--border-color);
   flex-shrink: 0;
 }
 
@@ -872,27 +872,27 @@
 
 .btnAux {
   padding: 7px 10px;
-  background: #ffffff;
-  border: 1.5px solid #cbd5e1;
+  background: var(--bg-card);
+  border: 1.5px solid var(--text-muted);
   border-radius: 4px;
   font-size: 12px;
   font-weight: 700;
-  color: #334155;
+  color: var(--text-secondary);
   cursor: pointer;
   text-align: center;
   transition: all 0.15s ease;
 }
 
 .btnAux:hover {
-  background: #f1f5f9;
-  border-color: #94a3b8;
+  background: var(--bg-nested);
+  border-color: var(--text-muted);
 }
 
 .btnFinalSubmit {
   width: 100%;
   padding: 10px;
   background: #16a34a;
-  color: #ffffff;
+  color: var(--bg-card);
   border: none;
   border-radius: 5px;
   font-size: 14px;
@@ -904,7 +904,7 @@
 }
 
 .btnFinalSubmit:hover:not(:disabled) {
-  background: #15803d;
+  background: var(--status-active-text, #166534);
 }
 
 .btnFinalSubmit:disabled {
@@ -926,7 +926,7 @@
 }
 
 .modalCard {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 10px;
   padding: 24px 28px;
   width: 100%;
@@ -950,7 +950,7 @@
 .modalHeading {
   font-size: 17px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0 0 10px 0;
 }
 
@@ -963,11 +963,11 @@
 
 .modalSummaryTable td {
   padding: 8px 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
 }
 
 .modalSummaryTable tr:nth-child(even) {
-  background: #f8fafc;
+  background: var(--bg-nested);
 }
 
 .modalBtnGroup {
@@ -1002,7 +1002,7 @@
 .watermarkItem {
   font-size: 17px !important;
   font-weight: 900;
-  color: #0f172a;
+  color: var(--text-primary);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1020,19 +1020,19 @@
 }
 
 .autosaveSaved {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #166534;
+  background: var(--status-active-bg, #dcfce7);
+  border: 1px solid var(--status-active-bg, #dcfce7);
+  color: var(--status-active-text, #166534);
 }
 
 .autosaveSaving {
-  background: #eff6ff;
+  background: var(--primary-light);
   border: 1px solid #bfdbfe;
   color: #1e40af;
 }
 
 .autosaveOffline {
-  background: #fffbeb;
+  background: var(--bg-card)beb;
   border: 1px solid #fde68a;
   color: #92400e;
 }
@@ -1048,7 +1048,7 @@
 }
 
 .dotSaving {
-  background: #3b82f6;
+  background: var(--primary-color);
   animation: pulseAlert 0.8s infinite;
 }
 
@@ -1074,14 +1074,14 @@
 }
 
 .networkOffline {
-  background: #fef2f2;
-  color: #991b1b;
+  background: var(--status-inactive-bg, #fee2e2);
+  color: var(--status-inactive-text, #ef4444);
   border: 1px solid #fecaca;
 }
 
 /* PROCTOR NOTIFICATION BANNER */
 .proctorNotice {
-  background: #fff1f2;
+  background: var(--bg-card)1f2;
   border: 1px solid #fecdd3;
   color: #9f1239;
   padding: 8px 14px;
@@ -1096,7 +1096,7 @@
 
 .proctorNotice button {
   background: #be123c;
-  color: #ffffff;
+  color: var(--bg-card);
   border: none;
   padding: 4px 10px;
   border-radius: 4px;
@@ -1126,3 +1126,115 @@
     max-width: 180px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════
+   DARK MODE OVERRIDES — Exam Engine
+   Eliminates hardcoded white backgrounds in dark mode.
+   ═══════════════════════════════════════════════════════ */
+
+[data-theme="dark"] .examContainer,
+[data-theme="dark"] .mainLayout {
+  background: var(--bg-main);
+}
+
+[data-theme="dark"] .topNavbar,
+[data-theme="dark"] .sidebarNavigator,
+[data-theme="dark"] .bottomActionBar,
+[data-theme="dark"] .infoBar {
+  background: var(--bg-surface);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .questionArea,
+[data-theme="dark"] .modalCard {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .candidateCard,
+[data-theme="dark"] .proctorFeedCard,
+[data-theme="dark"] .summaryBox {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .optionCard {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .optionCard:hover {
+  background: var(--bg-subtle);
+  border-color: var(--primary-color);
+}
+
+[data-theme="dark"] .optionCardSelected {
+  background: rgba(37, 99, 235, 0.15);
+  border-color: var(--primary-color);
+}
+
+[data-theme="dark"] .tileNotVisited,
+[data-theme="dark"] .navTileCurrent {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .tileNotVisited:hover {
+  background: var(--bg-subtle);
+}
+
+[data-theme="dark"] .zoomBtn,
+[data-theme="dark"] .btnAux,
+[data-theme="dark"] .btnClear,
+[data-theme="dark"] .btnPrevious {
+  background: var(--bg-nested);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .zoomBtn:hover:not(:disabled),
+[data-theme="dark"] .btnAux:hover,
+[data-theme="dark"] .btnClear:hover:not(:disabled),
+[data-theme="dark"] .btnPrevious:hover:not(:disabled) {
+  background: var(--bg-subtle);
+  border-color: var(--text-muted);
+}
+
+[data-theme="dark"] .sidebarTitle,
+[data-theme="dark"] .questionNumberHeader,
+[data-theme="dark"] .questionBody,
+[data-theme="dark"] .modalHeading {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .candidateName,
+[data-theme="dark"] .questionTypeText,
+[data-theme="dark"] .optionLabelText,
+[data-theme="dark"] .summaryItem span {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .candidateId,
+[data-theme="dark"] .proctorSubText,
+[data-theme="dark"] .zoomLabel,
+[data-theme="dark"] .marksTag {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .modalSummaryTable th {
+  background: var(--bg-nested);
+  color: var(--text-muted);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .modalSummaryTable td {
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .modalSummaryTable tr:nth-child(even) {
+  background: var(--bg-nested);
+}
+

@@ -1,12 +1,12 @@
 .page {
   min-height: 100vh;
-  background: linear-gradient(145deg, #f8fafc 0%, #eef2f6 100%);
+  background: linear-gradient(145deg, var(--bg-nested) 0%, #eef2f6 100%);
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 40px 20px;
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .container {
@@ -15,7 +15,7 @@
 }
 
 .card {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 20px;
   padding: 40px 48px;
   box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(226, 232, 240, 0.8);
@@ -31,7 +31,7 @@
 .title {
   font-size: 24px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
 }
 
@@ -39,9 +39,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  color: #334155;
+  background: var(--bg-nested);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   padding: 5px 14px;
   border-radius: 9999px;
   font-size: 13.5px;
@@ -62,12 +62,12 @@
 }
 
 .resultBoxPass {
-  background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%);
+  background: linear-gradient(180deg, var(--status-active-bg, #dcfce7) 0%, var(--status-active-bg, #dcfce7) 100%);
   border: 2px solid #86efac;
 }
 
 .resultBoxFail {
-  background: linear-gradient(180deg, #fef2f2 0%, #fee2e2 100%);
+  background: linear-gradient(180deg, var(--status-inactive-bg, #fee2e2) 0%, var(--status-inactive-bg, #fee2e2) 100%);
   border: 2px solid #fca5a5;
 }
 
@@ -82,12 +82,12 @@
 
 .statusPillPass {
   background: #16a34a;
-  color: #ffffff;
+  color: var(--bg-card);
 }
 
 .statusPillFail {
   background: #dc2626;
-  color: #ffffff;
+  color: var(--bg-card);
 }
 
 .scorePercentage {
@@ -97,13 +97,13 @@
   letter-spacing: -0.03em;
 }
 
-.scorePercentagePass { color: #15803d; }
-.scorePercentageFail { color: #b91c1c; }
+.scorePercentagePass { color: var(--status-active-text, #166534); }
+.scorePercentageFail { color: var(--status-inactive-text, #ef4444); }
 
 .scoreFraction {
   font-size: 16px;
   font-weight: 700;
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 /* Metric Breakdown Grid */
@@ -111,8 +111,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 14px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-nested);
+  border: 1px solid var(--border-color);
   border-radius: 14px;
   padding: 20px;
   margin-bottom: 24px;
@@ -128,7 +128,7 @@
 .itemLabel {
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -136,7 +136,7 @@
 .itemValue {
   font-size: 16px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .itemValueSuccess { color: #16a34a; }
@@ -156,13 +156,13 @@
 }
 
 .auditPillClean {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #166534;
+  background: var(--status-active-bg, #dcfce7);
+  border: 1px solid var(--status-active-bg, #dcfce7);
+  color: var(--status-active-text, #166534);
 }
 
 .auditPillWarning {
-  background: #fff1f2;
+  background: var(--bg-card)1f2;
   border: 1px solid #fecdd3;
   color: #be123c;
 }
@@ -171,7 +171,7 @@
 .noteBox {
   font-size: 14.5px;
   line-height: 1.55;
-  color: #334155;
+  color: var(--text-secondary);
   margin-bottom: 28px;
   padding: 0 12px;
 }
@@ -187,7 +187,7 @@
 .primaryBtn {
   padding: 14px 28px;
   background: linear-gradient(135deg, #7c2d92 0%, #1e40af 100%);
-  color: #ffffff;
+  color: var(--bg-card);
   border: none;
   border-radius: 10px;
   font-size: 15px;
@@ -205,9 +205,9 @@
 
 .secondaryBtn {
   padding: 14px 28px;
-  background: #ffffff;
-  color: #1e293b;
-  border: 1.5px solid #cbd5e1;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1.5px solid var(--text-muted);
   border-radius: 10px;
   font-size: 15px;
   font-weight: 700;
@@ -217,8 +217,8 @@
 }
 
 .secondaryBtn:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
+  background: var(--bg-nested);
+  border-color: var(--text-muted);
 }
 
 @media (max-width: 640px) {
@@ -244,3 +244,80 @@
     width: 100%;
   }
 }
+
+/* ═══════════════════════════════════════════════════════
+   DARK MODE OVERRIDES — Exam Result
+   Eliminates hardcoded white backgrounds in dark mode.
+   ═══════════════════════════════════════════════════════ */
+
+[data-theme="dark"] .page {
+  background: var(--bg-main);
+}
+
+[data-theme="dark"] .card {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-color);
+}
+
+[data-theme="dark"] .title {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .subtitle {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .scoreCard {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .scoreLabel {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .scorePercentage {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .statItem {
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .statValue {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .statLabel {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .messageCard {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .messageTitle {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .messageDesc {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .primaryBtn {
+  background: var(--primary-color);
+}
+
+[data-theme="dark"] .secondaryBtn {
+  background: var(--bg-nested);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .secondaryBtn:hover {
+  background: var(--bg-subtle);
+  border-color: var(--text-muted);
+}
+

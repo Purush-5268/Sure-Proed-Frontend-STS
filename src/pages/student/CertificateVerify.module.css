@@ -1,100 +1,89 @@
+/* ═══ Certificate Verify — Premium Visual System ═══ */
+
 .page {
-  min-height: 100vh;
-  background: transparent;
+  width: 100%;
+  min-height: 50vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 40px 20px;
+  justify-content: center;
+  animation: studentFadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .card {
   width: 100%;
-  max-width: 100%;
-  background: var(--bg-surface);
+  max-width: 600px;
+  background: var(--student-glass-bg, var(--bg-card));
+  backdrop-filter: blur(var(--student-glass-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--student-glass-blur, 12px));
   padding: 40px;
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--student-card-shadow);
+  border: 1px solid var(--student-glass-border, var(--border-color));
+  text-align: center;
 }
 
 .card h1 {
-  text-align: center;
-  color: #1e3a8a;
-  margin-bottom: 10px;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 16px;
 }
 
-.subtitle {
-  text-align: center;
+.card p {
   color: var(--text-secondary);
-  margin-bottom: 30px;
+  line-height: 1.6;
 }
 
-.form {
+.verifyForm {
   display: flex;
-  gap: 15px;
-  margin-bottom: 35px;
+  gap: 12px;
+  margin: 24px 0;
 }
 
-.form input {
+.verifyForm input {
   flex: 1;
-  padding: 14px;
+  padding: 12px 16px;
   border: 1px solid var(--border-color);
-  border-radius: 10px;
-  font-size: 15px;
-  outline: none;
+  border-radius: var(--radius-md);
+  background: var(--student-surface-2, var(--bg-surface));
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
-.form input:focus {
-  border-color: #2563eb;
+.verifyForm input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--student-glow-primary);
 }
 
 .verifyBtn {
-  background: #2563eb;
-  color: #ffffff;
+  padding: 12px 24px;
+  background: var(--student-btn-gradient, var(--primary-color));
+  color: var(--text-inverse, #fff);
   border: none;
-  padding: 14px 24px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
   cursor: pointer;
-  font-weight: 600;
-  transition: 0.3s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
 }
 
 .verifyBtn:hover {
-  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--student-glow-primary);
 }
 
-.result {
-  background: var(--bg-main);
+.resultCard {
+  background: var(--student-surface-2, var(--bg-nested));
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 25px;
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-top: 20px;
+  text-align: left;
 }
 
-.verified {
-  color: #16a34a;
-  text-align: center;
-  margin-bottom: 25px;
-}
-
-.details {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.row {
-  display: flex;
-  justify-content: space-between;
-  padding: 14px 18px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-}
-
-.row strong {
-  color: #2563eb;
-}
-
-.active {
-  color: #16a34a;
-  font-weight: bold;
+@media (max-width: 768px) {
+  .card { padding: 24px; }
+  .verifyForm { flex-direction: column; }
 }

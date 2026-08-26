@@ -1,234 +1,236 @@
-/* src/pages/student/Settings.module.css */
+/* ═══ Settings — Premium Visual System ═══ */
 
 .settingsPage {
-    padding: 40px 48px;
-    max-width: 1400px;
-    /* 🚨 Expanded to full-page enterprise width */
-    width: 100%;
-    margin: 0 auto;
-    animation: slideUpFade 0.4s ease-out forwards;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-}
-
-@keyframes slideUpFade {
-    0% {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  padding: 24px 32px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  animation: studentFadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 .header {
-    margin-bottom: 40px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 24px;
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 24px;
 }
 
 .header h1 {
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin: 0 0 8px 0;
-    letter-spacing: -0.5px;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+  letter-spacing: -0.02em;
 }
 
 .header p {
-    color: var(--text-secondary);
-    margin: 0;
-    font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 15px;
 }
 
 .settingsGrid {
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .settingsCard {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    /* 🚨 Sharper, modern enterprise corners */
-    padding: 32px 40px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-    /* 🚨 Subtle, professional shadow */
+  background: var(--student-glass-bg, var(--bg-surface));
+  backdrop-filter: blur(var(--student-glass-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--student-glass-blur, 12px));
+  border: 1px solid var(--student-glass-border, var(--border-color));
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  box-shadow: var(--student-card-shadow);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.settingsCard:hover {
+  box-shadow: var(--student-card-hover-shadow);
+  border-color: var(--primary-color);
 }
 
 .cardHeader {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
 }
 
 .icon {
-    font-size: 22px;
-    background: var(--bg-nested);
-    padding: 10px;
-    border-radius: 8px;
-    display: flex;
+  font-size: 20px;
+  background: var(--student-surface-2, var(--bg-nested));
+  padding: 10px;
+  border-radius: var(--radius-md);
+  display: flex;
+  color: var(--primary-color);
 }
 
 .cardHeader h2 {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
 }
 
 .description {
-    color: var(--text-secondary);
-    font-size: 14px;
-    margin: 0 0 32px 0;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0 0 24px 0;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .settingRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 0;
-    border-bottom: 1px solid var(--border-color);
-    /* Solid lines for clean separation */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .settingRow:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .settingInfo h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0 0 6px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
 }
 
 .settingInfo p {
-    color: var(--text-secondary);
-    font-size: 14px;
-    margin: 0;
-    max-width: 600px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 0;
+  max-width: 600px;
 }
 
 .badge {
-    background: rgba(16, 185, 129, 0.1);
-    color: #10b981;
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  background: var(--status-active-bg);
+  color: var(--status-active-text);
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* Password Form */
 .passwordForm {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    /* 🚨 Two-column professional layout */
-    gap: 24px;
-    max-width: 800px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 800px;
 }
 
 .inputGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .inputGroup:last-of-type {
-    grid-column: 1 / -1;
-    /* Make the confirm password span full width */
+  grid-column: 1 / -1;
 }
 
 .inputGroup label {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .inputGroup input {
-    padding: 14px 16px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background: var(--bg-main);
-    color: var(--text-primary);
-    font-family: inherit;
-    font-size: 15px;
-    transition: all 0.2s ease;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--student-surface-2, var(--bg-main));
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
 .inputGroup input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--student-glow-primary);
 }
 
 .saveBtn {
-    grid-column: 1 / -1;
-    background: var(--primary-color);
-    color: #fff;
-    padding: 14px 24px;
-    border-radius: 8px;
-    border: none;
-    font-weight: 700;
-    font-size: 15px;
-    cursor: pointer;
-    margin-top: 16px;
-    transition: 0.2s;
-    width: max-content;
+  grid-column: 1 / -1;
+  background: var(--student-btn-gradient, var(--primary-color));
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  border: none;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  width: max-content;
 }
 
 .saveBtn:hover {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--student-glow-primary);
 }
 
-/* Custom CSS Toggle Switches */
+.saveBtn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* CSS Toggle Switches */
 .toggleWrapper {
-    position: relative;
+  position: relative;
 }
 
 .toggle {
-    display: none;
+  display: none;
 }
 
 .toggleLabel {
-    display: block;
-    width: 48px;
-    height: 26px;
-    background: var(--bg-main);
-    border: 1px solid var(--border-color);
-    border-radius: 100px;
-    cursor: pointer;
-    position: relative;
-    transition: 0.3s;
+  display: block;
+  width: 48px;
+  height: 26px;
+  background: var(--student-surface-3, var(--bg-main));
+  border: 1px solid var(--border-color);
+  border-radius: 100px;
+  cursor: pointer;
+  position: relative;
+  transition: 0.3s;
 }
 
 .toggleLabel::after {
-    content: '';
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 18px;
-    height: 18px;
-    background: var(--text-muted);
-    border-radius: 50%;
-    transition: 0.3s;
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  transition: 0.3s;
 }
 
-.toggle:checked+.toggleLabel {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
+.toggle:checked + .toggleLabel {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
-.toggle:checked+.toggleLabel::after {
-    transform: translateX(22px);
-    background: #fff;
+.toggle:checked + .toggleLabel::after {
+  transform: translateX(22px);
+  background: #fff;
+}
+
+@media (max-width: 768px) {
+  .settingsPage { padding: 16px; }
+  .settingsCard { padding: 20px; }
+  .passwordForm { grid-template-columns: 1fr; }
+  .settingRow { flex-direction: column; align-items: flex-start; gap: 12px; }
 }

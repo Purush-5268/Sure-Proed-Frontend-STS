@@ -102,7 +102,7 @@ function Settings() {
                     <p className={styles.description}>Update your password to keep your account secure.</p>
 
                     {error && (
-                        <div style={{ display: "flex", gap: "10px", alignItems: "center", color: "#b91c1c", backgroundColor: "#fee2e2", padding: "12px", borderRadius: "8px", marginBottom: "1.5rem", fontWeight: "bold", fontSize: "14px" }}>
+                        <div style={{ display: "flex", gap: "10px", alignItems: "center", color: "var(--status-inactive-text, #ef4444)", backgroundColor: "var(--status-inactive-bg, rgba(239,68,68,0.1))", padding: "12px", borderRadius: "8px", marginBottom: "1.5rem", fontWeight: "bold", fontSize: "14px", border: "1px solid var(--status-inactive-text, #ef4444)" }}>
                             <FiAlertCircle size={18} /> {error}
                         </div>
                     )}

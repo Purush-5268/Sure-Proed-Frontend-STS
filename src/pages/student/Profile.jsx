@@ -76,27 +76,27 @@ function Profile() {
             phoneNumber: profile?.phoneNumber || user?.phone_number || "",
             gender: profile?.gender || user?.gender || "",
             dob: profile?.dob || user?.date_of_birth || "",
-            
+
             college: profile?.college || "",
             degree: profile?.degree || "",
             specialization: profile?.specialization || "",
             education_level: profile?.education_level || "",
             graduation_year: profile?.graduation_year || "",
-            
+
             city: profile?.city || "",
             state: profile?.state || "",
             country: profile?.country || "",
             bio: profile?.bio || "",
             tagline: profile?.tagline || "",
-            
+
             skills: profile?.skills || "",
             hobbies: profile?.hobbies || "",
             languages: profile?.languages || "",
             portfolio_url: profile?.portfolio_url || "",
-            
+
             linkedin_url: profile?.linkedin_url || "",
             github_username: profile?.github_username || "",
-            
+
             courseId: profile?.courseId || "",
             courseBatch: profile?.courseBatch || "",
           });
@@ -147,10 +147,10 @@ function Profile() {
     setSaving(true);
 
     try {
-      const payload = { 
-        ...formData, 
+      const payload = {
+        ...formData,
         courseBatch: formData.courseBatch.trim(),
-        isExistingStudent: isExistingStudent ? "yes" : "no" 
+        isExistingStudent: isExistingStudent ? "yes" : "no"
       };
 
       const savedProfile = await studentService.saveProfile(user?.email, payload);
@@ -212,7 +212,7 @@ function Profile() {
     { id: "personal", label: "Basic Info", icon: <FiUser /> },
     { id: "academic", label: "Education & Location", icon: <FiBook /> },
     { id: "skills", label: "Skills & Preferences", icon: <FiSettings /> },
-    { id: "integrations", label: "Integrations & Read-Only", icon: <FiShield /> },
+    { id: "integrations", label: "Integrations", icon: <FiShield /> },
   ];
 
   const requiredFields = ["firstName", "lastName", "email", "phoneNumber", "college", "degree", "specialization", "graduation_year"];
@@ -225,18 +225,18 @@ function Profile() {
         <div className={styles.profileHeaderLeft}>
           <div style={{ position: 'relative' }}>
             {serverProfile?.profile_photo ? (
-              <img 
-                src={serverProfile.profile_photo} 
-                alt="Profile" 
-                style={{ width: "120px", height: "120px", borderRadius: "50%", objectFit: "cover", border: "4px solid var(--bg-nested)", boxShadow: "0 8px 16px rgba(0,0,0,0.1)" }} 
+              <img
+                src={serverProfile.profile_photo}
+                alt="Profile"
+                style={{ width: "120px", height: "120px", borderRadius: "50%", objectFit: "cover", border: "4px solid var(--bg-nested)", boxShadow: "0 8px 16px rgba(0,0,0,0.1)" }}
               />
             ) : (
-              <div style={{ width: "120px", height: "120px", borderRadius: "50%", background: "var(--primary-color)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "48px", fontWeight: "bold", boxShadow: "0 8px 16px rgba(0,0,0,0.1)" }}>
+              <div style={{ width: "120px", height: "120px", borderRadius: "50%", background: "var(--primary-color)", color: "var(--text-inverse)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "48px", fontWeight: "bold", boxShadow: "0 8px 16px rgba(0,0,0,0.1)" }}>
                 {user?.first_name?.charAt(0) || <FiUser />}
               </div>
             )}
             {profileStatus === 'ADMIN_APPROVED' && (
-              <div style={{ position: 'absolute', bottom: '0', right: '0', background: '#059669', color: '#fff', borderRadius: '50%', padding: '6px', border: '3px solid var(--bg-default)' }}>
+              <div style={{ position: 'absolute', bottom: '0', right: '0', background: '#059669', color: 'var(--text-inverse)', borderRadius: '50%', padding: '6px', border: '3px solid var(--bg-default)' }}>
                 <FiCheckCircle size={18} />
               </div>
             )}
@@ -301,13 +301,13 @@ function Profile() {
       <GlassCard>
         <form onSubmit={handleSubmit} className="premium-form">
           <AnimatePresence mode="wait">
-            
+
             {/* PERSONAL TAB */}
             {activeTab === "personal" && (
               <motion.div key="personal" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
                 <div className="premium-section">
                   <h3 style={{ marginBottom: "16px", color: "var(--text-primary)", display: 'flex', alignItems: 'center', gap: '8px' }}><FiUser /> Personal Information</h3>
-                  
+
                   {serverProfile?.profile_photo && (
                     <div style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "16px" }}>
                       <img src={serverProfile.profile_photo} alt="Profile" style={{ width: "80px", height: "80px", borderRadius: "50%", objectFit: "cover", border: "2px solid var(--primary-color)" }} />
@@ -333,7 +333,7 @@ function Profile() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="premium-grid-2">
                     <div className="premium-form-group">
                       <label className="premium-label">First Name *</label>
@@ -365,7 +365,7 @@ function Profile() {
                       <input className="premium-input" type="date" name="dob" value={formData.dob} onChange={handleChange} />
                     </div>
                   </div>
-                  
+
                   <div className="premium-form-group" style={{ marginTop: "16px" }}>
                     <label className="premium-label">Tagline / Headline</label>
                     <input className="premium-input" name="tagline" value={formData.tagline} onChange={handleChange} placeholder="e.g. Aspiring Full-Stack Developer" />
@@ -463,30 +463,30 @@ function Profile() {
               <motion.div key="integrations" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
                 <div className="premium-section">
                   <h3 style={{ marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px' }}><FiShield /> Integrations & Admin Data</h3>
-                  
+
                   <div className="premium-grid-2" style={{ marginBottom: '24px' }}>
                     <div style={{ padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontWeight: 'bold' }}><FiLinkedin color="#0a66c2" size={20}/> LinkedIn Status</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontWeight: 'bold' }}><FiLinkedin color="#0a66c2" size={20} /> LinkedIn Status</div>
                       {serverProfile?.is_linkedin_connected ? (
                         <div style={{ color: '#059669', fontWeight: 'bold' }}>✅ Connected via Auth</div>
                       ) : (
                         <div>
                           <div style={{ color: '#d97706', fontWeight: 'bold', marginBottom: '12px' }}>⏳ Not Connected via Auth</div>
-                          <button type="button" onClick={handleLinkedInConnect} className="premium-btn" style={{ background: '#0a66c2', color: '#fff', width: '100%', justifyContent: 'center' }}>
+                          <button type="button" onClick={handleLinkedInConnect} className="premium-btn" style={{ background: '#0a66c2', color: 'var(--text-inverse)', width: '100%', justifyContent: 'center' }}>
                             Connect LinkedIn
                           </button>
                         </div>
                       )}
                     </div>
-                    
+
                     <div style={{ padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontWeight: 'bold' }}><FiGithub color="var(--text-primary)" size={20}/> GitHub Status</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontWeight: 'bold' }}><FiGithub color="var(--text-primary)" size={20} /> GitHub Status</div>
                       {serverProfile?.is_github_connected ? (
                         <div style={{ color: '#059669', fontWeight: 'bold' }}>✅ Connected ({serverProfile.github_username})</div>
                       ) : (
                         <div>
                           <div style={{ color: '#d97706', fontWeight: 'bold', marginBottom: '12px' }}>⏳ Not Connected via Auth</div>
-                          <button type="button" onClick={handleGithubConnect} className="premium-btn" style={{ background: '#24292e', color: '#fff', width: '100%', justifyContent: 'center' }}>
+                          <button type="button" onClick={handleGithubConnect} className="premium-btn" style={{ background: '#24292e', color: 'var(--text-inverse)', width: '100%', justifyContent: 'center' }}>
                             Connect GitHub
                           </button>
                         </div>
@@ -517,7 +517,7 @@ function Profile() {
                 </div>
               </motion.div>
             )}
-            
+
           </AnimatePresence>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>

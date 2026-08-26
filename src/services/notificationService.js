@@ -49,21 +49,19 @@ export const notificationService = {
 
   /**
    * Mark a single notification as read.
-   * Backend endpoint: PATCH /api/notifications/{id}/mark_read/
+   * Backend endpoint: POST /api/notifications/{id}/mark_read/
    */
   async markRead(id) {
-    const response = await apiClient.post(API_ENDPOINTS.NOTIFICATIONS.MARK_READ(id));
+    const response = await apiClient.post(API_ENDPOINTS.NOTIFICATIONS.MARK_READ(id), {});
     return response.data;
   },
 
   /**
    * Mark all unread notifications as read.
-   * No dedicated backend endpoint exists — uses individual mark_read calls.
-   * If a backend mark-all endpoint is added later, replace this implementation.
-   * @param {string[]} ids - array of notification IDs to mark read
    */
   async markAllRead(ids = []) {
-    const response = await apiClient.post("/api/notifications/mark_all_read/");
+    // DRF DefaultRouter uses hyphens by default: mark-all-read
+    const response = await apiClient.post("/api/notifications/mark-all-read/", {});
     return response.data;
   },
 };

@@ -1,22 +1,22 @@
 .page { padding: 28px; color: #172033; }
 .page header h1 { margin: 0 0 6px; }
-.page header p { margin: 0 0 18px; color: #64748b; }
-.error { margin: 12px 0; padding: 12px; color: #991b1b; background: #fee2e2; border-radius: 8px; }
+.page header p { margin: 0 0 18px; color: var(--text-secondary); }
+.error { margin: 12px 0; padding: 12px; color: var(--status-inactive-text, #ef4444); background: var(--status-inactive-bg, #fee2e2); border-radius: 8px; }
 .controls, .controls form { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; }
-.controls { padding: 16px; border: 1px solid #dbe3ef; border-radius: 10px; background: #fff; }
+.controls { padding: 16px; border: 1px solid #dbe3ef; border-radius: 10px; background: var(--bg-card); }
 .controls label, .assign { display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 800; }
-.controls select, .controls input, .assign select { min-height: 40px; min-width: 180px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 7px; }
-.controls button { min-height: 40px; padding: 8px 14px; color: #fff; background: #2563eb; border: 0; border-radius: 7px; font-weight: 800; }
+.controls select, .controls input, .assign select { min-height: 40px; min-width: 180px; padding: 8px; border: 1px solid var(--text-muted); border-radius: 7px; }
+.controls button { min-height: 40px; padding: 8px 14px; color: var(--bg-card); background: var(--primary-color); border: 0; border-radius: 7px; font-weight: 800; }
 .workspace { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 18px; margin-top: 18px; }
-.workspace aside, .workspace main { padding: 16px; border: 1px solid #dbe3ef; border-radius: 10px; background: #fff; }
+.workspace aside, .workspace main { padding: 16px; border: 1px solid #dbe3ef; border-radius: 10px; background: var(--bg-card); }
 .workspace aside h2 { margin: 0 0 12px; font-size: 16px; }
-.workspace aside button { width: 100%; margin-bottom: 8px; padding: 10px; display: flex; flex-direction: column; gap: 4px; text-align: left; border: 1px solid #cbd5e1; border-radius: 7px; background: #f8fafc; cursor: pointer; }
-.workspace aside button span { color: #64748b; font-size: 11px; }
-.workspace aside .activeRoom { color: #fff; border-color: #1d4ed8; background: #2563eb; }
-.workspace aside .activeRoom span { color: #dbeafe; }
+.workspace aside button { width: 100%; margin-bottom: 8px; padding: 10px; display: flex; flex-direction: column; gap: 4px; text-align: left; border: 1px solid var(--text-muted); border-radius: 7px; background: var(--bg-nested); cursor: pointer; }
+.workspace aside button span { color: var(--text-secondary); font-size: 11px; }
+.workspace aside .activeRoom { color: var(--bg-card); border-color: var(--primary-color); background: var(--primary-color); }
+.workspace aside .activeRoom span { color: var(--primary-light); }
 .assign { margin-bottom: 12px; }
 .candidates { margin-top: 16px; }
 .candidates h3 { margin-bottom: 8px; }
-.candidates div { padding: 9px 0; display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }
-.candidates em { color: #475569; font-style: normal; }
+.candidates div { padding: 9px 0; display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border-color); font-size: 12px; }
+.candidates em { color: var(--text-secondary); font-style: normal; }
 @media (max-width: 800px) { .workspace { grid-template-columns: 1fr; } .page { padding: 16px; } }

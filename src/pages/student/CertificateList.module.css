@@ -1,98 +1,109 @@
+/* ═══ Certificate List — Premium Visual System ═══ */
+
 .page {
   width: 100%;
+  animation: studentFadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .card {
   width: 100%;
-  background: var(--bg-card);
+  background: var(--student-glass-bg, var(--bg-card));
+  backdrop-filter: blur(var(--student-glass-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--student-glass-blur, 12px));
   padding: 28px;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--student-card-shadow);
+  border: 1px solid var(--student-glass-border, var(--border-color));
 }
 
 .card h1 {
   text-align: left;
-  color: var(--primary-dark);
+  color: var(--text-primary);
   font-size: 1.75rem;
+  font-weight: 800;
   margin-bottom: 6px;
+  letter-spacing: -0.02em;
 }
 
-.subtitle {
-  text-align: left;
-  color: var(--text-muted);
-  margin-bottom: 24px;
-  font-size: 0.95rem;
-}
-
-.list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-.certificateCard {
-  background: var(--bg-subtle);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-  display: flex;
-  flex-direction: column;
-}
-
-.certificateCard:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.certificateCard h3 {
-  color: var(--primary-color);
-  margin-bottom: 10px;
-  font-size: 1.1rem;
-}
-
-.certificateCard p {
-  margin-bottom: 12px;
+.card p {
   color: var(--text-secondary);
-  font-size: 0.95rem;
 }
 
-.issued {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  padding: 4px 10px;
-  background: var(--status-active-bg);
-  color: var(--status-active-text);
-  border-radius: 50px;
-  font-size: 12px;
-  font-weight: 600;
-  margin-bottom: 16px;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
 }
 
-.button {
+.certCard {
+  background: var(--student-surface-1, var(--bg-card));
+  border: 1px solid var(--student-glass-border, var(--border-color));
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--student-card-shadow);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.certCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(135deg, #f59e0b, #eab308);
+  opacity: 0.7;
+}
+
+.certCard:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--student-card-hover-shadow);
+  border-color: #f59e0b;
+}
+
+.certCard h3 {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.certCard p {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.downloadBtn {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: var(--button-height);
-  width: 100%;
-  text-decoration: none;
-  background: var(--primary-color);
-  color: #ffffff;
+  padding: 8px 20px;
+  background: var(--student-btn-gradient, var(--primary-color));
+  color: var(--text-inverse, #ffffff);
+  border: none;
   border-radius: var(--radius-md);
-  font-weight: 600;
-  font-size: 14px;
-  transition: all var(--transition-fast);
-  margin-top: auto;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  margin-top: 12px;
 }
 
-.button:hover {
-  background: var(--primary-hover);
+.downloadBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--student-glow-primary);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-muted);
+  background: var(--student-surface-2, var(--bg-nested));
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--border-color);
 }
 
 @media (max-width: 768px) {
-  .card {
-    padding: 18px;
-  }
+  .card { padding: 20px; }
+  .grid { grid-template-columns: 1fr; }
 }

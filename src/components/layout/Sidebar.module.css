@@ -1,25 +1,52 @@
+/* ═══════════════════════════════════════════════════════
+   SIDEBAR — Premium Visual Overhaul
+   Glassmorphism + depth + micro-interactions
+   ═══════════════════════════════════════════════════════ */
+
 .sidebar {
   width: var(--sidebar-width);
   min-width: var(--sidebar-width);
   height: calc(100vh - var(--navbar-height));
   position: sticky;
   top: var(--navbar-height);
-  background: var(--bg-surface);
-  border-right: 1px solid var(--border-color);
+  background: var(--student-glass-bg, var(--bg-surface));
+  backdrop-filter: blur(var(--student-glass-blur, 16px));
+  -webkit-backdrop-filter: blur(var(--student-glass-blur, 16px));
+  border-right: 1px solid var(--student-glass-border, var(--border-color));
   padding: var(--space-lg) var(--space-md);
   flex-shrink: 0;
   overflow-y: auto;
-  transition: width var(--transition-normal), min-width var(--transition-normal);
+  overflow-x: hidden;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   z-index: 10;
 }
 
-.sidebarCollapsed {
-  width: 80px;
-  min-width: 80px;
+/* Subtle ambient glow line on the right edge */
+.sidebar::after {
+  content: '';
+  position: absolute;
+  top: 10%;
+  right: 0;
+  width: 1px;
+  height: 80%;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--student-glow-primary, rgba(13, 148, 136, 0.15)),
+    transparent
+  );
+  pointer-events: none;
 }
 
+.sidebarCollapsed {
+  width: 72px;
+  min-width: 72px;
+}
+
+/* ── Header ── */
 .header {
   display: flex;
   justify-content: space-between;
@@ -68,17 +95,18 @@
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 4px;
+  padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .desktopCollapseBtn:hover {
   background: var(--bg-nested);
-  color: var(--text-primary);
+  color: var(--primary-color);
+  transform: scale(1.1);
 }
 
 .sidebarCollapsed .desktopCollapseBtn {
@@ -89,38 +117,53 @@
   display: none;
 }
 
+/* ── Navigation ── */
 .nav {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: 2px;
 }
 
 .link {
   position: relative;
   display: flex;
   align-items: center;
-  padding: var(--space-sm) var(--space-md);
+  padding: 10px var(--space-md);
   text-decoration: none;
   color: var(--text-secondary);
   border-radius: var(--radius-md);
   font-weight: 500;
   font-size: var(--font-sm);
-  transition: all var(--transition-fast);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
 
+.link:hover {
+  background: var(--student-sidebar-active-bg, var(--bg-nested));
+  color: var(--text-primary);
+  transform: translateX(2px);
+}
+
+.link:hover .linkIcon {
+  color: var(--primary-color);
+  transform: scale(1.1);
+}
+
+/* ── Icon ── */
 .linkIcon {
-  font-size: 18px;
+  font-size: 17px;
   margin-right: var(--space-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
   overflow: hidden;
   color: var(--text-muted);
-  transition: color var(--transition-fast);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
+  border-radius: 8px;
 }
 
 /* Prevent any SVG child from accidentally rendering visible text */
@@ -138,35 +181,29 @@
 
 .linkLabel {
   white-space: nowrap;
-  transition: color var(--transition-fast);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.link:hover {
-  background: var(--bg-nested);
-  color: var(--text-primary);
-}
-
-.link:hover .linkIcon {
-  color: var(--text-primary);
-}
-
+/* ── Active State ── */
 .active {
-  background: var(--primary-light) !important;
-  color: var(--primary-dark) !important;
+  background: var(--student-sidebar-active-bg, var(--primary-light)) !important;
+  color: var(--primary-color) !important;
   font-weight: 600;
 }
 
 .active .linkIcon {
   color: var(--primary-color);
+  background: var(--student-glow-primary, rgba(13, 148, 136, 0.1));
 }
 
 [data-theme='dark'] .active {
-  background: rgba(59, 130, 246, 0.15) !important;
-  color: #60a5fa !important;
+  background: var(--student-sidebar-active-bg, rgba(45, 212, 191, 0.1)) !important;
+  color: var(--primary-color) !important;
 }
 
 [data-theme='dark'] .active .linkIcon {
-  color: #3b82f6;
+  color: var(--primary-color);
+  background: rgba(45, 212, 191, 0.12);
 }
 
 /* Animated Active Indicator Pill */
@@ -175,12 +212,13 @@
   left: 0;
   top: 50%;
   transform: translateY(-50%) scaleY(0);
-  width: 4px;
-  height: 60%;
-  background-color: var(--primary-color);
+  width: 3px;
+  height: 55%;
+  background: var(--primary-color);
   border-radius: 0 4px 4px 0;
-  transition: transform var(--transition-normal);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   opacity: 0;
+  box-shadow: 0 0 8px var(--student-sidebar-active-glow, var(--primary-color));
 }
 
 .active .activeIndicator {
@@ -188,6 +226,7 @@
   opacity: 1;
 }
 
+/* ═══ Responsive ═══ */
 @media (max-width: 900px) {
   .sidebar {
     width: 100%;
@@ -199,7 +238,13 @@
     padding: var(--space-sm) var(--space-lg);
     border-right: none;
     border-bottom: 1px solid var(--border-color);
-    background: var(--bg-surface);
+    background: var(--student-glass-bg, var(--bg-surface));
+    backdrop-filter: blur(var(--student-glass-blur, 16px));
+    -webkit-backdrop-filter: blur(var(--student-glass-blur, 16px));
+  }
+
+  .sidebar::after {
+    display: none;
   }
 
   .sidebarCollapsed {
@@ -236,5 +281,9 @@
 
   .navMobileOpen {
     display: flex !important;
+  }
+
+  .link:hover {
+    transform: none;
   }
 }

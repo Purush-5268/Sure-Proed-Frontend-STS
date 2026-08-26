@@ -250,9 +250,11 @@ function MyApplications() {
               fontWeight: "bold",
               fontSize: "14px",
               cursor: "pointer",
-              backgroundColor: viewMode === "ACTIVE" ? "#2563eb" : "#f1f5f9",
-              color: viewMode === "ACTIVE" ? "#ffffff" : "#475569",
-              border: "1px solid #cbd5e1",
+              transition: "all 0.2s ease",
+              backgroundColor: viewMode === "ACTIVE" ? "var(--primary-color)" : "var(--student-surface-2, var(--bg-nested))",
+              color: viewMode === "ACTIVE" ? "var(--text-inverse)" : "var(--text-secondary)",
+              border: "1px solid",
+              borderColor: viewMode === "ACTIVE" ? "var(--primary-color)" : "var(--border-color)",
             }}
           >
             🟢 Active Applications ({activeApplications.length})
@@ -267,9 +269,11 @@ function MyApplications() {
               fontWeight: "bold",
               fontSize: "14px",
               cursor: "pointer",
-              backgroundColor: viewMode === "PAST" ? "#475569" : "#f1f5f9",
-              color: viewMode === "PAST" ? "#ffffff" : "#475569",
-              border: "1px solid #cbd5e1",
+              transition: "all 0.2s ease",
+              backgroundColor: viewMode === "PAST" ? "var(--primary-color)" : "var(--student-surface-2, var(--bg-nested))",
+              color: viewMode === "PAST" ? "var(--text-inverse)" : "var(--text-secondary)",
+              border: "1px solid",
+              borderColor: viewMode === "PAST" ? "var(--primary-color)" : "var(--border-color)",
             }}
           >
             📁 Previous / Past Courses ({pastApplications.length})
@@ -287,7 +291,7 @@ function MyApplications() {
         {viewMode === "ACTIVE" ? (
           /* 🟢 ACTIVE APPLICATIONS MODE 🟢 */
           activeApplications.length === 0 ? (
-            <div style={{ backgroundColor: "#fffbeb", border: "1px solid #fef3c7", padding: "2.5rem", borderRadius: "12px", textAlign: "center" }}>
+            <div style={{ backgroundColor: "var(--status-pending-bg, rgba(251,191,36,0.1))", border: "1px solid var(--status-pending-text, #f59e0b)", padding: "2.5rem", borderRadius: "12px", textAlign: "center" }}>
               <h2 style={{ color: "#92400e", margin: "0 0 8px 0" }}>No Pending Exam or Active Application</h2>
               <p style={{ color: "#b45309", fontSize: "15px", marginBottom: "1.5rem" }}>
                 You currently do not have an active pending application. Browse our course catalog to apply!
@@ -305,90 +309,87 @@ function MyApplications() {
               const formattedScoreStr = scoreVal != null ? `${scoreVal}% Marks` : "EVALUATED";
 
               return (
-                <div key={activeApp.id} className={styles.card} style={{ borderLeft: isQualified ? "5px solid #10b981" : "5px solid #2563eb", marginBottom: "1.5rem" }}>
-                  <div className={styles.row}>
-                    <strong>Application Number</strong>
-                    <span style={{ fontWeight: "bold", fontSize: "16px" }}>{activeApp.application_number || activeApp.id}</span>
-                  </div>
+                <div key={activeApp.id} className={styles.applicationCard} style={{ borderLeft: isQualified ? "4px solid var(--status-active-text, #10b981)" : "4px solid var(--primary-color)" }}>
+                  
+                  <div className={styles.infoGrid}>
+                    <div className={styles.infoBox}>
+                      <strong>Application Number</strong>
+                      <span>{activeApp.application_number || activeApp.id}</span>
+                    </div>
 
-                  <div className={styles.row}>
-                    <strong>Course Track</strong>
-                    <span style={{ color: "#2563eb", fontWeight: "bold", fontSize: "16px" }}>{activeApp.course_display || activeApp.course_name || activeApp.course?.name || "Course Track"}</span>
-                  </div>
+                    <div className={styles.infoBox}>
+                      <strong>Course Track</strong>
+                      <span style={{ color: "var(--primary-color)" }}>{activeApp.course_display || activeApp.course_name || activeApp.course?.name || "Course Track"}</span>
+                    </div>
 
-                  <div className={styles.row}>
-                    <strong>Status</strong>
-                    <span
-                      style={{
-                        backgroundColor: isQualified ? "#dcfce7" : (isExamTaken ? "#fef3c7" : "#dbeafe"),
-                        color: isQualified ? "#166534" : (isExamTaken ? "#92400e" : "#1e40af"),
-                        fontWeight: "bold",
-                        padding: "4px 12px",
-                        borderRadius: "12px",
-                        fontSize: "13px",
-                      }}
-                    >
-                      {isQualified ? `🏆 QUALIFIED (${formattedScoreStr})` : (isExamTaken ? `EXAM GIVEN (${formattedScoreStr})` : "📋 EXAM PENDING")}
-                    </span>
-                  </div>
+                    <div className={styles.infoBox}>
+                      <strong>Status</strong>
+                      <div>
+                        <span
+                          style={{
+                            backgroundColor: isQualified ? "var(--status-active-bg, #dcfce7)" : (isExamTaken ? "var(--status-pending-bg, #fef3c7)" : "var(--status-inactive-bg, #dbeafe)"),
+                            color: isQualified ? "var(--status-active-text, #166534)" : (isExamTaken ? "var(--status-pending-text, #92400e)" : "var(--status-inactive-text, #1e40af)"),
+                            fontWeight: "bold",
+                            padding: "6px 12px",
+                            borderRadius: "var(--radius-full)",
+                            fontSize: "12px",
+                            display: "inline-block"
+                          }}
+                        >
+                          {isQualified ? `🏆 QUALIFIED (${formattedScoreStr})` : (isExamTaken ? `EXAM GIVEN (${formattedScoreStr})` : "📋 EXAM PENDING")}
+                        </span>
+                      </div>
+                    </div>
 
-                  <div className={styles.row}>
-                    <strong>Applied On</strong>
-                    <span>{formatDate(activeApp.applied_at || activeApp.created_at)}</span>
+                    <div className={styles.infoBox}>
+                      <strong>Applied On</strong>
+                      <span>{formatDate(activeApp.applied_at || activeApp.created_at)}</span>
+                    </div>
                   </div>
 
                   {isQualified && activeApp.assigned_cohort && (
-                    <div style={{ marginTop: "1rem", padding: "12px", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                      <strong style={{ display: "block", marginBottom: "8px", color: "#1e293b" }}>Offer Letter</strong>
+                    <div className={styles.offerCard}>
+                      <strong style={{ display: "block", marginBottom: "12px", color: "var(--text-primary)" }}>Offer Letter Status</strong>
                       {activeApp.offer_letter_issued && activeApp.offer_letter_file ? (
-                        <div>
-                          <span style={{ color: "#166534", fontWeight: "bold", display: "block", marginBottom: "8px" }}>✅ Offer Letter Issued</span>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ color: "var(--status-active-text, #10b981)", fontWeight: "bold" }}>✅ Offer Letter Issued</span>
                           <button 
                             onClick={() => applicationService.downloadPrivateFile(activeApp.offer_letter_file, `Offer_Letter_${activeApp.application_number || activeApp.id}.pdf`)}
-                            style={{ display: "inline-block", padding: "8px 16px", backgroundColor: "#2563eb", color: "white", textDecoration: "none", borderRadius: "6px", fontSize: "14px", fontWeight: "bold", border: "none", cursor: "pointer" }}
+                            className={`${styles.premiumBtn} ${styles.btnPrimary}`}
+                            style={{ flex: "none", padding: "8px 16px", fontSize: "13px" }}
                           >
                             View / Download
                           </button>
                         </div>
                       ) : activeApp.offer_letter_request_status === "PENDING" ? (
-                        <span style={{ color: "#d97706", fontWeight: "bold", display: "block" }}>⏳ Offer Letter Request Pending<br/><small style={{color: "#64748b", fontWeight: "normal"}}>Your request has been submitted to the administration.</small></span>
+                        <span style={{ color: "var(--status-pending-text, #d97706)", fontWeight: "bold", display: "block" }}>⏳ Offer Letter Request Pending<br/><small style={{color: "var(--text-muted)", fontWeight: "normal"}}>Your request has been submitted to the administration.</small></span>
                       ) : activeApp.offer_letter_request_status === "IN_PROGRESS" ? (
-                        <span style={{ color: "#2563eb", fontWeight: "bold" }}>🔄 Request Being Processed</span>
+                        <span style={{ color: "var(--primary-color)", fontWeight: "bold" }}>🔄 Request Being Processed</span>
                       ) : activeApp.offer_letter_request_status === "RESOLVED" ? (
-                        <span style={{ color: "#166534", fontWeight: "bold", display: "block" }}>✓ Request Approved<br/><small style={{color: "#64748b", fontWeight: "normal"}}>Your offer letter is being prepared.</small></span>
+                        <span style={{ color: "var(--status-active-text, #10b981)", fontWeight: "bold", display: "block" }}>✓ Request Approved<br/><small style={{color: "var(--text-muted)", fontWeight: "normal"}}>Your offer letter is being prepared.</small></span>
                       ) : (
                         <div>
-                          <p style={{ margin: "0 0 8px 0", fontSize: "13px", color: "#475569" }}>
+                          <p style={{ margin: "0 0 12px 0", fontSize: "13px", color: "var(--text-secondary)" }}>
                             Your Offer Letter will be automatically issued after one calendar month.
                           </p>
                           <button
                             onClick={() => handleRequestOfferLetter(activeApp.id)}
                             disabled={requestingOfferLetterId === activeApp.id}
-                            style={{
-                              padding: "8px 16px",
-                              backgroundColor: "#475569",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "6px",
-                              cursor: requestingOfferLetterId === activeApp.id ? "not-allowed" : "pointer",
-                              fontWeight: "bold",
-                              fontSize: "13px",
-                              opacity: requestingOfferLetterId === activeApp.id ? 0.7 : 1
-                            }}
+                            className={`${styles.premiumBtn} ${styles.btnDisabled}`}
+                            style={{ flex: "none", padding: "8px 16px", fontSize: "13px", cursor: requestingOfferLetterId === activeApp.id ? "not-allowed" : "pointer", opacity: requestingOfferLetterId === activeApp.id ? 0.7 : 1 }}
                           >
-                            {requestingOfferLetterId === activeApp.id ? "Requesting..." : "Request Offer Letter"}
+                            {requestingOfferLetterId === activeApp.id ? "Requesting..." : "Request Offer Letter Manually"}
                           </button>
                         </div>
                       )}
                     </div>
                   )}
 
-                  <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
+                  <div className={styles.actionRow}>
                     <button
                       type="button"
                       onClick={() => setSelectedAppModal(activeApp)}
-                      className={styles.button}
-                      style={{ flex: 2, textAlign: "center" }}
+                      className={`${styles.premiumBtn} ${styles.btnPrimary}`}
                     >
                       View Status & Marks 📊
                     </button>
@@ -396,8 +397,7 @@ function MyApplications() {
                     {isQualified ? (
                       <Link
                         to="/student/cohort"
-                        className={styles.button}
-                        style={{ flex: 2, backgroundColor: "#10b981", textAlign: "center" }}
+                        className={`${styles.premiumBtn} ${styles.btnSuccess}`}
                       >
                         Go to My Cohort 🚀
                       </Link>
@@ -405,21 +405,18 @@ function MyApplications() {
                       <button
                         type="button"
                         onClick={() => setSelectedAppModal(activeApp)}
-                        className={styles.button}
-                        style={{ flex: 2, backgroundColor: "#d97706", textAlign: "center" }}
+                        className={`${styles.premiumBtn} ${styles.btnWarning}`}
                       >
                         Exam Already Given ✓
                       </button>
                     ) : (
                       <Link
                         to="/student/exam-instructions"
-                        className={styles.button}
-                        style={{ flex: 2, backgroundColor: "#059669", textAlign: "center" }}
+                        className={`${styles.premiumBtn} ${styles.btnSuccess}`}
                       >
                         Take Screening Exam →
                       </Link>
                     )}
-
                   </div>
                 </div>
               );
@@ -428,7 +425,7 @@ function MyApplications() {
         ) : (
           /* 📁 PAST APPLICATIONS (INACTIVE) MODE 📁 */
           pastApplications.length === 0 ? (
-            <div style={{ backgroundColor: "#f8fafc", padding: "2rem", borderRadius: "12px", textAlign: "center", color: "#64748b" }}>
+            <div style={{ backgroundColor: "var(--bg-nested)", padding: "2rem", borderRadius: "12px", textAlign: "center", color: "var(--text-muted, #64748b)" }}>
               No previous courses or past attempt records found.
             </div>
           ) : (
@@ -436,43 +433,50 @@ function MyApplications() {
               const isRejected = ["REJECTED", "DISQUALIFIED", "EXAM_FAILED"].includes((app.status || "").toUpperCase());
 
               return (
-                <div key={app.id} className={styles.card} style={{ borderLeft: isRejected ? "5px solid #ef4444" : "5px solid #64748b", opacity: 0.9, marginBottom: "1rem" }}>
-                  <div className={styles.row}>
-                    <strong>Application Number</strong>
-                    <span>{app.application_number || app.id}</span>
+                <div key={app.id} className={styles.applicationCard} style={{ borderLeft: isRejected ? "4px solid var(--status-inactive-text, #ef4444)" : "4px solid var(--text-muted, #64748b)", opacity: 0.9 }}>
+                  
+                  <div className={styles.infoGrid}>
+                    <div className={styles.infoBox}>
+                      <strong>Application Number</strong>
+                      <span>{app.application_number || app.id}</span>
+                    </div>
+
+                    <div className={styles.infoBox}>
+                      <strong>Course Track</strong>
+                      <span style={{ fontWeight: "bold" }}>{app.course_display || app.course_name || app.course?.name || "Course Track"}</span>
+                    </div>
+
+                    <div className={styles.infoBox}>
+                      <strong>Status</strong>
+                      <div>
+                        <span
+                          style={{
+                            backgroundColor: isRejected ? "var(--status-inactive-bg, #fee2e2)" : "var(--student-surface-2, #f1f5f9)",
+                            color: isRejected ? "var(--status-inactive-text, #991b1b)" : "var(--text-secondary, #475569)",
+                            padding: "6px 12px",
+                            borderRadius: "var(--radius-full)",
+                            fontWeight: "bold",
+                            fontSize: "12px",
+                            display: "inline-block"
+                          }}
+                        >
+                          {isRejected ? `REJECTED (15-Day Cooldown Active)` : app.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles.infoBox}>
+                      <strong>Applied / Attempted On</strong>
+                      <span>{formatDate(app.applied_at || app.created_at)}</span>
+                    </div>
                   </div>
 
-                  <div className={styles.row}>
-                    <strong>Course Track</strong>
-                    <span style={{ fontWeight: "bold" }}>{app.course_display || app.course_name || app.course?.name || "Course Track"}</span>
-                  </div>
-
-                  <div className={styles.row}>
-                    <strong>Status</strong>
-                    <span
-                      style={{
-                        backgroundColor: isRejected ? "#fee2e2" : "#f1f5f9",
-                        color: isRejected ? "#991b1b" : "#475569",
-                        padding: "4px 12px",
-                        borderRadius: "12px",
-                        fontWeight: "bold",
-                        fontSize: "12px",
-                      }}
-                    >
-                      {isRejected ? `REJECTED (15-Day Cooldown Active)` : app.status}
-                    </span>
-                  </div>
-
-                  <div className={styles.row}>
-                    <strong>Applied / Attempted On</strong>
-                    <span>{formatDate(app.applied_at || app.created_at)}</span>
-                  </div>
-
-                  <div style={{ marginTop: "1rem" }}>
+                  <div className={styles.actionRow}>
                     <button
                       type="button"
                       onClick={() => setSelectedAppModal(app)}
-                      style={{ width: "100%", padding: "10px 16px", backgroundColor: "#475569", color: "white", borderRadius: "6px", border: "none", fontWeight: "bold", fontSize: "14px", cursor: "pointer" }}
+                      className={`${styles.premiumBtn} ${styles.btnDisabled}`}
+                      style={{ cursor: "pointer", background: "var(--student-surface-3)" }}
                     >
                       View Result Marks & Info 📊
                     </button>

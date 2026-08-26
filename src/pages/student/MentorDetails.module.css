@@ -1,89 +1,115 @@
+/* ═══ Mentor Details — Premium Visual System ═══ */
+
 .page {
-  min-height: 100vh;
-  background: transparent;
+  width: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: 40px 20px;
+  align-items: flex-start;
+  padding: 20px;
+  animation: studentFadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .card {
   width: 100%;
   max-width: 100%;
-  background: var(--bg-surface);
-  border-radius: 18px;
-  padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  background: var(--student-glass-bg, var(--bg-surface));
+  backdrop-filter: blur(var(--student-glass-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--student-glass-blur, 12px));
+  border-radius: var(--radius-xl);
+  padding: 36px;
+  box-shadow: var(--student-card-shadow);
+  border: 1px solid var(--student-glass-border, var(--border-color));
 }
 
 .profile {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
 }
 
 .profile img {
-  width: 170px;
-  height: 170px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
   object-fit: cover;
-  border: 5px solid #2563eb;
-  margin-bottom: 20px;
+  border: 4px solid var(--primary-color);
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px var(--student-glow-primary);
 }
 
 .profile h1 {
-  color: #1e3a8a;
-  margin-bottom: 10px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-weight: 800;
 }
 
 .profile p {
   color: var(--text-secondary);
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .infoGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  gap: 16px;
 }
 
 .infoBox {
-  background: var(--bg-main);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
+  background: var(--student-surface-2, var(--bg-nested));
+  border: 1px solid var(--student-glass-border, var(--border-color));
+  border-radius: var(--radius-md);
   padding: 20px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.infoBox:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--student-card-hover-shadow);
+  border-color: var(--primary-color);
 }
 
 .infoBox h3 {
-  color: #2563eb;
-  margin-bottom: 10px;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .infoBox p,
 .infoBox a {
   color: var(--text-primary);
   text-decoration: none;
+  font-size: 15px;
 }
 
 .infoBox a:hover {
-  color: #2563eb;
+  color: var(--primary-color);
   text-decoration: underline;
 }
-.buttons{
-    margin-top:30px;
-    display:flex;
-    justify-content:flex-end;
+
+.buttons {
+  margin-top: 28px;
+  display: flex;
+  justify-content: flex-end;
 }
 
-.button{
-    background:#2563eb;
-    color:#fff;
-    text-decoration:none;
-    padding:12px 24px;
-    border-radius:8px;
-    font-weight:600;
-    transition:.3s;
+.button {
+  background: var(--student-btn-gradient, var(--primary-color));
+  color: #fff;
+  text-decoration: none;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.button:hover{
-    background:#1d4ed8;
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px var(--student-glow-primary);
+}
+
+@media (max-width: 768px) {
+  .card { padding: 24px; }
+  .infoGrid { grid-template-columns: 1fr; }
 }

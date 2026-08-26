@@ -325,7 +325,8 @@ function NotificationBell() {
     if (!notification.is_read) {
       try {
         await notificationService.markRead(notification.id);
-      } catch {
+      } catch (error) {
+        console.error("Failed to mark notification as read:", error);
         // Continue navigation even if mark-read fails
       }
     }

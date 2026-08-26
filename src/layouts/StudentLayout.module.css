@@ -10,6 +10,20 @@
   background: var(--bg-main);
   min-width: 0;
   width: 100%;
+  position: relative;
+}
+
+/* Ambient background gradient for student pages */
+.content::before {
+  content: '';
+  position: fixed;
+  top: var(--navbar-height);
+  left: var(--sidebar-width);
+  right: 0;
+  bottom: 0;
+  background: var(--student-page-bg, var(--bg-main));
+  z-index: -1;
+  pointer-events: none;
 }
 
 @media (max-width: 768px) {
@@ -19,5 +33,9 @@
 
   .content {
     padding: 16px;
+  }
+
+  .content::before {
+    left: 0;
   }
 }

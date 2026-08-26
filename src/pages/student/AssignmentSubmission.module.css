@@ -1,93 +1,95 @@
+/* ═══ Assignment Submission — Premium Visual System ═══ */
+
 .page {
-  min-height: 100vh;
-  background: transparent;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px 20px;
+  width: 100%;
+  animation: studentFadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .card {
   width: 100%;
-  max-width: 100%;
-  background: var(--bg-surface);
-  padding: 40px;
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  background: var(--student-glass-bg, var(--bg-card));
+  backdrop-filter: blur(var(--student-glass-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--student-glass-blur, 12px));
+  padding: 28px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--student-card-shadow);
+  border: 1px solid var(--student-glass-border, var(--border-color));
 }
 
 .card h1 {
-  text-align: center;
-  color: #1e3a8a;
-  margin-bottom: 10px;
-}
-
-.subtitle {
-  text-align: center;
-  color: var(--text-secondary);
-  margin-bottom: 35px;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 16px;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
-.group {
+.inputGroup {
   display: flex;
   flex-direction: column;
+  gap: 6px;
 }
 
-.group label {
-  margin-bottom: 8px;
+.inputGroup label {
   font-weight: 600;
-  color: #2563eb;
+  font-size: 14px;
+  color: var(--text-primary);
 }
 
-.group input,
-.group textarea {
-  padding: 14px;
+.inputGroup input,
+.inputGroup textarea,
+.inputGroup select {
+  padding: 10px 14px;
   border: 1px solid var(--border-color);
-  border-radius: 10px;
-  font-size: 15px;
+  border-radius: var(--radius-sm);
+  background: var(--student-surface-2, var(--bg-surface));
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.inputGroup input:focus,
+.inputGroup textarea:focus,
+.inputGroup select:focus {
   outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--student-glow-primary);
 }
 
-.group input:focus,
-.group textarea:focus {
-  border-color: #2563eb;
-}
-
-.group textarea {
+.inputGroup textarea {
+  min-height: 120px;
   resize: vertical;
 }
 
 .submitBtn {
-  background: #2563eb;
-  color: white;
+  padding: 12px 28px;
+  background: var(--student-btn-gradient, var(--primary-color));
+  color: var(--text-inverse, #fff);
   border: none;
-  padding: 15px;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-weight: 700;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  align-self: flex-start;
 }
 
 .submitBtn:hover {
-  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--student-glow-primary);
 }
 
-.back {
-  display: block;
-  text-align: center;
-  margin-top: 25px;
-  text-decoration: none;
-  color: #2563eb;
-  font-weight: 600;
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
-.back:hover {
-  text-decoration: underline;
+@media (max-width: 768px) {
+  .card { padding: 20px; }
+  .submitBtn { width: 100%; }
 }

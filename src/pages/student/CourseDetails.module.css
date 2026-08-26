@@ -1,61 +1,81 @@
+/* ═══ Course Details — Premium Visual System ═══ */
+
 .courseDetailsPage {
-  min-height: 100vh;
-  background: transparent;
-  padding: 60px 30px;
+  width: 100%;
+  padding: 20px;
+  animation: studentFadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .container {
   max-width: 100%;
   margin: auto;
-  background: var(--bg-surface);
-  padding: 40px;
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  background: var(--student-glass-bg, var(--bg-surface));
+  backdrop-filter: blur(var(--student-glass-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--student-glass-blur, 12px));
+  padding: 36px;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--student-card-shadow);
+  border: 1px solid var(--student-glass-border, var(--border-color));
 }
 
 .container h1 {
-  color: #1e3a8a;
-  margin-bottom: 15px;
-  font-size: 38px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .description {
   color: var(--text-secondary);
   line-height: 1.8;
-  margin-bottom: 35px;
+  margin-bottom: 32px;
 }
 
 .infoGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  margin-bottom: 40px;
+  gap: 16px;
+  margin-bottom: 32px;
 }
 
 .infoGrid div {
-  background: var(--bg-main);
+  background: var(--student-surface-2, var(--bg-nested));
   padding: 18px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.infoGrid div:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--student-card-hover-shadow);
+  border-color: var(--primary-color);
 }
 
 .infoGrid h3 {
-  color: var(--text-primary);
-  font-size: 15px;
-  margin-bottom: 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
 }
 
 .infoGrid p {
-  color: #2563eb;
-  font-weight: 600;
+  color: var(--primary-color);
+  font-weight: 700;
+  font-size: 16px;
 }
 
 .section {
-  margin-bottom: 35px;
+  margin-bottom: 28px;
 }
 
 .section h2 {
-  color: #1e3a8a;
-  margin-bottom: 15px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  font-weight: 700;
 }
 
 .section ul {
@@ -66,32 +86,28 @@
 
 .applyBtn {
   width: 100%;
-  padding: 16px;
+  padding: 14px;
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  color: white;
-  font-size: 17px;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  background: var(--student-btn-gradient, var(--primary-color));
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .applyBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 25px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 8px 24px var(--student-glow-primary);
+}
+
+.applyBtn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 @media (max-width: 768px) {
-  .container {
-    padding: 25px;
-  }
-
-  .infoGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .container h1 {
-    font-size: 30px;
-  }
+  .container { padding: 24px; }
+  .infoGrid { grid-template-columns: 1fr; }
+  .container h1 { font-size: 24px; }
 }

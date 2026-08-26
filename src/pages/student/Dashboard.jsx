@@ -74,6 +74,18 @@ function Dashboard() {
         }
 
         const enrollmentStatus = resolveStudentEnrollment(profileObj, apps, courses);
+        
+        // Bulletproof Domain Fallback: If activeApp is missing, try matching course by title from stats or profile
+        if (!enrollmentStatus.courseDomain) {
+          const fallbackTitle = profileObj?.current_application?.course?.name || statsRes?.data?.application_course_title || profileObj?.course_name;
+          if (fallbackTitle) {
+            const fallbackMatched = courses.find(c => c.name === fallbackTitle);
+            if (fallbackMatched) {
+              enrollmentStatus.courseDomain = fallbackMatched.domain;
+            }
+          }
+        }
+        
         if (isMounted) setResolvedEnrollment(enrollmentStatus);
 
         // Core data loaded, unlock UI immediately!
@@ -242,12 +254,15 @@ function Dashboard() {
       <div className={styles.immersiveHero}>
 
         {/* Left Side: Domain Stream Info */}
-        <div className={styles.heroContent} style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05), transparent)', border: '1px solid var(--border-color)', borderRadius: '24px', padding: '32px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
-          <p className={styles.streamLabel} style={{ color: 'var(--primary-color)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '12px' }}>Current Enrollment</p>
-          <h2 className={styles.streamTitle} style={{ fontSize: '32px', marginTop: '8px', marginBottom: '16px', color: 'var(--text-primary)' }}>{profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "Awaiting Course Assignment"}</h2>
+        <div className={styles.heroContent}>
+          <p className={styles.streamLabel}>Current Enrollment</p>
+          <h2 className={styles.streamTitle}>{profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "Awaiting Course Assignment"}</h2>
 
           <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
-            <span style={{ background: 'var(--primary-color)', color: '#fff', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+            <span style={{ background: 'var(--student-sidebar-active-bg)', color: 'var(--primary-color)', border: '1px solid var(--primary-color)', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+              🎓 DOMAIN: {resolvedEnrollment?.courseDomain || profile?.current_application?.course?.domain || stats?.application_course_domain || stats?.application_course_title?.split(' ')?.[0] || profile?.course_name?.split(' ')?.[0] || "General"}
+            </span>
+            <span style={{ background: 'var(--bg-nested)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', letterSpacing: '0.5px' }}>
               📦 GROUP: {profile?.current_application?.assigned_cohort?.code || stats?.active_cohort?.code || profile?.cohort_code || "Awaiting Cohort Assignment"}
             </span>
           </div>
@@ -256,7 +271,7 @@ function Dashboard() {
             <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Your Mentor</h4>
             {stats?.active_cohort?.mentor_name || activeApp?.assigned_cohort?.mentor?.user ? (
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--primary-color)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--primary-color)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold' }}>
                   {stats?.active_cohort?.mentor_name?.[0] || activeApp?.assigned_cohort?.mentor?.user?.first_name?.[0] || 'M'}
                 </div>
                 <div>
@@ -286,7 +301,7 @@ function Dashboard() {
         </div>
 
         {/* Right Side: Live Radar Widget */}
-        <div className={styles.floatingLiveSection} style={{ background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.05), transparent)', border: '1px solid var(--border-color)', borderRadius: '24px', padding: '32px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column' }}>
+        <div className={styles.floatingLiveSection}>
           <div style={{ position: 'relative', zIndex: 1, height: '100%' }}>
             <h3 style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', marginBottom: '20px' }}>
               <span style={{ width: '12px', height: '12px', background: '#ef4444', borderRadius: '50%', display: 'inline-block' }}></span>
@@ -348,8 +363,8 @@ function Dashboard() {
                           </div>
 
                           {classOpen ? (
-                            <button onClick={() => handleJoinClass(cls)} disabled={isJoining || !cls.meeting_link} style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: isJoining || !cls.meeting_link ? 'not-allowed' : 'pointer', opacity: isJoining || !cls.meeting_link ? 0.7 : 1, transition: '0.2s', whiteSpace: 'nowrap' }}>
-                              {!isJoining ? 'Join Live' : 'Connecting...'}
+                            <button onClick={() => handleJoinClass(cls)} disabled={isJoining || !cls.meeting_link} style={{ background: '#ef4444', color: 'var(--text-inverse)', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: isJoining || !cls.meeting_link ? 'not-allowed' : 'pointer', opacity: isJoining || !cls.meeting_link ? 0.7 : 1, transition: '0.2s', whiteSpace: 'nowrap' }}>
+                              {isJoining ? 'Opening...' : (cls.meeting_link ? 'Join Now' : 'No Link')}
                             </button>
                           ) : isEarly ? (
                             <div style={{ textAlign: 'right' }}>
@@ -401,10 +416,10 @@ function Dashboard() {
       </div>
 
       {/* Premium Statistics Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginTop: '24px' }}>
+      <div className={styles.statsGrid}>
         {/* Attendance Stats */}
-        <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
-          <h3 style={{ fontSize: '16px', marginBottom: '16px', color: 'var(--text-primary)' }}>Attendance Overview</h3>
+        <div className={styles.statCard}>
+          <h3>Attendance Overview</h3>
           {attendanceStats ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
               <div style={{ fontSize: '48px', fontWeight: 'bold', color: 'var(--primary-color)' }}>
@@ -421,8 +436,8 @@ function Dashboard() {
         </div>
 
         {/* Assignments Stats */}
-        <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
-          <h3 style={{ fontSize: '16px', marginBottom: '16px', color: 'var(--text-primary)' }}>Assignments</h3>
+        <div className={styles.statCard} style={{ display: 'flex', flexDirection: 'column' }}>
+          <h3>Assignments</h3>
           {assignmentStats.completed === 0 && assignmentStats.pending === 0 ? (
             <p style={{ color: 'var(--text-secondary)', flex: 1, display: 'flex', alignItems: 'center' }}>No assignments posted yet.</p>
           ) : (
@@ -451,8 +466,8 @@ function Dashboard() {
         </div>
 
         {/* Exams Stats */}
-        <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
-          <h3 style={{ fontSize: '16px', marginBottom: '16px', color: 'var(--text-primary)' }}>Exams & Assessments</h3>
+        <div className={styles.statCard}>
+          <h3>Exams & Assessments</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'var(--bg-nested)', borderRadius: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FiCheckCircle color="var(--primary-color)" /> <span style={{ color: 'var(--text-primary)' }}>Completed</span></div>
@@ -466,15 +481,15 @@ function Dashboard() {
         </div>
 
         {/* Feedback Stats */}
-        <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <h3 style={{ fontSize: '16px', marginBottom: '16px', color: 'var(--text-primary)' }}>Share Your Experience</h3>
+        <div className={styles.statCard} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <h3>Share Your Experience</h3>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>Your feedback helps us improve SURE ProEd. Let us know how things are going!</p>
           <FeedbackWidget />
         </div>
 
         {/* Offer Letters Card */}
-        <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <h3 style={{ fontSize: '16px', marginBottom: '16px', color: 'var(--text-primary)' }}>Offer Letters</h3>
+        <div className={styles.statCard} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <h3>Offer Letters</h3>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>View and manage your internship offer letters.</p>
           <button onClick={() => navigate('/student/applications')} style={{ width: '100%', padding: '10px 16px', backgroundColor: 'var(--brand-color, #2563eb)', color: 'white', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>
             Go to Applications →
@@ -499,7 +514,7 @@ function Dashboard() {
             <button 
               onClick={handleRequestPermission} 
               disabled={isSubmittingLateJoin || !lateJoinReason.trim()}
-              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--brand-color, #2563eb)', color: '#fff', fontWeight: 'bold', fontSize: '15px', cursor: isSubmittingLateJoin || !lateJoinReason.trim() ? 'not-allowed' : 'pointer', opacity: isSubmittingLateJoin || !lateJoinReason.trim() ? 0.7 : 1, transition: '0.2s' }}
+              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--brand-color, #2563eb)', color: 'var(--text-inverse)', fontWeight: 'bold', fontSize: '15px', cursor: isSubmittingLateJoin || !lateJoinReason.trim() ? 'not-allowed' : 'pointer', opacity: isSubmittingLateJoin || !lateJoinReason.trim() ? 0.7 : 1, transition: '0.2s' }}
             >
               {isSubmittingLateJoin ? 'Submitting...' : 'Submit Request'}
             </button>

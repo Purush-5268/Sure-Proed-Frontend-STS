@@ -261,10 +261,13 @@ function ApplyCourse() {
 
         {/* 🚨 PERMANENT QUALIFICATION BANNER 🚨 */}
         {!loading && hasQualified && (
-          <div style={{ backgroundColor: "#f0fdf4", border: "2px solid #22c55e", padding: "1rem 1.5rem", borderRadius: "12px", marginBottom: "2rem" }}>
-            <h3 style={{ margin: "0 0 4px 0", color: "#15803d", fontSize: "16px" }}>🏆 Permanent Qualified Lock Active</h3>
-            <p style={{ margin: 0, color: "#166534", fontSize: "14px" }}>
-              Congratulations! You have already qualified for an internship track. Further course applications are permanently locked.
+          <div className="premium-card" style={{ padding: "1.5rem", marginBottom: "2rem", borderLeft: "4px solid var(--primary-color)" }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+              <span style={{ fontSize: '24px' }}>🏆</span>
+              <h3 style={{ margin: 0, color: "var(--primary-color)", fontSize: "18px", fontWeight: "700" }}>Internship Track Secured</h3>
+            </div>
+            <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: "15px", lineHeight: "1.5", paddingLeft: "36px" }}>
+              You’re currently enrolled in an internship track. New course applications will become available after you complete your current cohort.
             </p>
           </div>
         )}
@@ -283,7 +286,7 @@ function ApplyCourse() {
 
         {/* 🚨 PROFILE INCOMPLETE WARNING BANNER 🚨 */}
         {!loading && !profileCompleted && !hasQualified && !activeApplication && (
-          <div style={{ backgroundColor: "#fffbeb", border: "1px solid #fcd34d", padding: "1rem 1.5rem", borderRadius: "12px", marginBottom: "2rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ backgroundColor: "var(--status-pending-bg, rgba(251,191,36,0.1))", border: "1px solid var(--status-pending-text, #f59e0b)", padding: "1rem 1.5rem", borderRadius: "12px", marginBottom: "2rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ color: "#92400e", fontWeight: "bold", fontSize: "14px" }}>
               ⚠️ Your student profile is incomplete. Please complete your profile details first to unlock course applications.
             </span>
@@ -296,7 +299,7 @@ function ApplyCourse() {
         {loading ? (
           <p style={{ color: "#64748b" }}>Loading available courses...</p>
         ) : courses.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "40px", backgroundColor: "#f8fafc", borderRadius: "12px", border: "1px dashed #cbd5e1" }}>
+          <div style={{ textAlign: "center", padding: "40px", backgroundColor: "var(--bg-nested)", borderRadius: "12px", border: "1px dashed var(--border-color)" }}>
             <h3 style={{ color: "#475569", marginBottom: "8px" }}>No Courses Available</h3>
             <p style={{ color: "#64748b" }}>There are currently no published internship courses available for application.</p>
           </div>
@@ -342,19 +345,19 @@ function ApplyCourse() {
 
                   <div className={styles.buttons}>
                     {hasQualified ? (
-                      <button disabled className={styles.detailsBtn} style={{ backgroundColor: "#94a3b8", color: "#ffffff", border: "none", cursor: "not-allowed" }}>
-                        🔒 Permanently Qualified
+                      <button disabled className={`${styles.detailsBtn} ${styles.btnDisabled}`}>
+                        🔒 Track Secured
                       </button>
                     ) : isActiveTrack ? (
-                      <Link to="/student/applications" className={styles.detailsBtn} style={{ backgroundColor: "#059669", color: "#ffffff", border: "none", textAlign: "center" }}>
+                      <Link to="/student/applications" className={`${styles.detailsBtn} ${styles.btnActive}`}>
                         ✓ Active Application (View Status)
                       </Link>
                     ) : activeApplication ? (
-                      <button disabled className={styles.detailsBtn} style={{ backgroundColor: "#cbd5e1", color: "#64748b", border: "none", cursor: "not-allowed" }}>
+                      <button disabled className={`${styles.detailsBtn} ${styles.btnDisabled}`}>
                         🔒 Locked (1 Active Application Allowed)
                       </button>
                     ) : isUnderCooldown ? (
-                      <button disabled className={styles.detailsBtn} style={{ backgroundColor: "#fee2e2", color: "#991b1b", border: "none", cursor: "not-allowed", fontWeight: "bold" }}>
+                      <button disabled className={`${styles.detailsBtn} ${styles.btnDanger}`}>
                         REJECTED (15-Day Cooldown Active)
                       </button>
                     ) : profileCompleted ? (
@@ -362,7 +365,7 @@ function ApplyCourse() {
                         View Details & Apply
                       </Link>
                     ) : (
-                      <Link to="/student/profile" className={styles.detailsBtn} style={{ backgroundColor: "#d97706", color: "#ffffff", border: "none" }}>
+                      <Link to="/student/profile" className={`${styles.detailsBtn} ${styles.btnWarning}`}>
                         Complete Profile First
                       </Link>
                     )}

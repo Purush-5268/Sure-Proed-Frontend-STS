@@ -1,72 +1,67 @@
+/* ═══ Assignment Feedback — Premium Visual System ═══ */
+
 .page {
-  min-height: 100vh;
-  background: transparent;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px 20px;
+  width: 100%;
+  animation: studentFadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .card {
   width: 100%;
-  max-width: 100%;
-  background: var(--bg-surface);
-  padding: 40px;
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  background: var(--student-glass-bg, var(--bg-card));
+  backdrop-filter: blur(var(--student-glass-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--student-glass-blur, 12px));
+  padding: 28px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--student-card-shadow);
+  border: 1px solid var(--student-glass-border, var(--border-color));
 }
 
 .card h1 {
-  text-align: center;
-  color: #1e3a8a;
-  margin-bottom: 10px;
-}
-
-.subtitle {
-  text-align: center;
-  color: var(--text-secondary);
-  margin-bottom: 35px;
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  margin-bottom: 35px;
-}
-
-.row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--bg-main);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 16px 20px;
-}
-
-.row strong {
-  color: #2563eb;
-}
-
-.submitted {
-  color: #16a34a;
-  font-weight: bold;
-}
-
-.feedbackBox {
-  background: #eff6ff;
-  border-left: 5px solid #2563eb;
-  border-radius: 10px;
-  padding: 20px;
-}
-
-.feedbackBox h2 {
-  color: #1e3a8a;
-  margin-bottom: 15px;
-}
-
-.feedbackBox p {
   color: var(--text-primary);
-  line-height: 1.8;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.feedbackContent {
+  background: var(--student-surface-2, var(--bg-nested));
+  padding: 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  line-height: 1.7;
+}
+
+.scoreBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 14px;
+  margin-top: 16px;
+}
+
+.backBtn {
+  display: inline-flex;
+  padding: 10px 20px;
+  background: var(--student-surface-2, var(--bg-nested));
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  margin-top: 20px;
+}
+
+.backBtn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+  .card { padding: 20px; }
 }

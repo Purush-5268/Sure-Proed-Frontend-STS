@@ -7,6 +7,7 @@ import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./MyCohort.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
+import { FiMessageSquare, FiCalendar, FiUser, FiChevronRight } from "react-icons/fi";
 
 function MyCohort() {
   const { user } = useAuth();
@@ -145,17 +146,34 @@ function MyCohort() {
               </div>
             </div>
 
-            <div style={{ marginTop: "24px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
+            <div className={styles.actionGrid}>
               {cohort.id && (
-                <Link to={`/student/cohort-chat/${cohort.id}`} className={styles.button} style={{ flex: 1, textAlign: "center", backgroundColor: "#2563eb", color: "white" }}>
-                  💬 Cohort Chat
+                <Link to={`/student/cohort-chat/${cohort.id}`} className={styles.actionCard}>
+                  <div className={styles.actionIcon}><FiMessageSquare /></div>
+                  <div className={styles.actionContent}>
+                    <h4>Cohort Chat</h4>
+                    <p>Talk with your cohort</p>
+                  </div>
+                  <div className={styles.actionChevron}><FiChevronRight /></div>
                 </Link>
               )}
-              <Link to="/student/class-schedule" className={styles.button}>
-                View Class Schedule
+              
+              <Link to="/student/class-schedule" className={styles.actionCard}>
+                <div className={styles.actionIcon}><FiCalendar /></div>
+                <div className={styles.actionContent}>
+                  <h4>Class Schedule</h4>
+                  <p>View upcoming classes</p>
+                </div>
+                <div className={styles.actionChevron}><FiChevronRight /></div>
               </Link>
-              <Link to="/student/mentor-details" className={styles.button}>
-                Mentor Details
+              
+              <Link to="/student/mentor-details" className={styles.actionCard}>
+                <div className={styles.actionIcon}><FiUser /></div>
+                <div className={styles.actionContent}>
+                  <h4>Mentor Details</h4>
+                  <p>View mentor information</p>
+                </div>
+                <div className={styles.actionChevron}><FiChevronRight /></div>
               </Link>
             </div>
           </>

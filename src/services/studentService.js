@@ -109,14 +109,29 @@ export const resolveStudentEnrollment = (serverProfile, applications = [], cours
   // Resolve Course
   let courseId = null;
   let courseName = null;
+  let courseDomain = null;
 
   if (activeApp?.course?.name) {
-    courseId = activeApp.course.id;
+    courseId = activeApp.course.id || activeApp.course;
     courseName = activeApp.course.name;
+    courseDomain = activeApp.course.domain;
   } else if (serverProfile?.course_id) {
     courseId = serverProfile.course_id;
-    const matched = coursesArray.find(c => c.id === courseId);
-    if (matched) courseName = matched.name;
+  }
+
+  // Always attempt to enrich with authoritative data from the courses list
+  if (courseId || courseName) {
+    // Handle case where activeApp.course is an ID or an object
+    const resolvedId = typeof courseId === 'object' ? courseId.id : courseId;
+    const matched = coursesArray.find(c => 
+      (resolvedId && c.id === resolvedId) || 
+      (courseName && c.name === courseName)
+    );
+    if (matched) {
+      if (!courseName) courseName = matched.name;
+      // The matched course from /api/courses/ always contains the full fields
+      courseDomain = matched.domain;
+    }
   }
 
   // Resolve Group
@@ -133,6 +148,7 @@ export const resolveStudentEnrollment = (serverProfile, applications = [], cours
     isEnrolled: true,
     courseId,
     courseName,
+    courseDomain,
     group,
     status: activeApp ? activeApp.status : (serverProfile?.status || "UNKNOWN"),
     application: activeApp || null,

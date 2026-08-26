@@ -1,13 +1,13 @@
 .page {
   min-height: 100vh;
-  background: #f1f5f9;
-  background: radial-gradient(circle at 50% 0%, #f8fafc 0%, #edf2f7 100%);
+  background: var(--bg-nested);
+  background: radial-gradient(circle at 50% 0%, var(--bg-nested) 0%, var(--border-color) 100%);
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 48px 24px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .container {
@@ -16,10 +16,10 @@
 }
 
 .card {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 16px;
   padding: 44px 48px;
-  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08), 0 0 0 1px #e2e8f0;
+  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08), 0 0 0 1px var(--border-color);
 }
 
 /* Institutional Masthead Header */
@@ -29,7 +29,7 @@
   align-items: center;
   text-align: center;
   margin-bottom: 28px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--bg-nested);
   padding-bottom: 24px;
 }
 
@@ -41,9 +41,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #475569;
+  background: var(--bg-nested);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -55,19 +55,19 @@
 
 .portalBadgeIcon {
   font-size: 13px;
-  color: #2563eb;
+  color: var(--primary-color);
 }
 
 .title {
   font-size: 24px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
   letter-spacing: -0.02em;
 }
 
 .subtitle {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 14px;
   margin: 0;
   max-width: 600px;
@@ -76,8 +76,8 @@
 
 /* Candidate Verification Card */
 .candidateAuthCard {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-nested);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 18px 22px;
   margin-bottom: 28px;
@@ -88,14 +88,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 14px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 10px;
 }
 
 .authLabel {
   font-size: 11px;
   font-weight: 700;
-  color: #64748b;
+  color: var(--text-secondary);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -104,9 +104,9 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #166534;
+  background: var(--status-active-bg, #dcfce7);
+  border: 1px solid var(--status-active-bg, #dcfce7);
+  color: var(--status-active-text, #166534);
   font-size: 11px;
   font-weight: 700;
   padding: 3px 10px;
@@ -133,7 +133,7 @@
 .authFieldLabel {
   font-size: 11px;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -141,13 +141,13 @@
 .authFieldValue {
   font-size: 13.5px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .authFieldValueHighlight {
   font-size: 13.5px;
   font-weight: 700;
-  color: #1d4ed8;
+  color: var(--primary-color);
 }
 
 /* Section Title */
@@ -160,13 +160,13 @@
 
 .sectionIcon {
   font-size: 16px;
-  color: #2563eb;
+  color: var(--primary-color);
 }
 
 .sectionTitle {
   font-size: 15px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -180,8 +180,8 @@
 }
 
 .paramCard {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 14px 16px;
   display: flex;
@@ -191,7 +191,7 @@
 }
 
 .paramCard:hover {
-  border-color: #cbd5e1;
+  border-color: var(--text-muted);
   box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.04);
 }
 
@@ -200,39 +200,39 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .paramValue {
   font-size: 16px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .paramValueSmall {
   font-size: 13.5px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .paramSubtext {
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin-top: 2px;
 }
 
 /* Schedule Card */
 .scheduleCard {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-nested);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 18px 22px;
   margin-bottom: 28px;
 }
 
 .scheduleCardActive {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
+  background: var(--status-active-bg, #dcfce7);
+  border-color: var(--status-active-bg, #dcfce7);
 }
 
 .scheduleHeader {
@@ -245,7 +245,7 @@
 .scheduleTitle {
   font-size: 14px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -253,7 +253,7 @@
 
 .scheduleIcon {
   font-size: 15px;
-  color: #2563eb;
+  color: var(--primary-color);
 }
 
 .statusBadge {
@@ -265,21 +265,21 @@
 }
 
 .statusScheduled {
-  background: #eff6ff;
+  background: var(--primary-light);
   border: 1px solid #bfdbfe;
-  color: #1d4ed8;
+  color: var(--primary-color);
 }
 
 .statusActive {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #166534;
+  background: var(--status-active-bg, #dcfce7);
+  border: 1px solid var(--status-active-bg, #dcfce7);
+  color: var(--status-active-text, #166534);
 }
 
 .statusCompleted {
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  color: #475569;
+  background: var(--bg-nested);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
 }
 
 .scheduleDetailsGrid {
@@ -287,14 +287,14 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 12px;
   font-size: 13px;
-  color: #334155;
+  color: var(--text-secondary);
 }
 
 .schedMetaLabel {
   display: block;
   font-size: 11px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-secondary);
   text-transform: uppercase;
   margin-bottom: 2px;
 }
@@ -303,7 +303,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #2563eb;
+  color: var(--primary-color);
   font-weight: 700;
   text-decoration: none;
 }
@@ -315,7 +315,7 @@
 .meetInstructionBox {
   margin-top: 14px;
   padding: 12px 16px;
-  background: #eff6ff;
+  background: var(--primary-light);
   border: 1px solid #bfdbfe;
   border-radius: 8px;
   font-size: 12.5px;
@@ -324,23 +324,23 @@
 }
 
 .meetInstructionBoxJoined {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
-  color: #166534;
+  background: var(--status-active-bg, #dcfce7);
+  border-color: var(--status-active-bg, #dcfce7);
+  color: var(--status-active-text, #166534);
 }
 
 /* Device Readiness Card */
 .deviceCheckCard {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 20px 22px;
   margin-bottom: 28px;
 }
 
 .deviceCheckCardActive {
-  border-color: #bbf7d0;
-  box-shadow: 0 0 0 1px #bbf7d0;
+  border-color: var(--status-active-bg, #dcfce7);
+  box-shadow: 0 0 0 1px var(--status-active-bg, #dcfce7);
 }
 
 .deviceCheckCardError {
@@ -359,7 +359,7 @@
 .deviceCheckTitle {
   font-size: 14px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -367,13 +367,13 @@
 
 .deviceSectionIcon {
   font-size: 16px;
-  color: #2563eb;
+  color: var(--primary-color);
 }
 
 .btnDeviceTest {
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
-  color: #1e293b;
+  background: var(--bg-nested);
+  border: 1px solid var(--text-muted);
+  color: var(--text-primary);
   padding: 7px 14px;
   border-radius: 8px;
   font-size: 12px;
@@ -383,8 +383,8 @@
 }
 
 .btnDeviceTest:hover:not(:disabled) {
-  background: #e2e8f0;
-  border-color: #94a3b8;
+  background: var(--border-color);
+  border-color: var(--text-muted);
 }
 
 .btnDeviceTest:disabled {
@@ -408,11 +408,11 @@
 .videoPreviewWrap {
   width: 100%;
   height: 140px;
-  background: #0f172a;
+  background: var(--text-primary);
   border-radius: 10px;
   overflow: hidden;
   position: relative;
-  border: 1px solid #334155;
+  border: 1px solid var(--text-secondary);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -435,7 +435,7 @@
   left: 8px;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
-  color: #ffffff;
+  color: var(--bg-card);
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -466,23 +466,23 @@
   text-align: center;
   gap: 6px;
   padding: 16px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .placeholderIcon {
   font-size: 24px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .placeholderTitle {
   font-size: 12px;
   font-weight: 700;
-  color: #cbd5e1;
+  color: var(--text-muted);
 }
 
 .placeholderSub {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-secondary);
   line-height: 1.3;
 }
 
@@ -497,8 +497,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 14px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-nested);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
 }
 
@@ -508,12 +508,12 @@
   gap: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #334155;
+  color: var(--text-secondary);
 }
 
 .deviceIcon {
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .statusPill {
@@ -527,15 +527,15 @@
 }
 
 .statusPillActive {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #166534;
+  background: var(--status-active-bg, #dcfce7);
+  border: 1px solid var(--status-active-bg, #dcfce7);
+  color: var(--status-active-text, #166534);
 }
 
 .statusPillInactive {
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  color: #64748b;
+  background: var(--bg-nested);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
 }
 
 .audioWaveVisualizerBox {
@@ -544,8 +544,8 @@
   gap: 8px;
   width: 100%;
   padding: 8px 12px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   margin-top: 4px;
 }
@@ -571,8 +571,8 @@
 .audioMeterContainer {
   width: 100%;
   height: 8px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-nested);
+  border: 1px solid var(--border-color);
   border-radius: 9999px;
   overflow: hidden;
   position: relative;
@@ -580,7 +580,7 @@
 
 .audioMeterBar {
   height: 100%;
-  background: linear-gradient(90deg, #10b981 0%, #059669 60%, #eab308 90%, #ef4444 100%);
+  background: linear-gradient(90deg, #10b981 0%, #059669 60%, #eab308 90%, var(--status-inactive-text, #ef4444) 100%);
   border-radius: 9999px;
   transition: width 0.06s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
@@ -595,12 +595,12 @@
 
 .audioFeedbackText {
   font-weight: 600;
-  color: #166534;
+  color: var(--status-active-text, #166534);
 }
 
 .audioDbText {
   font-weight: 700;
-  color: #64748b;
+  color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
@@ -609,9 +609,9 @@
   align-items: flex-start;
   gap: 8px;
   font-size: 12px;
-  color: #475569;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  color: var(--text-secondary);
+  background: var(--bg-nested);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 10px 12px;
   line-height: 1.4;
@@ -619,7 +619,7 @@
 
 .deviceNoticeIcon {
   font-size: 14px;
-  color: #2563eb;
+  color: var(--primary-color);
   margin-top: 1px;
   flex-shrink: 0;
 }
@@ -640,26 +640,26 @@
   align-items: flex-start;
   gap: 12px;
   padding: 12px 16px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-nested);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   transition: border-color 0.15s ease;
 }
 
 .ruleItem:hover {
-  border-color: #cbd5e1;
+  border-color: var(--text-muted);
 }
 
 .ruleIconWrap {
   width: 28px;
   height: 28px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #2563eb;
+  color: var(--primary-color);
   font-size: 14px;
   flex-shrink: 0;
   margin-top: 2px;
@@ -674,13 +674,13 @@
 .ruleContent strong {
   font-size: 13px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .ruleContent p {
   margin: 0;
   font-size: 12.5px;
-  color: #64748b;
+  color: var(--text-secondary);
   line-height: 1.45;
 }
 
@@ -689,7 +689,7 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--bg-nested);
   padding-top: 24px;
 }
 
@@ -700,7 +700,7 @@
   gap: 8px;
   background: #1e3a8a;
   background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
-  color: #ffffff;
+  color: var(--bg-card);
   padding: 12px 28px;
   border-radius: 10px;
   border: none;
@@ -713,7 +713,7 @@
 }
 
 .primaryButton:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, #1e40af 100%);
   box-shadow: 0 6px 16px rgba(30, 58, 138, 0.28);
   transform: translateY(-1px);
 }
@@ -729,9 +729,9 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: #ffffff;
-  color: #334155;
-  border: 1px solid #cbd5e1;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--text-muted);
   padding: 12px 24px;
   border-radius: 10px;
   font-size: 14px;
@@ -742,9 +742,9 @@
 }
 
 .secondaryButton:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
-  color: #0f172a;
+  background: var(--bg-nested);
+  border-color: var(--text-muted);
+  color: var(--text-primary);
 }
 
 /* Banners */
@@ -781,7 +781,7 @@
 
 .alertIconNotice {
   font-size: 16px;
-  color: #2563eb;
+  color: var(--primary-color);
 }
 
 .alertText {
@@ -791,25 +791,25 @@
 }
 
 .warningBanner {
-  background: #fffbeb;
+  background: var(--bg-card)beb;
   border: 1px solid #fde68a;
   color: #92400e;
 }
 
 .dangerBanner {
-  background: #fef2f2;
+  background: var(--status-inactive-bg, #fee2e2);
   border: 1px solid #fecaca;
-  color: #991b1b;
+  color: var(--status-inactive-text, #ef4444);
 }
 
 .successBanner {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #166534;
+  background: var(--status-active-bg, #dcfce7);
+  border: 1px solid var(--status-active-bg, #dcfce7);
+  color: var(--status-active-text, #166534);
 }
 
 .noticeBanner {
-  background: #eff6ff;
+  background: var(--primary-light);
   border: 1px solid #bfdbfe;
   color: #1e40af;
 }
@@ -826,7 +826,7 @@
   align-items: center;
   gap: 6px;
   background: #1e40af;
-  color: #ffffff;
+  color: var(--bg-card);
   border: none;
   padding: 8px 16px;
   border-radius: 8px;
@@ -839,9 +839,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #ffffff;
-  color: #1e293b;
-  border: 1px solid #cbd5e1;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--text-muted);
   padding: 8px 16px;
   border-radius: 8px;
   font-size: 12.5px;
@@ -854,7 +854,7 @@
   align-items: center;
   gap: 6px;
   background: #dc2626;
-  color: #ffffff;
+  color: var(--bg-card);
   border: none;
   padding: 8px 16px;
   border-radius: 8px;
@@ -867,8 +867,8 @@
 .spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid #e2e8f0;
-  border-top-color: #2563eb;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--primary-color);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0 auto 12px;
@@ -878,7 +878,7 @@
   width: 14px;
   height: 14px;
   border: 2px solid rgba(255, 255, 255, 0.4);
-  border-top-color: #ffffff;
+  border-top-color: var(--bg-card);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   display: inline-block;
@@ -886,4 +886,371 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   DARK MODE OVERRIDES — Exam Instructions
+   Eliminates ALL white panels in dark mode.
+   ═══════════════════════════════════════════════════════ */
+
+[data-theme="dark"] .page {
+  background: var(--bg-main);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .card {
+  background: var(--bg-card);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-color);
+}
+
+[data-theme="dark"] .headerWrap {
+  border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .portalBadge {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .portalBadgeIcon {
+  color: var(--primary-color);
+}
+
+[data-theme="dark"] .title {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .subtitle {
+  color: var(--text-secondary);
+}
+
+/* Candidate Auth Card */
+[data-theme="dark"] .candidateAuthCard {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .candidateAuthHeader {
+  border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .authLabel {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .authStatusPill {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.25);
+  color: #4ade80;
+}
+
+[data-theme="dark"] .authFieldLabel {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .authFieldValue {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .authFieldValueHighlight {
+  color: var(--primary-color);
+}
+
+/* Section Titles */
+[data-theme="dark"] .sectionIcon {
+  color: var(--primary-color);
+}
+
+[data-theme="dark"] .sectionTitle {
+  color: var(--text-primary);
+}
+
+/* Parameters Grid */
+[data-theme="dark"] .paramCard {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .paramCard:hover {
+  border-color: var(--text-muted);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .paramLabel {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .paramValue {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .paramValueSmall {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .paramSubtext {
+  color: var(--text-muted);
+}
+
+/* Schedule Card */
+[data-theme="dark"] .scheduleCard {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .scheduleCardActive {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+[data-theme="dark"] .scheduleTitle {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .scheduleIcon {
+  color: var(--primary-color);
+}
+
+[data-theme="dark"] .statusScheduled {
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(37, 99, 235, 0.25);
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .statusActive {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.25);
+  color: #4ade80;
+}
+
+[data-theme="dark"] .statusCompleted {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .scheduleDetailsGrid {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .schedMetaLabel {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .meetingLink {
+  color: var(--primary-color);
+}
+
+[data-theme="dark"] .meetInstructionBox {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.2);
+  color: #93c5fd;
+}
+
+[data-theme="dark"] .meetInstructionBoxJoined {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+}
+
+/* Device Check Card */
+[data-theme="dark"] .deviceCheckCard {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .deviceCheckCardActive {
+  border-color: rgba(34, 197, 94, 0.3);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.3);
+}
+
+[data-theme="dark"] .deviceCheckCardError {
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+[data-theme="dark"] .deviceCheckTitle {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .deviceSectionIcon {
+  color: var(--primary-color);
+}
+
+[data-theme="dark"] .btnDeviceTest {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .btnDeviceTest:hover:not(:disabled) {
+  background: var(--bg-subtle);
+  border-color: var(--text-muted);
+}
+
+[data-theme="dark"] .deviceStatusItem {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .deviceLabel {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .deviceIcon {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .statusPillActive {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.25);
+  color: #4ade80;
+}
+
+[data-theme="dark"] .statusPillInactive {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .audioWaveVisualizerBox {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .audioMeterContainer {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .audioFeedbackText {
+  color: #4ade80;
+}
+
+[data-theme="dark"] .audioDbText {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .placeholderTitle {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .placeholderIcon {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .placeholderSub {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .deviceNotice {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .deviceNoticeIcon {
+  color: var(--primary-color);
+}
+
+/* Rules List */
+[data-theme="dark"] .ruleItem {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .ruleItem:hover {
+  border-color: var(--text-muted);
+}
+
+[data-theme="dark"] .ruleIconWrap {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--primary-color);
+}
+
+[data-theme="dark"] .ruleContent strong {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .ruleContent p {
+  color: var(--text-secondary);
+}
+
+/* Actions */
+[data-theme="dark"] .actions {
+  border-top-color: var(--border-color);
+}
+
+[data-theme="dark"] .primaryButton {
+  background: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .primaryButton:hover:not(:disabled) {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .secondaryButton {
+  background: var(--bg-nested);
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .secondaryButton:hover {
+  background: var(--bg-subtle);
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+/* Banners */
+[data-theme="dark"] .warningBanner {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+[data-theme="dark"] .dangerBanner {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .successBanner {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+}
+
+[data-theme="dark"] .noticeBanner {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.2);
+  color: #93c5fd;
+}
+
+[data-theme="dark"] .alertIconSuccess { color: #4ade80; }
+[data-theme="dark"] .alertIconWarning { color: #fbbf24; }
+[data-theme="dark"] .alertIconNotice { color: #60a5fa; }
+
+[data-theme="dark"] .alertText {
+  color: inherit;
+}
+
+[data-theme="dark"] .btnPrimaryBanner {
+  background: var(--primary-color);
+}
+
+[data-theme="dark"] .btnSecondaryBanner {
+  background: var(--bg-nested);
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .spinner {
+  border-color: var(--border-color);
+  border-top-color: var(--primary-color);
+}
+
+[data-theme="dark"] .videoPlaceholder {
+  color: var(--text-muted);
 }

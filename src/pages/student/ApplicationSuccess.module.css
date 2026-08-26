@@ -1,80 +1,61 @@
-.successPage {
-  min-height: 100vh;
-  background: #f4f7fc;
+/* ═══ Application Success — Premium Visual System ═══ */
+
+.page {
+  width: 100%;
+  min-height: 60vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 40px;
+  justify-content: center;
+  background: var(--bg-main);
+  animation: studentFadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.successCard {
-  max-width: 100%;
+.card {
   width: 100%;
-  background: var(--bg-surface);
-  border-radius: 20px;
-  padding: 50px;
+  max-width: 500px;
+  background: var(--student-glass-bg, var(--bg-card));
+  backdrop-filter: blur(var(--student-glass-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--student-glass-blur, 12px));
+  border-radius: var(--radius-xl);
+  padding: 40px;
+  box-shadow: var(--student-card-shadow);
+  border: 1px solid var(--student-glass-border, var(--border-color));
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.card h1 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.card p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 24px;
 }
 
 .icon {
-  font-size: 70px;
-  margin-bottom: 20px;
+  font-size: 48px;
+  margin-bottom: 16px;
 }
 
-.successCard h1 {
-  color: #15803d;
-  margin-bottom: 15px;
-  font-size: 34px;
-}
-
-.successCard p {
-  color: var(--text-secondary);
-  line-height: 1.8;
-  margin-bottom: 30px;
-}
-
-.infoBox {
-  background: var(--bg-main);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 25px;
-  text-align: left;
-  margin-bottom: 30px;
-}
-
-.infoBox h3 {
-  color: #1e3a8a;
-  margin-bottom: 15px;
-}
-
-.infoBox ul {
-  padding-left: 20px;
-  line-height: 2;
-  color: var(--text-secondary);
-}
-
-.button {
-  display: inline-block;
+.primaryBtn {
+  display: inline-flex;
+  padding: 12px 28px;
+  background: var(--student-btn-gradient, var(--primary-color));
+  color: var(--text-inverse, #fff);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
-  background: #2563eb;
-  color: white;
-  padding: 14px 30px;
-  border-radius: 10px;
-  font-weight: 600;
-  transition: 0.3s;
 }
 
-.button:hover {
-  background: #1d4ed8;
-}
-
-@media (max-width: 768px) {
-  .successCard {
-    padding: 30px;
-  }
-
-  .successCard h1 {
-    font-size: 28px;
-  }
+.primaryBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px var(--student-glow-primary);
 }

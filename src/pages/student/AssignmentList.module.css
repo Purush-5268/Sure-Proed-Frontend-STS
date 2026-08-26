@@ -1,132 +1,143 @@
+/* ═══ Assignment List — Premium Visual System ═══ */
+
 .page {
   width: 100%;
+  animation: studentFadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .card {
   width: 100%;
-  background: var(--bg-card);
+  background: var(--student-glass-bg, var(--bg-card));
+  backdrop-filter: blur(var(--student-glass-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--student-glass-blur, 12px));
   padding: 28px;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--student-card-shadow);
+  border: 1px solid var(--student-glass-border, var(--border-color));
 }
 
 .card h1 {
   text-align: left;
-  color: var(--primary-dark);
+  color: var(--text-primary);
   font-size: 1.75rem;
+  font-weight: 800;
   margin-bottom: 6px;
+  letter-spacing: -0.02em;
 }
 
-.subtitle {
-  text-align: left;
-  color: var(--text-muted);
-  margin-bottom: 24px;
-  font-size: 0.95rem;
+.card p {
+  color: var(--text-secondary);
 }
 
-.list {
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
 }
 
 .assignmentCard {
-  background: var(--bg-subtle);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  background: var(--student-surface-1, var(--bg-card));
+  border: 1px solid var(--student-glass-border, var(--border-color));
+  border-radius: var(--radius-lg);
   padding: 20px;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-  display: flex;
-  flex-direction: column;
+  box-shadow: var(--student-card-shadow);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.assignmentCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--student-btn-gradient);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .assignmentCard:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+  box-shadow: var(--student-card-hover-shadow);
+  border-color: var(--primary-color);
+}
+
+.assignmentCard:hover::before {
+  opacity: 1;
 }
 
 .assignmentCard h3 {
-  color: var(--primary-color);
-  margin-bottom: 10px;
-  font-size: 1.1rem;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
 
 .assignmentCard p {
-  margin-bottom: 12px;
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: 13px;
 }
 
-.pending,
-.submitted {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  padding: 4px 10px;
-  border-radius: 50px;
+.statusBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
   font-size: 12px;
-  font-weight: 600;
-  margin-bottom: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
-.pending {
-  background: var(--status-pending-bg);
-  color: var(--status-pending-text);
-}
-
-.submitted {
-  background: var(--status-active-bg);
-  color: var(--status-active-text);
-}
-
-.button {
+.viewBtn {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: var(--button-height);
-  width: 100%;
-  text-decoration: none;
-  background: var(--primary-color);
-  color: #ffffff;
+  padding: 8px 20px;
+  background: var(--student-btn-gradient, var(--primary-color));
+  color: var(--text-inverse, #ffffff);
+  border: none;
   border-radius: var(--radius-md);
-  font-weight: 600;
-  font-size: 14px;
-  transition: all var(--transition-fast);
-  margin-top: auto;
-}
-
-.button:hover {
-  background: var(--primary-hover);
-}
-
-.actions {
-  margin-top: 24px;
-  text-align: left;
-}
-
-.nextBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: var(--button-height);
-  padding: 0 24px;
-  background: var(--primary-color);
-  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  font-size: 14px;
-  transition: all var(--transition-fast);
+  margin-top: 12px;
 }
 
-.nextBtn:hover {
-  background: var(--primary-hover);
+.viewBtn:hover {
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--student-glow-primary);
+}
+
+.submitBtn {
+  display: inline-flex;
+  padding: 8px 20px;
+  background: var(--status-active-text, #16a34a);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  margin-top: 12px;
+}
+
+.submitBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-muted);
+  background: var(--student-surface-2, var(--bg-nested));
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--border-color);
 }
 
 @media (max-width: 768px) {
-  .card {
-    padding: 18px;
-  }
+  .card { padding: 20px; }
+  .grid { grid-template-columns: 1fr; }
 }

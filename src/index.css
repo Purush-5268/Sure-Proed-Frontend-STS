@@ -197,6 +197,144 @@
   --status-info-text: #5eead4;
 }
 
+/* ═══════════════════════════════════════════════════════
+   STUDENT PANEL — PREMIUM DESIGN SYSTEM TOKENS
+   Applied via data-role="student" on the layout root.
+   ═══════════════════════════════════════════════════════ */
+
+[data-role="student"] {
+  --student-glass-bg: rgba(255, 255, 255, 0.7);
+  --student-glass-border: rgba(255, 255, 255, 0.3);
+  --student-glass-blur: 16px;
+  --student-surface-1: #ffffff;
+  --student-surface-2: #f8fafc;
+  --student-surface-3: #f1f5f9;
+  --student-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --student-card-hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --student-glow-primary: rgba(13, 148, 136, 0.15);
+  --student-glow-accent: rgba(6, 182, 212, 0.1);
+  --student-glow-danger: rgba(239, 68, 68, 0.12);
+  --student-page-bg: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e8f0fe 100%);
+  --student-hero-gradient: linear-gradient(135deg, rgba(13, 148, 136, 0.06) 0%, rgba(6, 182, 212, 0.04) 100%);
+  --student-btn-gradient: linear-gradient(135deg, #0d9488, #0891b2);
+  --student-btn-danger-gradient: linear-gradient(135deg, #ef4444, #dc2626);
+  --student-sidebar-active-bg: rgba(13, 148, 136, 0.08);
+  --student-sidebar-active-glow: rgba(13, 148, 136, 0.2);
+}
+
+[data-role="student"][data-theme="dark"],
+[data-theme="dark"] [data-role="student"] {
+  --student-glass-bg: rgba(18, 18, 20, 0.75);
+  --student-glass-border: rgba(45, 212, 191, 0.08);
+  --student-glass-blur: 24px;
+  --student-surface-1: #09090b;
+  --student-surface-2: #121214;
+  --student-surface-3: #18181b;
+  --student-card-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.03);
+  --student-card-hover-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 20px rgba(45, 212, 191, 0.08);
+  --student-glow-primary: rgba(45, 212, 191, 0.08);
+  --student-glow-accent: rgba(34, 211, 238, 0.05);
+  --student-glow-danger: rgba(239, 68, 68, 0.1);
+  --student-page-bg: #09090b;
+  --student-hero-gradient: linear-gradient(135deg, rgba(45, 212, 191, 0.05) 0%, rgba(34, 211, 238, 0.02) 100%);
+  --student-btn-gradient: linear-gradient(135deg, #0f766e, #0d9488);
+  --student-btn-danger-gradient: linear-gradient(135deg, #b91c1c, #991b1b);
+  --student-sidebar-active-bg: rgba(45, 212, 191, 0.08);
+  --student-sidebar-active-glow: rgba(45, 212, 191, 0.15);
+}
+
+/* ═══════════════════════════════════════════════════════
+   UNIVERSE ATMOSPHERE (DARK MODE ONLY)
+   ═══════════════════════════════════════════════════════ */
+[data-theme="dark"] body {
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="dark"] body::before,
+[data-theme="dark"] body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Faint ambient atmospheric glow */
+[data-theme="dark"] body::before {
+  background: 
+    radial-gradient(circle at 15% 30%, rgba(45, 212, 191, 0.03) 0%, transparent 40%),
+    radial-gradient(circle at 85% 70%, rgba(34, 211, 238, 0.02) 0%, transparent 50%);
+  opacity: 0.8;
+}
+
+/* Subtle trinkles / dust */
+[data-theme="dark"] body::after {
+  background-image: 
+    radial-gradient(rgba(255, 255, 255, 0.8) 1px, transparent 1px),
+    radial-gradient(rgba(255, 255, 255, 0.6) 1px, transparent 1px);
+  background-size: 150px 150px, 250px 250px;
+  background-position: 0 0, 75px 75px;
+  opacity: 0.04;
+  animation: subtleTwinkle 15s ease-in-out infinite alternate;
+}
+
+@keyframes subtleTwinkle {
+  0% { opacity: 0.02; transform: translateY(0); }
+  50% { opacity: 0.06; }
+  100% { opacity: 0.03; transform: translateY(-4px); }
+}
+
+/* Student Panel — Shared Keyframes */
+@keyframes studentFadeSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes studentShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes studentPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes studentRadarSweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes studentRadarPing {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes studentGlowPulse {
+  0%, 100% { box-shadow: 0 0 8px var(--student-glow-primary); }
+  50% { box-shadow: 0 0 20px var(--student-glow-primary); }
+}
+
+@keyframes studentGradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Reduced Motion — Disable ALL decorative animations */
+@media (prefers-reduced-motion: reduce) {
+  [data-role="student"] *,
+  [data-role="student"] *::before,
+  [data-role="student"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
 /* ═══════════════════════════════════════════════════════
    MOTION SAFETY
@@ -912,4 +1050,9 @@ select.premium-input {
   .premium-grid-2, .premium-grid-3, .premium-grid-4 {
     grid-template-columns: 1fr !important;
   }
+}
+
+/* Fix for Native Calendar/Time Pickers in Dark Mode */
+[data-theme="dark"] {
+  color-scheme: dark;
 }
