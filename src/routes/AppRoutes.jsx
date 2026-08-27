@@ -90,6 +90,7 @@ import AssignmentList from "../pages/student/AssignmentList";
 import AssignmentDetails from "../pages/student/AssignmentDetails";
 import AssignmentSubmission from "../pages/student/AssignmentSubmission";
 import AssignmentFeedback from "../pages/student/AssignmentFeedback";
+const Placements = lazy(() => import("../pages/student/Placements"));
 
 import CertificateList from "../pages/student/CertificateList";
 import CertificateView from "../pages/student/CertificateView";
@@ -277,6 +278,8 @@ function AppRoutes() {
               <Route path="assignment-details" element={<AssignmentDetails />} />
               <Route path="assignment-submission" element={<AssignmentSubmission />} />
               <Route path="assignment-feedback" element={<AssignmentFeedback />} />
+              
+              <Route path="placements" element={<Placements />} />
 
               <Route path="certificates" element={<CertificateList />} />
               <Route path="certificate-view" element={<CertificateView />} />

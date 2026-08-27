@@ -14,6 +14,12 @@ export const API_ENDPOINTS = {
     VERIFY_EMAIL_OTP: "/api/auth/verify-email-otp/",
   },
 
+  // Analytics
+  ANALYTICS: {
+    PLATFORM_STATS: "/api/analytics/platform-stats/",
+    PUBLIC_PEOPLE: "/api/analytics/public-people/",
+  },
+
   // Users
   USERS: {
     BASE: "/api/users/",
@@ -30,6 +36,12 @@ export const API_ENDPOINTS = {
     BULK_VERIFY: "/api/students/bulk_verify/",
     VERIFY: (id) => `/api/students/${id}/verify/`,
     STATISTICS: "/api/students/statistics/",
+  },
+
+  // Student Placements
+  PLACEMENTS: {
+    BASE: "/api/student-placements/",
+    BY_ID: (id) => `/api/student-placements/${id}/`,
   },
 
   // Courses

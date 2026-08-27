@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import {
   FaChartLine, FaUserAlt, FaBookOpen, FaFileSignature,
   FaClipboardCheck, FaUsers, FaCalendarCheck,
-  FaTasks, FaAward, FaCog // 🚨 Added FaCog icon
+  FaTasks, FaAward, FaCog, FaBriefcase // 🚨 Added FaBriefcase
 } from "react-icons/fa";
 
 import Navbar from "../components/layout/Navbar";
@@ -23,6 +23,7 @@ const studentLinks = [
   { label: "Attendance", path: "/student/attendance", icon: <FaCalendarCheck /> },
   { label: "Permissions", path: "/student/permissions", icon: <FaCalendarCheck /> },
   { label: "Assignments", path: "/student/assignments", icon: <FaTasks /> },
+  { label: "Placements", path: "/student/placements", icon: <FaBriefcase /> },
   { label: "Certificates", path: "/student/certificates", icon: <FaAward /> },
   { label: "Settings", path: "/student/settings", icon: <FaCog /> },
 ];
