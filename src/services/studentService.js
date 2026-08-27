@@ -362,7 +362,7 @@ export const studentService = {
       if (updated.courseId) formData.append("course_id", updated.courseId);
       formData.append("course_batch", updated.courseBatch || "");
 
-      const config = { headers: { "Content-Type": "multipart/form-data" } };
+      const config = {}; // Let Axios automatically set the Content-Type with boundary for FormData
 
       if (existing.id) {
         await apiClient.patch(API_ENDPOINTS.STUDENTS.BY_ID(existing.id), formData, config);
