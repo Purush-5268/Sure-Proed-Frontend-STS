@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
 import { studentService } from "../../services/studentService";
 import NotificationBell from "../common/NotificationBell";
+import NavbarThemeSwitcher from "../common/NavbarThemeSwitcher";
 
 function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -36,7 +37,8 @@ function Navbar() {
   const getDashboardPath = () => {
     if (user?.role === "ADMIN") return "/admin/dashboard";
     if (user?.role === "MENTOR") return "/mentor/dashboard";
-    return "/student/profile";
+    if (user?.role === "TRUSTEE" || user?.role === "VOLUNTEER" || user?.role === "ADVISOR") return "/trustee/dashboard";
+    return "/student/dashboard";
   };
 
   const closeMenu = () => setMobileOpen(false);
@@ -73,6 +75,7 @@ function Navbar() {
         <div className={styles.buttons}>
           {isAuthenticated ? (
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <NavbarThemeSwitcher />
               <NotificationBell />
               <Link to={getDashboardPath()} onClick={closeMenu} className={styles.signupBtn} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 {profilePhoto ? (

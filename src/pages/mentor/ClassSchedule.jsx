@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import apiClient from "../../services/apiClient";
+import apiClient, { fetchAllPages } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import PageHeader from "../../components/ui/PageHeader";
 import Card from "../../components/ui/Card";
@@ -12,7 +12,9 @@ import styles from "./ClassSchedule.module.css";
 import { FiCalendar, FiClock, FiPlus, FiX } from "react-icons/fi";
 
 function ClassSchedule() {
+  const { globalCohort } = useOutletContext() || {};
   const [schedules, setSchedules] = useState([]);
+  const [availableTrainings, setAvailableTrainings] = useState([]);
   const [activeSessions, setActiveSessions] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,14 +22,69 @@ function ClassSchedule() {
     let isMounted = true;
     const loadSchedules = async () => {
       try {
-        const response = await apiClient.get(API_ENDPOINTS.COHORTS.BASE);
-        if (isMounted) setSchedules(Array.isArray(response.data?.results) ? response.data.results : (Array.isArray(response.data) ? response.data : []));
+        const cohortParams = globalCohort ? { cohort: globalCohort } : {};
         
-        // Fetch active sessions
-        const activeRes = await apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { params: { conducted: "true" } });
-        const activeData = activeRes.data;
-        const allActive = Array.isArray(activeData?.results) ? activeData.results : (Array.isArray(activeData) ? activeData : []);
-        if (isMounted) setActiveSessions(allActive.filter(s => s.conducted !== false));
+        // 1. Fetch Mentor Cohorts
+        const cohortsRes = await apiClient.get(API_ENDPOINTS.COHORTS.MY_COHORTS);
+        let myCohorts = Array.isArray(cohortsRes.data?.results) ? cohortsRes.data.results : (Array.isArray(cohortsRes.data) ? cohortsRes.data : []);
+        if (globalCohort) {
+          myCohorts = myCohorts.filter(c => String(c.id) === String(globalCohort));
+        }
+        if (isMounted) setSchedules(myCohorts);
+
+        // 2. Fetch Available Trainings
+        const trainingsData = await fetchAllPages(API_ENDPOINTS.TRAININGS.BASE);
+        if (isMounted) setAvailableTrainings(trainingsData);
+
+        // 3. Fetch Active Sessions (Domain + Training)
+        const [domainRes, trainingRes] = await Promise.allSettled([
+          fetchAllPages(API_ENDPOINTS.ATTENDANCE.BASE, { params: { conducted: "true", ...cohortParams } }),
+          fetchAllPages(API_ENDPOINTS.TRAININGS.SESSIONS, { params: cohortParams })
+        ]);
+
+        let unifiedSessions = [];
+
+        if (domainRes.status === "fulfilled") {
+          const domainActive = domainRes.value.filter(s => s.conducted !== false);
+          domainActive.forEach(s => {
+            unifiedSessions.push({
+              id: s.id,
+              type: "DOMAIN",
+              title: s.title || "Live Class",
+              start_time: s.start_time,
+              end_time: s.end_time,
+              session_date: s.class_date,
+              meeting_link: s.meeting_link,
+              raw: s
+            });
+          });
+        }
+
+        if (trainingRes.status === "fulfilled") {
+          const trainingActive = trainingRes.value.filter(s => s.class_status !== 'COMPLETED' && s.class_status !== 'CANCELLED');
+          trainingActive.forEach(s => {
+            unifiedSessions.push({
+              id: s.id,
+              type: "TRAINING",
+              title: s.title || "Training Session",
+              start_time: s.start_time,
+              end_time: s.end_time,
+              session_date: s.session_date,
+              meeting_link: s.meeting_link,
+              raw: s
+            });
+          });
+        }
+
+        // Sort by date/time (most recent first or upcoming)
+        unifiedSessions.sort((a, b) => {
+          const dateA = new Date(`${a.session_date}T${a.start_time}`);
+          const dateB = new Date(`${b.session_date}T${b.start_time}`);
+          return dateA - dateB;
+        });
+
+        if (isMounted) setActiveSessions(unifiedSessions);
+
       } catch (err) {
         console.error("Failed to load class schedule:", err);
         if (isMounted) setSchedules([]);
@@ -37,12 +94,18 @@ function ClassSchedule() {
     };
 
     loadSchedules();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    return () => { isMounted = false; };
+  }, [globalCohort]);
 
-  const [scheduleForm, setScheduleForm] = useState({ title: "", cohortId: "", startTime: "", endTime: "", guestEmails: [] });
+  const [sessionType, setSessionType] = useState("DOMAIN"); // "DOMAIN" or "TRAINING"
+  const [scheduleForm, setScheduleForm] = useState({ 
+    title: "", 
+    cohortId: "", 
+    trainingId: "",
+    startTime: "", 
+    endTime: "", 
+    guestEmails: [] 
+  });
   const [newGuestEmail, setNewGuestEmail] = useState("");
   const [isScheduling, setIsScheduling] = useState(false);
   const [showScheduleForm, setShowScheduleForm] = useState(false);
@@ -57,32 +120,47 @@ function ClassSchedule() {
         return;
       }
 
-      // Split datetime-local into class_date and time strings
       const startDt = new Date(scheduleForm.startTime);
       const endDt = new Date(scheduleForm.endTime);
-      
       const class_date = startDt.toISOString().split("T")[0];
       const start_time = startDt.toTimeString().split(" ")[0];
       const end_time = endDt.toTimeString().split(" ")[0];
-
-      // Find the cohort to get the stream_id (course ID) if needed
       const selectedCohort = schedules.find(c => String(c.id) === scheduleForm.cohortId);
 
-      const payload = {
-        title: scheduleForm.title,
-        frontend_cohort_id: scheduleForm.cohortId,
-        stream_id: selectedCohort?.course?.id || selectedCohort?.course,
-        class_date,
-        start_time,
-        end_time,
-        session_type: "Domain",
-        guest_emails: scheduleForm.guestEmails.join(",")
-      };
+      if (sessionType === "DOMAIN") {
+        const payload = {
+          title: scheduleForm.title,
+          frontend_cohort_id: scheduleForm.cohortId,
+          stream_id: selectedCohort?.course?.id || selectedCohort?.course,
+          class_date,
+          start_time,
+          end_time,
+          session_type: "Domain",
+          guest_emails: scheduleForm.guestEmails.join(",")
+        };
+        await apiClient.post(API_ENDPOINTS.ATTENDANCE.BASE, payload);
+        alert("✅ Domain Session Scheduled!");
+      } else {
+        if (!scheduleForm.trainingId) {
+          alert("Please select a training topic.");
+          setIsScheduling(false);
+          return;
+        }
+        const payload = {
+          training: scheduleForm.trainingId,
+          cohort: scheduleForm.cohortId,
+          title: scheduleForm.title,
+          session_date: class_date,
+          start_time: start_time,
+          end_time: end_time
+        };
+        await apiClient.post(API_ENDPOINTS.TRAININGS.SESSIONS, payload);
+        alert("✅ Training Session Scheduled!");
+      }
 
-      await apiClient.post(API_ENDPOINTS.ATTENDANCE.BASE, payload);
-      alert("✅ Domain Session Scheduled!");
-      setScheduleForm({ title: "", cohortId: "", startTime: "", endTime: "", guestEmails: [] });
+      setScheduleForm({ title: "", cohortId: "", trainingId: "", startTime: "", endTime: "", guestEmails: [] });
       setShowScheduleForm(false);
+      // Reload logic could be added here, but preserving existing behavior which did not reload.
     } catch (err) {
       alert(err?.response?.data?.detail || "❌ Failed to schedule class.");
     } finally {
@@ -105,13 +183,16 @@ function ClassSchedule() {
     }));
   };
 
-  const handleEndClass = async (sessionId) => {
+  const handleEndClass = async (sessionId, type) => {
     if (!window.confirm("Are you sure you want to end this class?")) return;
     try {
-      await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId), { conducted: false });
-      // Remove from active sessions
+      if (type === "DOMAIN") {
+        await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId), { conducted: false });
+      } else {
+        await apiClient.patch(API_ENDPOINTS.TRAININGS.SESSION_BY_ID(sessionId), { class_status: "COMPLETED" });
+      }
       setActiveSessions(prev => prev.filter(s => s.id !== sessionId));
-      alert("Class ended successfully. You can download the Excel report in the Attendance tab.");
+      alert("Class ended successfully.");
     } catch (err) {
       alert("Failed to end class.");
     }
@@ -126,7 +207,7 @@ function ClassSchedule() {
     <div className={styles.container}>
       <PageHeader 
         title="Class Schedule" 
-        description="View your cohort timelines and schedule live domain sessions."
+        description="View your cohort timelines and schedule live sessions."
         actions={
           <button 
             type="button" 
@@ -148,9 +229,51 @@ function ClassSchedule() {
             className={styles.formWrapper}
           >
             <Card className={styles.formCard}>
-              <h2 className={styles.formTitle}>Schedule Domain Session</h2>
+              <h2 className={styles.formTitle}>Schedule Session</h2>
+              
+              <div className={styles.sessionTypeSelector} style={{ marginBottom: "1rem", display: "flex", gap: "1rem" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                  <input 
+                    type="radio" 
+                    name="sessionType" 
+                    value="DOMAIN" 
+                    checked={sessionType === "DOMAIN"} 
+                    onChange={() => setSessionType("DOMAIN")} 
+                  />
+                  Domain Class
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                  <input 
+                    type="radio" 
+                    name="sessionType" 
+                    value="TRAINING" 
+                    checked={sessionType === "TRAINING"} 
+                    onChange={() => setSessionType("TRAINING")} 
+                  />
+                  Training Session
+                </label>
+              </div>
+
               <form onSubmit={handleScheduleSubmit} className={styles.formGrid}>
-                {/* ... (rest of form) ... */}
+                {sessionType === "TRAINING" && (
+                  <div className={styles.fullWidth}>
+                    <label className={styles.label}>Select Training Topic <span className={styles.required}>*</span></label>
+                    <select
+                      required
+                      value={scheduleForm.trainingId}
+                      onChange={e => setScheduleForm({ ...scheduleForm, trainingId: e.target.value })}
+                      className={styles.input}
+                    >
+                      <option value="">-- Select Training --</option>
+                      {availableTrainings.map(t => (
+                        <option key={t.id} value={t.id}>
+                          {t.title} ({t.duration_hours} hours)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 <div className={styles.fullWidth}>
                   <label className={styles.label}>Meet Title / Topic <span className={styles.required}>*</span></label>
                   <input 
@@ -162,6 +285,7 @@ function ClassSchedule() {
                     placeholder="e.g. Advanced State Management"
                   />
                 </div>
+                
                 <div className={styles.fullWidth}>
                   <label className={styles.label}>Select Cohort <span className={styles.required}>*</span></label>
                   <select
@@ -201,35 +325,37 @@ function ClassSchedule() {
                   />
                 </div>
 
-                <div className={styles.fullWidth}>
-                  <div className={styles.guestSection}>
-                    <label className={styles.label}>Whitelist Guest Emails</label>
-                    <div className={styles.guestInputRow}>
-                      <input 
-                        type="email" 
-                        placeholder="guest@email.com" 
-                        value={newGuestEmail} 
-                        onChange={e => setNewGuestEmail(e.target.value)} 
-                        className={styles.input}
-                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addGuest(e))}
-                      />
-                      <button type="button" onClick={addGuest} className={styles.secondaryBtn}>Add</button>
-                    </div>
-                    
-                    {scheduleForm.guestEmails.length > 0 && (
-                      <div className={styles.guestList}>
-                        {scheduleForm.guestEmails.map((em, i) => (
-                          <span key={i} className={styles.guestPill}>
-                            {em} 
-                            <button type="button" onClick={() => removeGuest(i)} className={styles.removeGuestBtn}>
-                              <FiX />
-                            </button>
-                          </span>
-                        ))}
+                {sessionType === "DOMAIN" && (
+                  <div className={styles.fullWidth}>
+                    <div className={styles.guestSection}>
+                      <label className={styles.label}>Whitelist Guest Emails</label>
+                      <div className={styles.guestInputRow}>
+                        <input 
+                          type="email" 
+                          placeholder="guest@email.com" 
+                          value={newGuestEmail} 
+                          onChange={e => setNewGuestEmail(e.target.value)} 
+                          className={styles.input}
+                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addGuest(e))}
+                        />
+                        <button type="button" onClick={addGuest} className={styles.secondaryBtn}>Add</button>
                       </div>
-                    )}
+                      
+                      {scheduleForm.guestEmails.length > 0 && (
+                        <div className={styles.guestList}>
+                          {scheduleForm.guestEmails.map((em, i) => (
+                            <span key={i} className={styles.guestPill}>
+                              {em} 
+                              <button type="button" onClick={() => removeGuest(i)} className={styles.removeGuestBtn}>
+                                <FiX />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className={styles.fullWidth}>
                   <button type="submit" disabled={isScheduling} className={styles.submitBtn}>
@@ -247,12 +373,18 @@ function ClassSchedule() {
           <h2 className={styles.sectionTitle}>Active Sessions</h2>
           <div className={styles.grid}>
             {activeSessions.map(session => (
-              <Card key={session.id} hoverable className={styles.scheduleCard} style={{ borderLeft: '4px solid #ef4444' }}>
+              <Card key={session.id} hoverable className={styles.scheduleCard} style={{ borderLeft: `4px solid ${session.type === 'TRAINING' ? '#8b5cf6' : '#ef4444'}` }}>
                 <div className={styles.cardHeader}>
-                  <h3 className={styles.cohortName}>{session.title || "Live Class"}</h3>
-                  <Badge variant="error">LIVE</Badge>
+                  <h3 className={styles.cohortName}>{session.title}</h3>
+                  <Badge variant={session.type === 'TRAINING' ? 'primary' : 'error'}>
+                    {session.type === 'TRAINING' ? 'TRAINING' : 'DOMAIN'}
+                  </Badge>
                 </div>
                 <div className={styles.cardBody}>
+                  <div className={styles.infoRow}>
+                    <FiCalendar className={styles.icon} />
+                    <span>{session.session_date}</span>
+                  </div>
                   <div className={styles.infoRow}>
                     <FiClock className={styles.icon} />
                     <span>{session.start_time} — {session.end_time || "Ongoing"}</span>
@@ -266,8 +398,8 @@ function ClassSchedule() {
                   )}
                   <div style={{ marginTop: '1rem' }}>
                     <button 
-                      onClick={() => handleEndClass(session.id)}
-                      style={{ background: '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
+                      onClick={() => handleEndClass(session.id, session.type)}
+                      style={{ background: session.type === 'TRAINING' ? '#8b5cf6' : '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
                     >
                       End Class
                     </button>

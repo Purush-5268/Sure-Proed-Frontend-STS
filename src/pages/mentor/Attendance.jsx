@@ -7,6 +7,7 @@ import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
 import EmptyState from "../../components/ui/EmptyState";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
+import Pagination from "../../components/common/Pagination";
 import styles from "./Attendance.module.css";
 import { FiCalendar, FiDownload, FiUsers, FiClock, FiFileText, FiEye, FiX, FiCheck, FiXCircle } from "react-icons/fi";
 
@@ -17,6 +18,12 @@ function Attendance() {
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
   const [selectedSessionView, setSelectedSessionView] = useState(null);
+
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrev, setHasPrev] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
 
   // Fetch mentor's cohorts
   useEffect(() => {
@@ -39,17 +46,20 @@ function Attendance() {
     return () => { isMounted = false; };
   }, []);
 
-  // Fetch sessions for selected cohort
   useEffect(() => {
     if (!selectedCohort) return;
     let isMounted = true;
     const fetchSessions = async () => {
       try {
-        // We fetch all sessions and filter locally to ensure compatibility with backend filters
-        const response = await apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE);
-        const data = Array.isArray(response.data?.results) ? response.data.results : (Array.isArray(response.data) ? response.data : []);
+        const response = await apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { 
+          params: { cohort: selectedCohort, page } 
+        });
+        const data = response.data;
         if (isMounted) {
-          setSessions(data.filter(s => String(s.cohort) === selectedCohort));
+          setSessions(Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []));
+          setHasNext(!!data.next);
+          setHasPrev(!!data.previous);
+          setTotalCount(data.count || 0);
         }
       } catch (err) {
         console.error("Failed to load sessions:", err);
@@ -57,6 +67,10 @@ function Attendance() {
     };
     fetchSessions();
     return () => { isMounted = false; };
+  }, [selectedCohort, page]);
+
+  useEffect(() => {
+    setPage(1);
   }, [selectedCohort]);
 
   const handleDownloadReport = async () => {
@@ -287,6 +301,14 @@ function Attendance() {
                 </table>
               </div>
             )}
+
+            <Pagination 
+              page={page} 
+              setPage={setPage} 
+              hasNext={hasNext} 
+              hasPrev={hasPrev} 
+              loading={loading} 
+            />
           </Card>
         </>
       )}

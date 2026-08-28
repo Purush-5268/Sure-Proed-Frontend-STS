@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {
   FaChalkboardTeacher, FaUsers, FaCalendarAlt,
   FaVideo, FaUserGraduate, FaUserCheck,
-  FaTasks, FaUserCircle, FaCog
+  FaTasks, FaUserCircle, FaCog, FaFileSignature, FaListAlt
 } from "react-icons/fa";
 
 import Navbar from "../components/layout/Navbar";
@@ -19,9 +19,12 @@ const mentorLinks = [
   { label: "My Cohorts", path: "/mentor/cohorts", icon: <FaUsers /> },
   { label: "Class Schedule", path: "/mentor/class-schedule", icon: <FaCalendarAlt /> },
   // Meeting Links removed as requested
+  { label: "Applications", path: "/mentor/applications", icon: <FaFileSignature /> },
   { label: "My Students", path: "/mentor/students", icon: <FaUserGraduate /> },
   { label: "Attendance", path: "/mentor/attendance", icon: <FaUserCheck /> },
+  { label: "Exams & Modules", path: "/mentor/assessments", icon: <FaListAlt /> },
   { label: "Assignments", path: "/mentor/assignments", icon: <FaTasks /> },
+  { label: "My Tasks", path: "/mentor/tasks", icon: <FaListAlt /> },
   { label: "Profile", path: "/mentor/profile", icon: <FaUserCircle /> },
   { label: "Settings", path: "/mentor/settings", icon: <FaCog /> },
 ];

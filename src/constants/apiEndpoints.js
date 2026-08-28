@@ -175,6 +175,12 @@ export const API_ENDPOINTS = {
     REQUEST_AUTOGRADE: (id) => `/api/submissions/${id}/request-autograde/`,
   },
 
+  TRAININGS: {
+    BASE: "/api/trainings/",
+    SESSIONS: "/api/training-sessions/",
+    SESSION_BY_ID: (id) => `/api/training-sessions/${id}/`,
+  },
+
   // Attendance
   ATTENDANCE: {
     BASE: "/api/attendance/",
@@ -211,8 +217,19 @@ export const API_ENDPOINTS = {
     ME: "/api/trustees/profiles/me/",
     BY_ID: (id) => `/api/trustees/profiles/${id}/`,
   },
+  
+  // Volunteer operations
+  VOLUNTEER_TASKS: {
+    BASE: "/api/volunteers/tasks/",
+    BY_ID: (id) => `/api/volunteers/tasks/${id}/`,
+    UPDATE_STATUS: (id) => `/api/volunteers/tasks/${id}/update_status/`,
+  },
+  VOLUNTEER_HELP_REQUESTS: {
+    BASE: "/api/volunteers/help-requests/",
+    BY_ID: (id) => `/api/volunteers/help-requests/${id}/`,
+  },
+
   TRUSTEE: {
-    // Volunteer operations
     LOW_ATTENDANCE_ALERTS: "/api/attendance/alerts/low/",
     ATTENDANCE_HIERARCHY: "/api/attendance/hierarchy/",
     CREATE_SESSION: "/api/sessions/",

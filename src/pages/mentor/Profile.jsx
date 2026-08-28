@@ -127,12 +127,12 @@ function Profile() {
       // Save mentor profile fields
       if (profile?.id) {
         await apiClient.patch(API_ENDPOINTS.MENTORS.PROFILE_BY_ID(profile.id), {
-          linkedin_url: profileForm.linkedin_url.trim() || null,
-          years_of_experience: profileForm.experience_years.trim() || null,
-          company_name: profileForm.company_name.trim() || null,
-          designation: profileForm.designation.trim() || null,
-          expertise: profileForm.expertise.trim() || null,
-          bio: profileForm.bio.trim() || null,
+          linkedin_url: String(profileForm.linkedin_url || "").trim() || null,
+          years_of_experience: String(profileForm.experience_years || "").trim() || null,
+          company_name: String(profileForm.company_name || "").trim() || null,
+          designation: String(profileForm.designation || "").trim() || null,
+          expertise: String(profileForm.expertise || "").trim() || null,
+          bio: String(profileForm.bio || "").trim() || null,
         });
       }
 

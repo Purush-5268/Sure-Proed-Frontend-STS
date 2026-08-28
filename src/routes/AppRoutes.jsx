@@ -191,6 +191,9 @@ const MentorDashboard = lazy(() => import("../pages/mentor/MentorDashboard"));
 import MyCohorts from "../pages/mentor/MyCohorts";
 import MentorCohortDetails from "../pages/mentor/CohortDetails";
 import MentorClassSchedule from "../pages/mentor/ClassSchedule";
+import MentorApplications from "../pages/mentor/Applications";
+import MentorAssessments from "../pages/mentor/Assessments";
+import MentorTasks from "../pages/mentor/Tasks";
 import MeetingLinks from "../pages/mentor/MeetingLinks";
 import EditMeetingLink from "../pages/mentor/EditMeetingLink";
 
@@ -407,6 +410,9 @@ function AppRoutes() {
             <Route path="/mentor" element={<MentorLayout />}>
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<MentorDashboard />} />
+              <Route path="applications" element={<MentorApplications />} />
+              <Route path="assessments" element={<MentorAssessments />} />
+              <Route path="tasks" element={<MentorTasks />} />
               <Route path="cohorts" element={<MyCohorts />} />
               <Route path="cohort-details" element={<MentorCohortDetails />} />
               <Route path="class-schedule" element={<MentorClassSchedule />} />

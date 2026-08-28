@@ -7,14 +7,38 @@
   flex-direction: column;
 }
 
-.toolbar {
+.wordRibbon {
   display: flex;
   align-items: center;
-  padding: 0.5rem;
-  background: var(--bg-nested);
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-surface);
   border-bottom: 1px solid var(--border-color);
-  gap: 0.25rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
+}
+
+.toolbarGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  background: var(--bg-nested);
+  padding: 0.25rem;
+  border-radius: var(--radius-sm, 0.25rem);
+  border: 1px solid var(--border-color);
+}
+
+.headingSelect {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm, 0.25rem);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  outline: none;
+}
+.headingSelect:focus {
+  border-color: var(--primary-color);
 }
 
 .toolbarBtn {

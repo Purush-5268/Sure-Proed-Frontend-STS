@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import apiClient from "../../services/apiClient";
+import apiClient, { fetchAllPages } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import PageHeader from "../../components/ui/PageHeader";
 import Badge from "../../components/ui/Badge";
@@ -9,61 +9,58 @@ import EmptyState from "../../components/ui/EmptyState";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./MyStudents.module.css";
 import { FiUsers, FiSearch, FiAlertCircle, FiMail, FiX, FiSend } from "react-icons/fi";
+import Pagination from "../../components/common/Pagination";
 
 function MyStudents() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrev, setHasPrev] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
   const [messageDialog, setMessageDialog] = useState(null); // { studentId, studentEmail, studentName }
   const [messageText, setMessageText] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
   const [messageSent, setMessageSent] = useState(false);
 
+  const { globalCohort } = useOutletContext() || {};
+
   useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1); // Reset page on new search
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    setPage(1); // Reset page on cohort change
+  }, [globalCohort]);
+
+  useEffect(() => {
+    if (globalCohort === undefined) return;
     let isMounted = true;
     const loadStudents = async () => {
       try {
-        // Step 1: Load mentor's cohorts (scoped to this mentor only)
-        const cohortsRes = await apiClient.get(API_ENDPOINTS.COHORTS.MY_COHORTS);
-        const cohortsData = cohortsRes.data;
-        const myCohorts = Array.isArray(cohortsData?.results) ? cohortsData.results : (Array.isArray(cohortsData) ? cohortsData : []);
+        setLoading(true);
+        const params = { page };
+        if (globalCohort) params.cohort = globalCohort;
+        if (debouncedSearch) params.search = debouncedSearch;
 
-        if (myCohorts.length === 0) {
-          if (isMounted) { setStudents([]); setLoading(false); }
-          return;
+        const res = await apiClient.get(API_ENDPOINTS.STUDENTS.BASE, { params });
+        const data = res.data;
+        
+        if (isMounted) {
+          setStudents(Array.isArray(data.results) ? data.results : (Array.isArray(data) ? data : []));
+          setHasNext(!!data.next);
+          setHasPrev(!!data.previous);
+          setTotalCount(data.count || 0);
         }
-
-        // Step 2: Load students from each cohort (server-driven, not client-filtered)
-        const studentRequests = myCohorts.map(c =>
-          apiClient.get(API_ENDPOINTS.COHORTS.STUDENTS(c.id))
-        );
-        const results = await Promise.allSettled(studentRequests);
-
-        const allStudents = [];
-        const seenIds = new Set();
-
-        results.forEach(result => {
-          if (result.status === "fulfilled") {
-            const data = result.value.data;
-            const arr = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
-            arr.forEach(student => {
-              if (!seenIds.has(student.id)) {
-                seenIds.add(student.id);
-                allStudents.push(student);
-              }
-            });
-          }
-        });
-
-        // Sort alphabetically by first name
-        allStudents.sort((a, b) => {
-          const nameA = `${a.first_name} ${a.last_name}`.toLowerCase();
-          const nameB = `${b.first_name} ${b.last_name}`.toLowerCase();
-          return nameA.localeCompare(nameB);
-        });
-
-        if (isMounted) setStudents(allStudents);
 
       } catch (err) {
         if (isMounted) setError("Unable to load students. Please try again.");
@@ -74,7 +71,7 @@ function MyStudents() {
 
     loadStudents();
     return () => { isMounted = false; };
-  }, []);
+  }, [globalCohort, page, debouncedSearch]);
 
   const handleSendMessage = async () => {
     if (!messageText.trim() || !messageDialog) return;
@@ -109,16 +106,6 @@ function MyStudents() {
     }
   };
 
-  const filteredStudents = students.filter(s => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      `${s.first_name} ${s.last_name}`.toLowerCase().includes(q) ||
-      (s.email || "").toLowerCase().includes(q) ||
-      (s.college || "").toLowerCase().includes(q)
-    );
-  });
-
   const item = {
     hidden: { opacity: 0, y: 12 },
     show: { opacity: 1, y: 0, transition: { duration: 0.3 } }
@@ -147,34 +134,22 @@ function MyStudents() {
             </button>
           )}
         </div>
-        <span className={styles.countBadge}>{filteredStudents.length} student{filteredStudents.length !== 1 ? "s" : ""}</span>
+        <span className={styles.countBadge}>{totalCount} student{totalCount !== 1 ? "s" : ""}</span>
       </div>
 
       {loading ? (
-        <div className={styles.tableCard}>
-          {[1,2,3,4,5].map(i => (
-            <div key={i} className={styles.skeletonRow}>
-              <SkeletonLoader width="2rem" height="2rem" borderRadius="50%" />
-              <SkeletonLoader width="35%" height="14px" borderRadius="4px" />
-              <SkeletonLoader width="25%" height="12px" borderRadius="4px" />
-              <SkeletonLoader width="15%" height="22px" borderRadius="20px" />
-            </div>
-          ))}
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <SkeletonLoader width="100%" height="80px" borderRadius="12px" />
+          <SkeletonLoader width="100%" height="80px" borderRadius="12px" />
+          <SkeletonLoader width="100%" height="80px" borderRadius="12px" />
         </div>
       ) : error ? (
         <EmptyState icon={<FiAlertCircle />} title="Failed to load students" description={error} />
       ) : students.length === 0 ? (
         <EmptyState
           icon={<FiUsers />}
-          title="No students yet"
-          description="Students will appear here once they are enrolled in your cohort."
-        />
-      ) : filteredStudents.length === 0 ? (
-        <EmptyState
-          icon={<FiSearch />}
-          title="No matches found"
-          description={`No students match "${searchQuery}".`}
-          action={<button className={styles.clearBtn} onClick={() => setSearchQuery("")}>Clear search</button>}
+          title="No students found"
+          description={searchQuery ? `No students match "${searchQuery}".` : "Students will appear here once they are enrolled in your cohort."}
         />
       ) : (
         <div className={styles.tableCard}>
@@ -193,7 +168,7 @@ function MyStudents() {
               variants={{ show: { transition: { staggerChildren: 0.04 } } }}
             >
               <AnimatePresence mode="popLayout">
-                {filteredStudents.map(student => {
+                {students.map(student => {
                   const fullName = `${student.first_name || ""} ${student.last_name || ""}`.trim() || student.email;
                   return (
                     <motion.tr key={student.id} variants={item} layout exit={{ opacity: 0 }}>
@@ -228,6 +203,16 @@ function MyStudents() {
               </AnimatePresence>
             </motion.tbody>
           </table>
+          
+          {!loading && students.length > 0 && (
+            <Pagination 
+              page={page} 
+              setPage={setPage} 
+              hasNext={hasNext} 
+              hasPrev={hasPrev} 
+              loading={loading} 
+            />
+          )}
         </div>
       )}
 

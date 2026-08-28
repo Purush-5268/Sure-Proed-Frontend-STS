@@ -49,13 +49,13 @@ function relativeTime(dateStr) {
  */
 const ACTION_URL_SLUG_MAP = {
   // Slug → { student, admin, mentor } route mapping
-  "application_tracker": { student: "/student/applications", admin: "/admin/applications", mentor: "/mentor/dashboard" },
+  "application_tracker": { student: "/student/applications", admin: "/admin/applications", mentor: "/mentor/applications" },
   "assignments":         { student: "/student/assignments", admin: "/admin/assignments", mentor: "/mentor/assignments" },
   "certificates":        { student: "/student/certificates", admin: "/admin/certificates", mentor: "/mentor/dashboard" },
   "community_activities":{ student: "/student/dashboard", admin: "/admin/dashboard", mentor: "/mentor/dashboard" },
   "courses":             { student: "/student/courses", admin: "/admin/courses", mentor: "/mentor/dashboard" },
   "grades":              { student: "/student/dashboard", admin: "/admin/reports", mentor: "/mentor/dashboard" },
-  "screening":           { student: "/student/applications", admin: "/admin/applications", mentor: "/mentor/dashboard" },
+  "screening":           { student: "/student/applications", admin: "/admin/applications", mentor: "/mentor/applications" },
   "support_requests":    { student: "/student/permissions", admin: "/admin/requests-support", mentor: "/mentor/dashboard" },
   "timetable":           { student: "/student/class-schedule", admin: "/admin/schedule", mentor: "/mentor/class-schedule" },
   "training":            { student: "/student/cohort", admin: "/admin/cohorts", mentor: "/mentor/cohorts" },
@@ -101,12 +101,14 @@ const getNotificationRoute = (notification, userRole) => {
       if (title.includes("request")) return `/admin/requests-support`;
       return `/admin/applications`;
     }
+    if (role === "mentor") return `/mentor/applications`;
   }
 
   // Exam results / screening
   if (title.includes("exam") || title.includes("screening") || title.includes("test result")) {
     if (role === "student") return `/student/applications`;
     if (role === "admin") return `/admin/exams`;
+    if (role === "mentor") return `/mentor/assessments`;
   }
 
   // Certificates

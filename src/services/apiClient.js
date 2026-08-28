@@ -44,7 +44,17 @@ export const fetchAllPages = async (url, config = {}) => {
 
     if (response.data && Array.isArray(response.data.results)) {
       allResults = [...allResults, ...response.data.results];
-      currentUrl = response.data.next || null;
+      if (response.data.next) {
+        try {
+          const nextUrlObj = new URL(response.data.next);
+          currentUrl = nextUrlObj.pathname + nextUrlObj.search;
+        } catch (e) {
+          // If it's already a relative path or invalid URL, fallback to it directly
+          currentUrl = response.data.next;
+        }
+      } else {
+        currentUrl = null;
+      }
     } else if (Array.isArray(response.data)) {
       allResults = [...allResults, ...response.data];
       currentUrl = null;

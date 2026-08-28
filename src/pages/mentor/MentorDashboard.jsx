@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { useOutletContext } from "react-router-dom";
-import apiClient from "../../services/apiClient";
+import apiClient, { fetchAllPages } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import PageHeader from "../../components/ui/PageHeader";
 import Card from "../../components/ui/Card";
@@ -103,26 +103,8 @@ function MentorDashboard() {
             : myCohorts;
 
           if (activeCohorts.length > 0) {
-            const studentRequests = activeCohorts.map(c =>
-              apiClient.get(API_ENDPOINTS.COHORTS.STUDENTS(c.id))
-            );
-            const studentResults = await Promise.allSettled(studentRequests);
-            
-            let count = 0;
-            const seenIds = new Set();
-            studentResults.forEach(result => {
-              if (result.status === "fulfilled") {
-                const data = result.value.data;
-                const arr = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
-                arr.forEach(student => {
-                  if (!seenIds.has(student.id)) {
-                    seenIds.add(student.id);
-                    count++;
-                  }
-                });
-              }
-            });
-            setTotalStudents(count);
+            const res = await apiClient.get(API_ENDPOINTS.STUDENTS.BASE, { params: { ...cohortParams, limit: 1 } });
+            setTotalStudents(res.data.count || 0);
           } else {
             setTotalStudents(0);
           }
@@ -140,8 +122,10 @@ function MentorDashboard() {
   }, [globalCohort]);
 
   const firstName = user?.first_name || user?.firstName || "";
+  const lastName = user?.last_name || user?.lastName || "";
+  const fullName = `${firstName} ${lastName}`.trim();
   const salutation = getSalutation(user?.gender);
-  const welcomeName = firstName ? `${firstName}${salutation}` : (user?.email || "Mentor");
+  const welcomeName = fullName ? `${fullName}${salutation}` : (user?.email || "Mentor");
 
   const stagger = {
     hidden: { opacity: 0 },
