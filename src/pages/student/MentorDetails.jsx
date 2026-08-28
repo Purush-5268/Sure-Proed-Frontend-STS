@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
@@ -10,6 +10,7 @@ import { FiMail, FiPhone, FiAward, FiClock, FiBriefcase, FiLinkedin, FiAlertCirc
 import styles from "./MentorDetails.module.css";
 
 function MentorDetails() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [mentor, setMentor] = useState(null);
   const [loading, setLoading] = useState(true);

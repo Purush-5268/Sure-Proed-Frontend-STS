@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./CourseDetails.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function CourseDetails() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -85,7 +86,7 @@ function CourseDetails() {
 
         <div className={styles.buttons}>
           <Link to={`/admin/edit-course/${course.id}`} className={styles.editBtn}>Edit Course</Link>
-          <Link to="/admin/courses" className={styles.cancelBtn}>Back to Courses</Link>
+          <a href="#" onClick={(e) => { e.preventDefault(); navigate(-1); }}  className={styles.cancelBtn}>Back to Courses</a>
         </div>
       </div>
     </div>

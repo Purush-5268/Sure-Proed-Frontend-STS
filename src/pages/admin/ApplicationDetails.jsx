@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { FiChevronDown, FiChevronUp, FiCheckCircle, FiXCircle, FiClock, FiFileText, FiVideo, FiShield, FiUsers, FiAward, FiFile } from "react-icons/fi";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
@@ -8,6 +8,7 @@ import styles from "./ApplicationDetails.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function ApplicationDetails() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -297,7 +298,7 @@ function ApplicationDetails() {
     <div className={styles.pageContainer}>
       <div className={styles.header}>
         <h1>Application Control Panel</h1>
-        <Link to="/admin/applications" className="premium-btn premium-btn-secondary">Back to List</Link>
+        <button onClick={() => navigate(-1)} className="premium-btn premium-btn-secondary">Back to List</button>
       </div>
 
       <div className={styles.panelsContainer}>
@@ -466,21 +467,29 @@ function ApplicationDetails() {
                 </div>
               </div>
               
-              <form onSubmit={handleAssignCohort}>
-                <div className={styles.formGroup}>
-                  <label>Assign to Cohort</label>
-                  <select name="cohort" className="premium-input" required disabled={cohorts.length === 0}>
-                    <option value="">Select a Cohort...</option>
-                    {cohorts.map(c => (
-                      <option key={c.id} value={c.id}>{c.code} - {c.name}</option>
-                    ))}
-                  </select>
-                  {cohorts.length === 0 && <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>No cohorts available for this course.</span>}
+              {!currentCohortId ? (
+                <form onSubmit={handleAssignCohort}>
+                  <div className={styles.formGroup}>
+                    <label>Assign to Cohort</label>
+                    <select name="cohort" className="premium-input" required disabled={cohorts.length === 0}>
+                      <option value="">Select a Cohort...</option>
+                      {cohorts.map(c => (
+                        <option key={c.id} value={c.id}>{c.code} - {c.name}</option>
+                      ))}
+                    </select>
+                    {cohorts.length === 0 && <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>No cohorts available for this course.</span>}
+                  </div>
+                  <div className={styles.actionRow}>
+                    <button type="submit" className="premium-btn premium-btn-primary" disabled={submitting || cohorts.length === 0}>Assign Cohort</button>
+                  </div>
+                </form>
+              ) : (
+                <div style={{ padding: "16px", background: "var(--bg-nested)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+                  <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: "14px" }}>
+                    This application is already assigned to a cohort. You can manage cohort-level operations in the Cohort Details page.
+                  </p>
                 </div>
-                <div className={styles.actionRow}>
-                  <button type="submit" className="premium-btn premium-btn-primary" disabled={submitting || cohorts.length === 0}>Assign Cohort</button>
-                </div>
-              </form>
+              )}
             </div>
           )}
         </div>

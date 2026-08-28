@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
@@ -12,6 +12,7 @@ import styles from "./AssignmentFeedback.module.css";
 import { FiFileText, FiCheckCircle, FiClock, FiArrowLeft, FiAlertCircle, FiX, FiExternalLink } from "react-icons/fi";
 
 function AssignmentFeedback() {
+  const navigate = useNavigate();
   const { id } = useParams(); // Assignment ID
   const [assignment, setAssignment] = useState(null);
   const [submissions, setSubmissions] = useState([]);

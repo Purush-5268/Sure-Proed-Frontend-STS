@@ -121,7 +121,7 @@ function AddMentor() {
           <h1 style={{ margin: 0, color: "var(--text-primary)", fontSize: "2rem" }}>Add New Mentor</h1>
           <p style={{ color: "var(--text-muted)", margin: "4px 0 0 0" }}>Register a new mentor and assign their specific training domain.</p>
         </div>
-        <Link to="/admin/mentors" style={{ padding: "10px 20px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>← Back to Mentors</Link>
+        <a href="#" onClick={(e) => { e.preventDefault(); navigate(-1); }}  style={{ padding: "10px 20px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>← Back to Mentors</a>
       </div>
 
       <div style={{ backgroundColor: "var(--bg-surface)", padding: "2.5rem", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>

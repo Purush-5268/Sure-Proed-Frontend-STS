@@ -63,7 +63,7 @@ function Dashboard() {
 
         const apps = appRes?.data?.results || appRes?.data || [];
         const courses = Array.isArray(coursesRes) ? coursesRes : (coursesRes?.results || coursesRes?.data || []);
-        
+
         // Find active or suspended application
         const enrolled = apps.find(a => ['COHORT_ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'SUSPENDED'].includes(a.status));
         if (isMounted && enrolled) {
@@ -74,7 +74,7 @@ function Dashboard() {
         }
 
         const enrollmentStatus = resolveStudentEnrollment(profileObj, apps, courses);
-        
+
         // Bulletproof Domain Fallback: If activeApp is missing, try matching course by title from stats or profile
         if (!enrollmentStatus.courseDomain) {
           const fallbackTitle = profileObj?.current_application?.course?.name || statsRes?.data?.application_course_title || profileObj?.course_name;
@@ -85,7 +85,7 @@ function Dashboard() {
             }
           }
         }
-        
+
         if (isMounted) setResolvedEnrollment(enrollmentStatus);
 
         // Core data loaded, unlock UI immediately!
@@ -130,13 +130,41 @@ function Dashboard() {
           });
         }
 
-        // Fetch scheduled LST/SST/Domain sessions via the central attendance logic
-        attendanceService.getAttendanceRecords({ status: "ACTIVE" }).then(sessionsRes => {
-          if (sessionsRes) {
-            const rawData = sessionsRes.data || sessionsRes;
-            const sessionsArray = Array.isArray(rawData) ? rawData : (rawData.results || []);
-            if (isMounted) setTodayClasses(sessionsArray);
+        // Calculate the student's actual cohort ID
+        const cohortId = activeApp?.assigned_cohort?.id || statsRes?.data?.active_cohort?.id || profileObj?.cohort;
+        const sessionParams = cohortId ? { status: "ACTIVE", cohort: cohortId } : { status: "ACTIVE" };
+
+        // Fetch scheduled LST/SST/Domain sessions limited to their cohort
+        Promise.allSettled([
+          apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { params: sessionParams }),
+          apiClient.get(API_ENDPOINTS.TRAININGS.SESSIONS, { params: sessionParams })
+        ]).then(([domainRes, trainingRes]) => {
+          let combinedSessions = [];
+
+          if (domainRes.status === "fulfilled" && domainRes.value) {
+            const data = domainRes.value.data;
+            const sessionsArray = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
+            combinedSessions = [...combinedSessions, ...sessionsArray.map(s => ({
+              ...s,
+              id: `domain_${s.id}`,
+              realId: s.id,
+              type: "DOMAIN"
+            }))];
           }
+
+          if (trainingRes.status === "fulfilled" && trainingRes.value) {
+            const data = trainingRes.value.data;
+            const sessionsArray = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
+            combinedSessions = [...combinedSessions, ...sessionsArray.map(s => ({
+              ...s,
+              id: `training_${s.id}`,
+              realId: s.id,
+              type: "TRAINING",
+              class_date: s.session_date // map session_date to class_date for uniform radar parsing
+            }))];
+          }
+
+          if (isMounted) setTodayClasses(combinedSessions);
         }).catch((err) => {
           if (err.response?.status === 403) setIsSuspended(true);
         });
@@ -154,8 +182,12 @@ function Dashboard() {
   const handleJoinClass = async (cls) => {
     setIsJoining(true);
     try {
-      await attendanceService.markJoined(cls.id);
-      // Heartbeat tracking removed — attendance is now server-side via Google Meet
+      if (cls.type === "DOMAIN") {
+        await attendanceService.markJoined(cls.realId);
+      }
+      // If it's a TRAINING session, there might not be a markJoined API yet, 
+      // or it might use the same. We skip it if not DOMAIN to be safe, 
+      // since attendance is server-side Google Meet.
     } catch (err) {
       console.error("Failed to mark joined", err);
     }
@@ -176,9 +208,9 @@ function Dashboard() {
       alert("Permission request submitted successfully.");
       setShowLateJoinModal(false);
       setLateJoinReason("");
-      
+
       // Update local state to reflect the pending warning
-      setTodayClasses(prev => prev.map(cls => 
+      setTodayClasses(prev => prev.map(cls =>
         cls.id === lateJoinClassId ? { ...cls, warning_state: 'APOLOGIZED' } : cls
       ));
     } catch (error) {
@@ -216,10 +248,10 @@ function Dashboard() {
             {isSuspended
               ? "Your access to this cohort is currently suspended. Please contact the administration for assistance."
               : isRevoked
-              ? "Your access has been temporarily revoked by an administrator."
-              : (isExisting
-                ? "Please complete your Offer Letter verification in your Profile to restore your cohort access."
-                : "Please complete your Profile and click 'Apply Course' to begin your journey.")}
+                ? "Your access has been temporarily revoked by an administrator."
+                : (isExisting
+                  ? "Please complete your Offer Letter verification in your Profile to restore your cohort access."
+                  : "Please complete your Profile and click 'Apply Course' to begin your journey.")}
           </p>
           <div style={{ background: 'var(--bg-nested)', padding: '16px', borderRadius: '12px', color: 'var(--primary-color)' }}>
             <strong>Status:</strong> {isSuspended ? "SUSPENDED" : activeApp?.status ? activeApp.status.replace("_", " ") : (profile?.status ? profile.status.replace("_", " ") : "Action Required")}
@@ -380,7 +412,7 @@ function Dashboard() {
                                   Status: {cls.warning_state === 'APOLOGIZED' ? 'Pending Approval' : cls.warning_state}
                                 </span>
                               ) : (
-                                <button 
+                                <button
                                   onClick={() => { setLateJoinClassId(cls.id); setShowLateJoinModal(true); }}
                                   style={{ fontSize: '12px', color: '#0ea5e9', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginTop: '6px', fontWeight: 'bold' }}
                                 >
@@ -511,8 +543,8 @@ function Dashboard() {
               placeholder="E.g., I had an emergency..."
               style={{ width: '100%', minHeight: '100px', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-nested)', color: 'var(--text-primary)', fontSize: '14px', resize: 'none', marginBottom: '20px', fontFamily: 'inherit' }}
             />
-            <button 
-              onClick={handleRequestPermission} 
+            <button
+              onClick={handleRequestPermission}
               disabled={isSubmittingLateJoin || !lateJoinReason.trim()}
               style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--brand-color, #2563eb)', color: 'var(--text-inverse)', fontWeight: 'bold', fontSize: '15px', cursor: isSubmittingLateJoin || !lateJoinReason.trim() ? 'not-allowed' : 'pointer', opacity: isSubmittingLateJoin || !lateJoinReason.trim() ? 0.7 : 1, transition: '0.2s' }}
             >

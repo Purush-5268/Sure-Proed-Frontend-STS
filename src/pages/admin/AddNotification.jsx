@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { courseService } from "../../services/courseService";
 import { cohortService } from "../../services/cohortService";
 import apiClient, { normalizeListResponse } from "../../services/apiClient";
@@ -8,6 +8,7 @@ import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./AddNotification.module.css";
 
 function AddNotification() {
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [cohorts, setCohorts] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,7 +72,7 @@ function AddNotification() {
           <h1 style={{ margin: 0, color: "var(--text-primary)", fontSize: "2rem" }}>Add Notification</h1>
           <p style={{ color: "var(--text-muted)", margin: "4px 0 0 0" }}>Broadcast announcements to specific domains, batches, or everyone.</p>
         </div>
-        <Link to="/admin/notifications" style={{ padding: "10px 20px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>← Back to Notifications</Link>
+        <a href="#" onClick={(e) => { e.preventDefault(); navigate(-1); }}  style={{ padding: "10px 20px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>← Back to Notifications</a>
       </div>
 
       <div style={{ backgroundColor: "var(--bg-surface)", padding: "2.5rem", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>

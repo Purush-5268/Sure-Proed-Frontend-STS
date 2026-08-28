@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import PageHeader from "../../components/ui/PageHeader";
@@ -11,6 +11,7 @@ import styles from "./CohortDetails.module.css";
 import { FiUsers, FiBook, FiCalendar, FiArrowLeft, FiAlertCircle } from "react-icons/fi";
 
 function CohortDetails() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [cohort, setCohort] = useState(null);
   const [students, setStudents] = useState([]);

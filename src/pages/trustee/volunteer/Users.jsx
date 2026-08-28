@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getStudents, removeStudent } from "../../../services/trusteeService";
 import SkeletonLoader from "../../../components/common/SkeletonLoader";
 import styles from "./Users.module.css";
 
 function VolunteerUsers() {
+  const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);

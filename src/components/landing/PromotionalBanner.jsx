@@ -119,7 +119,7 @@ const PromotionalBanner = () => {
           <div className={styles.textContent}>
             <div className={styles.badgeWrapper}>
               <span className={styles.badge}>
-                New Cohort Open
+                🚀 New Cohort Open
               </span>
             </div>
             
@@ -144,10 +144,8 @@ const PromotionalBanner = () => {
           </div>
           
           <div className={styles.graphicContent}>
-            <div className={styles.glassCircle}>
-              <div className={styles.innerCircle}>
-                <span className={styles.accentText}>Apply</span>
-              </div>
+            <div className={styles.announcementImagePlaceholder}>
+              <span className={styles.speakerIcon}>📢</span>
               <img src="/sure-logo.jpg" alt="SURE Trust" className={styles.brandLogoSmall} />
             </div>
           </div>

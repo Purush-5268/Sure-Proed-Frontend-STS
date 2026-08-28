@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getLowAttendanceAlerts } from "../../../services/trusteeService";
 import styles from "./Alerts.module.css";
 
 function VolunteerAlerts() {
+  const navigate = useNavigate();
   const [flaggedStudents, setFlaggedStudents] = useState([]);
   const [loading, setLoading] = useState(true);
 

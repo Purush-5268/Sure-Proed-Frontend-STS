@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { studentService } from "../../services/studentService";
 import styles from "./ApplicationStatus.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 function ApplicationStatus() {
+  const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
 

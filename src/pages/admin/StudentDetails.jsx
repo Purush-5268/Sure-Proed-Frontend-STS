@@ -348,7 +348,7 @@ function StudentDetails() {
 
         <div className={styles.buttons} style={{ marginTop: "2rem" }}>
           <Link to={`/admin/edit-student/${student.id}`} className={styles.edit}>Edit Student</Link>
-          <Link to="/admin/students" className={styles.back}>Back to Students</Link>
+          <a href="#" onClick={(e) => { e.preventDefault(); navigate(-1); }}  className={styles.back}>Back to Students</a>
         </div>
       </div>
     </div>

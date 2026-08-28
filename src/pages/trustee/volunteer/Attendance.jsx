@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { attendanceService } from "../../../services/attendanceService";
 import SkeletonLoader from "../../../components/common/SkeletonLoader";
 import styles from "./Attendance.module.css";
 
 function VolunteerAttendance() {
+  const navigate = useNavigate();
   const [hierarchy, setHierarchy] = useState([]);
   const [activeSessions, setActiveSessions] = useState([]);
   const [loading, setLoading] = useState(true);

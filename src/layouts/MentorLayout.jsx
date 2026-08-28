@@ -35,7 +35,7 @@ function MentorLayout() {
 
   useEffect(() => {
     document.body.setAttribute("data-role", "mentor");
-    
+
     // Fetch cohorts for the global filter
     apiClient.get(API_ENDPOINTS.COHORTS.MY_COHORTS)
       .then(res => {
@@ -79,7 +79,7 @@ function MentorLayout() {
               )}
             </select>
           </div>
-          
+
           <Outlet context={{ globalCohort: selectedGlobalCohort }} />
         </main>
       </div>

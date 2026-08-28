@@ -93,7 +93,7 @@ function AddCourse() {
           <h1 style={{ margin: 0, color: "var(--text-primary)", fontSize: "2rem" }}>Add New Course</h1>
           <p style={{ color: "var(--text-muted)", margin: "4px 0 0 0" }}>Create a new training domain or course module.</p>
         </div>
-        <Link to="/admin/courses" style={{ padding: "10px 20px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>← Back to Courses</Link>
+        <a href="#" onClick={(e) => { e.preventDefault(); navigate(-1); }}  style={{ padding: "10px 20px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>← Back to Courses</a>
       </div>
 
       <div style={{ backgroundColor: "var(--bg-surface)", padding: "2.5rem", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>

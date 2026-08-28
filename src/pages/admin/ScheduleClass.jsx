@@ -52,7 +52,7 @@ function ScheduleClass() {
   // 🚨 Function to fetch live radar data
   const loadActiveClasses = async () => {
     try {
-      const res = await attendanceService.getAttendanceRecords({ status: "ACTIVE" });
+      const res = await attendanceService.getAttendanceRecords({ status: "ACTIVE", page_size: 50 });
       const rawData = res.data || res;
       // Safely extract Django's paginated results
       const sessionsArray = Array.isArray(rawData.results) ? rawData.results : (Array.isArray(rawData) ? rawData : []);

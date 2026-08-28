@@ -11,13 +11,13 @@ import EmptyState from "../../components/ui/EmptyState";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import PushNotificationBanner from "../../components/common/PushNotificationBanner";
 import styles from "./MentorDashboard.module.css";
-import { 
-  FiUsers, 
-  FiFileText, 
-  FiCheckCircle, 
-  FiCalendar, 
-  FiClock, 
-  FiAlertCircle, 
+import {
+  FiUsers,
+  FiFileText,
+  FiCheckCircle,
+  FiCalendar,
+  FiClock,
+  FiAlertCircle,
   FiArrowRight,
   FiPlus,
   FiBarChart2,
@@ -46,7 +46,7 @@ function MentorDashboard() {
   useEffect(() => {
     // If there is no globalCohort yet (meaning cohorts haven't loaded in layout or none assigned), wait.
     if (globalCohort === undefined) return;
-    
+
     const abortController = new AbortController();
     let isMounted = true;
     setLoading(true);
@@ -55,13 +55,15 @@ function MentorDashboard() {
       try {
         const today = new Date().toISOString().split("T")[0];
 
-        // Base params for cohort filtering if a specific cohort is selected
         const cohortParams = globalCohort ? { cohort: globalCohort } : {};
 
-        const [cohortsRes, attendanceRes, submissionsRes] = await Promise.allSettled([
+        const [cohortsRes, attendanceRes, trainingsRes, submissionsRes] = await Promise.allSettled([
           apiClient.get(API_ENDPOINTS.COHORTS.MY_COHORTS),
           apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, {
-            params: { conducted: "true", class_date: today, ...cohortParams }
+            params: { status: "ACTIVE", ...cohortParams }
+          }),
+          apiClient.get(API_ENDPOINTS.TRAININGS.SESSIONS, {
+            params: { status: "ACTIVE", ...cohortParams }
           }),
           apiClient.get(API_ENDPOINTS.SUBMISSIONS.BASE, {
             params: { ...cohortParams }
@@ -72,7 +74,6 @@ function MentorDashboard() {
 
         if (cohortsRes.status === "fulfilled") {
           const data = cohortsRes.value.data;
-          // Filter cohorts to only show the global selected one if applicable, or all
           let myCohorts = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
           if (globalCohort) {
             myCohorts = myCohorts.filter(c => String(c.id) === String(globalCohort));
@@ -80,11 +81,55 @@ function MentorDashboard() {
           setCohorts(myCohorts);
         }
 
+        let combinedSessions = [];
+
         if (attendanceRes.status === "fulfilled") {
           const data = attendanceRes.value.data;
           const sessions = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
-          setTodaySessions(sessions.filter(s => s.conducted !== false && s.meeting_link));
+          combinedSessions = [...combinedSessions, ...sessions.map(s => ({
+            id: `domain_${s.id}`,
+            realId: s.id,
+            title: s.title,
+            start_time: s.start_time,
+            end_time: s.end_time,
+            class_date: s.class_date,
+            meeting_link: s.meeting_link,
+            type: "DOMAIN",
+            status: s.status
+          }))];
         }
+
+        if (trainingsRes.status === "fulfilled") {
+          const data = trainingsRes.value.data;
+          const sessions = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
+          combinedSessions = [...combinedSessions, ...sessions.map(s => ({
+            id: `training_${s.id}`,
+            realId: s.id,
+            title: s.title || s.topic,
+            start_time: s.start_time,
+            end_time: s.end_time,
+            class_date: s.session_date,
+            meeting_link: s.meeting_link,
+            type: "TRAINING",
+            status: s.class_status
+          }))];
+        }
+
+        // Apply radar logic to refine currently active/upcoming sessions today
+        const now = new Date();
+        const todayStr = now.toISOString().split("T")[0];
+        const activeSessions = combinedSessions.filter(cls => {
+          if (cls.class_date === todayStr) return true;
+          // Also include if it's currently active based on radar logic
+          const classStart = new Date(`${cls.class_date}T${cls.start_time}`);
+          let classEnd = cls.end_time ? new Date(`${cls.class_date}T${cls.end_time}`) : new Date(classStart.getTime() + 2 * 60 * 60 * 1000);
+          if (classEnd < classStart) classEnd = new Date(classEnd.getTime() + 24 * 60 * 60 * 1000);
+          const windowOpenTime = new Date(classStart.getTime() - 10 * 60 * 1000);
+          if (now >= windowOpenTime && now <= classEnd) return true;
+          return false;
+        });
+
+        setTodaySessions(activeSessions);
 
         if (submissionsRes.status === "fulfilled") {
           const data = submissionsRes.value.data;
@@ -94,11 +139,11 @@ function MentorDashboard() {
 
         // Fetch students for the displayed cohorts to match MyStudents page exactly
         if (cohortsRes.status === "fulfilled") {
-          const myCohorts = Array.isArray(cohortsRes.value.data?.results) 
-            ? cohortsRes.value.data.results 
+          const myCohorts = Array.isArray(cohortsRes.value.data?.results)
+            ? cohortsRes.value.data.results
             : (Array.isArray(cohortsRes.value.data) ? cohortsRes.value.data : []);
-            
-          const activeCohorts = globalCohort 
+
+          const activeCohorts = globalCohort
             ? myCohorts.filter(c => String(c.id) === String(globalCohort))
             : myCohorts;
 
@@ -151,7 +196,7 @@ function MentorDashboard() {
 
       {loading ? (
         <div className={styles.skeletonGrid}>
-          {[1,2,3,4].map(i => (
+          {[1, 2, 3, 4].map(i => (
             <div key={i} className={styles.skeletonCard}>
               <SkeletonLoader width="60%" height="14px" borderRadius="4px" />
               <SkeletonLoader width="40%" height="32px" borderRadius="4px" />
@@ -198,15 +243,17 @@ function MentorDashboard() {
                             exit={{ opacity: 0, x: 8 }}
                             className={styles.sessionItem}
                           >
-                            <div className={styles.sessionDot} />
+                            <div className={styles.sessionDot} style={{ background: session.type === 'TRAINING' ? '#8b5cf6' : 'var(--primary-color)' }} />
                             <div className={styles.sessionDetails}>
                               <span className={styles.sessionTitle}>{session.title}</span>
                               <span className={styles.sessionTime}>{session.start_time}</span>
                             </div>
-                            {session.meeting_link && (
+                            {session.meeting_link ? (
                               <a href={session.meeting_link} target="_blank" rel="noreferrer" className={styles.joinBtn}>
                                 Join
                               </a>
+                            ) : (
+                              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>No Link</span>
                             )}
                           </motion.div>
                         ))}

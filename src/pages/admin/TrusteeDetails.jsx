@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiShield } from "react-icons/fi";
 import apiClient, { normalizeListResponse } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function TrusteeDetails() {
+  const navigate = useNavigate();
   const { id } = useParams(); // This is the user.id from the URL
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);

@@ -121,7 +121,7 @@ function AddCohort() {
           <h1>Add New Batch / Cohort</h1>
           <p className="text-secondary">Create a new training group and assign it to a Domain.</p>
         </div>
-        <Link to="/admin/cohorts" className={styles.backBtn}>← Back to Batches</Link>
+        <a href="#" onClick={(e) => { e.preventDefault(); navigate(-1); }}  className={styles.backBtn}>← Back to Batches</a>
       </div>
 
       <div className={styles.card}>
