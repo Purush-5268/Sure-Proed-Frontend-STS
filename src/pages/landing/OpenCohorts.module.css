@@ -1,0 +1,164 @@
+.pageContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+}
+
+.mainContent {
+  flex-grow: 1;
+  padding: 6rem 2rem 4rem;
+  max-width: 1300px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.header p {
+  font-size: 1.15rem;
+  color: var(--text-secondary, #475569);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.allCohortsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.cohortCard {
+  background: var(--bg-card);
+  border: 2px solid var(--primary-color);
+  border-radius: 16px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cohortCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.cohortCardHeader {
+  margin-bottom: 1.25rem;
+}
+
+.cohortCardBadge {
+  display: inline-block;
+  background: rgba(59, 130, 246, 0.15);
+  color: #2563eb;
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.cohortCardHeader h3 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.cohortCardBody {
+  flex-grow: 1;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  background: var(--bg-nested);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.cohortCardBody p {
+  margin: 0.5rem 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.cohortCardActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.ctaButtonSignUp {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  cursor: pointer;
+  flex: 1;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.3);
+  transition: all 0.2s ease;
+}
+
+.ctaButtonLearnMore {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  cursor: pointer;
+  flex: 1;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+  transition: all 0.2s ease;
+}
+
+.ctaButtonSignUp:hover, .ctaButtonLearnMore:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--border-color, #e2e8f0);
+  border-top-color: var(--primary-color, #2563eb);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px dashed var(--border-color);
+}

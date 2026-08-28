@@ -161,6 +161,8 @@
   padding: 40px;
   box-shadow: var(--shadow-md);
   margin-bottom: 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 :global([data-theme="dark"]) .chartContainer {
@@ -378,6 +380,7 @@
 
 @media (max-width: 768px) {
   .heroNumber { font-size: 64px; }
-  .chartContainer { padding: 20px; }
+  .chartContainer { padding: 16px; overflow-x: auto; }
   .header h2 { font-size: 32px; }
+  .heroImpact { gap: 40px; }
 }

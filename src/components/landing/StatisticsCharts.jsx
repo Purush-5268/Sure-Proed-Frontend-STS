@@ -33,7 +33,7 @@ export const StudentJourneyChart = ({ data }) => {
   ];
 
   return (
-    <div style={{ width: '100%', height: 320 }}>
+    <div style={{ width: '100%', minWidth: '400px', height: 320 }}>
       <ResponsiveContainer>
         <BarChart
           data={chartData}
@@ -75,7 +75,7 @@ export const EcosystemChart = ({ data }) => {
   ];
 
   return (
-    <div style={{ width: '100%', height: 320 }}>
+    <div style={{ width: '100%', minWidth: '400px', height: 320 }}>
       <ResponsiveContainer>
         <BarChart
           data={chartData}

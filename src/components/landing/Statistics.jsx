@@ -118,7 +118,7 @@ function Statistics() {
         <motion.div 
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, margin: "0px" }}
           variants={fadeUp}
           className={styles.header}
         >
@@ -132,7 +132,7 @@ function Statistics() {
           <motion.div
             initial="hidden"
             whileInView="show"
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: "0px" }}
             variants={staggerContainer}
           >
             {/* HERO KPI */}

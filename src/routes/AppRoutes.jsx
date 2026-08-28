@@ -23,6 +23,8 @@ import SetupPassword from "../pages/auth/SetupPassword";
 import NotFound from "../pages/errors/Error404";
 import OfferLetterVerify from "../pages/public/OfferLetterVerify";
 import CohortChat from "../pages/student/CohortChat";
+import OpenCohorts from "../pages/landing/OpenCohorts";
+import CohortInfo from "../pages/landing/CohortInfo";
 
 /* Theme Enforcer for Public Pages */
 function ThemeEnforcer() {
@@ -30,8 +32,8 @@ function ThemeEnforcer() {
   const { theme } = useTheme();
 
   useEffect(() => {
-    const publicPaths = ['/', '/login', '/signup', '/setup-password', '/forgot-password', '/reset-password', '/email-verification'];
-    const isPublic = publicPaths.includes(location.pathname) || location.pathname.startsWith('/verify-offer-letter') || location.pathname.startsWith('/certificate/verify');
+    const publicPaths = ['/', '/login', '/signup', '/setup-password', '/forgot-password', '/reset-password', '/email-verification', '/open-cohorts'];
+    const isPublic = publicPaths.includes(location.pathname) || location.pathname.startsWith('/verify-offer-letter') || location.pathname.startsWith('/certificate/verify') || location.pathname.startsWith('/cohort-info');
 
     const applyTheme = () => {
       if (isPublic) {
@@ -243,6 +245,8 @@ function AppRoutes() {
             <Route path="/setup-password" element={<SetupPassword />} />
             <Route path="/verify-offer-letter/:hash" element={<OfferLetterVerify />} />
             <Route path="/certificate/verify/:code" element={<CertificateVerify />} />
+            <Route path="/open-cohorts" element={<OpenCohorts />} />
+            <Route path="/cohort-info/:cohortId" element={<CohortInfo />} />
           </Route>
 
           {/* ================= STUDENT MODULE (PROTECTED) ================= */}

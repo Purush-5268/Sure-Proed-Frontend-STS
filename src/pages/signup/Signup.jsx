@@ -240,7 +240,14 @@ function Signup() {
       setShowOtpPanel(false);
       clearInterval(timerRef.current);
       setSuccess(true);
-      setTimeout(() => navigate("/student/profile", { replace: true }), 1800);
+      setTimeout(() => {
+        const returnUrl = new URLSearchParams(window.location.search).get("returnUrl");
+        if (returnUrl && returnUrl.startsWith("/student/")) {
+          navigate(returnUrl, { replace: true });
+        } else {
+          navigate("/student/profile", { replace: true });
+        }
+      }, 1800);
     } catch (err) {
       const data = err?.response?.data;
       const msg  = data?.detail || data?.otp?.[0] || data?.message ||

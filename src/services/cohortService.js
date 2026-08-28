@@ -6,17 +6,17 @@ let getCohortsPromise = null;
 let getCohortByIdPromises = {};
 
 export const cohortService = {
-  async getCohorts(params = {}) {
-    if (Object.keys(params).length === 0) {
+  async getCohorts(params = {}, config = {}) {
+    if (Object.keys(params).length === 0 && !config.signal) {
       if (getCohortsPromise) return getCohortsPromise;
       
-      getCohortsPromise = apiClient.get(API_ENDPOINTS.COHORTS.BASE, { params })
+      getCohortsPromise = apiClient.get(API_ENDPOINTS.COHORTS.BASE, { params, ...config })
         .then(res => res.data)
         .finally(() => { getCohortsPromise = null; });
       return getCohortsPromise;
     }
 
-    const response = await apiClient.get(API_ENDPOINTS.COHORTS.BASE, { params });
+    const response = await apiClient.get(API_ENDPOINTS.COHORTS.BASE, { params, ...config });
     return response.data;
   },
 

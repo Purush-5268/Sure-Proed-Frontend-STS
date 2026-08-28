@@ -55,11 +55,14 @@ function Login() {
       
       // Route based on role
       setTimeout(() => {
-        if (role === "ADMIN") navigate("/admin/dashboard", { replace: true });
+        const returnUrl = params.get("returnUrl");
+        if (returnUrl && returnUrl.startsWith("/student/") && role === "STUDENT") {
+          navigate(returnUrl, { replace: true });
+        } else if (role === "ADMIN") navigate("/admin/dashboard", { replace: true });
         else if (role === "MENTOR") navigate("/mentor/dashboard", { replace: true });
         else if (role === "TRUSTEE") navigate("/trustee/dashboard", { replace: true });
         else navigate("/student/profile", { replace: true });
-      }, 100);
+      }, 500);
     };
 
     if (access) {
@@ -80,6 +83,15 @@ function Login() {
       
       // Delay navigation slightly for success animation
       setTimeout(() => {
+        const params = new URLSearchParams(window.location.search);
+        const returnUrl = params.get("returnUrl");
+        
+        // Safe internal redirect check
+        if (returnUrl && returnUrl.startsWith("/student/") && userRole === "STUDENT") {
+          navigate(returnUrl);
+          return;
+        }
+
         if (userRole === "ADMIN") {
           navigate("/admin/dashboard");
         } else if (userRole === "MENTOR") {
@@ -261,12 +273,18 @@ function Login() {
           </button>
 
           <div className={styles.footerInfo}>
-            <p>
-              Don't have an account?{" "}
-              <Link to="/signup" className={styles.signupLink}>
-                Register here
-              </Link>
-            </p>
+            <div className={styles.signupLinkWrapper}>
+            Don't have an account?{" "}
+            <span
+              className={styles.signupLink}
+              onClick={() => {
+                const returnUrl = new URLSearchParams(window.location.search).get("returnUrl");
+                navigate(returnUrl ? `/signup?returnUrl=${encodeURIComponent(returnUrl)}` : "/signup");
+              }}
+            >
+              Sign up here
+            </span>
+          </div>
             <Link to="/" className={styles.homeLink}>
               Return to Home
             </Link>
