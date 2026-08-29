@@ -55,23 +55,60 @@ function ModuleTests() {
 
   const submissionFor = (testId) => submissions.find((submission) => (submission.test?.id || submission.test) === testId);
 
+  const now = new Date();
+
   return (
     <div className={styles.page}>
-      <header><h1>Module Tests</h1><p>Syllabus papers are assigned and shuffled by Django when you start.</p></header>
+      <header>
+        <h1>Module Tests</h1>
+        <p>Proctored module assessments with randomized question banks & automatic evaluation.</p>
+      </header>
       {error && <div className={styles.error}>{error}</div>}
       <div className={styles.grid}>
         {tests.map((test) => {
           const submission = submissionFor(test.id);
+          
+          const isReleased = test.is_released !== false;
+          const scheduledAt = test.scheduled_at ? new Date(test.scheduled_at) : null;
+          const endTime = test.end_time ? new Date(test.end_time) : null;
+          const isFuture = Boolean(scheduledAt && scheduledAt > now);
+          const isExpired = Boolean(endTime && endTime < now);
+          const isLocked = Boolean(!isReleased || isFuture || isExpired);
+
+          let lockReason = "";
+          if (!isReleased) lockReason = "Gate Locked by Admin";
+          else if (isFuture) lockReason = `Opens at ${scheduledAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+          else if (isExpired) lockReason = "Window Closed";
+
           return (
             <article key={test.id}>
-              <span className={styles.module}>{test.module_name || "Course assessment"}</span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                <span className={styles.module}>{test.module_name || "Course assessment"}</span>
+                {isLocked && !submission && (
+                  <span style={{ fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "12px", background: "#fee2e2", color: "#991b1b" }}>
+                    🔒 {lockReason}
+                  </span>
+                )}
+              </div>
               <h2>{test.title}</h2>
               <p>{test.description || "Questions are generated from the configured module syllabus."}</p>
               <dl><div><dt>Questions</dt><dd>{test.total_questions}</dd></div><div><dt>Duration</dt><dd>{test.duration_minutes} min</dd></div><div><dt>Pass</dt><dd>{test.pass_percentage}%</dd></div></dl>
               {submission?.status === "SUBMITTED" ? (
                 <div className={submission.qualified ? styles.pass : styles.fail}>Submitted · {submission.percentage}% · {submission.qualified ? "Passed" : "Not passed"}</div>
               ) : (
-                <button onClick={() => begin(test)} disabled={busy === test.id}>{busy === test.id ? "Assigning paper…" : submission?.status === "IN_PROGRESS" ? "Resume test" : "Start test"}</button>
+                <button
+                  onClick={() => begin(test)}
+                  disabled={busy === test.id || isLocked}
+                  style={{ opacity: isLocked ? 0.6 : 1, cursor: isLocked ? "not-allowed" : "pointer" }}
+                >
+                  {busy === test.id
+                    ? "Assigning paper…"
+                    : isLocked
+                    ? `Locked (${lockReason})`
+                    : submission?.status === "IN_PROGRESS"
+                    ? "Resume test"
+                    : "Start test"}
+                </button>
               )}
             </article>
           );

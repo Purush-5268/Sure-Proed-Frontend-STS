@@ -35,6 +35,52 @@ function ProctorDashboard() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
+  const [streamData, setStreamData] = useState({ active_attempts: [], recent_events: [], total_active: 0 });
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [actionBusy, setActionBusy] = useState("");
+
+  const fetchLiveStream = useCallback(async () => {
+    try {
+      const response = await apiClient.get("/api/exams/live-proctor-stream/");
+      setStreamData(response.data || { active_attempts: [], recent_events: [], total_active: 0 });
+    } catch (err) {
+      console.warn("Live proctor stream poll note:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLiveStream();
+    if (!autoRefresh) return;
+    const interval = setInterval(fetchLiveStream, 3000);
+    return () => clearInterval(interval);
+  }, [autoRefresh, fetchLiveStream]);
+
+  const handleDisqualify = async (attemptId, studentName) => {
+    if (!window.confirm(`Are you sure you want to DISQUALIFY ${studentName}? This will immediately terminate their exam attempt with 0 marks.`)) {
+      return;
+    }
+    setActionBusy(attemptId);
+    try {
+      await apiClient.post(`/api/exams/${attemptId}/disqualify-attempt/`);
+      await fetchLiveStream();
+      alert(`Candidate ${studentName} has been disqualified.`);
+    } catch (err) {
+      alert(err?.response?.data?.error || "Failed to disqualify candidate.");
+    } finally {
+      setActionBusy("");
+    }
+  };
+
+  const getEventBadge = (eventType) => {
+    switch (eventType) {
+      case "TAB_SWITCH": return { label: "Tab Switch", bg: "#fee2e2", color: "#dc2626" };
+      case "WINDOW_BLUR": return { label: "Window Unfocused", bg: "#fef3c7", color: "#d97706" };
+      case "FULLSCREEN_EXIT": return { label: "Exited Fullscreen", bg: "#f3e8ff", color: "#9333ea" };
+      case "DISQUALIFIED_BY_PROCTOR": return { label: "Disqualified", bg: "#fecaca", color: "#7f1d1d" };
+      default: return { label: eventType || "Notice", bg: "#dbeafe", color: "#2563eb" };
+    }
+  };
+
   const loadRooms = useCallback(async (assessmentId, type = assessmentType) => {
     if (!assessmentId) return;
     try {
@@ -193,18 +239,76 @@ function ProctorDashboard() {
             {selectedRoom ? (
               <>
                 {isAdmin && <label className={styles.assign}>Assigned proctor<select value={selectedRoom.assigned_proctor || ""} onChange={(event) => assign(selectedRoom.id, event.target.value)} disabled={busy}><option value="">Unassigned</option>{staff.map((member) => <option key={member.id} value={member.id}>{member.email} · {member.role}</option>)}</select></label>}
+                
+                {/* Jitsi Exam Room */}
                 <JitsiExamRoom session={jitsiSession} mode="proctor" />
+                
                 <div className={styles.candidates}>
+                  <h3>Candidate connections</h3>
+                  {selectedRoom.active_attempts.map((attempt) => (
+                    <div key={attempt.attempt_id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span><strong>{attempt.student_code}</strong> · {attempt.student_name}</span>
+                      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                        <em>{attempt.proctoring_status} · {attempt.attempt_status}</em>
+                        {isAdmin && attempt.attempt_status !== "SUBMITTED" && attempt.attempt_status !== "DISQUALIFIED" && (
+                          <button
+                            onClick={() => handleDisqualify(attempt.attempt_id, attempt.student_name)}
+                            disabled={actionBusy === attempt.attempt_id}
+                            style={{ padding: "4px 8px", background: "#fee2e2", color: "#dc2626", border: "1px solid #f87171", borderRadius: "4px", fontSize: "11px", cursor: "pointer", fontWeight: "bold" }}
+                          >
+                            {actionBusy === attempt.attempt_id ? "..." : "Disqualify"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {!selectedRoom.active_attempts.length && <p>No candidate has started in this room.</p>}
+
                   <h3>Assigned candidate roster</h3>
                   {(selectedRoom.assigned_candidates || []).map((candidate) => <div key={candidate.student_id}><span><strong>{candidate.student_code}</strong> · {candidate.student_name}</span><em>{candidate.has_started ? candidate.proctoring_status : "NOT STARTED"}</em></div>)}
                   {!selectedRoom.assigned_candidates?.length && <p>No candidates have been pre-assigned. Use Django admin’s bulk room action.</p>}
-                  <h3>Candidate connections</h3>
-                  {selectedRoom.active_attempts.map((attempt) => <div key={attempt.attempt_id}><span><strong>{attempt.student_code}</strong> · {attempt.student_name}</span><em>{attempt.proctoring_status} · {attempt.attempt_status}</em></div>)}
-                  {!selectedRoom.active_attempts.length && <p>No candidate has started in this room.</p>}
                 </div>
               </>
             ) : <p>No active room is available.</p>}
           </main>
+        </div>
+      )}
+
+      {/* Global Telemetry Feed (Only visible if polling active stream) */}
+      {streamData?.recent_events?.length > 0 && (
+        <div style={{ marginTop: "30px", padding: "20px", background: "#fff", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+            <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "#0f172a" }}>Real-Time Cheating & Infraction Incident Stream</h3>
+            <label style={{ fontSize: "13px", fontWeight: "600", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+              <input type="checkbox" checked={autoRefresh} onChange={(e) => setAutoRefresh(e.target.checked)} />
+              Auto-Refresh (3s)
+            </label>
+          </div>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+            <thead>
+              <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0", textAlign: "left" }}>
+                <th style={{ padding: "12px", color: "#475569" }}>Time</th>
+                <th style={{ padding: "12px", color: "#475569" }}>Candidate</th>
+                <th style={{ padding: "12px", color: "#475569" }}>Infraction Event</th>
+              </tr>
+            </thead>
+            <tbody>
+              {streamData.recent_events.map((event, idx) => {
+                const badge = getEventBadge(event.event_type);
+                return (
+                  <tr key={idx} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                    <td style={{ padding: "10px 12px", color: "#64748b" }}>{new Date(event.timestamp).toLocaleTimeString()}</td>
+                    <td style={{ padding: "10px 12px", fontWeight: "600" }}>{event.student_name}</td>
+                    <td style={{ padding: "10px 12px" }}>
+                      <span style={{ padding: "4px 8px", borderRadius: "12px", fontSize: "12px", fontWeight: "600", background: badge.bg, color: badge.color }}>
+                        {badge.label}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
