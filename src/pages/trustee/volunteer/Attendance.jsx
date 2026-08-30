@@ -1,309 +1,402 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import apiClient from "../../../services/apiClient";
+import { API_ENDPOINTS } from "../../../constants/apiEndpoints";
 import { attendanceService } from "../../../services/attendanceService";
-import SkeletonLoader from "../../../components/common/SkeletonLoader";
 import styles from "./Attendance.module.css";
+import SkeletonLoader from "../../../components/common/SkeletonLoader";
 
-function VolunteerAttendance() {
-  const navigate = useNavigate();
-  const [hierarchy, setHierarchy] = useState([]);
-  const [activeSessions, setActiveSessions] = useState([]);
+function AttendanceManagement() {
+  const [attendance, setAttendance] = useState([]);
+  const [cohorts, setCohorts] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const [selectedDomain, setSelectedDomain] = useState(null);
-  const [selectedGroup, setSelectedGroup] = useState(null);
-
-  const loadData = async () => {
-    try {
-      // We fetch ALL records, or just ACTIVE if desired. For history we need all.
-      const res = await attendanceService.getAttendanceRecords();
-      const sessionsData = res.results || res || [];
-      
-      const active = sessionsData.filter((s) => s.conducted !== false);
-      const past = sessionsData.filter((s) => s.conducted === false);
-      
-      // Build hierarchy: Domain/Type -> Group/Batch -> Sessions
-      const hierarchyMap = {};
-      
-      past.forEach((session) => {
-        const domainName = session.course?.name || session.class_type || "General";
-        const groupName = session.lst_batch ? `Batch ${session.lst_batch}` : (session.title || "Main Group");
-        
-        if (!hierarchyMap[domainName]) {
-          hierarchyMap[domainName] = { domainName, groupsMap: {} };
-        }
-        
-        if (!hierarchyMap[domainName].groupsMap[groupName]) {
-          hierarchyMap[domainName].groupsMap[groupName] = { groupName, sessions: [] };
-        }
-        
-        hierarchyMap[domainName].groupsMap[groupName].sessions.push(session);
-      });
-      
-      // Convert map to array
-      const builtHierarchy = Object.values(hierarchyMap).map((d) => ({
-        domainName: d.domainName,
-        groups: Object.values(d.groupsMap)
-      }));
-      
-      setHierarchy(builtHierarchy);
-      setActiveSessions(active);
-    } catch (err) {
-      console.warn("Could not load attendance data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [errorState, setErrorState] = useState(null); // null, '403', '500', 'NETWORK'
+  const [selectedCourse, setSelectedCourse] = useState("");
+  const [filterGroup, setFilterGroup] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+    const abortController = new AbortController();
+
+    const loadData = async () => {
+      try {
+        const [attendanceResponse, cohortsResponse, coursesResponse] = await Promise.all([
+          apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { signal: abortController.signal }),
+          apiClient.get(API_ENDPOINTS.COHORTS.BASE, { signal: abortController.signal }),
+          apiClient.get(API_ENDPOINTS.COURSES?.BASE || "/api/courses/", { signal: abortController.signal }),
+        ]);
+
+        if (isMounted) {
+          const attData = attendanceResponse.data || {};
+          const cohData = cohortsResponse.data || {};
+          const courseData = coursesResponse.data || {};
+
+          setAttendance(Array.isArray(attData.results) ? attData.results : (Array.isArray(attData) ? attData : []));
+          setCohorts(Array.isArray(cohData.results) ? cohData.results : (Array.isArray(cohData) ? cohData : []));
+          setCourses(Array.isArray(courseData.results) ? courseData.results : (Array.isArray(courseData) ? courseData : []));
+        }
+      } catch (err) {
+        if (err.name === 'CanceledError' || err.name === 'AbortError') return;
+        console.error("Failed to load attendance data:", err);
+        if (isMounted) {
+          if (!err.response) {
+            setErrorState('NETWORK');
+          } else if (err.response?.status === 403) {
+            setErrorState('403');
+          } else {
+            setErrorState('500');
+          }
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
     loadData();
+    return () => {
+      isMounted = false;
+      abortController.abort();
+    };
   }, []);
 
-  const handleJoinClass = (session) => {
-    if (session.meeting_link) {
-      window.open(
-        session.meeting_link.startsWith('http') ? session.meeting_link : `https://${session.meeting_link}`, 
-        "_blank"
-      );
-    } else {
-      alert("Cannot join right now: meeting link not found.");
+  const getCohortName = (cohortId, title) => {
+    const cohort = cohorts.find((item) => String(item.id) === String(cohortId));
+    if (cohort && cohort.course?.name) return cohort.course.name;
+    if (cohort && cohort.name) return cohort.name;
+    if (title) {
+      if (title.includes("[")) return title.replace(/\[.*?\]/g, "").trim();
+      const parts = title.split(" - ");
+      return parts.length > 1 ? parts.slice(0, -1).join(" - ").trim() : title.trim();
     }
+    return "General Session";
   };
 
-  const handleEndClass = async (sessionId) => {
-    if (window.confirm("Are you sure you want to END this session?")) {
-      try {
-        await attendanceService.patchAttendanceRecord(sessionId, { conducted: false });
-        alert("Session ended successfully. Reports are generating.");
-        loadData();
-      } catch (err) {
-        alert("Failed to end session: " + (err.response?.data?.detail || err.message));
-      }
+  const getCohortBatch = (cohortId, title) => {
+    const cohort = cohorts.find((item) => String(item.id) === String(cohortId));
+    if (cohort && cohort.batch_name) return cohort.batch_name;
+    if (title) {
+      const bracketMatch = title.match(/\[(.*?)\]/);
+      if (bracketMatch) return bracketMatch[1].trim();
+      const parts = title.split(" - ");
+      return parts.length > 1 ? parts[parts.length - 1].trim() : "N/A";
     }
+    return "N/A";
   };
 
-  const handleDownloadExcel = async (sessionId, dateString) => {
+  const getDomainName = (cohortId, title) => {
+    const cohort = cohorts.find((item) => String(item.id) === String(cohortId));
+    if (cohort && cohort.course?.name) return cohort.course.name;
+    if (title) {
+      if (title.includes("[")) return title.replace(/\[.*?\]/g, "").trim();
+      const parts = title.split(" - ");
+      return parts.length > 1 ? parts.slice(0, -1).join(" - ").trim() : title.trim();
+    }
+    return "General Session";
+  };
+
+  const getGroupNumber = (cohortId, title) => {
+    const cohort = cohorts.find((item) => String(item.id) === String(cohortId));
+    if (cohort && cohort.batch_name) return cohort.batch_name;
+    if (title) {
+      const bracketMatch = title.match(/\[(.*?)\]/);
+      if (bracketMatch) return bracketMatch[1].trim();
+      const parts = title.split(" - ");
+      return parts.length > 1 ? parts[parts.length - 1].trim() : "N/A";
+    }
+    return "N/A";
+  };
+
+  const filteredAttendance = attendance.filter((item) => {
+    const domainName = getDomainName(item.cohort, item.title);
+    const groupName = getGroupNumber(item.cohort, item.title);
+
+    const matchesCourse = selectedCourse === "" || domainName.toLowerCase().includes(selectedCourse.toLowerCase());
+    const matchesGroup = filterGroup === "" || groupName.toLowerCase().includes(filterGroup.toLowerCase());
+
+    return matchesCourse && matchesGroup;
+  });
+
+  const handleDownloadExcel = async (sessionId, sessionTitle, sessionDate) => {
     try {
       const response = await attendanceService.downloadExcel(sessionId);
 
-      // Check if status is 202 (Report Generating)
-      if (response.status === 202) {
-        let detailMessage = "Report is being generated in the background. Please retry in a few seconds.";
-        if (response.data instanceof Blob && response.data.type === 'application/json') {
-          const text = await response.data.text();
-          const json = JSON.parse(text);
-          if (json.detail) detailMessage = json.detail;
-        } else if (response.data && response.data.detail) {
-          detailMessage = response.data.detail;
-        }
+      // Check if status is 202 or 425 (Report Pending / Too Early)
+      if (response.status === 202 || response.status === 425) {
+        let detailMessage = response.data?.detail || response.data?.message || "Attendance data is pending. Please wait for Google to finalize the conference log.";
         alert(`⏳ ${detailMessage}`);
-        return; 
+        return;
       }
 
-      if (response.data instanceof Blob && response.data.type === 'application/json') {
-        const text = await response.data.text();
-        const json = JSON.parse(text);
-        alert(json.detail || "Report is not ready or missing.");
-        return; 
+      // Handle Blob error responses safely
+      let responseData = response.data;
+      if (responseData instanceof Blob) {
+        if (responseData.type === 'application/json' || responseData.type.includes('text')) {
+          const text = await responseData.text();
+          try {
+            const json = JSON.parse(text);
+            alert(`⚠️ ${json.detail || json.message || "Report is not ready yet."}`);
+            return;
+          } catch (e) {
+            // Not JSON, proceed as file
+          }
+        }
       }
 
-      const formattedDate = dateString ? new Date(dateString).toISOString().split("T")[0] : "Report";
-      let filename = `Attendance_${formattedDate}.xlsx`;
-      const contentDisposition = response.headers['content-disposition'];
+      // 🚨 FILENAME FIX: Extract filename from Django's headers
+      let filename = 'Attendance_Report.xlsx';
+      const contentDisposition = response.headers?.['content-disposition'];
       if (contentDisposition) {
         const match = contentDisposition.match(/filename="?([^"]+)"?/);
-        if (match && match[1]) filename = match[1];
+        if (match && match[1]) {
+          filename = match[1];
+        }
+      } else {
+        const safeTitle = (sessionTitle || "Attendance").replace(/[^a-zA-Z0-9]/g, "_");
+        filename = `${safeTitle}_${sessionDate || 'Report'}.xlsx`;
       }
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const blobType = responseData instanceof Blob ? responseData.type : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+      const url = window.URL.createObjectURL(new Blob([responseData], { type: blobType }));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', filename);
+
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
+
     } catch (err) {
       console.error("Excel download error:", err);
-      let errorMsg = "Failed to download the report. Make sure the session has ended.";
+      let errorMsg = "Failed to download the report. Make sure the session has ended and Google Meet data is available.";
+
       try {
-        const errData = err.response?.data;
-        if (errData instanceof Blob) {
-          const text = await errData.text();
+        const errResponse = err.response?.data;
+        if (errResponse instanceof Blob) {
+          const text = await errResponse.text();
           const json = JSON.parse(text);
           errorMsg = json.detail || json.message || errorMsg;
-        } else if (errData?.detail || errData?.message) {
-          errorMsg = errData.detail || errData.message;
+        } else if (errResponse?.detail || errResponse?.message) {
+          errorMsg = errResponse.detail || errResponse.message;
         }
       } catch (e) {
-        // Fallback if parsing fails
+        // Fallback to default error message if blob parsing fails
       }
-      alert(`Attendance download failed: ${errorMsg}`);
-    }
-  };
 
-  const handleGoBack = () => {
-    if (selectedGroup) {
-      setSelectedGroup(null);
-    } else if (selectedDomain) {
-      setSelectedDomain(null);
+      alert(`Attendance download failed: ${errorMsg}`);
     }
   };
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>Historical Attendance</h2>
-        <Link to="/trustee/volunteer/dashboard" className="btn btnSecondary">
-          ← Back to Dashboard
+        <div>
+          <h1>Attendance Management</h1>
+          <p>Manage daily attendance records</p>
+        </div>
+        <Link to="/trustee/volunteer/update-attendance" className={styles.addBtn}>
+          + Update Attendance
         </Link>
       </div>
 
-      {selectedDomain && (
-        <div className={styles.breadcrumb}>
-          <button className={styles.btnBack} onClick={handleGoBack}>
-            ← Back
-          </button>
-          <span className={styles.crumbDomain}>{selectedDomain.domainName}</span>
-          {selectedGroup && (
-            <span className={styles.crumbGroup}>/ {selectedGroup.groupName}</span>
+      <div style={{ display: "flex", gap: "16px", marginBottom: "24px", backgroundColor: "var(--bg-surface)", padding: "16px", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+        <select
+          value={selectedCourse}
+          onChange={(e) => setSelectedCourse(e.target.value)}
+          style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}
+        >
+          <option value="">-- Select Course / Stream --</option>
+          {courses.map((c) => (
+            <option key={c.id} value={c.name || c.title}>
+              {c.name || c.title}
+            </option>
+          ))}
+        </select>
+
+        <input
+          type="text" className="premium-input" placeholder="Filter by Group Number (e.g. G2-26)"
+          value={filterGroup}
+          onChange={(e) => setFilterGroup(e.target.value)}
+          style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)" }}
+        />
+
+        <button
+          onClick={() => { setSelectedCourse(""); setFilterGroup(""); }}
+          style={{ padding: "10px 16px", backgroundColor: "var(--bg-nested)", border: "1px solid var(--border-color)", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}
+        >
+          Clear
+        </button>
+      </div>
+
+      {errorState === 'NETWORK' ? (
+        <div className="premium-empty-state">
+          <div className="premium-empty-state-icon" style={{ color: "#ef4444" }}>🌐</div>
+          <h3>Network Error</h3>
+          <p>Please check your internet connection.</p>
+        </div>
+      ) : errorState === '403' ? (
+        <div className="premium-empty-state">
+          <div className="premium-empty-state-icon" style={{ color: "#ef4444" }}>🔒</div>
+          <h3>Access Restricted</h3>
+          <p>You do not have permission to view attendance records.</p>
+        </div>
+      ) : errorState === '500' ? (
+        <div className="premium-empty-state">
+          <div className="premium-empty-state-icon" style={{ color: "#ef4444" }}>⚠️</div>
+          <h3>Unable to load attendance data</h3>
+          <p>The server encountered an error. Please try again later.</p>
+        </div>
+      ) : loading ? (
+        <SkeletonLoader variant="table" rows={6} />
+      ) : filteredAttendance.length === 0 ? (
+        <div className="premium-empty-state">
+          <div className="premium-empty-state-icon">📅</div>
+          <h3>No active classes yet</h3>
+          <p>Attendance will appear here when a class is conducted.</p>
+          {(selectedCourse || filterGroup) && (
+            <button onClick={() => { setSelectedCourse(""); setFilterGroup(""); }} className="premium-btn premium-btn-secondary" style={{ marginTop: "1rem" }}>
+              Clear Filters
+            </button>
           )}
         </div>
-      )}
+      ) : (
+        <div className="premium-table-container">
+          <table className="premium-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Domain Name</th>
+                <th>Group Number</th>
+                <th>Meet Start</th>
+                <th>Meet End</th>
+                <th>Total Students</th>
+                <th>Whitelisted</th>
+                <th>Joined</th>
+                <th>Absent</th>
+                <th>Action</th>
+              </tr>
+            </thead>
 
-      <div className={styles.mainCard}>
-        {activeSessions.length > 0 && (
-          <div className={styles.liveSessionsPanel}>
-            <h3 className={styles.liveTitle}>
-              🔴 LIVE SESSIONS REQUIRING ACTION
-            </h3>
-            <div className={styles.liveGrid}>
-              {activeSessions.map((session) => (
-                <div key={session.id} className={styles.liveCard}>
-                  <div>
-                    <p className={styles.liveName}>
-                      {session.title || session.class_type || "Global Event"}
-                      {session.lst_batch && (
-                        <span className={styles.liveGroup}>
-                          {" "}
-                          | {session.lst_batch}
+            <tbody>
+              {filteredAttendance.map((item) => {
+                const whitelistCount = item.whitelist_email_count || 0;
+                const totalStudents = item.google_total_students ?? (item.total_attendee_count || item.actual_student_count || 0);
+                const joinedStudents = item.google_joined_count ?? (Array.isArray(item.joined_students) ? item.joined_students.length : 0);
+                const absentStudents = item.google_absent_count ?? Math.max(0, totalStudents - joinedStudents);
+
+                return (
+                  <tr key={item.id}>
+                    <td style={{ verticalAlign: "middle" }}>{item.class_date}</td>
+                    <td style={{ verticalAlign: "middle" }}>{getCohortName(item.cohort, item.title)}</td>
+                    <td style={{ verticalAlign: "middle" }}>{getCohortBatch(item.cohort, item.title)}</td>
+                    <td style={{ verticalAlign: "middle", whiteSpace: "nowrap" }}>
+                      {item.start_time
+                        ? new Date(`${item.class_date}T${item.start_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : "Not available yet"}
+                    </td>
+                    <td style={{ verticalAlign: "middle", whiteSpace: "nowrap" }}>
+                      {item.end_time
+                        ? new Date(`${item.class_date}T${item.end_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : "Not available yet"}
+                    </td>
+                    <td style={{ verticalAlign: "middle" }}>{totalStudents}</td>
+                    <td style={{ verticalAlign: "middle", fontWeight: whitelistCount > 0 ? "bold" : "normal", color: whitelistCount > 0 ? "#3b82f6" : "inherit" }}>
+                      {whitelistCount}
+                    </td>
+                    <td style={{ verticalAlign: "middle" }}>{joinedStudents}</td>
+                    <td style={{ verticalAlign: "middle" }}>{absentStudents}</td>
+
+                    <td className="actions" style={{ verticalAlign: "middle", padding: "8px 16px", whiteSpace: "nowrap", minWidth: "200px" }}>
+                      {item.status === "ATTENDANCE_PENDING" ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span style={{ color: "#f59e0b", fontWeight: "bold", fontSize: "12px", border: "1px solid #f59e0b", padding: "4px 8px", borderRadius: "4px", backgroundColor: "rgba(245, 158, 11, 0.1)" }}>
+                            Generating Meet Link...
+                          </span>
+                        </div>
+                      ) : item.status === "ATTENDANCE_FAILED" ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span style={{ color: "#ef4444", fontWeight: "bold", fontSize: "12px", border: "1px solid #ef4444", padding: "4px 8px", borderRadius: "4px", backgroundColor: "rgba(239, 68, 68, 0.1)" }}>
+                            Generation Failed
+                          </span>
+                          <button onClick={() => {/* retry logic here if backend supported */ }} style={{ cursor: "pointer", background: "none", border: "none", color: "#3b82f6", textDecoration: "underline" }}>Retry</button>
+                        </div>
+                      ) : (!item.conducted || item.conducted === 'false' || item.conducted === false) ? (
+                        <div style={{ display: "flex", alignItems: "stretch", gap: "8px", margin: 0, padding: 0, height: "32px" }}>
+                          <button
+                            onClick={() => handleDownloadExcel(item.id, item.title, item.class_date)}
+                            style={{
+                              background: "#10b981",
+                              color: "white",
+                              border: "none",
+                              padding: "0 14px",
+                              height: "100%", /* 🚨 Fills the flex container */
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              fontWeight: "bold",
+                              fontSize: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              boxSizing: "border-box",
+                              transition: "all 0.2s ease",
+                              whiteSpace: "nowrap",
+                              margin: 0
+                            }}
+                          >
+                            ⬇️ Excel
+                          </button>
+
+                          <Link
+                            to="/trustee/volunteer/attendance-details"
+                            state={{ sessionId: item.id, sessionTitle: item.title, sessionDate: item.class_date }}
+                            style={{
+                              background: "var(--primary-color)",
+                              color: "white",
+                              padding: "0 16px",
+                              height: "100%", /* 🚨 Fills the flex container */
+                              borderRadius: "6px",
+                              textDecoration: "none",
+                              fontWeight: "bold",
+                              fontSize: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              boxSizing: "border-box",
+                              whiteSpace: "nowrap",
+                              margin: 0
+                            }}
+                          >
+                            View Details
+                          </Link>
+                        </div>
+                      ) : (
+                        <span
+                          style={{
+                            display: "inline-block",
+                            background: "var(--bg-nested)",
+                            color: "var(--text-muted)",
+                            border: "1px solid var(--border-color)",
+                            padding: "6px 12px",
+                            borderRadius: "6px",
+                            fontSize: "12px",
+                            fontWeight: "bold",
+                            whiteSpace: "nowrap"
+                          }}
+                        >
+                          ⏳ Ongoing...
                         </span>
                       )}
-                    </p>
-                    <p className={styles.liveTime}>
-                      Time: {session.start_time} - {session.end_time}
-                    </p>
-                  </div>
-                  <div className={styles.liveActions}>
-                    <button
-                      className={styles.btnSpectate}
-                      onClick={() => handleJoinClass(session)}
-                    >
-                      Spectate
-                    </button>
-                    <button
-                      className={styles.btnEnd}
-                      onClick={() => handleEndClass(session.id)}
-                    >
-                      🛑 End Now
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {loading ? (
-          <SkeletonLoader variant="table" rows={5} />
-        ) : (
-          <>
-            {!selectedDomain && (
-              <div className={styles.gridContainer}>
-                <h3 className={styles.sectionTitle}>Select Domain or Event</h3>
-                {hierarchy.length === 0 ? (
-                  <div className={styles.emptyState}>
-                    No attendance records generated yet.
-                  </div>
-                ) : (
-                  <div className={styles.grid}>
-                    {hierarchy.map((domain, idx) => (
-                      <div
-                        key={idx}
-                        className={styles.domainCard}
-                        onClick={() => {
-                          setSelectedDomain(domain);
-                          setSelectedGroup(null);
-                        }}
-                      >
-                        <h4>{domain.domainName}</h4>
-                        <p>{domain.groups?.length || 0} Groups / Batches</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {selectedDomain && !selectedGroup && (
-              <div className={styles.gridContainer}>
-                <h3 className={styles.sectionTitle}>Select Target Group</h3>
-                <div className={styles.grid}>
-                  {selectedDomain.groups?.map((group, idx) => (
-                    <div
-                      key={idx}
-                      className={styles.groupCard}
-                      onClick={() => setSelectedGroup(group)}
-                    >
-                      <h4>{group.groupName}</h4>
-                      <p>{group.sessions?.length || 0} Recorded Sessions</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {selectedDomain && selectedGroup && (
-              <div className={styles.gridContainer}>
-                <h3 className={styles.sectionTitle}>Available Reports</h3>
-                <div className={styles.listContainer}>
-                  {selectedGroup.sessions?.map((session) => (
-                    <div key={session.id} className={styles.sessionItem}>
-                      <div>
-                        <p className={styles.sessionDate}>
-                          {new Date(session.class_date || session.startTime).toLocaleDateString(
-                            undefined,
-                            {
-                              weekday: "long",
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            }
-                          )}
-                        </p>
-                        <p className={styles.sessionDetails}>
-                          {session.start_time} - {session.end_time}
-                        </p>
-                      </div>
-                      <button
-                        className={styles.btnDownload}
-                        onClick={() =>
-                          handleDownloadExcel(session.id, session.class_date)
-                        }
-                      >
-                        Download Excel
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
 
-export default VolunteerAttendance;
+export default AttendanceManagement;

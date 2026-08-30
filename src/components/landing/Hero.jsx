@@ -11,7 +11,7 @@ function Hero() {
             <span className={styles.badgeDot}></span>
             Next-Gen Learning Platform
           </div>
-          
+
           <h1 className={styles.title}>
             Master Your Future With <span className={styles.highlight}>SURE ProEd</span>
           </h1>
@@ -51,7 +51,7 @@ function Hero() {
               alt="SURE ProEd Platform"
               className={styles.heroImage}
             />
-            
+
             {/* Glassmorphic floating elements */}
             <div className={`${styles.glassCard} ${styles.float1}`}>
               <div className={styles.glassIcon}>🎓</div>
@@ -60,7 +60,7 @@ function Hero() {
                 <p>Track your progress</p>
               </div>
             </div>
-            
+
             <div className={`${styles.glassCard} ${styles.float2}`}>
               <div className={styles.glassIcon}>📊</div>
               <div>

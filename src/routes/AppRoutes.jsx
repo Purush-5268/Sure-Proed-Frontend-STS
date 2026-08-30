@@ -451,6 +451,8 @@ function AppRoutes() {
               <Route path="volunteer/alerts" element={<VolunteerAlerts />} />
               <Route path="volunteer/schedule" element={<VolunteerSchedule />} />
               <Route path="volunteer/attendance" element={<VolunteerAttendance />} />
+              <Route path="volunteer/attendance-details" element={<AttendanceDetails />} />
+              <Route path="volunteer/update-attendance" element={<UpdateAttendance />} />
               <Route path="volunteer/users" element={<VolunteerUsers />} />
 
               {/* Commercial Trustee */}

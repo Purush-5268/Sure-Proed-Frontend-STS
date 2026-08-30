@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { attendanceService } from "../../../services/attendanceService";
 import { useAuth } from "../../../context/AuthContext";
+import { normalizeListResponse } from "../../../services/apiClient";
 import styles from "./Dashboard.module.css";
 
 function VolunteerDashboard() {
@@ -15,7 +16,7 @@ function VolunteerDashboard() {
   const fetchLiveSessions = async () => {
     try {
       const res = await attendanceService.getAttendanceRecords({ status: "ACTIVE" });
-      const sessionsArray = res.results || res || [];
+      const sessionsArray = normalizeListResponse(res);
       // Filter out completed ones, keep pending/active (backend filters this mostly, but just in case)
       setActiveSessions(sessionsArray.filter((s) => s.conducted !== false));
     } catch (err) {

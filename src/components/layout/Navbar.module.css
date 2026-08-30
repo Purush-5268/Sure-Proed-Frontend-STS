@@ -17,8 +17,10 @@
 
 :global([data-theme='dark']) .navbar {
   background: rgba(10, 10, 10, 0.85);
-  border-bottom: 1px solid rgba(251, 191, 36, 0.3); /* Premium gold accent border */
-  box-shadow: 0 4px 25px rgba(251, 191, 36, 0.05), 0 10px 30px rgba(0, 0, 0, 0.5); /* Subtle gold glow */
+  border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+  /* Premium gold accent border */
+  box-shadow: 0 4px 25px rgba(251, 191, 36, 0.05), 0 10px 30px rgba(0, 0, 0, 0.5);
+  /* Subtle gold glow */
 }
 
 .logo {

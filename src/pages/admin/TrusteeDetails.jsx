@@ -24,14 +24,9 @@ function TrusteeDetails() {
         const userRes = await apiClient.get(API_ENDPOINTS.USERS.BY_ID(id));
         const userData = userRes.data;
 
-        // Fetch Profiles collection to match by email
-        const profilesRes = await apiClient.get(API_ENDPOINTS.TRUSTEE_PROFILES.BASE);
-        const allProfiles = normalizeListResponse(profilesRes.data);
-        const matchedProfile = allProfiles.find(p => p.email === userData.email);
-
         if (isMounted) {
           setUser(userData);
-          setProfile(matchedProfile || null);
+          setProfile(null);
         }
       } catch (err) {
         console.error("Failed to fetch trustee details:", err);
@@ -117,9 +112,9 @@ function TrusteeDetails() {
             </h2>
             <p style={{ color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "6px" }}>
               <FiShield /> {
-                profile?.trustee_type === "COMMERCIAL" ? "Trustee" :
-                profile?.trustee_type === "VOLUNTEER" ? "Volunteer" :
-                profile?.trustee_type === "ADVISOR" ? "Advisor" :
+                user?.role === "TRUSTEE" && user?.admin_category === "ADVISORY" ? "Advisor" :
+                user?.role === "VOLUNTEER" ? "Volunteer" :
+                user?.role === "TRUSTEE" ? "Trustee" :
                 "No Type Assigned"
               }
             </p>
@@ -138,8 +133,8 @@ function TrusteeDetails() {
           <div>
             <h3 style={{ fontSize: "14px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Organization Details</h3>
             <div style={{ background: "var(--bg-nested)", padding: "16px", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
-              <p style={{ margin: "0 0 12px 0", color: "var(--text-primary)" }}><strong>Organization:</strong> {profile?.organization || "N/A"}</p>
-              <p style={{ margin: 0, color: "var(--text-primary)" }}><strong>Designation:</strong> {profile?.designation || "N/A"}</p>
+              <p style={{ margin: "0 0 12px 0", color: "var(--text-primary)" }}><strong>Organization:</strong> N/A (Backend update required)</p>
+              <p style={{ margin: 0, color: "var(--text-primary)" }}><strong>Designation:</strong> N/A (Backend update required)</p>
             </div>
           </div>
         </div>

@@ -191,33 +191,6 @@ function NotificationBell() {
     try {
       const data = await notificationService.getNotifications();
       setNotifications(data);
-
-      // --- LOCAL FALLBACK FOR PUSH NOTIFICATIONS ---
-      // If the browser granted permission but the backend push subscription (isSubscribed) 
-      // isn't working (e.g., local dev missing VAPID keys), we manually trigger standard
-      // HTML5 Notifications when our polling detects new unread messages.
-      if (Notification.permission === "granted" && !isSubscribed) {
-        const newNotifs = data.filter(n => !n.is_read && !seenIdsRef.current.has(n.id));
-        newNotifs.forEach(n => {
-          const fallbackNotif = new Notification(n.title || "New Notification", {
-            body: n.message || "You have a new update.",
-            icon: "/favicon.ico"
-          });
-          
-          fallbackNotif.onclick = () => {
-            window.focus();
-            const finalUrl = getNotificationRoute(n, user?.role);
-            if (finalUrl.startsWith('http')) window.location.href = finalUrl;
-            else navigate(finalUrl);
-            fallbackNotif.close();
-          };
-          
-          seenIdsRef.current.add(n.id);
-        });
-        
-        // Add all fetched IDs to seen set to prevent future spam
-        data.forEach(n => seenIdsRef.current.add(n.id));
-      }
     } catch {
       // Fail silently — bell should never break the page
     }

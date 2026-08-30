@@ -60,7 +60,8 @@ function Login() {
           navigate(returnUrl, { replace: true });
         } else if (role === "ADMIN") navigate("/admin/dashboard", { replace: true });
         else if (role === "MENTOR") navigate("/mentor/dashboard", { replace: true });
-        else if (role === "TRUSTEE" || role === "VOLUNTEER") navigate("/trustee/dashboard", { replace: true });
+        else if (role === "VOLUNTEER") navigate("/trustee/volunteer/dashboard", { replace: true });
+        else if (role === "TRUSTEE") navigate("/trustee/commercial/dashboard", { replace: true });
         else navigate("/student/profile", { replace: true });
       }, 500);
     };
@@ -96,8 +97,10 @@ function Login() {
           navigate("/admin/dashboard");
         } else if (userRole === "MENTOR") {
           navigate("/mentor/dashboard");
-        } else if (userRole === "TRUSTEE" || userRole === "VOLUNTEER") {
-          navigate("/trustee/dashboard");
+        } else if (userRole === "VOLUNTEER") {
+          navigate("/trustee/volunteer/dashboard");
+        } else if (userRole === "TRUSTEE") {
+          navigate("/trustee/commercial/dashboard");
         } else {
           navigate("/student/profile");
         }

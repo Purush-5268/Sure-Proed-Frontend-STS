@@ -265,7 +265,7 @@
 
 /* Faint ambient atmospheric glow */
 [data-theme="dark"] body::before {
-  background: 
+  background:
     radial-gradient(circle at 15% 30%, rgba(45, 212, 191, 0.03) 0%, transparent 40%),
     radial-gradient(circle at 85% 70%, rgba(34, 211, 238, 0.02) 0%, transparent 50%);
   opacity: 0.8;
@@ -273,7 +273,7 @@
 
 /* Subtle trinkles / dust */
 [data-theme="dark"] body::after {
-  background-image: 
+  background-image:
     radial-gradient(rgba(255, 255, 255, 0.8) 1px, transparent 1px),
     radial-gradient(rgba(255, 255, 255, 0.6) 1px, transparent 1px);
   background-size: 150px 150px, 250px 250px;
@@ -283,50 +283,107 @@
 }
 
 @keyframes subtleTwinkle {
-  0% { opacity: 0.02; transform: translateY(0); }
-  50% { opacity: 0.06; }
-  100% { opacity: 0.03; transform: translateY(-4px); }
+  0% {
+    opacity: 0.02;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 0.06;
+  }
+
+  100% {
+    opacity: 0.03;
+    transform: translateY(-4px);
+  }
 }
 
 /* Student Panel — Shared Keyframes */
 @keyframes studentFadeSlideUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes studentShimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 @keyframes studentPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 @keyframes studentRadarSweep {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes studentRadarPing {
-  0% { transform: scale(1); opacity: 0.6; }
-  100% { transform: scale(2.5); opacity: 0; }
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
 }
 
 @keyframes studentGlowPulse {
-  0%, 100% { box-shadow: 0 0 8px var(--student-glow-primary); }
-  50% { box-shadow: 0 0 20px var(--student-glow-primary); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 8px var(--student-glow-primary);
+  }
+
+  50% {
+    box-shadow: 0 0 20px var(--student-glow-primary);
+  }
 }
 
 @keyframes studentGradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Reduced Motion — Disable ALL decorative animations */
 @media (prefers-reduced-motion: reduce) {
+
   [data-role="student"] *,
   [data-role="student"] *::before,
   [data-role="student"] *::after {
@@ -1046,8 +1103,12 @@ select.premium-input {
 
   --border-color: #3f3f46;
 }
+
 @media (max-width: 768px) {
-  .premium-grid-2, .premium-grid-3, .premium-grid-4 {
+
+  .premium-grid-2,
+  .premium-grid-3,
+  .premium-grid-4 {
     grid-template-columns: 1fr !important;
   }
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getStudents, removeStudent } from "../../../services/trusteeService";
+import { normalizeListResponse } from "../../../services/apiClient";
 import SkeletonLoader from "../../../components/common/SkeletonLoader";
 import styles from "./Users.module.css";
 
@@ -13,9 +14,10 @@ function VolunteerUsers() {
   const loadStudents = async () => {
     try {
       const data = await getStudents();
-      setStudents(data || []);
+      setStudents(normalizeListResponse(data));
     } catch (err) {
       console.warn("Could not load students:", err);
+      setStudents([]);
     } finally {
       setLoading(false);
     }
