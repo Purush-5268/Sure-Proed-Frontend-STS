@@ -141,6 +141,14 @@ apiClient.interceptors.response.use(
         clearAuthStorage();
         isRefreshing = false;
         window.dispatchEvent(new CustomEvent('sure_session_expired'));
+        
+        // Retry the request once without the token (for public endpoints)
+        delete originalRequest.headers.Authorization;
+        if (!originalRequest._publicRetry) {
+          originalRequest._publicRetry = true;
+          return apiClient(originalRequest);
+        }
+        
         return Promise.reject(error);
       }
 
@@ -158,6 +166,14 @@ apiClient.interceptors.response.use(
         processQueue(refreshErr, null);
         clearAuthStorage();
         window.dispatchEvent(new CustomEvent('sure_session_expired'));
+        
+        // Retry the request once without the token (for public endpoints)
+        delete originalRequest.headers.Authorization;
+        if (!originalRequest._publicRetry) {
+          originalRequest._publicRetry = true;
+          return apiClient(originalRequest);
+        }
+
         return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;
