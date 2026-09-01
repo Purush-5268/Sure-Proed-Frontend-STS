@@ -13,6 +13,7 @@ function MyCohort() {
   const { user } = useAuth();
   const [cohort, setCohort] = useState(null);
   const [hasEnrollment, setHasEnrollment] = useState(false);
+  const [enrollmentStatus, setEnrollmentStatus] = useState("ACTIVE");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,24 +33,41 @@ function MyCohort() {
         if (isMounted) {
           const enrollment = resolveStudentEnrollment(profileData, apps, courses);
           setHasEnrollment(enrollment.isEnrolled);
+          if (enrollment.status) setEnrollmentStatus(enrollment.status);
 
           let resolvedCohort = null;
           // First check if the API returns a cohort directly for this student
           const cohortList = Array.isArray(cohortRes.data?.results) ? cohortRes.data.results : (Array.isArray(cohortRes.data) ? cohortRes.data : []);
           if (cohortList.length > 0) {
             resolvedCohort = cohortList[0];
-          } else if (enrollment.isEnrolled && enrollment.application?.assigned_cohort) {
-            // Fallback: assigned_cohort might be an object or a UUID string
-            const ac = enrollment.application.assigned_cohort;
-            if (typeof ac === 'string') {
-              try {
-                const singleRes = await apiClient.get(API_ENDPOINTS.COHORTS.BY_ID(ac));
-                resolvedCohort = singleRes.data;
-              } catch (e) {
-                console.error("Failed to fetch assigned cohort by ID");
+          } else if (enrollment.isEnrolled) {
+            // Fallback: Check various places for the cohort ID or object
+            const ac = enrollment.application?.assigned_cohort || 
+                       profileData?.current_application?.assigned_cohort ||
+                       profileData?.cohort ||
+                       profileData?.course_batch;
+                       
+            if (ac) {
+              if (typeof ac === 'string') {
+                try {
+                  const singleRes = await apiClient.get(API_ENDPOINTS.COHORTS.BY_ID(ac));
+                  resolvedCohort = singleRes.data;
+                } catch (e) {
+                  try {
+                    const listRes = await apiClient.get(API_ENDPOINTS.COHORTS.BASE, { params: { search: ac } });
+                    const results = Array.isArray(listRes.data?.results) ? listRes.data.results : (Array.isArray(listRes.data) ? listRes.data : []);
+                    if (results.length > 0) {
+                      resolvedCohort = results[0];
+                    } else {
+                      console.error("Failed to fetch assigned cohort by ID or search");
+                    }
+                  } catch (err2) {
+                    console.error("Failed to fetch assigned cohort by ID or search");
+                  }
+                }
+              } else {
+                resolvedCohort = ac;
               }
-            } else {
-              resolvedCohort = ac;
             }
           }
           if (resolvedCohort) {
@@ -82,8 +100,24 @@ function MyCohort() {
 
   return (
     <div className={styles.page}>
+      {enrollmentStatus === "COMPLETED" && (
+        <div style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', padding: '20px 24px', borderRadius: '16px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: '0 4px 15px rgba(16, 185, 129, 0.2)' }}>
+          <div style={{ fontSize: '32px' }}>🎉</div>
+          <div>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: '18px' }}>Congratulations! Your Cohort is Completed</h4>
+            <p style={{ margin: 0, opacity: 0.9 }}>You have successfully completed this program.</p>
+          </div>
+        </div>
+      )}
       <div className="premium-card">
-        <h1 style={{ color: 'var(--primary-color)' }}>My Internship Group</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '16px' }}>
+          <h1 style={{ color: 'var(--primary-color)', margin: 0 }}>My Internship Group</h1>
+          {hasEnrollment && (
+            <div style={{ padding: '8px 16px', borderRadius: '12px', background: 'var(--bg-nested)', border: '1px solid var(--border-color)', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+              Status: {enrollmentStatus.replace(/_/g, " ")}
+            </div>
+          )}
+        </div>
 
         <p className={styles.subtitle}>
           Your group and mentor details.

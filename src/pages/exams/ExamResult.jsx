@@ -95,8 +95,7 @@ function ExamResult() {
               ? Boolean(location.state?.examResult?.qualified)
               : authCtx.isQualified ||
                 appStatusUpper === "QUALIFIED" ||
-                appStatusUpper === "COHORT_ASSIGNED" ||
-                appStatusUpper === "ACCEPTED" ||
+                ["COHORT_ASSIGNED", "ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS", "ACCEPTED"].includes(appStatusUpper) ||
                 percentage >= passThreshold;
 
           const normalizedScore = normalizeExamScore({

@@ -217,7 +217,7 @@ function ApplyCourse() {
 
           if (isCheatedOrDisqualified) {
             if (cId) cooldownMap[cId] = true;
-          } else if (["QUALIFIED", "COHORT_ASSIGNED", "IN_PROGRESS", "COMPLETED"].includes(statusUpper) && (a.qualified !== false)) {
+          } else if (["QUALIFIED", "COHORT_ASSIGNED", "ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS", "IN_PROGRESS", "COMPLETED"].includes(statusUpper) && (a.qualified !== false)) {
             qualified = true;
             if (cId) appliedSet.add(cId);
           } else if (["REJECTED", "EXAM_FAILED"].includes(statusUpper)) {

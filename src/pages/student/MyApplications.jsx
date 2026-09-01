@@ -137,7 +137,7 @@ function MyApplications() {
 
       masterAppsList.forEach((app) => {
         const st = (app.status || "").toUpperCase();
-        const isQualified = st === "QUALIFIED" || st === "COHORT_ASSIGNED" || app.qualified === true;
+        const isQualified = st === "QUALIFIED" || st === "COHORT_ASSIGNED" || ["ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS"].includes(st) || app.qualified === true;
         const isDisqualified = !isQualified && ((app.cheat_count && app.cheat_count >= 5) || app.qualified === false || st === "REJECTED" || st === "DISQUALIFIED");
 
         if (isQualified) {
@@ -302,7 +302,7 @@ function MyApplications() {
             </div>
           ) : (
             activeApplications.map((activeApp) => {
-              const isQualified = ["QUALIFIED", "COHORT_ASSIGNED"].includes((activeApp.status || "").toUpperCase()) || activeApp.qualified === true;
+              const isQualified = ["QUALIFIED", "COHORT_ASSIGNED", "ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS"].includes((activeApp.status || "").toUpperCase()) || activeApp.qualified === true;
               const isExamTaken = activeApp.exam_taken || isQualified || ["EXAM_COMPLETED", "EVALUATED", "REJECTED", "EXAM_GIVEN"].includes((activeApp.status || "").toUpperCase()) || activeApp.qualification_score != null || activeApp.score != null;
 
               const scoreVal = activeApp.qualification_score != null ? activeApp.qualification_score : (activeApp.score != null ? activeApp.score : (activeApp.percentage != null ? activeApp.percentage : null));
@@ -500,7 +500,7 @@ function MyApplications() {
               {(() => {
                 const mScore = selectedAppModal.qualification_score != null ? selectedAppModal.qualification_score : (selectedAppModal.score != null ? selectedAppModal.score : (selectedAppModal.percentage != null ? selectedAppModal.percentage : null));
                 const stUpper = (selectedAppModal.status || "").toUpperCase();
-                const isQual = selectedAppModal.qualified === true || ["QUALIFIED", "COHORT_ASSIGNED"].includes(stUpper) || (mScore != null && Number(mScore) >= 40.0);
+                const isQual = selectedAppModal.qualified === true || ["QUALIFIED", "COHORT_ASSIGNED", "ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS"].includes(stUpper) || (mScore != null && Number(mScore) >= 40.0);
                 const isRej = !isQual && (selectedAppModal.qualified === false || ["REJECTED", "EXAM_FAILED", "DISQUALIFIED"].includes(stUpper));
 
                 const statusText = isQual ? "QUALIFIED" : (isRej ? "REJECTED" : (selectedAppModal.status || "APPLIED"));

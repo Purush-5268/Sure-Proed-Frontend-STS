@@ -686,6 +686,16 @@ select.premium-input {
   white-space: normal;
 }
 
+input[type="datetime-local"].premium-input::-webkit-datetime-edit,
+input[type="date"].premium-input::-webkit-datetime-edit {
+  color: var(--text-primary);
+}
+
+input[type="datetime-local"].premium-input,
+input[type="date"].premium-input {
+  color-scheme: light dark;
+}
+
 .premium-input:focus {
   outline: none;
   border-color: var(--primary-color);

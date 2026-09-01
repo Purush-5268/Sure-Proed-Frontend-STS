@@ -120,7 +120,7 @@ function CohortDetails() {
   const [courseName, setCourseName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  
+
   const [updatingStage, setUpdatingStage] = useState(false);
   const [bulkGenerating, setBulkGenerating] = useState(false);
   const [updatingBatch, setUpdatingBatch] = useState(false);
@@ -247,7 +247,7 @@ function CohortDetails() {
     const stageOrder = ["DRAFT", "OPEN", "ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS", "COMPLETED", "CANCELLED"];
     const currentIndex = stageOrder.indexOf(currentStatus);
     const targetIndex = Math.min(...targetStages.map(s => stageOrder.indexOf(s)));
-    
+
     if (currentStatus === "CANCELLED") return "upcoming";
     if (targetStages.includes(currentStatus)) return "active";
     if (currentIndex > targetIndex) return "completed";
@@ -258,7 +258,7 @@ function CohortDetails() {
 
   return (
     <div className={styles.pageContainer}>
-      
+
       {/* Header Section */}
       <div className={styles.headerCard}>
         <div className={styles.headerLeft}>
@@ -313,12 +313,12 @@ function CohortDetails() {
             Cohort Chat
             {unreadCount > 0 && <span className={styles.unreadBadge}>{unreadCount}</span>}
           </Link>
-          
+
           <Link to={`/admin/edit-cohort/${cohort.id}`} className={`${styles.btn} ${styles.btnSecondary}`} aria-label="Edit Cohort">
             <FiEdit2 size={16} aria-hidden="true" />
             Edit
           </Link>
-          
+
           <Link to="/admin/cohorts" className={`${styles.btn} ${styles.btnTertiary}`} aria-label="Back to Cohorts">
             <FiArrowLeft size={20} aria-hidden="true" />
           </Link>
@@ -331,7 +331,7 @@ function CohortDetails() {
           <h3 className={styles.timelineTitle}>Cohort Timeline</h3>
           <div className={styles.timelineTrack}>
             <div className={styles.timelineLine}></div>
-            
+
             {[
               { label: "Start", date: calculateTimeline(cohort.start_date).start, status: getTimelineStatus(cohort.status, ["ACTIVE"]) },
               { label: "Training Ends", date: calculateTimeline(cohort.start_date).trainingEnd, status: getTimelineStatus(cohort.status, ["TRAINING"]) },

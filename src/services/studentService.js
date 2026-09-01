@@ -80,7 +80,8 @@ export const isProfileComplete = (profile = {}) => {
 export const checkCurrentEnrollment = (profile, activeApplication) => {
   if (profile?.status === "ADMIN_APPROVED") return true;
   if (profile?.authoritative_course_batch) return true;
-  if (activeApplication && ['COHORT_ASSIGNED', 'IN_PROGRESS', 'COMPLETED'].includes(activeApplication.status)) return true;
+  const ENROLLED_STATUSES = ['COHORT_ASSIGNED', 'IN_PROGRESS', 'ACTIVE', 'TRAINING', 'INTERNSHIP', 'SOFT_SKILLS', 'PRE_TRAINING', 'COMPLETED'];
+  if (activeApplication && ENROLLED_STATUSES.includes(activeApplication.status)) return true;
   return false;
 };
 
@@ -88,12 +89,25 @@ export const resolveStudentEnrollment = (serverProfile, applications = [], cours
   const appsArray = Array.isArray(applications) ? applications : (applications?.results || []);
   const coursesArray = Array.isArray(courses) ? courses : (courses?.results || []);
 
-  const activeApp = appsArray.find(a => ['COHORT_ASSIGNED', 'IN_PROGRESS', 'COMPLETED'].includes(a.status));
+  const ENROLLED_STATUSES = ['COHORT_ASSIGNED', 'IN_PROGRESS', 'ACTIVE', 'TRAINING', 'INTERNSHIP', 'SOFT_SKILLS', 'PRE_TRAINING', 'COMPLETED'];
+  const activeApp = appsArray.find(a => ENROLLED_STATUSES.includes(a.status));
+  
+  // Debug: log what statuses are coming back so we can diagnose issues
+  if (appsArray.length > 0) {
+    console.log('[Dashboard] Applications found:', appsArray.map(a => ({ id: a.id, status: a.status, cohort: a.assigned_cohort?.code })));
+  } else {
+    console.log('[Dashboard] No applications returned from API');
+  }
+
+  // Fallback: if no cohort-assigned app found, try SUSPENDED ones too
+  const suspendedApp = !activeApp ? appsArray.find(a => a.status === 'SUSPENDED') : null;
 
   const isEnrolled = Boolean(
+    ENROLLED_STATUSES.includes(serverProfile?.status) ||
     (serverProfile?.status === "ADMIN_APPROVED") ||
     (serverProfile?.authoritative_course_batch) ||
-    activeApp
+    activeApp ||
+    suspendedApp
   );
 
   const isExistingStudent = serverProfile?.is_existing_student || serverProfile?.isExistingStudent === "yes";

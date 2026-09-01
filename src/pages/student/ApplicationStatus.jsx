@@ -62,7 +62,7 @@ function ApplicationStatus() {
               <div className={styles.completed}>✓ Screening Exam Completed</div>
             )}
             
-            {["QUALIFIED", "COHORT_ASSIGNED", "IN_PROGRESS", "COMPLETED"].includes(application?.status) ? (
+            {["QUALIFIED", "COHORT_ASSIGNED", "ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS", "IN_PROGRESS", "COMPLETED"].includes(application?.status) ? (
               <div className={styles.completed}>✓ Qualification Passed</div>
             ) : application?.status === "REJECTED" ? (
               <div className="premium-badge" style={{ backgroundColor: 'var(--danger-color)' }}>✗ Application Rejected</div>
@@ -72,26 +72,26 @@ function ApplicationStatus() {
               <div>Qualification Result</div>
             )}
             
-            {["COHORT_ASSIGNED", "IN_PROGRESS", "COMPLETED"].includes(application?.status) ? (
+            {["COHORT_ASSIGNED", "ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS", "IN_PROGRESS", "COMPLETED"].includes(application?.status) ? (
               <div className={styles.completed}>✓ Cohort Assigned</div>
             ) : (
               <div>Cohort Assignment</div>
             )}
             
-            {["IN_PROGRESS", "COMPLETED"].includes(application?.status) ? (
+            {["ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS", "IN_PROGRESS", "COMPLETED"].includes(application?.status) ? (
               <div className={styles.completed}>✓ Internship Began</div>
             ) : (
               <div>Internship Begins</div>
             )}
           </div>
 
-        {["EXAM_PENDING", "APPLIED"].includes(application?.status) && (
+        {["EXAM_PENDING", "APPLIED", "OPEN", "DRAFT"].includes(application?.status) && (
           <Link to="/student/exam-instructions" className={styles.examButton}>
             Start Screening Exam
           </Link>
         )}
 
-        {["COHORT_ASSIGNED", "IN_PROGRESS", "COMPLETED"].includes(application?.status) && (
+        {["COHORT_ASSIGNED", "ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS", "IN_PROGRESS", "COMPLETED"].includes(application?.status) && (
           <Link to="/student/cohort" className={styles.button}>
             Continue to My Cohort →
           </Link>

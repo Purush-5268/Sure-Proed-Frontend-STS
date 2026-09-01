@@ -191,7 +191,7 @@ export const fetchAuthoritativeExamContext = async () => {
       !isNewScheduleActive &&
       (activeApp.qualified === true ||
         latestExam?.qualified === true ||
-        ["QUALIFIED", "COHORT_ASSIGNED"].includes(appStatus));
+        ["QUALIFIED", "COHORT_ASSIGNED", "ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS"].includes(appStatus));
     const isFailed =
       !isNewScheduleActive &&
       !isQualified &&

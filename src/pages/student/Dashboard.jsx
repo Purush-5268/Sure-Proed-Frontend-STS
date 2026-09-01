@@ -48,8 +48,8 @@ function Dashboard() {
       if (!user?.email) return;
       try {
         const [profileRes, statsRes, appRes, coursesRes] = await Promise.all([
-          studentService.getStudentProfiles({}, { signal: abortController.signal }).catch(() => null),
-          apiClient.get('/students/statistics/').catch(() => ({ data: {} })),
+          studentService.getStudentProfiles({ user__email: user.email }, { signal: abortController.signal }).catch(() => null),
+          apiClient.get(API_ENDPOINTS.STUDENTS.STATISTICS).catch(() => ({ data: {} })),
           apiClient.get(API_ENDPOINTS.APPLICATIONS?.BASE || "/applications/").catch(() => ({ data: [] })),
           courseService.getCourses().catch(() => [])
         ]);
@@ -64,13 +64,20 @@ function Dashboard() {
         const apps = appRes?.data?.results || appRes?.data || [];
         const courses = Array.isArray(coursesRes) ? coursesRes : (coursesRes?.results || coursesRes?.data || []);
 
-        // Find active or suspended application
-        const enrolled = apps.find(a => ['COHORT_ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'SUSPENDED'].includes(a.status));
+        // Find active/enrolled application by status — covers all cohort phases
+        const ENROLLED_STATUSES = ['COHORT_ASSIGNED', 'IN_PROGRESS', 'ACTIVE', 'TRAINING', 'INTERNSHIP', 'SOFT_SKILLS', 'PRE_TRAINING', 'COMPLETED', 'SUSPENDED'];
+        const enrolled = apps.find(a => ENROLLED_STATUSES.includes(a.status));
+        
+        console.log('[Dashboard] Apps from API:', apps.map(a => ({ status: a.status, cohort: a.assigned_cohort?.code || a.assigned_cohort })));
+        
         if (isMounted && enrolled) {
           setActiveApp(enrolled);
           if (enrolled.status === "SUSPENDED") {
             setIsSuspended(true);
           }
+        } else if (isMounted && profileObj?.current_application?.assigned_cohort) {
+          // Fallback: apps list may be stale — use the cohort from the profile's current_application
+          setActiveApp(profileObj.current_application);
         }
 
         const enrollmentStatus = resolveStudentEnrollment(profileObj, apps, courses);
@@ -130,10 +137,25 @@ function Dashboard() {
           });
         }
 
-        // Calculate the student's actual cohort ID
-        const cohortId = activeApp?.assigned_cohort?.id || statsRes?.data?.active_cohort?.id || profileObj?.cohort;
-        const sessionParams = cohortId ? { status: "ACTIVE", cohort: cohortId } : { status: "ACTIVE" };
+        // Robust cohort and course ID extraction
+        // NOTE: Use `enrolled` (local var) NOT `activeApp` (React state) — state is async and stale here!
+        const getStrId = (val) => {
+          if (!val) return null;
+          return typeof val === 'string' ? val : (val.id || null);
+        };
+        const cohortId = getStrId(enrolled?.assigned_cohort) 
+          || getStrId(statsRes?.data?.active_cohort) 
+          || getStrId(profileObj?.current_application?.assigned_cohort)
+          || getStrId(profileObj?.cohort) 
+          || getStrId(profileObj?.course_batch);
+        const courseId = getStrId(enrolled?.course) || getStrId(profileObj?.current_application?.course) || getStrId(profileObj?.course) || getStrId(statsRes?.data?.active_course);
+        console.log('[Dashboard] cohortId resolved:', cohortId, '| enrolled.assigned_cohort:', enrolled?.assigned_cohort);
 
+        // Fetch all sessions for this cohort — no status filter so upcoming ones are included
+        const sessionParams = {};
+        if (cohortId) sessionParams.cohort = cohortId;
+        if (courseId) sessionParams.course = courseId;
+        
         // Fetch scheduled LST/SST/Domain sessions limited to their cohort
         Promise.allSettled([
           apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { params: sessionParams }),
@@ -276,11 +298,28 @@ function Dashboard() {
 
       {/* Sleek Glass Header */}
       <header className={styles.header}>
-        <div>
-          <h3 style={{ margin: 0, fontSize: '24px' }}>Welcome back, {`${user?.first_name || ''} ${user?.last_name || ''}`.trim() || profile?.first_name || "Student"}!</h3>
-          <p style={{ margin: '8px 0 0 0', opacity: 0.9 }}>{profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "Awaiting Course Assignment"} | {profile?.current_application?.assigned_cohort?.code || stats?.active_cohort?.code || profile?.cohort_code || "Awaiting Cohort Assignment"}</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '24px' }}>Welcome back, {`${user?.first_name || ''} ${user?.last_name || ''}`.trim() || profile?.first_name || "Student"}!</h3>
+            <p style={{ margin: '8px 0 0 0', opacity: 0.9 }}>{profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "Awaiting Course Assignment"} | {profile?.current_application?.assigned_cohort?.code || stats?.active_cohort?.code || profile?.cohort_code || "Awaiting Cohort Assignment"}</p>
+          </div>
+          <div style={{ padding: '8px 16px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.2)', fontWeight: 'bold' }}>
+            Status: {resolvedEnrollment?.status ? resolvedEnrollment.status.replace(/_/g, " ") : "ACTIVE"}
+          </div>
         </div>
       </header>
+
+      {resolvedEnrollment?.status === "COMPLETED" && (
+        <div style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', padding: '20px 24px', borderRadius: '16px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: '0 4px 15px rgba(16, 185, 129, 0.2)' }}>
+          <div style={{ fontSize: '32px' }}>🎉</div>
+          <div>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: '18px' }}>Congratulations! Your Cohort is Completed</h4>
+            <p style={{ margin: 0, opacity: 0.9 }}>You have successfully completed this program. You can now apply for your next cohort and continue your journey.</p>
+          </div>
+          <button onClick={() => navigate('/student/apply-course')} style={{ marginLeft: 'auto', background: 'white', color: '#059669', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>Apply Now</button>
+        </div>
+      )}
+
 
       {/* Smart Bento Grid Layout */}
       <div className={styles.immersiveHero}>
@@ -301,64 +340,75 @@ function Dashboard() {
 
           <div style={{ background: 'var(--bg-nested)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
             <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Your Mentor</h4>
-            {stats?.active_cohort?.mentor_name || activeApp?.assigned_cohort?.mentor?.user ? (
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--primary-color)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold' }}>
-                  {stats?.active_cohort?.mentor_name?.[0] || activeApp?.assigned_cohort?.mentor?.user?.first_name?.[0] || 'M'}
-                </div>
-                <div>
-                  <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
-                    {stats?.active_cohort?.mentor_name || `${activeApp?.assigned_cohort?.mentor?.user?.first_name || ''} ${activeApp?.assigned_cohort?.mentor?.user?.last_name || ''}`.trim()}
+            {(() => {
+              const activeMentors = stats?.active_cohort?.active_mentors || activeApp?.assigned_cohort?.active_mentors || [];
+
+              if (activeMentors.length === 0) {
+                return (
+                  <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>🌱</div>
+                    <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>Pending Assignment</div>
+                    <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px' }}>We are matching you with an expert. Check back soon!</div>
                   </div>
-                  {(activeApp?.assigned_cohort?.mentor?.user?.email || activeApp?.assigned_cohort?.mentor?.user?.phone) && (
-                    <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                      {activeApp.assigned_cohort.mentor.user.email} {activeApp.assigned_cohort.mentor.user.phone ? ` • ${activeApp.assigned_cohort.mentor.user.phone}` : ''}
-                    </div>
-                  )}
-                  {activeApp?.assigned_cohort?.mentor?.linkedin_url && (
-                    <a href={activeApp.assigned_cohort.mentor.linkedin_url} target="_blank" rel="noreferrer" style={{ display: 'inline-block', marginTop: '8px', fontSize: '13px', color: '#0ea5e9', textDecoration: 'none', fontWeight: '600' }}>
-                      🔗 View LinkedIn Profile
-                    </a>
-                  )}
+                );
+              }
+
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {activeMentors.map((mentor) => {
+                    const mentorName = `${mentor.first_name || ''} ${mentor.last_name || ''}`.trim() || mentor.name || mentor.email || 'Mentor';
+                    const avatarChar = mentorName.charAt(0).toUpperCase();
+
+                    return (
+                      <div key={mentor.id || mentor.email} style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--primary-color)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold', flexShrink: 0 }}>
+                          {avatarChar}
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+                            {mentorName}
+                          </div>
+                          {(mentor.email || mentor.phone || mentor.phone_number) && (
+                            <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                              {mentor.email} {(mentor.phone || mentor.phone_number) ? ` • ${mentor.phone || mentor.phone_number}` : ''}
+                            </div>
+                          )}
+                          {mentor.linkedin_url && (
+                            <a href={mentor.linkedin_url} target="_blank" rel="noreferrer" style={{ display: 'inline-block', marginTop: '8px', fontSize: '13px', color: '#0ea5e9', textDecoration: 'none', fontWeight: '600' }}>
+                              🔗 View LinkedIn Profile
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '16px 0' }}>
-                <div style={{ fontSize: '32px', marginBottom: '8px' }}>🌱</div>
-                <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>No Mentor Assigned Yet</div>
-                <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px' }}>We are matching you with an expert. Check back soon!</div>
-              </div>
-            )}
+              );
+            })()}
           </div>
         </div>
 
-        {/* Right Side: Live Radar Widget */}
+        {/* Right Side: Live Classes Widget */}
         <div className={styles.floatingLiveSection}>
           <div style={{ position: 'relative', zIndex: 1, height: '100%' }}>
             <h3 style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', marginBottom: '20px' }}>
-              <span style={{ width: '12px', height: '12px', background: '#ef4444', borderRadius: '50%', display: 'inline-block' }}></span>
-              Live Class Radar
+              Live Classes
             </h3>
 
             {(() => {
               const now = new Date();
               const visibleClasses = todayClasses.filter(cls => {
-                const classStart = new Date(`${cls.class_date}T${cls.start_time}`);
-                let classEnd = cls.end_time ? new Date(`${cls.class_date}T${cls.end_time}`) : new Date(classStart.getTime() + 2 * 60 * 60 * 1000);
-                if (classEnd < classStart) {
-                  classEnd = new Date(classEnd.getTime() + 24 * 60 * 60 * 1000);
-                }
-                const hasEnded = cls.status === 'COMPLETED' || cls.status === 'ENDED' || now > classEnd;
-                if (cls.conducted === false) return false;
+                // Trust the backend: if backend says COMPLETED, ENDED, or CANCELLED → hide it
+                if (['COMPLETED', 'ENDED', 'CANCELLED'].includes(cls.status)) return false;
                 return true;
               });
 
               if (visibleClasses.length === 0) {
                 return (
                   <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>📡</div>
-                    <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0' }}>Radar is Clear</h4>
-                    <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '14px' }}>No active or rescheduled sessions detected within your time window.</p>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>📅</div>
+                    <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0' }}>No Classes Scheduled</h4>
+                    <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '14px' }}>No upcoming or active sessions for your cohort right now.</p>
                   </div>
                 );
               }
@@ -371,21 +421,25 @@ function Dashboard() {
                     if (classEnd < classStart) classEnd = new Date(classEnd.getTime() + 24 * 60 * 60 * 1000);
                     const windowOpenTime = new Date(classStart.getTime() - 10 * 60 * 1000);
                     const windowCloseTime = new Date(classStart.getTime()); // Closes exactly at start time
+                    const isNextDay = classEnd < classStart;
 
                     if (now >= windowOpenTime && now <= new Date(windowOpenTime.getTime() + 60000) && Notification.permission === "granted" && !cls.notified) {
                       cls.notified = true;
                       new Notification(`Live Class: ${cls.title}`, { body: "Join window is now open! Please join before class starts." });
                     }
 
-                    const classOpen = cls.conducted !== false && cls.status !== 'COMPLETED' && cls.status !== 'ENDED' && now >= windowOpenTime && now <= windowCloseTime;
+                    // Backend has NOT marked it completed — so we only use clock for Join Window logic
+                    const classOpen = now >= windowOpenTime && now <= windowCloseTime;
                     const isEarly = now < windowOpenTime;
-                    const isLate = now > windowCloseTime && now <= classEnd && cls.status !== 'COMPLETED' && cls.status !== 'ENDED';
-                    const hasEnded = cls.status === 'COMPLETED' || cls.status === 'ENDED' || now > classEnd;
-                    const isNextDay = classEnd < classStart;
+                    // isLate = join window closed but class time hasn't ended yet
+                    const isLate = now > windowCloseTime && now <= classEnd;
+                    // classOngoing = class time hasn't passed yet (between start and end by clock)
+                    const classOngoing = now > classStart && now <= classEnd;
 
                     return (
                       <div key={idx} style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' }}>
                         {classOpen && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#ef4444' }}></div>}
+                        {classOngoing && !classOpen && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#f59e0b' }}></div>}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <div>
                             <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-primary)' }}>{cls.title || cls.class_type || "Live Session"}</h4>
@@ -400,13 +454,13 @@ function Dashboard() {
                             </button>
                           ) : isEarly ? (
                             <div style={{ textAlign: 'right' }}>
-                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🔒 Locked</span>
+                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🗓️ Upcoming</span>
                               <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Join opens at {windowOpenTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                             </div>
                           ) : isLate ? (
                             <div style={{ textAlign: 'right', maxWidth: '200px' }}>
-                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🔒 Window Closed</span>
-                              <div style={{ fontSize: '12px', color: '#ef4444' }}>Join time has expired.</div>
+                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#f59e0b', padding: '6px 12px', background: 'rgba(245,158,11,0.1)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🔴 In Progress</span>
+                              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Join window closed, class ongoing</div>
                               {cls.warning_state ? (
                                 <span style={{ fontSize: '12px', color: cls.warning_state === 'ACCEPTED' ? '#10b981' : cls.warning_state === 'REJECTED' ? '#ef4444' : '#f59e0b', fontWeight: 'bold', display: 'block', marginTop: '6px' }}>
                                   Status: {cls.warning_state === 'APOLOGIZED' ? 'Pending Approval' : cls.warning_state}
@@ -420,9 +474,10 @@ function Dashboard() {
                                 </button>
                               )}
                             </div>
-                          ) : hasEnded ? (
-                            <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px' }}>Session Ended</span>
-                          ) : null}
+                          ) : (
+                            // Future class beyond today — just show Scheduled
+                            <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px' }}>🗓️ Scheduled</span>
+                          )}
                         </div>
                         {classOpen && (
                           <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
@@ -443,6 +498,7 @@ function Dashboard() {
                 </div>
               );
             })()}
+
           </div>
         </div>
       </div>
