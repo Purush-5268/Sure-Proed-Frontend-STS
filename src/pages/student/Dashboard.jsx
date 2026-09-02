@@ -6,6 +6,7 @@ import { courseService } from "../../services/courseService";
 import { attendanceService } from "../../services/attendanceService";
 import { assignmentService } from "../../services/assignmentService";
 import { examService } from "../../services/examService";
+import { requestService } from "../../services/requestService";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
@@ -68,7 +69,6 @@ function Dashboard() {
         const ENROLLED_STATUSES = ['COHORT_ASSIGNED', 'IN_PROGRESS', 'ACTIVE', 'TRAINING', 'INTERNSHIP', 'SOFT_SKILLS', 'PRE_TRAINING', 'COMPLETED', 'SUSPENDED'];
         const enrolled = apps.find(a => ENROLLED_STATUSES.includes(a.status));
         
-        console.log('[Dashboard] Apps from API:', apps.map(a => ({ status: a.status, cohort: a.assigned_cohort?.code || a.assigned_cohort })));
         
         if (isMounted && enrolled) {
           setActiveApp(enrolled);
@@ -100,11 +100,12 @@ function Dashboard() {
 
         // Fetch remaining secondary data non-blockingly
         if (enrollmentStatus.isEnrolled && isMounted) {
-          apiClient.get('/attendance-summary/').then(attRes => {
+          apiClient.get(API_ENDPOINTS.ATTENDANCE.SUMMARY).then(attRes => {
             const attData = attRes.data?.results || attRes.data || [];
             if (attData.length > 0 && isMounted) {
-              setAttendanceStats(attData[0]);
-              if (attData[0].history) setAttendanceHistory(attData[0].history);
+              const myAtt = attData.find(a => a.student_id === user?.id || a.user?.id === user?.id || a.email === user?.email) || attData[0];
+              setAttendanceStats(myAtt);
+              if (myAtt.history) setAttendanceHistory(myAtt.history);
             }
           }).catch((err) => {
             if (err.response?.status === 403) setIsSuspended(true);
@@ -149,7 +150,6 @@ function Dashboard() {
           || getStrId(profileObj?.cohort) 
           || getStrId(profileObj?.course_batch);
         const courseId = getStrId(enrolled?.course) || getStrId(profileObj?.current_application?.course) || getStrId(profileObj?.course) || getStrId(statsRes?.data?.active_course);
-        console.log('[Dashboard] cohortId resolved:', cohortId, '| enrolled.assigned_cohort:', enrolled?.assigned_cohort);
 
         // Fetch all sessions for this cohort — no status filter so upcoming ones are included
         const sessionParams = {};
@@ -226,7 +226,11 @@ function Dashboard() {
     }
     setIsSubmittingLateJoin(true);
     try {
-      await attendanceService.requestPermission(lateJoinClassId, lateJoinReason);
+      await requestService.createRequest({
+        title: `Late Join Request (Class ID: ${lateJoinClassId})`,
+        description: lateJoinReason,
+        category: 'PERMISSION'
+      });
       alert("Permission request submitted successfully.");
       setShowLateJoinModal(false);
       setLateJoinReason("");
@@ -398,8 +402,19 @@ function Dashboard() {
             {(() => {
               const now = new Date();
               const visibleClasses = todayClasses.filter(cls => {
-                // Trust the backend: if backend says COMPLETED, ENDED, or CANCELLED → hide it
-                if (['COMPLETED', 'ENDED', 'CANCELLED'].includes(cls.status)) return false;
+                const clsStatus = (cls.status || "").toUpperCase();
+                if (['CANCELLED'].includes(clsStatus)) return false;
+                
+                const classStart = new Date(`${cls.class_date}T${cls.start_time}`);
+                if (isNaN(classStart)) return false;
+                
+                const hoursSince = (now - classStart) / (1000 * 60 * 60);
+                
+                // Hide any class that is older than 24 hours, regardless of status
+                if (hoursSince > 24) {
+                  return false;
+                }
+                
                 return true;
               });
 
@@ -428,39 +443,44 @@ function Dashboard() {
                       new Notification(`Live Class: ${cls.title}`, { body: "Join window is now open! Please join before class starts." });
                     }
 
-                    // Backend has NOT marked it completed — so we only use clock for Join Window logic
-                    const classOpen = now >= windowOpenTime && now <= windowCloseTime;
-                    const isEarly = now < windowOpenTime;
-                    // isLate = join window closed but class time hasn't ended yet
-                    const isLate = now > windowCloseTime && now <= classEnd;
-                    // classOngoing = class time hasn't passed yet (between start and end by clock)
-                    const classOngoing = now > classStart && now <= classEnd;
+                    const clsStatus = (cls.status || "").toUpperCase();
+                    const isCompleted = clsStatus === 'COMPLETED' || clsStatus === 'ENDED';
+                    const classOpen = !isCompleted && now >= windowOpenTime && now <= windowCloseTime;
+                    const isEarly = !isCompleted && now < windowOpenTime;
+                    const isLate = !isCompleted && now > windowCloseTime && now <= classEnd;
+                    const isTimePassed = !isCompleted && now > classEnd;
+                    const classOngoing = !isCompleted && now > classStart && now <= classEnd;
 
                     return (
                       <div key={idx} style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' }}>
                         {classOpen && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#ef4444' }}></div>}
                         {classOngoing && !classOpen && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#f59e0b' }}></div>}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div>
-                            <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-primary)' }}>{cls.title || cls.class_type || "Live Session"}</h4>
-                            <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <FiClock /> {classStart.toLocaleDateString([], { month: 'short', day: 'numeric' })} • {classStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {classEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {isNextDay && <span style={{ fontSize: '11px', background: 'var(--bg-nested)', padding: '2px 6px', borderRadius: '4px', marginLeft: '4px' }}>(Next Day)</span>}
+                        {isCompleted && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#10b981' }}></div>}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ flex: '1 1 min-content', minWidth: '200px' }}>
+                            <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-primary)', wordBreak: 'break-word', lineHeight: 1.3 }}>{cls.title || cls.class_type || "Live Session"}</h4>
+                            <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                              <FiClock style={{ flexShrink: 0 }} /> <span>{classStart.toLocaleDateString([], { month: 'short', day: 'numeric' })} • {classStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {classEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span> {isNextDay && <span style={{ fontSize: '11px', background: 'var(--bg-nested)', padding: '2px 6px', borderRadius: '4px' }}>(Next Day)</span>}
                             </p>
                           </div>
 
-                          {classOpen ? (
-                            <button onClick={() => handleJoinClass(cls)} disabled={isJoining || !cls.meeting_link} style={{ background: '#ef4444', color: 'var(--text-inverse)', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: isJoining || !cls.meeting_link ? 'not-allowed' : 'pointer', opacity: isJoining || !cls.meeting_link ? 0.7 : 1, transition: '0.2s', whiteSpace: 'nowrap' }}>
+                          {isCompleted ? (
+                            <div style={{ flexShrink: 0 }}>
+                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#10b981', padding: '6px 12px', background: 'rgba(16,185,129,0.1)', borderRadius: '6px', display: 'inline-block' }}>✔️ Completed</span>
+                            </div>
+                          ) : classOpen ? (
+                            <button onClick={() => handleJoinClass(cls)} disabled={isJoining || !cls.meeting_link} style={{ flexShrink: 0, background: '#ef4444', color: 'var(--text-inverse)', border: 'none', padding: '10px 24px', borderRadius: '12px', fontWeight: 'bold', cursor: isJoining || !cls.meeting_link ? 'not-allowed' : 'pointer', opacity: isJoining || !cls.meeting_link ? 0.7 : 1, transition: '0.2s', whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)' }}>
                               {isJoining ? 'Opening...' : (cls.meeting_link ? 'Join Now' : 'No Link')}
                             </button>
                           ) : isEarly ? (
-                            <div style={{ textAlign: 'right' }}>
-                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🗓️ Upcoming</span>
+                            <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🗓️ Scheduled</span>
                               <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Join opens at {windowOpenTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                             </div>
                           ) : isLate ? (
-                            <div style={{ textAlign: 'right', maxWidth: '200px' }}>
-                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#f59e0b', padding: '6px 12px', background: 'rgba(245,158,11,0.1)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🔴 In Progress</span>
-                              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Join window closed, class ongoing</div>
+                            <div style={{ flexShrink: 0, textAlign: 'right', maxWidth: '200px' }}>
+                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#f59e0b', padding: '6px 12px', background: 'rgba(245,158,11,0.1)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🔴 Ongoing</span>
+                              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Window closed. Ask admin to join.</div>
                               {cls.warning_state ? (
                                 <span style={{ fontSize: '12px', color: cls.warning_state === 'ACCEPTED' ? '#10b981' : cls.warning_state === 'REJECTED' ? '#ef4444' : '#f59e0b', fontWeight: 'bold', display: 'block', marginTop: '6px' }}>
                                   Status: {cls.warning_state === 'APOLOGIZED' ? 'Pending Approval' : cls.warning_state}
@@ -474,10 +494,11 @@ function Dashboard() {
                                 </button>
                               )}
                             </div>
-                          ) : (
-                            // Future class beyond today — just show Scheduled
-                            <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px' }}>🗓️ Scheduled</span>
-                          )}
+                          ) : isTimePassed ? (
+                            <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block' }}>Ended (Pending Admin)</span>
+                            </div>
+                          ) : null}
                         </div>
                         {classOpen && (
                           <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>

@@ -67,7 +67,7 @@ export const cohortChatService = {
    * URL: ws(s)://host/ws/cohort-chat/{cohort_id}/?token=<jwt>
    */
   buildWebSocketUrl(cohortId) {
-    const apiBase = import.meta.env.VITE_API_URL || "http://106.51.129.34:8000";
+    const apiBase = import.meta.env.VITE_API_URL || "";
     
     let wsProtocol = "ws";
     let wsHost = apiBase;

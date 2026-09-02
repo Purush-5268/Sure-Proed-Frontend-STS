@@ -57,6 +57,14 @@ export const notificationService = {
   },
 
   /**
+   * Delete a notification (remove from UI and DB).
+   */
+  async deleteNotification(id) {
+    const response = await apiClient.delete(API_ENDPOINTS.NOTIFICATIONS.BY_ID(id));
+    return response.data;
+  },
+
+  /**
    * Mark all unread notifications as read.
    */
   async markAllRead(ids = []) {

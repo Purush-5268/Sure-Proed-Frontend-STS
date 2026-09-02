@@ -316,6 +316,20 @@ function NotificationBell() {
     }
   };
 
+  const handleClearNotification = async (e, id) => {
+    e.stopPropagation();
+    // Immediately clear from UI
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    
+    // Delete from backend
+    try {
+      await notificationService.deleteNotification(id);
+    } catch (err) {
+      console.error("Failed to delete notification:", err);
+      // Fallback: restore it or ignore
+    }
+  };
+
   const handleMarkAllRead = async () => {
     const unreadIds = unreadNotifications.map((n) => n.id);
     if (!unreadIds.length) return;
@@ -389,28 +403,55 @@ function NotificationBell() {
               notifications.map((notification) => {
                 const typeConf = TYPE_CONFIG[notification.notification_type] || TYPE_CONFIG.INFO;
                 return (
-                  <button
+                  <div
                     key={notification.id}
-                    className={`${styles.notificationItem} ${!notification.is_read ? styles.unread : ""
-                      } ${notification.action_url ? styles.clickable : ""}`}
-                    onClick={() => handleNotificationClick(notification)}
-                    disabled={!notification.action_url && notification.is_read}
+                    style={{ position: 'relative' }}
+                    className={styles.notificationWrapper}
                   >
-                    <span className={`${styles.typeIcon} ${styles[typeConf.className]}`}>
-                      {typeConf.icon}
-                    </span>
-                    <div className={styles.notifContent}>
-                      <div className={styles.notifTitle}>{notification.title}</div>
-                      <div className={styles.notifMessage}>{notification.message}</div>
-                      <div className={styles.notifMeta}>
-                        <span className={`${styles.typeBadge} ${styles[typeConf.className]}`}>
-                          {typeConf.label}
-                        </span>
-                        <span className={styles.timeAgo}>{relativeTime(notification.created_at)}</span>
+                    <button
+                      className={`${styles.notificationItem} ${!notification.is_read ? styles.unread : ""} ${notification.action_url ? styles.clickable : ""}`}
+                      onClick={() => handleNotificationClick(notification)}
+                      disabled={!notification.action_url && notification.is_read}
+                      style={{ paddingRight: '36px', width: '100%', textAlign: 'left', border: 'none', background: 'transparent' }}
+                    >
+                      <span className={`${styles.typeIcon} ${styles[typeConf.className]}`}>
+                        {typeConf.icon}
+                      </span>
+                      <div className={styles.notifContent}>
+                        <div className={styles.notifTitle}>{notification.title}</div>
+                        <div className={styles.notifMessage}>{notification.message}</div>
+                        <div className={styles.notifMeta}>
+                          <span className={`${styles.typeBadge} ${styles[typeConf.className]}`}>
+                            {typeConf.label}
+                          </span>
+                          <span className={styles.timeAgo}>{relativeTime(notification.created_at)}</span>
+                        </div>
                       </div>
-                    </div>
-                    {!notification.is_read && <span className={styles.unreadDot} aria-hidden="true" />}
-                  </button>
+                      {!notification.is_read && <span className={styles.unreadDot} aria-hidden="true" />}
+                    </button>
+                    <button
+                      onClick={(e) => handleClearNotification(e, notification.id)}
+                      title="Clear notification"
+                      style={{
+                        position: 'absolute',
+                        right: '8px',
+                        top: '12px',
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--text-muted)',
+                        cursor: 'pointer',
+                        padding: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '50%',
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-nested)'}
+                      onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <span aria-hidden="true">✕</span>
+                    </button>
+                  </div>
                 );
               })
             )}

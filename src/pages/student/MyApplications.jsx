@@ -91,6 +91,7 @@ import { Link, useNavigate } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { applicationService } from "../../services/applicationService";
+import { courseService } from "../../services/courseService";
 import styles from "./MyApplications.module.css";
 
 function MyApplications() {
@@ -109,10 +110,24 @@ function MyApplications() {
   const loadApplications = async () => {
     try {
       setLoading(true);
-      const res = await apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE).catch(() => null);
-      const apps = Array.isArray(res?.data) ? res.data : (res?.data?.results || []);
+      const [res, coursesRes] = await Promise.all([
+        apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE).catch(() => null),
+        courseService.getCourses().catch(() => [])
+      ]);
+      const rawApps = Array.isArray(res?.data) ? res.data : (res?.data?.results || []);
+      const coursesArray = Array.isArray(coursesRes) ? coursesRes : (coursesRes?.results || coursesRes?.data || []);
 
-      // If backend API call succeeded, sync live DB applications directly and purge stale storage
+      // Map course names to apps if they are just UUIDs
+      const apps = rawApps.map(app => {
+        if (!app.course_display && !app.course_name && typeof app.course === 'string') {
+          const matchedCourse = coursesArray.find(c => c.id === app.course);
+          if (matchedCourse) {
+            app.course_display = matchedCourse.name;
+            app.course = matchedCourse;
+          }
+        }
+        return app;
+      });
       if (res && res.data != null) {
         localStorage.setItem("sure_student_applications", JSON.stringify(apps));
         const validCourseIds = apps.map((a) => a.course?.id || a.course_id).filter(Boolean);
@@ -318,8 +333,8 @@ function MyApplications() {
                     </div>
 
                     <div className={styles.infoBox}>
-                      <strong>Course Track</strong>
-                      <span style={{ color: "var(--primary-color)" }}>{activeApp.course_display || activeApp.course_name || activeApp.course?.name || "Course Track"}</span>
+                      <strong>Course Name</strong>
+                      <span style={{ color: "var(--primary-color)" }}>{activeApp.course_display || activeApp.course_name || activeApp.course?.name || "Unknown Course"}</span>
                     </div>
 
                     <div className={styles.infoBox}>
@@ -442,8 +457,8 @@ function MyApplications() {
                     </div>
 
                     <div className={styles.infoBox}>
-                      <strong>Course Track</strong>
-                      <span style={{ fontWeight: "bold" }}>{app.course_display || app.course_name || app.course?.name || "Course Track"}</span>
+                      <strong>Course Name</strong>
+                      <span style={{ fontWeight: "bold" }}>{app.course_display || app.course_name || app.course?.name || "Unknown Course"}</span>
                     </div>
 
                     <div className={styles.infoBox}>
@@ -510,7 +525,7 @@ function MyApplications() {
                 return (
                   <>
                     <div><strong>Application No:</strong> {selectedAppModal.application_number || selectedAppModal.id}</div>
-                    <div><strong>Course Track:</strong> <span style={{ color: "#2563eb", fontWeight: "bold" }}>{selectedAppModal.course_display || selectedAppModal.course_name || selectedAppModal.course?.name || "General Track"}</span></div>
+                    <div><strong>Course Name:</strong> <span style={{ color: "#2563eb", fontWeight: "bold" }}>{selectedAppModal.course_display || selectedAppModal.course_name || selectedAppModal.course?.name || "Unknown Course"}</span></div>
                     <div><strong>Current Status:</strong> <span style={{ fontWeight: "bold", color: isQual ? "#166534" : (isRej ? "#991b1b" : "#d97706") }}>{statusText}</span></div>
                     <div><strong>Marks Score:</strong> <span style={{ fontWeight: "bold", color: "#1e293b" }}>{scoreText}</span></div>
                     <div><strong>Qualification:</strong> <span style={{ fontWeight: "bold", color: isQual ? "#166534" : (isRej ? "#991b1b" : "#d97706") }}>{qualText}</span></div>

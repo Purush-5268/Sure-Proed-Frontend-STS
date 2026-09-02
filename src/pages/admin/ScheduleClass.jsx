@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import { courseService } from "../../services/courseService";
 import { attendanceService } from "../../services/attendanceService";
 import { normalizeListResponse } from "../../services/apiClient";
@@ -9,6 +10,7 @@ import styles from "./ScheduleClass.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function ScheduleClass() {
+  const { user } = useAuth();
   const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -24,7 +26,7 @@ function ScheduleClass() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // 🚨 State for the Live Radar
+  // 🚨 State for the Active Classes
   const [activeAdminClasses, setActiveAdminClasses] = useState([]);
 
   const [request, setRequest] = useState({
@@ -49,7 +51,7 @@ function ScheduleClass() {
   const [newWhitelistEmail, setNewWhitelistEmail] = useState("");
   const [isAddingWhitelist, setIsAddingWhitelist] = useState(false);
 
-  // 🚨 Function to fetch live radar data
+  // 🚨 Function to fetch active classes
   const loadActiveClasses = async () => {
     try {
       const res = await attendanceService.getAttendanceRecords({ status: "ACTIVE", page_size: 50 });
@@ -58,7 +60,7 @@ function ScheduleClass() {
       const sessionsArray = Array.isArray(rawData.results) ? rawData.results : (Array.isArray(rawData) ? rawData : []);
       setActiveAdminClasses(sessionsArray);
     } catch (err) {
-      console.error("Failed to load radar classes:", err);
+      console.error("Failed to load active classes:", err);
     }
   };
 
@@ -342,7 +344,7 @@ function ScheduleClass() {
         res = await attendanceService.scheduleSession(formattedData);
       }
 
-      setSuccessMessage(`Live class scheduled successfully! Check the radar below for details.`);
+      setSuccessMessage(`Live class scheduled successfully! Check the active classes below for details.`);
 
       // 🚨 Fetch fresh data to ensure we have all fields (like class_date, counts) correctly populated
       await loadActiveClasses();
@@ -394,12 +396,14 @@ function ScheduleClass() {
           >
             Manual Live Class
           </button>
-          <button 
-            onClick={() => setActiveTab("AUTO")} 
-            className={`premium-btn ${activeTab === "AUTO" ? "premium-btn-primary" : "premium-btn-secondary"}`}
-          >
-            Automatic LST Schedule
-          </button>
+          {user?.role === "ADMIN" && (
+            <button 
+              onClick={() => setActiveTab("AUTO")} 
+              className={`premium-btn ${activeTab === "AUTO" ? "premium-btn-primary" : "premium-btn-secondary"}`}
+            >
+              Automatic LST Schedule
+            </button>
+          )}
         </div>
 
         {activeTab === "AUTO" && (
@@ -587,11 +591,12 @@ function ScheduleClass() {
         )}
       </div>
 
-      {/* 🚨 ADMIN LIVE RADAR UI 🚨 */}
+      {/* 🚨 ADMIN ACTIVE CLASSES UI 🚨 */}
       <div className="premium-section" style={{ marginTop: "3rem" }}>
-        <h2 className="premium-title" style={{ marginBottom: "1.5rem" }}>📡 Live Class Radar</h2>
+        <h2 className="premium-title" style={{ marginBottom: "1.5rem" }}>📡 Active Classes</h2>
+        <p className="premium-subtitle">Monitor and manage all live ongoing classes in real-time.</p>
 
-        <div className={`premium-form ${styles.radarContainer}`}>
+        <div className={`premium-form ${styles.activeClassesContainer}`}>
           {activeAdminClasses.map(cls => (
             <div key={cls.id} className={`premium-card ${styles.animatedCard}`} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 

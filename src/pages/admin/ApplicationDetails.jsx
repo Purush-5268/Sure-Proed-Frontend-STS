@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { FiChevronDown, FiChevronUp, FiCheckCircle, FiXCircle, FiClock, FiFileText, FiVideo, FiShield, FiUsers, FiAward, FiFile } from "react-icons/fi";
+import { FiClock, FiFileText, FiVideo, FiShield, FiUsers, FiAward, FiFile } from "react-icons/fi";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { applicationService } from "../../services/applicationService";
@@ -19,20 +19,7 @@ function ApplicationDetails() {
   const [cohorts, setCohorts] = useState([]);
   const [courses, setCourses] = useState([]);
 
-  // Panel toggles
-  const [expanded, setExpanded] = useState({
-    overview: true,
-    screening: false,
-    interview: false,
-    cohort: false,
-    completion: false,
-    update: false,
-    offerLetter: false
-  });
-
-  const togglePanel = (panel) => {
-    setExpanded(prev => ({ ...prev, [panel]: !prev[panel] }));
-  };
+  const [activeTab, setActiveTab] = useState("overview");
 
   const loadApplication = async () => {
     try {
@@ -301,363 +288,380 @@ function ApplicationDetails() {
         <button onClick={() => navigate(-1)} className="premium-btn premium-btn-secondary">Back to List</button>
       </div>
 
-      <div className={styles.panelsContainer}>
+      <div className={styles.persistentHeader}>
+        <div className={styles.persistentInfo}>
+          <div className={styles.persistentItem}>
+            <span className={styles.label}>Application #</span>
+            <span className={styles.value}>{application.application_number}</span>
+          </div>
+          <div className={styles.persistentItem}>
+            <span className={styles.label}>Student</span>
+            <span className={styles.value}>{fullName} ({studentCode})</span>
+          </div>
+          <div className={styles.persistentItem}>
+            <span className={styles.label}>Course</span>
+            <span className={styles.value}>{courseName}</span>
+          </div>
+        </div>
+        <div className={styles.persistentItem} style={{ alignItems: "flex-end" }}>
+          <span className={styles.label}>Status</span>
+          <span className={`${styles.statusBadge} ${application.status === 'REJECTED' || application.status === 'SUSPENDED' ? 'premium-badge-danger' : 'premium-badge-primary'}`}>
+            {application.status}
+          </span>
+        </div>
+      </div>
+
+      <div className={styles.layoutWrapper}>
+        <div className={styles.sidebar}>
+          <button className={`${styles.sidebarBtn} ${activeTab === 'overview' ? styles.active : ''}`} onClick={() => setActiveTab('overview')}>
+            <FiFileText className={styles.sidebarIcon} /> Overview
+          </button>
+          <button className={`${styles.sidebarBtn} ${activeTab === 'screening' ? styles.active : ''}`} onClick={() => setActiveTab('screening')}>
+            <FiClock className={styles.sidebarIcon} /> Screening & Exams
+          </button>
+          <button className={`${styles.sidebarBtn} ${activeTab === 'interviews' ? styles.active : ''}`} onClick={() => setActiveTab('interviews')}>
+            <FiVideo className={styles.sidebarIcon} /> Interviews
+          </button>
+          <button className={`${styles.sidebarBtn} ${activeTab === 'cohort' ? styles.active : ''}`} onClick={() => setActiveTab('cohort')}>
+            <FiUsers className={styles.sidebarIcon} /> Cohort & Enrollment
+          </button>
+          <button className={`${styles.sidebarBtn} ${activeTab === 'completion' ? styles.active : ''}`} onClick={() => setActiveTab('completion')}>
+            <FiAward className={styles.sidebarIcon} /> Course Completion
+          </button>
+          <button className={`${styles.sidebarBtn} ${activeTab === 'update' ? styles.active : ''}`} onClick={() => setActiveTab('update')}>
+            <FiShield className={styles.sidebarIcon} /> Status Override
+          </button>
+          <button className={`${styles.sidebarBtn} ${activeTab === 'offerLetter' ? styles.active : ''}`} onClick={() => setActiveTab('offerLetter')}>
+            <FiFile className={styles.sidebarIcon} /> Offer Letter
+          </button>
+        </div>
+
+        <div className={styles.mainContent}>
         
-        {/* PANEL A: Overview */}
-        <div className={styles.panel} data-expanded={expanded.overview}>
-          <div className={styles.panelHeader} onClick={() => togglePanel('overview')}>
-            <div className={styles.panelTitle}><FiFileText /> A. Application Overview</div>
-            {expanded.overview ? <FiChevronUp /> : <FiChevronDown />}
-          </div>
-          {expanded.overview && (
-            <div className={styles.panelContent}>
-              <div className={styles.grid}>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Application #</span>
-                  <span className={styles.value}>{application.application_number}</span>
-                </div>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Student</span>
-                  <span className={styles.value}>{fullName} ({studentCode})</span>
-                </div>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Course</span>
-                  <span className={styles.value}>{courseName}</span>
-                </div>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Applied On</span>
-                  <span className={styles.value}>{application.applied_at ? new Date(application.applied_at).toLocaleDateString() : "N/A"}</span>
-                </div>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Workflow Status</span>
-                  <span className={`${styles.statusBadge} ${application.status === 'REJECTED' ? 'premium-badge-danger' : 'premium-badge-primary'}`}>
-                    {application.status}
-                  </span>
-                </div>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Exam Result</span>
-                  <span className={styles.value}>
-                    {application.qualified === true ? <span style={{color:"var(--success-color)"}}>Passed</span> : application.qualified === false ? <span style={{color:"var(--danger-color)"}}>Failed</span> : "Pending"}
-                  </span>
-                </div>
+        {/* TAB: OVERVIEW */}
+        {activeTab === 'overview' && (
+          <div>
+            <div className={styles.contentHeader}>
+              <h2><FiFileText /> Application Overview</h2>
+            </div>
+            <div className={styles.grid}>
+              <div className={styles.gridItem}>
+                <span className={styles.label}>Applied On</span>
+                <span className={styles.value}>{application.applied_at ? new Date(application.applied_at).toLocaleDateString() : "N/A"}</span>
+              </div>
+              <div className={styles.gridItem}>
+                <span className={styles.label}>Exam Result</span>
+                <span className={styles.value}>
+                  {application.qualified === true ? <span style={{color:"var(--success-color)"}}>Passed</span> : application.qualified === false ? <span style={{color:"var(--danger-color)"}}>Failed</span> : "Pending"}
+                </span>
               </div>
             </div>
-          )}
-        </div>
-
-        {/* PANEL B: Screening & Exam Result */}
-        <div className={styles.panel} data-expanded={expanded.screening}>
-          <div className={styles.panelHeader} onClick={() => togglePanel('screening')}>
-            <div className={styles.panelTitle}><FiClock /> B. Screening & Exam Result</div>
-            {expanded.screening ? <FiChevronUp /> : <FiChevronDown />}
           </div>
-          {expanded.screening && (
-            <div className={styles.panelContent}>
-              {application.pre_screening ? (
-                <form onSubmit={handleUpdateScreening}>
-                  <div className={styles.grid} style={{ marginBottom: "20px" }}>
-                    <div className={styles.gridItem}>
-                      <span className={styles.label}>Current Status</span>
-                      <span className={styles.value}>{application.pre_screening.status}</span>
-                    </div>
-                    <div className={styles.gridItem}>
-                      <span className={styles.label}>Exam Level</span>
-                      <span className={styles.value}>{application.pre_screening.level || "N/A"}</span>
-                    </div>
-                  </div>
-                  
-                  <div className={styles.formGroup}>
-                    <label>Update Status</label>
-                    <select name="status" className="premium-input" defaultValue={application.pre_screening.status} required>
-                      <option value="PENDING">Pending</option>
-                      <option value="IN_PROGRESS">In Progress</option>
-                      <option value="SUBMITTED">Submitted</option>
-                      <option value="EVALUATED">Evaluated</option>
-                      <option value="PASSED">Passed</option>
-                      <option value="FAILED">Failed</option>
-                    </select>
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Admin Remarks</label>
-                    <textarea name="remarks" className="premium-input" rows={2} defaultValue={application.pre_screening.remarks}></textarea>
-                  </div>
-                  <div className={styles.actionRow} style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid var(--border-color)" }}>
-                    <button type="submit" className="premium-btn premium-btn-primary" disabled={submitting}>Save Screening</button>
-                    <Link to="/admin/exams" className="premium-btn premium-btn-secondary">View Exam Dashboard</Link>
-                  </div>
-                </form>
-              ) : (
-                <div style={{ padding: "20px", background: "var(--bg-secondary)", borderRadius: "8px", textAlign: "center" }}>
-                  <p style={{ color: "var(--text-secondary)", marginBottom: "16px" }}>No pre-screening exam record exists for this application yet.</p>
-                  <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
-                    <Link to={`/admin/add-exam?appId=${application.id}`} className="premium-btn premium-btn-primary">
-                      Assign Exam Now
-                    </Link>
-                    <Link to="/admin/exams" className="premium-btn premium-btn-secondary">
-                      Go to Exams Tab
-                    </Link>
-                  </div>
-                </div>
-              )}
+        )}
+
+        {/* TAB: SCREENING & EXAMS */}
+        {activeTab === 'screening' && (
+          <div>
+            <div className={styles.contentHeader}>
+              <h2><FiClock /> Screening & Exam Result</h2>
             </div>
-          )}
-        </div>
-
-        {/* PANEL C: Candidate Interview */}
-        <div className={styles.panel} data-expanded={expanded.interview}>
-          <div className={styles.panelHeader} onClick={() => togglePanel('interview')}>
-            <div className={styles.panelTitle}><FiVideo /> C. Candidate Interview</div>
-            {expanded.interview ? <FiChevronUp /> : <FiChevronDown />}
-          </div>
-          {expanded.interview && (
-            <div className={styles.panelContent}>
-              {application.pre_screening_interview ? (
-                <form onSubmit={handleUpdateInterview}>
-                  <div className={styles.grid} style={{ marginBottom: "20px" }}>
-                    <div className={styles.gridItem}>
-                      <span className={styles.label}>Current Status</span>
-                      <span className={styles.value}>{application.pre_screening_interview.status}</span>
-                    </div>
-                    <div className={styles.gridItem}>
-                      <span className={styles.label}>Score</span>
-                      <span className={styles.value}>{application.pre_screening_interview.score || "N/A"}</span>
-                    </div>
+            {application.pre_screening ? (
+              <form onSubmit={handleUpdateScreening}>
+                <div className={styles.grid} style={{ marginBottom: "20px" }}>
+                  <div className={styles.gridItem}>
+                    <span className={styles.label}>Current Status</span>
+                    <span className={styles.value}>{application.pre_screening.status}</span>
                   </div>
-                  
-                  <div className={styles.formGroup}>
-                    <label>Update Status</label>
-                    <select name="status" className="premium-input" defaultValue={application.pre_screening_interview.status} required>
-                      <option value="SCHEDULED">Scheduled</option>
-                      <option value="COMPLETED">Completed</option>
-                      <option value="PASSED">Passed</option>
-                      <option value="FAILED">Failed</option>
-                    </select>
+                  <div className={styles.gridItem}>
+                    <span className={styles.label}>Exam Level</span>
+                    <span className={styles.value}>{application.pre_screening.level || "N/A"}</span>
                   </div>
-                  <div className={styles.formGroup}>
-                    <label>Interview Score (0-100)</label>
-                    <input type="number" name="score" className="premium-input" defaultValue={application.pre_screening_interview.score} min="0" max="100" />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Interview Feedback</label>
-                    <textarea name="feedback" className="premium-input" rows={2} defaultValue={application.pre_screening_interview.feedback}></textarea>
-                  </div>
-                  <div className={styles.actionRow}>
-                    <button type="submit" className="premium-btn premium-btn-primary" disabled={submitting}>Save Interview</button>
-                  </div>
-                </form>
-              ) : (
-                <p style={{ color: "var(--text-secondary)" }}>No interview record generated for this application.</p>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* PANEL E: Cohort Management */}
-        <div className={styles.panel} data-expanded={expanded.cohort}>
-          <div className={styles.panelHeader} onClick={() => togglePanel('cohort')}>
-            <div className={styles.panelTitle}><FiUsers /> E. Cohort Assignment</div>
-            {expanded.cohort ? <FiChevronUp /> : <FiChevronDown />}
-          </div>
-          {expanded.cohort && (
-            <div className={styles.panelContent}>
-              <div className={styles.grid} style={{ marginBottom: "20px" }}>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Current Cohort</span>
-                  <span className={styles.value}>{currentCohortName}</span>
                 </div>
-              </div>
-              
-              {!currentCohortId ? (
-                <form onSubmit={handleAssignCohort}>
-                  <div className={styles.formGroup}>
-                    <label>Assign to Cohort</label>
-                    <select name="cohort" className="premium-input" required disabled={cohorts.length === 0}>
-                      <option value="">Select a Cohort...</option>
-                      {cohorts.map(c => (
-                        <option key={c.id} value={c.id}>{c.code} - {c.name}</option>
-                      ))}
-                    </select>
-                    {cohorts.length === 0 && <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>No cohorts available for this course.</span>}
-                  </div>
-                  <div className={styles.actionRow}>
-                    <button type="submit" className="premium-btn premium-btn-primary" disabled={submitting || cohorts.length === 0}>Assign Cohort</button>
-                  </div>
-                </form>
-              ) : (
-                <div style={{ padding: "16px", background: "var(--bg-nested)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
-                  <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: "14px" }}>
-                    This application is already assigned to a cohort. You can manage cohort-level operations in the Cohort Details page.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* PANEL F: Course Completion */}
-        <div className={styles.panel} data-expanded={expanded.completion}>
-          <div className={styles.panelHeader} onClick={() => togglePanel('completion')}>
-            <div className={styles.panelTitle}><FiAward /> F. Course Completion</div>
-            {expanded.completion ? <FiChevronUp /> : <FiChevronDown />}
-          </div>
-          {expanded.completion && (
-            <div className={styles.panelContent}>
-              <div className={styles.grid} style={{ marginBottom: "20px" }}>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Completed</span>
-                  <span className={styles.value}>{application.completed_course ? "Yes" : "No"}</span>
-                </div>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Final Score</span>
-                  <span className={styles.value}>{application.final_score || "N/A"}</span>
-                </div>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Completion Date</span>
-                  <span className={styles.value}>{application.completed_at ? new Date(application.completed_at).toLocaleDateString() : "N/A"}</span>
-                </div>
-              </div>
-
-              <div className={styles.actionRow} style={{ justifyContent: "flex-start" }}>
-                <button onClick={handleCheckCompletion} className="premium-btn premium-btn-secondary" disabled={submitting || application.completed_course}>
-                  Trigger Completion Check
-                </button>
-                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", alignSelf: "center", margin: 0 }}>
-                  This will evaluate attendance and assignments to trigger final completion.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* PANEL G: General Updates / Offer Letter */}
-        <div className={styles.panel} data-expanded={expanded.update}>
-          <div className={styles.panelHeader} onClick={() => togglePanel('update')}>
-            <div className={styles.panelTitle}><FiShield /> G. General Updates & Manual Status</div>
-            {expanded.update ? <FiChevronUp /> : <FiChevronDown />}
-          </div>
-          {expanded.update && (
-            <div className={styles.panelContent}>
-              <form onSubmit={handleGeneralUpdate}>
+                
                 <div className={styles.formGroup}>
-                  <label>Override Status (Use carefully!)</label>
-                  <select name="status" className="premium-input" defaultValue={application.status} required>
-                    <option value="APPLIED">Applied</option>
-                    <option value="PRE_SCREENING_PENDING">Pre-Screening Pending</option>
-                    <option value="EXAM_PENDING">Exam Pending</option>
-                    <option value="QUALIFIED">Qualified</option>
-                    <option value="REJECTED">Rejected</option>
-                    <option value="WAITLISTED">Waitlisted</option>
-                    <option value="COHORT_ASSIGNED">Cohort Assigned</option>
+                  <label>Update Status</label>
+                  <select name="status" className="premium-input" defaultValue={application.pre_screening.status} required>
+                    <option value="PENDING">Pending</option>
                     <option value="IN_PROGRESS">In Progress</option>
-                    <option value="COMPLETED">Completed</option>
-                    <option value="DROPPED">Dropped</option>
-                    <option value="SUSPENDED">Suspended</option>
-                    <option value="CANCELLED">Cancelled</option>
+                    <option value="SUBMITTED">Submitted</option>
+                    <option value="EVALUATED">Evaluated</option>
+                    <option value="PASSED">Passed</option>
+                    <option value="FAILED">Failed</option>
                   </select>
                 </div>
                 <div className={styles.formGroup}>
-                  <label>Remarks</label>
-                  <textarea name="remarks" className="premium-input" rows={2} defaultValue={application.remarks}></textarea>
+                  <label>Admin Remarks</label>
+                  <textarea name="remarks" className="premium-input" rows={2} defaultValue={application.pre_screening.remarks}></textarea>
                 </div>
                 <div className={styles.actionRow}>
-                  <button type="submit" className="premium-btn premium-btn-danger" disabled={submitting}>Force Update Application</button>
+                  <button type="submit" className="premium-btn premium-btn-primary" disabled={submitting}>Save Screening</button>
+                  <Link to="/admin/exams" className="premium-btn premium-btn-secondary">View Exam Dashboard</Link>
                 </div>
               </form>
-              
-              <div style={{ marginTop: "30px", paddingTop: "20px", borderTop: "1px solid var(--border-color)" }}>
-                <h4 style={{ marginBottom: "10px", color: "var(--text-primary)" }}>Core Application Status Management</h4>
-                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "15px" }}>
-                  Use these buttons to quickly change the core application status (e.g., if a student drops out or needs to be reinstated).
-                </p>
-                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                  {application.status === "SUSPENDED" ? (
-                    <>
-                      <button onClick={() => handleReactivateApplication("IN_PROGRESS")} className="premium-btn premium-btn-primary" disabled={submitting}>
-                        Reactivate (In Progress)
-                      </button>
-                      <button onClick={() => handleReactivateApplication("COHORT_ASSIGNED")} className="premium-btn premium-btn-secondary" disabled={submitting}>
-                        Reactivate (Cohort Assigned)
-                      </button>
-                    </>
-                  ) : (
-                    <button onClick={handleSuspendApplication} className="premium-btn premium-btn-danger" disabled={submitting || application.status === "DROPPED" || application.status === "CANCELLED" || application.status === "REJECTED"}>
-                      Suspend Application
-                    </button>
-                  )}
+            ) : (
+              <div style={{ padding: "20px", background: "var(--bg-secondary)", borderRadius: "8px", textAlign: "center" }}>
+                <p style={{ color: "var(--text-secondary)", marginBottom: "16px" }}>No pre-screening exam record exists for this application yet.</p>
+                <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
+                  <Link to={`/admin/add-exam?appId=${application.id}`} className="premium-btn premium-btn-primary">
+                    Assign Exam Now
+                  </Link>
+                  <Link to="/admin/exams" className="premium-btn premium-btn-secondary">
+                    Go to Exams Tab
+                  </Link>
                 </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB: INTERVIEWS */}
+        {activeTab === 'interviews' && (
+          <div>
+            <div className={styles.contentHeader}>
+              <h2><FiVideo /> Candidate Interview</h2>
+            </div>
+            {application.pre_screening_interview ? (
+              <form onSubmit={handleUpdateInterview}>
+                <div className={styles.grid} style={{ marginBottom: "20px" }}>
+                  <div className={styles.gridItem}>
+                    <span className={styles.label}>Current Status</span>
+                    <span className={styles.value}>{application.pre_screening_interview.status}</span>
+                  </div>
+                  <div className={styles.gridItem}>
+                    <span className={styles.label}>Score</span>
+                    <span className={styles.value}>{application.pre_screening_interview.score || "N/A"}</span>
+                  </div>
+                </div>
+                
+                <div className={styles.formGroup}>
+                  <label>Update Status</label>
+                  <select name="status" className="premium-input" defaultValue={application.pre_screening_interview.status} required>
+                    <option value="SCHEDULED">Scheduled</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="PASSED">Passed</option>
+                    <option value="FAILED">Failed</option>
+                  </select>
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Interview Score (0-100)</label>
+                  <input type="number" name="score" className="premium-input" defaultValue={application.pre_screening_interview.score} min="0" max="100" />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Interview Feedback</label>
+                  <textarea name="feedback" className="premium-input" rows={2} defaultValue={application.pre_screening_interview.feedback}></textarea>
+                </div>
+                <div className={styles.actionRow}>
+                  <button type="submit" className="premium-btn premium-btn-primary" disabled={submitting}>Save Interview</button>
+                </div>
+              </form>
+            ) : (
+              <p style={{ color: "var(--text-secondary)" }}>No interview record generated for this application.</p>
+            )}
+          </div>
+        )}
+
+        {/* TAB: COHORT & ENROLLMENT */}
+        {activeTab === 'cohort' && (
+          <div>
+            <div className={styles.contentHeader}>
+              <h2><FiUsers /> Cohort Assignment</h2>
+            </div>
+            <div className={styles.grid} style={{ marginBottom: "20px" }}>
+              <div className={styles.gridItem}>
+                <span className={styles.label}>Current Cohort</span>
+                <span className={styles.value}>{currentCohortName}</span>
               </div>
             </div>
-          )}
-        </div>
-
-        {/* PANEL H: Offer Letter */}
-        <div className={styles.panel} data-expanded={expanded.offerLetter}>
-          <div className={styles.panelHeader} onClick={() => togglePanel('offerLetter')}>
-            <div className={styles.panelTitle}><FiFile /> H. Offer Letter Management</div>
-            {expanded.offerLetter ? <FiChevronUp /> : <FiChevronDown />}
-          </div>
-          {expanded.offerLetter && (
-            <div className={styles.panelContent}>
-              <div className={styles.grid} style={{ marginBottom: "20px" }}>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Offer Letter Status</span>
-                  <span className={styles.value}>{application.offer_letter_issued ? "Generated" : "Not Generated"}</span>
+            
+            {(!currentCohortId || application.status === "SUSPENDED") ? (
+              <form onSubmit={handleAssignCohort}>
+                <div className={styles.formGroup}>
+                  <label>{currentCohortId ? "Change Cohort (Suspended Student)" : "Assign to Cohort"}</label>
+                  <select name="cohort" className="premium-input" required disabled={cohorts.length === 0} defaultValue={currentCohortId || ""}>
+                    <option value="">Select a Cohort...</option>
+                    {cohorts.map(c => (
+                      <option key={c.id} value={c.id}>{c.code} - {c.name}</option>
+                    ))}
+                  </select>
+                  {cohorts.length === 0 && <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>No cohorts available for this course.</span>}
                 </div>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Student Request</span>
-                  <span className={styles.value}>{application.offer_letter_request_status || "Not Requested"}</span>
-                </div>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Eligibility Date</span>
-                  <span className={styles.value}>
-                    {application.assigned_cohort?.start_date ? (() => {
-                        const start = new Date(application.assigned_cohort.start_date);
-                        const eligible = new Date(start);
-                        eligible.setMonth(eligible.getMonth() + 1);
-                        if (new Date() >= eligible) {
-                          return <span style={{color:"var(--success-color)", fontWeight: "bold"}}>Eligible</span>;
-                        }
-                        return <span style={{color:"var(--warning-color)", fontWeight: "bold"}}>Eligible after {eligible.toLocaleDateString()}</span>;
-                      })() : "N/A"}
-                  </span>
-                </div>
-              </div>
-
-              <div className={styles.actionRow} style={{ justifyContent: "flex-start", gap: "10px", flexWrap: "wrap" }}>
-                {!application.offer_letter_issued || application.offer_letter_request_status === "NOT_REQUESTED" ? (
-                  <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-primary" disabled={submitting}>
-                    Issue Offer Letter
+                <div className={styles.actionRow}>
+                  <button type="submit" className="premium-btn premium-btn-primary" disabled={submitting || cohorts.length === 0}>
+                    {currentCohortId ? "Transfer Cohort" : "Assign Cohort"}
                   </button>
-                ) : application.offer_letter_request_status === "REVOKED" ? (
+                </div>
+              </form>
+            ) : (
+              <div style={{ padding: "16px", background: "var(--bg-nested)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+                <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: "14px" }}>
+                  This application is already assigned to a cohort. You can manage cohort-level operations in the Cohort Details page.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB: COURSE COMPLETION */}
+        {activeTab === 'completion' && (
+          <div>
+            <div className={styles.contentHeader}>
+              <h2><FiAward /> Course Completion</h2>
+            </div>
+            <div className={styles.grid} style={{ marginBottom: "20px" }}>
+              <div className={styles.gridItem}>
+                <span className={styles.label}>Completed</span>
+                <span className={styles.value}>{application.completed_course ? "Yes" : "No"}</span>
+              </div>
+              <div className={styles.gridItem}>
+                <span className={styles.label}>Final Score</span>
+                <span className={styles.value}>{application.final_score || "N/A"}</span>
+              </div>
+              <div className={styles.gridItem}>
+                <span className={styles.label}>Completion Date</span>
+                <span className={styles.value}>{application.completed_at ? new Date(application.completed_at).toLocaleDateString() : "N/A"}</span>
+              </div>
+            </div>
+
+            <div className={styles.actionRow} style={{ justifyContent: "flex-start" }}>
+              <button onClick={handleCheckCompletion} className="premium-btn premium-btn-secondary" disabled={submitting || application.completed_course}>
+                Trigger Completion Check
+              </button>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", alignSelf: "center", margin: 0 }}>
+                This will evaluate attendance and assignments to trigger final completion.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: STATUS OVERRIDE */}
+        {activeTab === 'update' && (
+          <div>
+            <div className={styles.contentHeader}>
+              <h2><FiShield /> General Updates & Manual Status</h2>
+            </div>
+            <form onSubmit={handleGeneralUpdate}>
+              <div className={styles.formGroup}>
+                <label>Override Status (Use carefully!)</label>
+                <select name="status" className="premium-input" defaultValue={application.status} required>
+                  <option value="APPLIED">Applied</option>
+                  <option value="PRE_SCREENING_PENDING">Pre-Screening Pending</option>
+                  <option value="EXAM_PENDING">Exam Pending</option>
+                  <option value="QUALIFIED">Qualified</option>
+                  <option value="REJECTED">Rejected</option>
+                  <option value="WAITLISTED">Waitlisted</option>
+                  <option value="COHORT_ASSIGNED">Cohort Assigned</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="TRAINING">Training</option>
+                  <option value="INTERNSHIP">Internship</option>
+                  <option value="SOFT_SKILLS">Soft Skills</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="DROPPED">Dropped</option>
+                  <option value="SUSPENDED">Suspended</option>
+                  <option value="CANCELLED">Cancelled</option>
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Remarks</label>
+                <textarea name="remarks" className="premium-input" rows={2} defaultValue={application.remarks}></textarea>
+              </div>
+              <div className={styles.actionRow}>
+                <button type="submit" className="premium-btn premium-btn-danger" disabled={submitting}>Force Update Application</button>
+              </div>
+            </form>
+            
+            <div style={{ marginTop: "30px", paddingTop: "20px", borderTop: "1px solid var(--border-color)" }}>
+              <h4 style={{ marginBottom: "10px", color: "var(--text-primary)" }}>Core Application Status Management</h4>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "15px" }}>
+                Use these buttons to quickly change the core application status (e.g., if a student drops out or needs to be reinstated).
+              </p>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                {application.status === "SUSPENDED" ? (
                   <>
-                    <button onClick={handleRestoreOfferLetter} className="premium-btn premium-btn-secondary" disabled={submitting}>
-                      Restore / Reaccess
+                    <button onClick={() => handleReactivateApplication("TRAINING")} className="premium-btn premium-btn-primary" disabled={submitting}>
+                      Reactivate (Training)
                     </button>
-                    <button onClick={handleResetOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting}>
-                      Reset Offer Letter
+                    <button onClick={() => handleReactivateApplication("IN_PROGRESS")} className="premium-btn premium-btn-secondary" disabled={submitting}>
+                      Reactivate (In Progress)
+                    </button>
+                    <button onClick={() => handleReactivateApplication("COHORT_ASSIGNED")} className="premium-btn premium-btn-secondary" disabled={submitting}>
+                      Reactivate (Cohort Assigned)
                     </button>
                   </>
                 ) : (
-                  <>
-                    <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-secondary" disabled={submitting}>
-                      Regenerate Offer Letter
-                    </button>
-                    <button onClick={handleDownloadOfferLetter} className="premium-btn premium-btn-primary" disabled={submitting}>
-                      View / Download
-                    </button>
-                    <button onClick={handleRevokeOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting || application.offer_letter_status === 'REVOKED'}>
-                      Revoke Offer Letter
-                    </button>
-                    <button onClick={handleResetOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting}>
-                      Reset Offer Letter
-                    </button>
-                  </>
+                  <button onClick={handleSuspendApplication} className="premium-btn premium-btn-danger" disabled={submitting || application.status === "DROPPED" || application.status === "CANCELLED" || application.status === "REJECTED"}>
+                    Suspend Application
+                  </button>
                 )}
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
+        {/* TAB: OFFER LETTER */}
+        {activeTab === 'offerLetter' && (
+          <div>
+            <div className={styles.contentHeader}>
+              <h2><FiFile /> Offer Letter Management</h2>
+            </div>
+            <div className={styles.grid} style={{ marginBottom: "20px" }}>
+              <div className={styles.gridItem}>
+                <span className={styles.label}>Offer Letter Status</span>
+                <span className={styles.value}>{application.offer_letter_issued ? "Generated" : "Not Generated"}</span>
+              </div>
+              <div className={styles.gridItem}>
+                <span className={styles.label}>Student Request</span>
+                <span className={styles.value}>{application.offer_letter_request_status || "Not Requested"}</span>
+              </div>
+              <div className={styles.gridItem}>
+                <span className={styles.label}>Eligibility Date</span>
+                <span className={styles.value}>
+                  {application.assigned_cohort?.start_date ? (() => {
+                      const start = new Date(application.assigned_cohort.start_date);
+                      const eligible = new Date(start);
+                      eligible.setMonth(eligible.getMonth() + 1);
+                      if (new Date() >= eligible) {
+                        return <span style={{color:"var(--success-color)", fontWeight: "bold"}}>Eligible</span>;
+                      }
+                      return <span style={{color:"var(--warning-color)", fontWeight: "bold"}}>Eligible after {eligible.toLocaleDateString()}</span>;
+                    })() : "N/A"}
+                </span>
+              </div>
+            </div>
+
+            <div className={styles.actionRow} style={{ justifyContent: "flex-start", gap: "10px", flexWrap: "wrap" }}>
+              {!application.offer_letter_issued || application.offer_letter_request_status === "NOT_REQUESTED" ? (
+                <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-primary" disabled={submitting}>
+                  Issue Offer Letter
+                </button>
+              ) : application.offer_letter_request_status === "REVOKED" ? (
+                <>
+                  <button onClick={handleRestoreOfferLetter} className="premium-btn premium-btn-secondary" disabled={submitting}>
+                    Restore / Reaccess
+                  </button>
+                  <button onClick={handleResetOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting}>
+                    Reset Offer Letter
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-secondary" disabled={submitting}>
+                    Regenerate Offer Letter
+                  </button>
+                  <button onClick={handleDownloadOfferLetter} className="premium-btn premium-btn-primary" disabled={submitting}>
+                    View / Download
+                  </button>
+                  <button onClick={handleRevokeOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting || application.offer_letter_status === 'REVOKED'}>
+                    Revoke Offer Letter
+                  </button>
+                  <button onClick={handleResetOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting}>
+                    Reset Offer Letter
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+        </div>
       </div>
     </div>
   );

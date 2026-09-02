@@ -185,7 +185,7 @@ export const API_ENDPOINTS = {
   ATTENDANCE: {
     BASE: "/api/attendance/",
     BY_ID: (id) => `/api/attendance/${id}/`,
-    SUMMARY: "/api/attendance-summary/",
+    SUMMARY: "/api/attendance/summary/",
     DOWNLOAD_EXCEL: (id) => `/api/attendance/${id}/official-attendance/download/`,
     ADD_ATTENDEES: (id) => `/api/attendance/${id}/add-attendees/`,
     WARNINGS: "/api/attendance/warnings/",

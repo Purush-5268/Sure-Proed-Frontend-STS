@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { FaCommentDots, FaTimes, FaSpinner, FaStar } from "react-icons/fa";
@@ -20,9 +21,9 @@ export default function FeedbackWidget() {
   const [comments, setComments] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // When 'bad_animation' is active, delay showing the close button
+  // When 'bad_animation' or 'error' is active, delay showing the close button
   useEffect(() => {
-    if (feedbackState === "bad_animation") {
+    if (feedbackState === "bad_animation" || feedbackState === "error") {
       setShowClose(false);
       const timer = setTimeout(() => {
         setShowClose(true);
@@ -44,10 +45,19 @@ export default function FeedbackWidget() {
 
   const handleClose = () => {
     if (!showClose) return; 
+    
+    // If they try to close from idle or form, show the sad cat guilt trip first!
+    if (feedbackState === "idle" || feedbackState === "form") {
+      setFeedbackState("bad_animation");
+      return;
+    }
+
+    // Actually close the modal if they've already seen the sad cat or finished
     setIsOpen(false);
     setTimeout(() => {
       setFeedbackState("idle");
       setComments("");
+      setRating(5);
     }, 500);
   };
 
@@ -69,6 +79,8 @@ export default function FeedbackWidget() {
     } catch (err) {
       console.error("Failed to submit feedback", err);
       setIsSubmitting(false);
+      setFeedbackState("error");
+      setTimeout(() => handleClose(), 3000);
     }
   };
 
@@ -76,37 +88,26 @@ export default function FeedbackWidget() {
     setRating(selectedRating);
   };
 
-  return (
-    <>
-      <motion.button
-        className={styles.inlineBtn}
-        onClick={handleOpen}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        <FaCommentDots />
-        <span className={styles.btnText}>Give Feedback</span>
-      </motion.button>
+  const modalContent = (
+    <AnimatePresence>
+      {isOpen && (
+        <div className={styles.overlay}>
+          <motion.div
+            className={styles.modal}
+            initial={{ opacity: 0, scale: 0.8, y: 50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 50 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            style={{ padding: '24px', width: '100%', maxWidth: '450px', background: 'var(--bg-card)', borderRadius: '24px', position: 'relative', border: '1px solid var(--border-color)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}
+          >
+            {showClose && (
+              <button className={styles.closeBtn} onClick={handleClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '20px' }}>
+                <FaTimes />
+              </button>
+            )}
 
-      <AnimatePresence>
-        {isOpen && (
-          <div className={styles.overlay}>
-            <motion.div
-              className={styles.modal}
-              initial={{ opacity: 0, scale: 0.8, y: 50 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: 50 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              style={{ padding: '24px', width: '100%', maxWidth: '450px', background: 'var(--bg-card)', borderRadius: '24px', position: 'relative', border: '1px solid var(--border-color)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}
-            >
-              {showClose && (
-                <button className={styles.closeBtn} onClick={handleClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '20px' }}>
-                  <FaTimes />
-                </button>
-              )}
-
-              <div className={styles.content} style={{ textAlign: 'center' }}>
-                {feedbackState === "idle" && (
+            <div className={styles.content} style={{ textAlign: 'center' }}>
+              {feedbackState === "idle" && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -232,21 +233,49 @@ export default function FeedbackWidget() {
                   </motion.div>
                 )}
 
-                {feedbackState === "success" && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                  >
-                    <div style={{ fontSize: '48px', color: '#10b981', marginBottom: '16px' }}>✨</div>
-                    <h3 style={{ color: 'var(--text-primary)', margin: '0 0 12px 0', fontSize: '24px' }}>Thank you!</h3>
-                    <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '15px' }}>Your feedback has been submitted successfully.</p>
-                  </motion.div>
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+              {feedbackState === "success" && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                >
+                  <div style={{ fontSize: '48px', color: '#10b981', marginBottom: '16px' }}>✨</div>
+                  <h3 style={{ color: 'var(--text-primary)', margin: '0 0 12px 0', fontSize: '24px' }}>Thank you!</h3>
+                  <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '15px' }}>Your feedback has been submitted successfully.</p>
+                </motion.div>
+              )}
+
+              {feedbackState === "error" && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                >
+                  <div style={{ height: '180px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <DotLottieReact src={feedbackBadUrl} loop autoplay />
+                  </div>
+                  <h3 style={{ color: 'var(--text-primary)', margin: '0 0 12px 0', fontSize: '24px' }}>Oops!</h3>
+                  <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '15px' }}>Something went wrong while submitting.</p>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+
+  return (
+    <>
+      <motion.button
+        className={styles.inlineBtn}
+        onClick={handleOpen}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <FaCommentDots />
+        <span className={styles.btnText}>Give Feedback</span>
+      </motion.button>
+      
+      {isOpen && ReactDOM.createPortal(modalContent, document.body)}
     </>
   );
 }

@@ -20,6 +20,22 @@
     color-scheme: dark light;
 }
 
+/* Fix invisible calendar icons in webkit browsers (Chrome/Edge) */
+.formInput::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    filter: invert(0);
+}
+
+:global([data-theme='dark']) .formInput::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+.formInput::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
 /* The elegant highlight effect when selecting a box */
 .formInput:focus,
 .formInput:focus-visible {
@@ -136,31 +152,31 @@
 }
 
 /* 🚨 Radar Container: Fixed height with premium sleek scrollbar */
-.radarContainer {
-    max-height: 400px;
+.activeClassesContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-height: 800px;
     overflow-y: auto;
-    padding-right: 12px;
-    /* Space for the scrollbar */
-    scroll-behavior: smooth;
+    padding-right: 10px;
 }
 
-/* Custom Premium Scrollbar for Radar */
-.radarContainer::-webkit-scrollbar {
+.activeClassesContainer::-webkit-scrollbar {
     width: 6px;
 }
 
-.radarContainer::-webkit-scrollbar-track {
-    background: var(--bg-nested);
-    border-radius: 8px;
+.activeClassesContainer::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
 }
 
-.radarContainer::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 8px;
-    transition: background 0.3s ease;
+.activeClassesContainer::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
+    border: 1px solid var(--bg-card);
 }
 
-.radarContainer::-webkit-scrollbar-thumb:hover {
+.activeClassesContainer::-webkit-scrollbar-thumb:hover {
     background: var(--text-muted);
 }
 

@@ -122,6 +122,8 @@ export default defineConfig({
       '/ws': {
         target: 'wss://sureproed.com',
         ws: true,
+        secure: false,
+        changeOrigin: true,
       },
       '/media': {
         target: 'https://sureproed.com',
@@ -140,6 +142,8 @@ export default defineConfig({
       '/ws': {
         target: 'wss://sureproed.com',
         ws: true,
+        secure: false,
+        changeOrigin: true,
       },
       '/media': {
         target: 'https://sureproed.com',

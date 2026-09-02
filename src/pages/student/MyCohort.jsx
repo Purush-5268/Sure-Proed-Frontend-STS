@@ -21,13 +21,13 @@ function MyCohort() {
     const loadCohort = async () => {
       try {
         const [profileData, appRes, coursesRes, cohortRes] = await Promise.all([
-          user?.email ? studentService.getProfile(user.email) : Promise.resolve(null),
-          apiClient.get(API_ENDPOINTS.APPLICATIONS?.BASE || "/applications/"),
-          courseService.getCourses(),
-          apiClient.get(API_ENDPOINTS.COHORTS.BASE)
+          user?.email ? studentService.getProfile(user.email).catch(() => null) : Promise.resolve(null),
+          apiClient.get(API_ENDPOINTS.APPLICATIONS?.BASE || "/applications/").catch(() => ({ data: [] })),
+          courseService.getCourses().catch(() => []),
+          apiClient.get(API_ENDPOINTS.COHORTS.BASE).catch(() => ({ data: [] }))
         ]);
 
-        const apps = Array.isArray(appRes.data?.results) ? appRes.data.results : appRes.data || [];
+        const apps = Array.isArray(appRes?.data?.results) ? appRes.data.results : appRes?.data || [];
         const courses = Array.isArray(coursesRes) ? coursesRes : (coursesRes?.results || coursesRes?.data || []);
 
         if (isMounted) {
@@ -36,13 +36,10 @@ function MyCohort() {
           if (enrollment.status) setEnrollmentStatus(enrollment.status);
 
           let resolvedCohort = null;
-          // First check if the API returns a cohort directly for this student
-          const cohortList = Array.isArray(cohortRes.data?.results) ? cohortRes.data.results : (Array.isArray(cohortRes.data) ? cohortRes.data : []);
-          if (cohortList.length > 0) {
-            resolvedCohort = cohortList[0];
-          } else if (enrollment.isEnrolled) {
-            // Fallback: Check various places for the cohort ID or object
-            const ac = enrollment.application?.assigned_cohort || 
+          
+          if (enrollment.isEnrolled) {
+            // Check various places for the precise cohort ID or object
+            const ac = enrollment.application?.assigned_cohort ||
                        profileData?.current_application?.assigned_cohort ||
                        profileData?.cohort ||
                        profileData?.course_batch;
@@ -50,16 +47,24 @@ function MyCohort() {
             if (ac) {
               if (typeof ac === 'string') {
                 try {
-                  const singleRes = await apiClient.get(API_ENDPOINTS.COHORTS.BY_ID(ac));
-                  resolvedCohort = singleRes.data;
+                  const singleRes = await apiClient.get(API_ENDPOINTS.COHORTS.BY_ID(ac)).catch(() => null);
+                  if (singleRes && singleRes.data) {
+                    resolvedCohort = singleRes.data;
+                  } else {
+                    throw new Error("Fallback to list search");
+                  }
                 } catch (e) {
                   try {
-                    const listRes = await apiClient.get(API_ENDPOINTS.COHORTS.BASE, { params: { search: ac } });
-                    const results = Array.isArray(listRes.data?.results) ? listRes.data.results : (Array.isArray(listRes.data) ? listRes.data : []);
-                    if (results.length > 0) {
-                      resolvedCohort = results[0];
+                    const listRes = await apiClient.get(API_ENDPOINTS.COHORTS.BASE, { params: { search: ac } }).catch(() => ({ data: [] }));
+                    const results = Array.isArray(listRes?.data?.results) ? listRes.data.results : (Array.isArray(listRes?.data) ? listRes.data : []);
+                    
+                    // The backend might ignore `search=` and return all cohorts, so explicitly find the one matching our code
+                    const matchedCohort = results.find(c => c.code === ac || c.id === ac || c.name === ac);
+                    
+                    if (matchedCohort) {
+                      resolvedCohort = matchedCohort;
                     } else {
-                      console.error("Failed to fetch assigned cohort by ID or search");
+                      console.error("Failed to find cohort matching code:", ac);
                     }
                   } catch (err2) {
                     console.error("Failed to fetch assigned cohort by ID or search");

@@ -92,13 +92,7 @@ export const resolveStudentEnrollment = (serverProfile, applications = [], cours
   const ENROLLED_STATUSES = ['COHORT_ASSIGNED', 'IN_PROGRESS', 'ACTIVE', 'TRAINING', 'INTERNSHIP', 'SOFT_SKILLS', 'PRE_TRAINING', 'COMPLETED'];
   const activeApp = appsArray.find(a => ENROLLED_STATUSES.includes(a.status));
   
-  // Debug: log what statuses are coming back so we can diagnose issues
-  if (appsArray.length > 0) {
-    console.log('[Dashboard] Applications found:', appsArray.map(a => ({ id: a.id, status: a.status, cohort: a.assigned_cohort?.code })));
-  } else {
-    console.log('[Dashboard] No applications returned from API');
-  }
-
+  
   // Fallback: if no cohort-assigned app found, try SUSPENDED ones too
   const suspendedApp = !activeApp ? appsArray.find(a => a.status === 'SUSPENDED') : null;
 

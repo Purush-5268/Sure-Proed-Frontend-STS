@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { attendanceService } from "../../services/attendanceService";
+import apiClient from "../../services/apiClient";
+import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import { useAuth } from "../../context/AuthContext";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./Attendance.module.css";
 
 function Attendance() {
+  const { user } = useAuth();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -12,10 +16,15 @@ function Attendance() {
     let isMounted = true;
     async function loadSessions() {
       try {
-        const res = await attendanceService.getAttendanceRecords({});
-        const data = res?.data || res;
-        const fetchedSessions = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
-        if (isMounted) setSessions(fetchedSessions);
+        const res = await apiClient.get(API_ENDPOINTS.ATTENDANCE.SUMMARY);
+        const data = res?.data?.results || res?.data || [];
+        if (data.length > 0) {
+          const myAtt = data.find(a => a.student_id === user?.id || a.user?.id === user?.id || a.email === user?.email) || data[0];
+          const history = myAtt.history || [];
+          if (isMounted) setSessions(history);
+        } else {
+          if (isMounted) setSessions([]);
+        }
       } catch (error) {
         console.error("Failed to load attendance sessions", error);
       } finally {

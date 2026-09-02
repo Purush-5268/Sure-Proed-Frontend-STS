@@ -24,7 +24,7 @@ function PermissionChatModal({ warningId, onClose }) {
 
     // 2. Initialize WebSocket Connection
     const token = getAccessToken();
-    const apiBase = import.meta.env.VITE_API_URL || "http://106.51.129.34:8000";
+    const apiBase = import.meta.env.VITE_API_URL || "";
     let wsProtocol = "ws";
     let wsHost = apiBase;
     

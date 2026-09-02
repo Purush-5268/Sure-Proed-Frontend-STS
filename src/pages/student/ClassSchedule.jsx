@@ -48,23 +48,49 @@ function ClassSchedule() {
     });
   };
 
-  // 🚨 Strict -10 min to +5 min Window Checker Logic
-  const isWithinJoinWindow = (classDate, startTimeStr, endTimeStr) => {
-    if (!classDate || !startTimeStr) return false;
+  const formatTime = (timeStr) => {
+    if (!timeStr) return "";
+    const parts = timeStr.split(":");
+    if (parts.length >= 2) {
+      let hours = parseInt(parts[0], 10);
+      let mins = parts[1];
+      let ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; 
+      return `${hours}:${mins} ${ampm}`;
+    }
+    return timeStr;
+  };
+
+  const getClassStatus = (item) => {
+    if (!item.class_date || !item.start_time) return { canJoin: false, label: "Invalid Time" };
     try {
       const now = new Date();
-      const startDateTime = new Date(`${classDate}T${startTimeStr}`);
+      const startDateTime = new Date(`${item.class_date}T${item.start_time}`);
       let endDateTime;
-      if (endTimeStr) {
-        endDateTime = new Date(`${classDate}T${endTimeStr}`);
+      if (item.end_time) {
+        endDateTime = new Date(`${item.class_date}T${item.end_time}`);
       } else {
         endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
       }
       const windowOpenTime = new Date(startDateTime.getTime() - 10 * 60 * 1000);
       const windowCloseTime = new Date(endDateTime.getTime() + 5 * 60 * 1000);
-      return now >= windowOpenTime && now <= windowCloseTime;
+
+      if (now < windowOpenTime) return { canJoin: false, label: "Locked (Opens 10m prior)" };
+      
+      const itemStatus = (item.status || "").toUpperCase();
+      const isCompleted = itemStatus === "COMPLETED" || itemStatus === "ENDED";
+      if (isCompleted) {
+         return { canJoin: false, label: "Completed" };
+      }
+      
+      if (now > windowCloseTime) {
+         return { canJoin: false, label: "Window Closed (Ask Admin)" };
+      }
+      
+      return { canJoin: true, label: "Live Now" };
     } catch (e) {
-      return false;
+      return { canJoin: false, label: "Error" };
     }
   };
 
@@ -87,7 +113,8 @@ function ClassSchedule() {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
             {schedule.map((item, idx) => {
-              const canJoin = isWithinJoinWindow(item.class_date, item.start_time, item.end_time);
+              const status = getClassStatus(item);
+              const canJoin = status.canJoin;
               const meetLink = item.meet_link || item.meeting_link;
 
               return (
@@ -123,7 +150,7 @@ function ClassSchedule() {
                     </div>
                     <h3 style={{ fontSize: '1.05rem', color: 'var(--text-primary)', margin: '0 0 2px 0' }}>{item.title || "Class Session"}</h3>
                     <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                      📅 {formatDate(item.class_date)} &nbsp;|&nbsp; ⏰ {item.start_time} - {item.end_time || ""}
+                      📅 {formatDate(item.class_date)} &nbsp;|&nbsp; ⏰ {formatTime(item.start_time)} - {formatTime(item.end_time) || "Ongoing"}
                     </p>
                   </div>
 
@@ -140,7 +167,7 @@ function ClassSchedule() {
                       </a>
                     ) : (
                       <span className="premium-badge premium-badge-inactive" style={{ background: canJoin ? 'transparent' : 'var(--bg-subtle)' }}>
-                        {canJoin ? "Link Pending" : (item.conducted ? "Conducted" : "Locked (10m Prior)")}
+                        {status.label}
                       </span>
                     )}
                   </div>

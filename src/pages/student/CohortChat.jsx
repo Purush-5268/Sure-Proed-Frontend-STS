@@ -5,7 +5,8 @@ import { cohortChatService } from "../../services/cohortChatService";
 import { cohortService } from "../../services/cohortService";
 import { courseService } from "../../services/courseService";
 import { getAccessToken } from "../../utils/tokenStorage";
-import { FiSend, FiWifi, FiWifiOff, FiLoader, FiAlertCircle, FiArrowLeft, FiTrash2 } from "react-icons/fi";
+import { FiSend, FiWifi, FiWifiOff, FiLoader, FiAlertCircle, FiArrowLeft, FiTrash2, FiEdit2, FiMoreVertical, FiX } from "react-icons/fi";
+import { BiCheck, BiCheckDouble } from "react-icons/bi";
 
 /**
  * Cohort Group Chat page.
@@ -47,8 +48,26 @@ function getDateLabel(iso) {
   return new Date(iso).toDateString();
 }
 
-function MessageBubble({ msg, isOwnMessage, onDelete, canDelete }) {
-  const [showDelete, setShowDelete] = useState(false);
+function renderTextWithLinks(text) {
+  if (!text) return null;
+  // Simple regex for URLs
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  return parts.map((part, i) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+}
+
+function MessageBubble({ msg, isOwnMessage, onDeleteForMe, onDeleteForEveryone, onEdit, canDelete, isReadByAny }) {
+  const [showActions, setShowActions] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   if (msg.is_deleted) {
     return (
@@ -73,64 +92,142 @@ function MessageBubble({ msg, isOwnMessage, onDelete, canDelete }) {
         marginBottom: '6px',
         padding: '0 12px',
       }}
-      onMouseEnter={() => setShowDelete(true)}
-      onMouseLeave={() => setShowDelete(false)}
+      onMouseEnter={() => setShowActions(true)}
+      onMouseLeave={() => {
+        setShowActions(false);
+        setShowMenu(false);
+      }}
     >
-      <div style={{ maxWidth: '70%', position: 'relative' }}>
-        {/* Sender info (only for others) */}
-        {!isOwnMessage && (
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '2px', paddingLeft: '4px' }}>
-            {msg.sender_name}
-            {msg.sender_role && msg.sender_role !== 'STUDENT' && (
-              <span style={{ marginLeft: '4px', background: 'var(--primary-color)', color: 'white', padding: '1px 5px', borderRadius: '3px', fontSize: '10px' }}>
-                {msg.sender_role}
-              </span>
+      <div style={{ maxWidth: '70%', position: 'relative', display: 'flex', alignItems: 'flex-start', gap: '8px', flexDirection: isOwnMessage ? 'row-reverse' : 'row' }}>
+
+        {/* Actions Menu Trigger */}
+        {showActions && (
+          <div style={{ position: 'relative', marginTop: '4px' }}>
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              style={{
+                background: 'var(--bg-nested)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '50%',
+                width: '24px',
+                height: '24px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--text-secondary)',
+                padding: 0,
+              }}
+              title="Message options"
+            >
+              <FiMoreVertical size={14} />
+            </button>
+
+            {/* Dropdown Menu */}
+            {showMenu && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: isOwnMessage ? '0' : 'auto',
+                left: isOwnMessage ? 'auto' : '0',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                padding: '4px 0',
+                zIndex: 10,
+                minWidth: '160px',
+                marginTop: '4px'
+              }}>
+                {isOwnMessage && (
+                  <button
+                    onClick={() => {
+                      setShowMenu(false);
+                      onEdit(msg);
+                    }}
+                    style={{
+                      width: '100%', padding: '8px 12px', background: 'transparent', border: 'none',
+                      textAlign: 'left', cursor: 'pointer', fontSize: '13px', color: 'var(--text-primary)',
+                      display: 'flex', alignItems: 'center', gap: '8px'
+                    }}
+                  >
+                    <FiEdit2 size={14} /> Edit message
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    setShowMenu(false);
+                    onDeleteForMe(msg.id);
+                  }}
+                  style={{
+                    width: '100%', padding: '8px 12px', background: 'transparent', border: 'none',
+                    textAlign: 'left', cursor: 'pointer', fontSize: '13px', color: 'var(--text-primary)',
+                    display: 'flex', alignItems: 'center', gap: '8px'
+                  }}
+                >
+                  <FiTrash2 size={14} /> Hide on this device
+                </button>
+
+                {canDelete && (
+                  <button
+                    onClick={() => {
+                      setShowMenu(false);
+                      onDeleteForEveryone(msg.id);
+                    }}
+                    style={{
+                      width: '100%', padding: '8px 12px', background: 'transparent', border: 'none',
+                      textAlign: 'left', cursor: 'pointer', fontSize: '13px', color: '#ef4444',
+                      display: 'flex', alignItems: 'center', gap: '8px'
+                    }}
+                  >
+                    <FiTrash2 size={14} /> Delete for everyone
+                  </button>
+                )}
+              </div>
             )}
           </div>
         )}
 
-        <div style={{
-          background: isOwnMessage ? 'var(--primary-color)' : 'var(--bg-card)',
-          color: isOwnMessage ? 'white' : 'var(--text-primary)',
-          padding: '8px 12px',
-          borderRadius: isOwnMessage ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-          border: isOwnMessage ? 'none' : '1px solid var(--border-color)',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
-          wordBreak: 'break-word',
-          lineHeight: 1.5,
-          fontSize: '14px',
-        }}>
-          {msg.body}
-          <div style={{ fontSize: '11px', opacity: 0.6, textAlign: 'right', marginTop: '2px' }}>
-            {formatTime(msg.created_at)}
+        {/* Bubble */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Sender info (only for others) */}
+          {!isOwnMessage && (
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '2px', paddingLeft: '4px' }}>
+              {msg.sender_name}
+              {msg.sender_role && msg.sender_role !== 'STUDENT' && (
+                <span style={{ marginLeft: '4px', background: 'var(--primary-color)', color: 'white', padding: '1px 5px', borderRadius: '3px', fontSize: '10px' }}>
+                  {msg.sender_role}
+                </span>
+              )}
+            </div>
+          )}
+
+          <div style={{
+            background: isOwnMessage ? 'var(--primary-color)' : 'var(--bg-card)',
+            color: isOwnMessage ? 'white' : 'var(--text-primary)',
+            padding: '8px 12px',
+            borderRadius: isOwnMessage ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+            border: isOwnMessage ? 'none' : '1px solid var(--border-color)',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+            wordBreak: 'break-word',
+            lineHeight: 1.5,
+            fontSize: '14px',
+            whiteSpace: 'pre-wrap',
+          }}>
+            {renderTextWithLinks(msg.body)}
+            <div style={{ fontSize: '11px', opacity: 0.6, textAlign: 'right', marginTop: '4px', display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
+              {msg.is_edited && <span style={{ fontStyle: 'italic' }}>(edited)</span>}
+              {formatTime(msg.created_at)}
+              {isOwnMessage && (
+                <span style={{ color: isReadByAny ? '#3b82f6' : 'var(--text-muted)' }}>
+                  {isReadByAny ? <BiCheckDouble size={16} /> : <BiCheck size={16} />}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Delete button */}
-        {canDelete && showDelete && (
-          <button
-            onClick={() => onDelete(msg.id)}
-            style={{
-              position: 'absolute',
-              top: '-8px',
-              right: isOwnMessage ? '0' : 'auto',
-              left: isOwnMessage ? 'auto' : '0',
-              background: '#ef4444',
-              border: 'none',
-              borderRadius: '50%',
-              width: '22px',
-              height: '22px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 0,
-            }}
-            title="Delete message"
-          >
-            <FiTrash2 size={11} color="white" />
-          </button>
-        )}
       </div>
     </div>
   );
@@ -154,6 +251,16 @@ function CohortChat() {
   const [cohortInfo, setCohortInfo] = useState(null);
   const [cohortData, setCohortData] = useState(null);
   const [courseName, setCourseName] = useState("");
+  const [editingMessage, setEditingMessage] = useState(null);
+  const [hiddenMessages, setHiddenMessages] = useState(() => {
+    try {
+      const stored = localStorage.getItem(`hidden_msgs_${user?.id}_${cohortId}`);
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch (e) {
+      return new Set();
+    }
+  });
+  const [readStates, setReadStates] = useState({});
 
   const wsRef = useRef(null);
   const reconnectCount = useRef(0);
@@ -164,6 +271,36 @@ function CohortChat() {
 
   const isAdmin = user?.role === 'ADMIN' || user?.is_superuser;
   const userId = user?.id;
+
+  const markReadTimeout = useRef(null);
+
+  const attemptMarkRead = useCallback(() => {
+    if (!document.hasFocus() || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    
+    // Check if near bottom
+    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    if (isNearBottom) {
+      if (markReadTimeout.current) clearTimeout(markReadTimeout.current);
+      markReadTimeout.current = setTimeout(() => {
+        setMessages(currentMessages => {
+          // Find latest message from another user
+          const lastOtherMsg = [...currentMessages].reverse().find(m => m.sender_id !== userId);
+          if (lastOtherMsg && wsRef.current?.readyState === WebSocket.OPEN) {
+            wsRef.current.send(JSON.stringify({ action: "mark_read", message_id: lastOtherMsg.id }));
+          }
+          return currentMessages;
+        });
+      }, 1000);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    const onFocus = () => attemptMarkRead();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [attemptMarkRead]);
 
   // Scroll to bottom
   const scrollToBottom = useCallback((smooth = false) => {
@@ -187,6 +324,7 @@ function CohortChat() {
         setMessages(msgs);
         setHasMore(data.has_more || false);
         setCohortInfo({ cohort_id: data.cohort_id, conversation_id: data.conversation_id });
+        setReadStates(data.read_states || {});
         setLoadingHistory(false);
         requestAnimationFrame(() => scrollToBottom(false));
       })
@@ -207,12 +345,9 @@ function CohortChat() {
         courseService.getCourseById(data.course).then(courseRes => {
           if (!isMounted) return;
           setCourseName(courseRes?.name || courseRes?.title || data.course);
-        }).catch(() => {});
+        }).catch(() => { });
       }
-    }).catch(() => {});
-
-    // Mark as read on enter
-    cohortChatService.markRead(cohortId).catch(() => {});
+    }).catch(() => { });
 
     return () => { isMounted = false; };
   }, [cohortId, scrollToBottom, isInvalidCohort]);
@@ -255,6 +390,7 @@ function CohortChat() {
         setWsStatus("CONNECTED");
         setWsError("");
         reconnectCount.current = 0;
+        attemptMarkRead();
       };
 
       ws.onmessage = (event) => {
@@ -271,8 +407,29 @@ function CohortChat() {
             return;
           }
 
-          // New message broadcast
-          if (data.message_id && data.body) {
+          if (data.event === "message_deleted") {
+            setMessages(prev => prev.map(m => m.id === data.message_id ? { ...m, is_deleted: true } : m));
+            return;
+          }
+
+          if (data.event === "message_updated") {
+            setMessages(prev => prev.map(m => m.id === data.message_id ? { ...m, body: data.body, is_edited: data.is_edited } : m));
+            return;
+          }
+
+          if (data.event === "read_state_update") {
+            setReadStates(prev => ({
+              ...prev,
+              [data.user_id]: {
+                message_id: data.last_read_message_id,
+                timestamp: data.last_read_timestamp
+              }
+            }));
+            return;
+          }
+
+          // New message broadcast (event === "message_created" or legacy fallback)
+          if ((data.event === "message_created" || !data.event) && data.message_id && data.body) {
             const newMsg = {
               id: data.message_id,
               sender_id: data.sender_id,
@@ -281,14 +438,16 @@ function CohortChat() {
               body: data.body,
               created_at: data.created_at,
               is_deleted: false,
+              is_edited: data.is_edited || false,
             };
             if (!seenIds.current.has(newMsg.id)) {
               seenIds.current.add(newMsg.id);
               setMessages(prev => [...prev, newMsg]);
               // Auto scroll only if near bottom
-              setTimeout(() => scrollToBottom(true), 50);
-              // Mark read
-              cohortChatService.markRead(cohortId).catch(() => {});
+              setTimeout(() => {
+                scrollToBottom(true);
+                attemptMarkRead();
+              }, 50);
             }
           }
         } catch (e) {
@@ -312,7 +471,7 @@ function CohortChat() {
           setWsError("Your access to this cohort chat is suspended or revoked.");
           return;
         }
-        
+
         // Auto-reconnect with exponential backoff (max 5 retries)
         if (reconnectCount.current < MAX_RECONNECT_ATTEMPTS) {
           setWsStatus("RECONNECTING");
@@ -347,10 +506,23 @@ function CohortChat() {
     const body = inputText.trim();
     if (!body || sending || wsStatus !== "CONNECTED") return;
 
+    if (editingMessage) {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        setSending(true);
+        wsRef.current.send(JSON.stringify({ action: "edit", message_id: editingMessage.id, body }));
+        setInputText("");
+        setEditingMessage(null);
+        setSending(false);
+      } else {
+        alert("Editing is only available when fully connected to chat.");
+      }
+      return;
+    }
+
     // Send via WebSocket for instant delivery
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       setSending(true);
-      wsRef.current.send(JSON.stringify({ body }));
+      wsRef.current.send(JSON.stringify({ action: "send", body }));
       setInputText("");
       setSending(false);
     } else {
@@ -372,14 +544,40 @@ function CohortChat() {
     }
   };
 
-  const handleDelete = async (messageId) => {
-    if (!window.confirm("Delete this message?")) return;
+  const handleDeleteForEveryone = async (messageId) => {
+    if (!window.confirm("Delete this message for everyone?")) return;
     try {
-      await cohortChatService.deleteMessage(cohortId, messageId);
-      setMessages(prev => prev.map(m => m.id === messageId ? { ...m, is_deleted: true } : m));
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({ action: "delete", message_id: messageId }));
+      } else {
+        await cohortChatService.deleteMessage(cohortId, messageId);
+        setMessages(prev => prev.map(m => m.id === messageId ? { ...m, is_deleted: true } : m));
+      }
     } catch (err) {
       alert(err.response?.data?.error || "Failed to delete message.");
     }
+  };
+
+  const handleDeleteForMe = (messageId) => {
+    if (!window.confirm("Hide this message on your device?")) return;
+    setHiddenMessages(prev => {
+      const next = new Set(prev);
+      next.add(messageId);
+      try {
+        localStorage.setItem(`hidden_msgs_${userId}_${cohortId}`, JSON.stringify(Array.from(next)));
+      } catch (e) { }
+      return next;
+    });
+  };
+
+  const handleEditInit = (msg) => {
+    setEditingMessage(msg);
+    setInputText(msg.body);
+  };
+
+  const cancelEdit = () => {
+    setEditingMessage(null);
+    setInputText("");
   };
 
   const handleKeyDown = (e) => {
@@ -397,18 +595,6 @@ function CohortChat() {
     if (wsStatus === "ACCESS DENIED") return <span style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: '500' }}><FiAlertCircle size={12} /> Access Denied</span>;
     return <span style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: '500' }}><FiWifiOff size={12} /> Offline</span>;
   };
-
-  // Group messages by date
-  const groupedMessages = [];
-  let lastDateLabel = null;
-  messages.forEach(msg => {
-    const dl = getDateLabel(msg.created_at);
-    if (dl !== lastDateLabel) {
-      groupedMessages.push({ type: 'date', label: formatDate(msg.created_at), key: dl });
-      lastDateLabel = dl;
-    }
-    groupedMessages.push({ type: 'message', msg });
-  });
 
   // Suspended screen
   if (wsStatus === "ACCESS DENIED" && !loadingHistory) {
@@ -501,6 +687,7 @@ function CohortChat() {
           if (e.target.scrollTop < 80 && hasMore && !loadingOlder) {
             loadOlderMessages();
           }
+          attemptMarkRead();
         }}
       >
         {/* Load older */}
@@ -532,26 +719,57 @@ function CohortChat() {
           </div>
         )}
 
-        {groupedMessages.map((item, idx) => {
-          if (item.type === 'date') {
-            return (
-              <div key={item.key} style={{ textAlign: 'center', margin: '12px 0 8px 0' }}>
-                <span style={{ background: 'var(--bg-nested)', color: 'var(--text-muted)', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '600' }}>
-                  {item.label}
-                </span>
-              </div>
-            );
-          }
-          const msg = item.msg;
+        {messages.map((msg, index) => {
           const isOwn = msg.sender_id === userId;
+          const showDate = index === 0 || getDateLabel(msg.created_at) !== getDateLabel(messages[index - 1].created_at);
+
+          // Calculate isReadByAny
+          let isReadByAny = false;
+          if (isOwn) {
+            for (const [uid, state] of Object.entries(readStates)) {
+              if (uid === userId) continue;
+              const readIdx = messages.findIndex(m => m.id === state.message_id);
+              if (readIdx !== -1 && index <= readIdx) {
+                isReadByAny = true;
+                break;
+              }
+            }
+          }
+
           return (
-            <MessageBubble
-              key={msg.id}
-              msg={msg}
-              isOwnMessage={isOwn}
-              onDelete={handleDelete}
-              canDelete={isOwn || isAdmin}
-            />
+            <div key={msg.id}>
+              {showDate && (
+                <div style={{ textAlign: 'center', margin: '16px 0 8px', fontSize: '11px', color: 'var(--text-muted)' }}>
+                  <span style={{ background: 'var(--bg-nested)', padding: '4px 8px', borderRadius: '12px' }}>
+                    {formatDate(msg.created_at)}
+                  </span>
+                </div>
+              )}
+              {hiddenMessages.has(msg.id) ? (
+                <div style={{
+                  margin: '8px 12px',
+                  padding: '8px 12px',
+                  background: 'var(--bg-nested)',
+                  color: 'var(--text-muted)',
+                  fontSize: '12px',
+                  borderRadius: '8px',
+                  fontStyle: 'italic',
+                  textAlign: isOwn ? 'right' : 'left'
+                }}>
+                  You hid this message on this device.
+                </div>
+              ) : (
+                <MessageBubble
+                  msg={msg}
+                  isOwnMessage={isOwn}
+                  onDeleteForMe={handleDeleteForMe}
+                  onDeleteForEveryone={handleDeleteForEveryone}
+                  onEdit={handleEditInit}
+                  canDelete={isOwn || isAdmin}
+                  isReadByAny={isReadByAny}
+                />
+              )}
+            </div>
           );
         })}
         <div ref={bottomRef} />
@@ -570,57 +788,72 @@ function CohortChat() {
       {/* Input */}
       <div style={{
         display: 'flex',
-        gap: '8px',
-        padding: '12px 16px',
+        flexDirection: 'column',
         background: 'var(--bg-surface)',
         borderTop: '1px solid var(--border-color)',
         flexShrink: 0,
-        alignItems: 'flex-end',
       }}>
-        <textarea
-          value={inputText}
-          onChange={e => setInputText(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={wsStatus === 'suspended' ? "Chat access suspended" : (wsStatus === 'connected' ? "Type a message... (Enter to send)" : "Connecting...")}
-          disabled={wsStatus === 'suspended' || wsStatus === 'error'}
-          rows={1}
-          style={{
-            flex: 1,
-            resize: 'none',
-            padding: '10px 14px',
-            borderRadius: '20px',
-            border: '1px solid var(--border-color)',
-            background: 'var(--bg-card)',
-            color: 'var(--text-primary)',
-            fontSize: '14px',
-            outline: 'none',
-            maxHeight: '120px',
-            overflowY: 'auto',
-            lineHeight: 1.5,
-            fontFamily: 'inherit',
-          }}
-        />
-        <button
-          onClick={handleSend}
-          disabled={!inputText.trim() || sending || wsStatus === 'suspended' || wsStatus === 'error'}
-          style={{
-            background: 'var(--primary-color)',
-            border: 'none',
-            borderRadius: '50%',
-            width: '42px',
-            height: '42px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            opacity: (!inputText.trim() || sending || wsStatus !== 'connected') ? 0.5 : 1,
-            transition: 'opacity 0.2s',
-          }}
-          title="Send message"
-        >
-          {sending ? <FiLoader size={18} color="white" style={{ animation: 'spin 1s linear infinite' }} /> : <FiSend size={18} color="white" />}
-        </button>
+        {editingMessage && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '8px 16px', background: 'var(--bg-nested)', borderBottom: '1px solid var(--border-color)',
+            fontSize: '13px', color: 'var(--text-secondary)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <FiEdit2 size={12} /> Editing message
+            </div>
+            <button onClick={cancelEdit} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
+              <FiX size={14} />
+            </button>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: '8px', padding: '12px 16px', alignItems: 'flex-end' }}>
+          <textarea
+            value={inputText}
+            onChange={e => setInputText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={wsStatus === 'suspended' ? "Chat access suspended" : (wsStatus === 'connected' ? "Type a message... (Enter to send)" : "Connecting...")}
+            disabled={wsStatus === 'suspended' || wsStatus === 'error'}
+            rows={1}
+            style={{
+              flex: 1,
+              resize: 'none',
+              padding: '10px 14px',
+              borderRadius: '20px',
+              border: '1px solid var(--border-color)',
+              background: 'var(--bg-card)',
+              color: 'var(--text-primary)',
+              fontSize: '14px',
+              outline: 'none',
+              maxHeight: '120px',
+              overflowY: 'auto',
+              lineHeight: 1.5,
+              fontFamily: 'inherit',
+            }}
+          />
+          <button
+            onClick={handleSend}
+            disabled={!inputText.trim() || sending || wsStatus === 'suspended' || wsStatus === 'error'}
+            style={{
+              background: 'var(--primary-color)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '42px',
+              height: '42px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              opacity: (!inputText.trim() || sending || wsStatus !== 'connected') ? 0.5 : 1,
+              transition: 'opacity 0.2s',
+            }}
+            title={editingMessage ? "Save changes" : "Send message"}
+          >
+            {sending ? <FiLoader size={18} color="white" style={{ animation: 'spin 1s linear infinite' }} /> : <FiSend size={18} color="white" />}
+          </button>
+        </div>
       </div>
     </div>
   );
