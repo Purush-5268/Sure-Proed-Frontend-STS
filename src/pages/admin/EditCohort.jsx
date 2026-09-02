@@ -146,6 +146,9 @@ function EditCohort() {
                 <option value="DRAFT">Draft</option>
                 <option value="OPEN">Open</option>
                 <option value="ACTIVE">Active</option>
+                <option value="TRAINING">Training</option>
+                <option value="INTERNSHIP">Internship</option>
+                <option value="SOFT_SKILLS">Soft Skills</option>
                 <option value="COMPLETED">Completed</option>
                 <option value="CANCELLED">Cancelled</option>
               </select>

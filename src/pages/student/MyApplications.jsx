@@ -506,12 +506,12 @@ function MyApplications() {
       {/* 📊 APPLICATION STATUS & MARKS MODAL 📊 */}
       {selectedAppModal && (
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
-          <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "16px", maxWidth: "500px", width: "90%", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)" }}>
-            <h2 style={{ margin: "0 0 1rem 0", color: "#1e3a8a", borderBottom: "2px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+          <div style={{ backgroundColor: "var(--bg-card)", padding: "2rem", borderRadius: "16px", maxWidth: "500px", width: "90%", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)" }}>
+            <h2 style={{ margin: "0 0 1rem 0", color: "var(--primary-color)", borderBottom: "2px solid var(--border-color)", paddingBottom: "0.5rem" }}>
               Application Details & Result Info
             </h2>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "15px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "15px", color: "var(--text-primary)" }}>
               {(() => {
                 const mScore = selectedAppModal.qualification_score != null ? selectedAppModal.qualification_score : (selectedAppModal.score != null ? selectedAppModal.score : (selectedAppModal.percentage != null ? selectedAppModal.percentage : null));
                 const stUpper = (selectedAppModal.status || "").toUpperCase();
@@ -525,10 +525,10 @@ function MyApplications() {
                 return (
                   <>
                     <div><strong>Application No:</strong> {selectedAppModal.application_number || selectedAppModal.id}</div>
-                    <div><strong>Course Name:</strong> <span style={{ color: "#2563eb", fontWeight: "bold" }}>{selectedAppModal.course_display || selectedAppModal.course_name || selectedAppModal.course?.name || "Unknown Course"}</span></div>
-                    <div><strong>Current Status:</strong> <span style={{ fontWeight: "bold", color: isQual ? "#166534" : (isRej ? "#991b1b" : "#d97706") }}>{statusText}</span></div>
-                    <div><strong>Marks Score:</strong> <span style={{ fontWeight: "bold", color: "#1e293b" }}>{scoreText}</span></div>
-                    <div><strong>Qualification:</strong> <span style={{ fontWeight: "bold", color: isQual ? "#166534" : (isRej ? "#991b1b" : "#d97706") }}>{qualText}</span></div>
+                    <div><strong>Course Name:</strong> <span style={{ color: "var(--primary-color)", fontWeight: "bold" }}>{selectedAppModal.course_display || selectedAppModal.course_name || selectedAppModal.course?.name || "Unknown Course"}</span></div>
+                    <div><strong>Current Status:</strong> <span style={{ fontWeight: "bold", color: isQual ? "#16a34a" : (isRej ? "#dc2626" : "#d97706") }}>{statusText}</span></div>
+                    <div><strong>Marks Score:</strong> <span style={{ fontWeight: "bold", color: "var(--text-primary)" }}>{scoreText}</span></div>
+                    <div><strong>Qualification:</strong> <span style={{ fontWeight: "bold", color: isQual ? "#16a34a" : (isRej ? "#dc2626" : "#d97706") }}>{qualText}</span></div>
                     <div><strong>Anti-Cheat Violations:</strong> {selectedAppModal.cheat_count || 0} / 5 Security Violations</div>
                     <div><strong>Applied Date:</strong> {formatDate(selectedAppModal.applied_at || selectedAppModal.created_at)}</div>
                   </>

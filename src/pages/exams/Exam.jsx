@@ -881,19 +881,19 @@ function Exam() {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "100vh",
-          backgroundColor: "#f8fafc",
+          backgroundColor: "var(--bg-main)",
           fontFamily: "sans-serif",
         }}
       >
         <div
           style={{
-            backgroundColor: "white",
+            backgroundColor: "var(--bg-card)",
             padding: "3rem",
             borderRadius: "12px",
             boxShadow: "0 10px 25px rgba(0,0,0,0.06)",
             textAlign: "center",
             maxWidth: "480px",
-            border: "1.5px solid #cbd5e1",
+            border: "1.5px solid var(--border-color)",
           }}
         >
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
@@ -902,7 +902,7 @@ function Exam() {
           <h2 style={{ color: "#dc2626", margin: "0 0 0.5rem 0", fontSize: "20px" }}>
             Examination Session Unavailable
           </h2>
-          <p style={{ color: "#475569", fontSize: "14px", marginBottom: "1.5rem", lineHeight: "1.5" }}>
+          <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginBottom: "1.5rem", lineHeight: "1.5" }}>
             {error || "Unable to retrieve examination session from server."}
           </p>
           <button

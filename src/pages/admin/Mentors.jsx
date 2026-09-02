@@ -464,7 +464,7 @@ function Mentors() {
                         </div>
                       </td>
                       <td>{mentor.email || mentor.user_email || "N/A"}</td>
-                      <td>{mentor.specialization || mentor.assigned_course?.name || "Unassigned"}</td>
+                      <td>{mentor.assigned_cohorts?.length > 0 ? getAssignmentsString(mentor) : (mentor.specialization || mentor.assigned_course?.name || "Unassigned")}</td>
                       <td>
                         <Link to={`/admin/mentor-details/${mentor.user}`} className="premium-btn premium-btn-secondary" style={{ padding: "6px 12px" }}>
                           View Details

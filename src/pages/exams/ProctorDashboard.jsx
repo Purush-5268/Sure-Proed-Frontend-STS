@@ -276,9 +276,9 @@ function ProctorDashboard() {
 
       {/* Global Telemetry Feed (Only visible if polling active stream) */}
       {streamData?.recent_events?.length > 0 && (
-        <div style={{ marginTop: "30px", padding: "20px", background: "#fff", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+        <div style={{ marginTop: "30px", padding: "20px", background: "var(--bg-surface)", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-            <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "#0f172a" }}>Real-Time Cheating & Infraction Incident Stream</h3>
+            <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "var(--text-primary)" }}>Real-Time Cheating & Infraction Incident Stream</h3>
             <label style={{ fontSize: "13px", fontWeight: "600", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
               <input type="checkbox" checked={autoRefresh} onChange={(e) => setAutoRefresh(e.target.checked)} />
               Auto-Refresh (3s)
@@ -286,19 +286,19 @@ function ProctorDashboard() {
           </div>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
             <thead>
-              <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0", textAlign: "left" }}>
-                <th style={{ padding: "12px", color: "#475569" }}>Time</th>
-                <th style={{ padding: "12px", color: "#475569" }}>Candidate</th>
-                <th style={{ padding: "12px", color: "#475569" }}>Infraction Event</th>
+              <tr style={{ background: "var(--bg-nested)", borderBottom: "1px solid var(--border-color)", textAlign: "left" }}>
+                <th style={{ padding: "12px", color: "var(--text-secondary)" }}>Time</th>
+                <th style={{ padding: "12px", color: "var(--text-secondary)" }}>Candidate</th>
+                <th style={{ padding: "12px", color: "var(--text-secondary)" }}>Infraction Event</th>
               </tr>
             </thead>
             <tbody>
               {streamData.recent_events.map((event, idx) => {
                 const badge = getEventBadge(event.event_type);
                 return (
-                  <tr key={idx} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                    <td style={{ padding: "10px 12px", color: "#64748b" }}>{new Date(event.timestamp).toLocaleTimeString()}</td>
-                    <td style={{ padding: "10px 12px", fontWeight: "600" }}>{event.student_name}</td>
+                  <tr key={idx} style={{ borderBottom: "1px solid var(--border-color)" }}>
+                    <td style={{ padding: "10px 12px", color: "var(--text-muted)" }}>{new Date(event.timestamp).toLocaleTimeString()}</td>
+                    <td style={{ padding: "10px 12px", fontWeight: "600" }}>{event.student_name} <span style={{ color: "var(--text-muted)", fontSize: "11px", fontWeight: "normal" }}>({event.student_code})</span></td>
                     <td style={{ padding: "10px 12px" }}>
                       <span style={{ padding: "4px 8px", borderRadius: "12px", fontSize: "12px", fontWeight: "600", background: badge.bg, color: badge.color }}>
                         {badge.label}

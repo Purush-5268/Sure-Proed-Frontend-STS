@@ -1,5 +1,5 @@
-﻿import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./MentorDetails.module.css";
@@ -7,6 +7,7 @@ import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function MentorDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [mentor, setMentor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -69,7 +70,7 @@ function MentorDetails() {
       <div className="premium-card">
         <div className={styles.header}>
           <h1>Mentor Details</h1>
-          <Link to="/admin/mentors" className={styles.backBtn}>← Back</Link>
+          <button onClick={() => navigate(-1)} className={styles.backBtn} style={{ border: "none", cursor: "pointer", font: "inherit" }}>← Back</button>
         </div>
 
         <div className={styles.profile}>
@@ -101,7 +102,7 @@ function MentorDetails() {
 
         <div className={styles.buttons}>
           <Link to={`/admin/edit-mentor/${mentor.id}`} className={styles.editBtn}>Edit Mentor</Link>
-          <Link to="/admin/mentors" className={styles.cancelBtn}>Back</Link>
+          <button onClick={() => navigate(-1)} className={styles.cancelBtn} style={{ border: "none", cursor: "pointer", font: "inherit" }}>Back</button>
         </div>
       </div>
     </div>

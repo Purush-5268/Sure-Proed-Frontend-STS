@@ -13,8 +13,8 @@ function Trustees() {
     let isMounted = true;
     const fetchTrustees = async () => {
       try {
-        const resUsers = await apiClient.get(API_ENDPOINTS.USERS.BASE, { params: { role: "TRUSTEE" } });
-        const users = normalizeListResponse(resUsers.data).filter(u => u.role === "TRUSTEE");
+        const resUsers = await apiClient.get(API_ENDPOINTS.USERS.BASE, { params: { role: "TRUSTEE,VOLUNTEER" } });
+        const users = normalizeListResponse(resUsers.data).filter(u => u.role === "TRUSTEE" || u.role === "VOLUNTEER");
 
         // Map trustee_type directly from user object (backend embeds it)
         const enriched = users.map(u => ({
@@ -88,7 +88,7 @@ function Trustees() {
                   </td>
                   <td>{t.email}</td>
                   <td>
-                    {t.profile?.trustee_type === "VOLUNTEER" ? (
+                    {t.profile?.trustee_type === "VOLUNTEER" || t.role === "VOLUNTEER" ? (
                       <span className="premium-badge premium-badge-green">
                         <FiShield style={{ marginRight: "4px" }} /> Volunteer
                       </span>

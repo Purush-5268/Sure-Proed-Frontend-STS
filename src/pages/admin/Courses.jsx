@@ -39,6 +39,8 @@ function Courses() {
     if (lowerName.includes('autocad') || lowerName.includes('solidworks') || lowerName.includes('creo')) return '/assets/autocad-creo.png';
     if (lowerName.includes('robotics')) return '/assets/robotics.jpg';
     if (lowerName.includes('financial') || lowerName.includes('valuation') || lowerName.includes('finance')) return '/assets/finance.jpg';
+    if (lowerName.includes('medical coding') || lowerName.includes('medical')) return '/assets/medical-coding.jpg';
+    if (lowerName.includes('actuarial')) return '/assets/actuarial.webp';
 
     return '/sure-logo.jpg';
   };

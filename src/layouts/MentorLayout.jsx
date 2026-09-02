@@ -60,7 +60,7 @@ function MentorLayout() {
         />
 
         <main className={styles.content}>
-          <div className={styles.globalFilterBar} style={{ padding: "16px 32px", borderBottom: "1px solid #e5e7eb", background: "white", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "12px" }}>
+          <div className={styles.globalFilterBar} style={{ padding: "16px 32px", borderBottom: "1px solid var(--border-color)", background: "var(--bg-surface)", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "12px" }}>
             <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--text-secondary)" }}>GLOBAL FILTER:</span>
             <select
               className="premium-input"

@@ -3,6 +3,7 @@ import {
   getAccessToken,
   getRefreshToken,
   setAccessToken,
+  setRefreshToken,
   clearAuthStorage,
 } from "../utils/tokenStorage";
 import { API_ENDPOINTS } from "../constants/apiEndpoints";
@@ -119,14 +120,23 @@ apiClient.interceptors.response.use(
         return Promise.reject(error);
       }
 
-
-
+      // 3. Stale-token race condition check
+      // If the token was refreshed by another concurrent request while this one was in-flight,
+      // the sent token will differ from the current stored token.
+      const currentToken = getAccessToken();
+      const sentToken = originalRequest.headers?.Authorization?.replace("Bearer ", "");
+      if (sentToken && currentToken && sentToken !== currentToken) {
+        originalRequest._retry = true;
+        originalRequest.headers.Authorization = `Bearer ${currentToken}`;
+        return apiClient(originalRequest);
+      }
 
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
           .then((token) => {
+            originalRequest._retry = true;
             originalRequest.headers.Authorization = `Bearer ${token}`;
             return apiClient(originalRequest);
           })
@@ -158,6 +168,9 @@ apiClient.interceptors.response.use(
           { refresh: refreshToken }
         );
         setAccessToken(data.access);
+        if (data.refresh) {
+          setRefreshToken(data.refresh);
+        }
         apiClient.defaults.headers.common["Authorization"] = `Bearer ${data.access}`;
         processQueue(null, data.access);
         originalRequest.headers.Authorization = `Bearer ${data.access}`;
