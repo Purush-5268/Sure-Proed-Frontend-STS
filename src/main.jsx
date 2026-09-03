@@ -6,12 +6,16 @@ import { AuthProvider } from './context/AuthContext'
 
 import { ThemeProvider } from './context/ThemeContext'
 
+import ErrorBoundary from './components/common/ErrorBoundary'
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+      <ErrorBoundary>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </ErrorBoundary>
     </ThemeProvider>
   </StrictMode>,
 )
