@@ -384,14 +384,21 @@ function Dashboard() {
                   if (typeof cohortData.mentors[0] === 'object') {
                     activeMentors = cohortData.mentors;
                   } else {
-                    const names = cohortData.mentor_name && cohortData.mentor_name !== "Not assigned"
-                      ? cohortData.mentor_name.split(',').map(n => n.trim())
-                      : [];
-                    activeMentors = cohortData.mentors.map((id, i) => {
-                      const m = mentorsMap[id];
-                      const fallbackName = m ? `${m.first_name || ""} ${m.last_name || ""}`.trim() : (names[i] || "Assigned Mentor");
-                      return m ? m : { id, first_name: fallbackName };
-                    });
+                    // Check if mentors is an array of strings (names) rather than IDs
+                    const isNameArray = typeof cohortData.mentors[0] === 'string' && cohortData.mentors[0].includes(' ');
+                    
+                    if (isNameArray && !mentorsMap[cohortData.mentors[0]]) {
+                      activeMentors = cohortData.mentors.map((name, i) => ({ id: `mentor-${i}`, first_name: name }));
+                    } else {
+                      const names = cohortData.mentor_name && cohortData.mentor_name !== "Not assigned"
+                        ? cohortData.mentor_name.split(',').map(n => n.trim())
+                        : [];
+                      activeMentors = cohortData.mentors.map((id, i) => {
+                        const m = mentorsMap[id];
+                        const fallbackName = m ? `${m.first_name || ""} ${m.last_name || ""}`.trim() : (names[i] || "Assigned Mentor");
+                        return m ? m : { id, first_name: fallbackName };
+                      });
+                    }
                   }
                 } else if (cohortData.mentor_name && cohortData.mentor_name !== "Not assigned") {
                   activeMentors = cohortData.mentor_name.split(',').map((name, i) => ({ id: `mentor-${i}`, first_name: name.trim() }));
@@ -515,42 +522,42 @@ function Dashboard() {
                         {isCompleted && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#10b981' }}></div>}
                         {isCancelled && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#ef4444' }}></div>}
                         
-                        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-                          <div style={{ flex: '1 1 auto', minWidth: 0 }}>
-                            <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-primary)', wordBreak: 'break-word', lineHeight: 1.3 }}>{cls.title || cls.class_type || "Live Session"}</h4>
-                            <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                              <FiClock style={{ flexShrink: 0 }} /> <span>{classStart.toLocaleDateString([], { month: 'short', day: 'numeric' })} • {classStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {classEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span> {isNextDay && <span style={{ fontSize: '11px', background: 'var(--bg-nested)', padding: '2px 6px', borderRadius: '4px' }}>(Next Day)</span>}
+                        <div style={{ display: 'flex', flexWrap: 'nowrap', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ flex: '1 1 auto', minWidth: 0, overflow: 'hidden' }}>
+                            <h4 style={{ margin: '0 0 4px 0', fontSize: '13px', color: 'var(--text-primary)', wordBreak: 'break-word', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cls.title || cls.class_type || "Live Session"}</h4>
+                            <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              <FiClock style={{ flexShrink: 0 }} /> <span>{classStart.toLocaleDateString([], { month: 'short', day: 'numeric' })} • {classStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {classEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span> {isNextDay && <span style={{ fontSize: '9px', background: 'var(--bg-nested)', padding: '2px 4px', borderRadius: '4px' }}>(Next Day)</span>}
                             </p>
                           </div>
 
                           <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', textAlign: 'right' }}>
                             {isCompleted ? (
-                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#10b981', padding: '6px 12px', background: 'rgba(16,185,129,0.1)', borderRadius: '6px', display: 'inline-block' }}>✔️ Completed</span>
+                              <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#10b981', padding: '4px 8px', background: 'rgba(16,185,129,0.1)', borderRadius: '4px', display: 'inline-block' }}>✔️ Completed</span>
                             ) : isCancelled ? (
-                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#ef4444', padding: '6px 12px', background: 'rgba(239,68,68,0.1)', borderRadius: '6px', display: 'inline-block' }}>❌ Cancelled</span>
+                              <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#ef4444', padding: '4px 8px', background: 'rgba(239,68,68,0.1)', borderRadius: '4px', display: 'inline-block' }}>❌ Cancelled</span>
                             ) : classOpen ? (
-                              <button onClick={() => handleJoinClass(cls)} disabled={isJoining || !cls.meeting_link} style={{ background: '#ef4444', color: 'var(--text-inverse)', border: 'none', padding: '10px 24px', borderRadius: '12px', fontWeight: 'bold', cursor: isJoining || !cls.meeting_link ? 'not-allowed' : 'pointer', opacity: isJoining || !cls.meeting_link ? 0.7 : 1, transition: '0.2s', whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)' }}>
+                              <button onClick={() => handleJoinClass(cls)} disabled={isJoining || !cls.meeting_link} style={{ background: '#ef4444', color: 'var(--text-inverse)', border: 'none', padding: '6px 12px', borderRadius: '8px', fontWeight: 'bold', cursor: isJoining || !cls.meeting_link ? 'not-allowed' : 'pointer', opacity: isJoining || !cls.meeting_link ? 0.7 : 1, transition: '0.2s', whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)', fontSize: '11px' }}>
                                 {isJoining ? 'Opening...' : (cls.meeting_link ? 'Join Now' : 'No Link')}
                               </button>
                             ) : isEarly ? (
                               <div style={{ textAlign: 'right' }}>
-                                <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🗓️ Scheduled</span>
-                                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Join opens at {windowOpenTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '4px 8px', background: 'var(--bg-nested)', borderRadius: '4px', display: 'inline-block', marginBottom: '2px' }}>🗓️ Scheduled</span>
+                                <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Join opens at {windowOpenTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                               </div>
                             ) : isLate ? (
                               <div style={{ textAlign: 'right' }}>
-                                <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#f59e0b', padding: '6px 12px', background: 'rgba(245,158,11,0.1)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🔴 Ongoing</span>
-                                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Window closed. Ask admin to join.</div>
+                                <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#f59e0b', padding: '4px 8px', background: 'rgba(245,158,11,0.1)', borderRadius: '4px', display: 'inline-block', marginBottom: '2px' }}>🔴 Ongoing</span>
+                                <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Window closed. Ask admin.</div>
                                 {cls.warning_state ? (
-                                  <span style={{ fontSize: '12px', color: cls.warning_state === 'ACCEPTED' ? '#10b981' : cls.warning_state === 'REJECTED' ? '#ef4444' : '#f59e0b', fontWeight: 'bold', display: 'block', marginTop: '6px' }}>
+                                  <span style={{ fontSize: '10px', color: cls.warning_state === 'ACCEPTED' ? '#10b981' : cls.warning_state === 'REJECTED' ? '#ef4444' : '#f59e0b', fontWeight: 'bold', display: 'block', marginTop: '4px' }}>
                                     Status: {cls.warning_state === 'APOLOGIZED' ? 'Pending Approval' : cls.warning_state}
                                   </span>
                                 ) : (
                                   <button
                                     onClick={() => { setLateJoinClassId(cls.id); setShowLateJoinModal(true); }}
-                                    style={{ fontSize: '12px', color: '#0ea5e9', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginTop: '6px', fontWeight: 'bold' }}
+                                    style={{ fontSize: '10px', color: '#0ea5e9', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginTop: '4px', fontWeight: 'bold', textDecoration: 'underline' }}
                                   >
-                                    Request Late Join Permission
+                                    Request Permission
                                   </button>
                                 )}
                               </div>
