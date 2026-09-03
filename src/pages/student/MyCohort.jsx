@@ -13,30 +13,42 @@ function MyCohort() {
   const { user } = useAuth();
   const [cohort, setCohort] = useState(null);
   const [hasEnrollment, setHasEnrollment] = useState(false);
-  const [enrollmentStatus, setEnrollmentStatus] = useState("ACTIVE");
+  const [enrollmentStatus, setEnrollmentStatus] = useState(null);
+  const [mentorsMap, setMentorsMap] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
     const loadCohort = async () => {
       try {
-        const [profileData, appRes, coursesRes, cohortRes] = await Promise.all([
+        const [profileData, appRes, coursesRes, mentorsRes] = await Promise.all([
           user?.email ? studentService.getProfile(user.email).catch(() => null) : Promise.resolve(null),
           apiClient.get(API_ENDPOINTS.APPLICATIONS?.BASE || "/applications/").catch(() => ({ data: [] })),
           courseService.getCourses().catch(() => []),
-          apiClient.get(API_ENDPOINTS.COHORTS.BASE).catch(() => ({ data: [] }))
+          apiClient.get(API_ENDPOINTS.MENTORS?.BASE || "/api/volunteers/mentor-profiles/").catch(() => ({ data: [] }))
         ]);
 
         const apps = Array.isArray(appRes?.data?.results) ? appRes.data.results : appRes?.data || [];
         const courses = Array.isArray(coursesRes) ? coursesRes : (coursesRes?.results || coursesRes?.data || []);
+        
+        const allMentors = Array.isArray(mentorsRes?.data?.results) ? mentorsRes.data.results : (Array.isArray(mentorsRes?.data) ? mentorsRes.data : []);
+        const mentorMap = {};
+        allMentors.forEach(m => {
+          if (m.user) mentorMap[m.user] = m;
+          if (m.id) mentorMap[m.id] = m;
+        });
+
+        let resolvedCohort = null;
+        let enrollmentStatusValue = null;
 
         if (isMounted) {
           const enrollment = resolveStudentEnrollment(profileData, apps, courses);
           setHasEnrollment(enrollment.isEnrolled);
-          if (enrollment.status) setEnrollmentStatus(enrollment.status);
+          if (enrollment.status) {
+             enrollmentStatusValue = enrollment.status;
+             setEnrollmentStatus(enrollment.status);
+          }
 
-          let resolvedCohort = null;
-          
           if (enrollment.isEnrolled) {
             // Check various places for the precise cohort ID or object
             const ac = enrollment.application?.assigned_cohort ||
@@ -45,7 +57,7 @@ function MyCohort() {
                        profileData?.course_batch;
                        
             if (ac) {
-              if (typeof ac === 'string') {
+              if (typeof ac === 'string' || typeof ac === 'number') {
                 try {
                   const singleRes = await apiClient.get(API_ENDPOINTS.COHORTS.BY_ID(ac)).catch(() => null);
                   if (singleRes && singleRes.data) {
@@ -57,17 +69,12 @@ function MyCohort() {
                   try {
                     const listRes = await apiClient.get(API_ENDPOINTS.COHORTS.BASE, { params: { search: ac } }).catch(() => ({ data: [] }));
                     const results = Array.isArray(listRes?.data?.results) ? listRes.data.results : (Array.isArray(listRes?.data) ? listRes.data : []);
-                    
-                    // The backend might ignore `search=` and return all cohorts, so explicitly find the one matching our code
                     const matchedCohort = results.find(c => c.code === ac || c.id === ac || c.name === ac);
-                    
                     if (matchedCohort) {
                       resolvedCohort = matchedCohort;
-                    } else {
-                      console.error("Failed to find cohort matching code:", ac);
                     }
                   } catch (err2) {
-                    console.error("Failed to fetch assigned cohort by ID or search");
+                    console.error("Failed to fetch assigned cohort");
                   }
                 }
               } else {
@@ -75,6 +82,28 @@ function MyCohort() {
               }
             }
           }
+
+          if (resolvedCohort && Array.isArray(resolvedCohort.mentors) && resolvedCohort.mentors.length > 0) {
+            const missingIds = resolvedCohort.mentors.filter(id => !mentorMap[id]);
+            if (missingIds.length > 0) {
+              const missingRes = await Promise.all(missingIds.map(id => {
+                const url = API_ENDPOINTS.MENTORS?.PROFILE_BY_USER ? API_ENDPOINTS.MENTORS.PROFILE_BY_USER(id) : `/api/volunteers/mentor-profiles/?user=${id}`;
+                return apiClient.get(url).catch(() => null);
+              }));
+              missingRes.forEach(r => {
+                if (r && r.data) {
+                  const results = Array.isArray(r.data.results) ? r.data.results : (Array.isArray(r.data) ? r.data : [r.data]);
+                  results.forEach(m => {
+                     if (m && m.user) mentorMap[m.user] = m;
+                     if (m && m.id) mentorMap[m.id] = m;
+                  });
+                }
+              });
+            }
+          }
+          
+          setMentorsMap(mentorMap);
+
           if (resolvedCohort) {
             // Attempt to resolve course name if it's just an ID
             if (resolvedCohort.course && typeof resolvedCohort.course === 'string') {
@@ -89,8 +118,8 @@ function MyCohort() {
       } catch (err) {
         console.error("Failed to load student cohort:", err);
         if (isMounted) {
-          setCohort(null);
-          setHasEnrollment(false);
+          setCohort({ name: "ERROR", error: err.message || err.toString(), stack: err.stack });
+          setHasEnrollment(true); // force display
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -138,16 +167,36 @@ function MyCohort() {
           <>
             <div className={styles.infoGrid}>
               <div className={styles.infoBox}>
-                <h3>Group Name</h3>
-                <p style={{ fontWeight: 'bold' }}>{cohort.name || cohort.code}</p>
+                <h3>Error Details</h3>
+                <p style={{ color: 'red', fontWeight: 'bold' }}>{cohort.error}</p>
+                <pre style={{ fontSize: '12px', whiteSpace: 'pre-wrap', color: 'red' }}>{cohort.stack}</pre>
               </div>
 
               <div className={styles.infoBox}>
                 <h3>Mentor</h3>
                 <span className="premium-badge premium-badge-active">
-                  {cohort.mentors && cohort.mentors.length > 0
-                    ? cohort.mentors.map(m => `${m.first_name || ""} ${m.last_name || ""}`).join(", ")
-                    : (cohort.active_mentor ? `${cohort.active_mentor.first_name || ""} ${cohort.active_mentor.last_name || ""}` : "Unassigned")}
+                  {(() => {
+                    if (cohort.active_mentors && cohort.active_mentors.length > 0) {
+                      return cohort.active_mentors.map(m => `${m.first_name || ""} ${m.last_name || ""}`.trim() || m.name || m.email || "Mentor").join(", ");
+                    }
+                    if (cohort.mentors && cohort.mentors.length > 0) {
+                      if (typeof cohort.mentors[0] === 'object') {
+                        return cohort.mentors.map(m => `${m.first_name || ""} ${m.last_name || ""}`.trim() || "Mentor").join(", ");
+                      } else {
+                        const names = cohort.mentor_name && cohort.mentor_name !== "Not assigned" 
+                          ? cohort.mentor_name.split(',').map(n => n.trim()) 
+                          : [];
+                        return cohort.mentors.map((id, i) => {
+                          const m = mentorsMap[id];
+                          if (m) return `${m.first_name || ""} ${m.last_name || ""}`.trim() || "Assigned Mentor";
+                          return names[i] || "Assigned Mentor";
+                        }).join(", ");
+                      }
+                    } else if (cohort.mentor_name && cohort.mentor_name !== "Not assigned") {
+                      return cohort.mentor_name;
+                    }
+                    return cohort.active_mentor ? `${cohort.active_mentor.first_name || ""} ${cohort.active_mentor.last_name || ""}`.trim() || "Assigned" : "Unassigned";
+                  })()}
                 </span>
               </div>
 

@@ -40,6 +40,7 @@ function Dashboard() {
   const [lateJoinReason, setLateJoinReason] = useState("");
   const [lateJoinClassId, setLateJoinClassId] = useState(null);
   const [isSubmittingLateJoin, setIsSubmittingLateJoin] = useState(false);
+  const [mentorsMap, setMentorsMap] = useState({});
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -48,19 +49,24 @@ function Dashboard() {
     async function fetchCoreData() {
       if (!user?.email) return;
       try {
-        const [profileRes, statsRes, appRes, coursesRes] = await Promise.all([
+        const [profileRes, statsRes, appRes, coursesRes, mentorsRes] = await Promise.all([
           studentService.getStudentProfiles({ user__email: user.email }, { signal: abortController.signal }).catch(() => null),
           apiClient.get(API_ENDPOINTS.STUDENTS.STATISTICS).catch(() => ({ data: {} })),
           apiClient.get(API_ENDPOINTS.APPLICATIONS?.BASE || "/applications/").catch(() => ({ data: [] })),
-          courseService.getCourses().catch(() => [])
+          courseService.getCourses().catch(() => []),
+          apiClient.get(API_ENDPOINTS.MENTORS?.BASE || "/api/volunteers/mentor-profiles/").catch(() => ({ data: [] }))
         ]);
 
         const profileData = profileRes?.data || profileRes;
         const profileObj = Array.isArray(profileData?.results) ? profileData.results[0] : (Array.isArray(profileData) ? profileData[0] : profileData);
-        if (isMounted) {
-          setProfile(profileObj || {});
-          setStats(statsRes?.data || {});
-        }
+
+        // Build mentors map
+        const allMentors = Array.isArray(mentorsRes?.data?.results) ? mentorsRes.data.results : (Array.isArray(mentorsRes?.data) ? mentorsRes.data : []);
+        const mentorMap = {};
+        allMentors.forEach(m => {
+          if (m.user) mentorMap[m.user] = m;
+          if (m.id) mentorMap[m.id] = m;
+        });
 
         const apps = appRes?.data?.results || appRes?.data || [];
         const courses = Array.isArray(coursesRes) ? coursesRes : (coursesRes?.results || coursesRes?.data || []);
@@ -68,8 +74,33 @@ function Dashboard() {
         // Find active/enrolled application by status — covers all cohort phases
         const ENROLLED_STATUSES = ['COHORT_ASSIGNED', 'IN_PROGRESS', 'ACTIVE', 'TRAINING', 'INTERNSHIP', 'SOFT_SKILLS', 'PRE_TRAINING', 'COMPLETED', 'SUSPENDED'];
         const enrolled = apps.find(a => ENROLLED_STATUSES.includes(a.status));
-        
-        
+
+        const cohortData = statsRes?.data?.active_cohort || enrolled?.assigned_cohort || profileObj?.current_application?.assigned_cohort || {};
+        if (cohortData.mentors && Array.isArray(cohortData.mentors) && cohortData.mentors.length > 0) {
+          const missingIds = cohortData.mentors.filter(id => !mentorMap[id]);
+          if (missingIds.length > 0) {
+            const missingRes = await Promise.all(missingIds.map(id => {
+              const url = API_ENDPOINTS.MENTORS?.PROFILE_BY_USER ? API_ENDPOINTS.MENTORS.PROFILE_BY_USER(id) : `/api/volunteers/mentor-profiles/?user=${id}`;
+              return apiClient.get(url).catch(() => null);
+            }));
+            missingRes.forEach(r => {
+              if (r && r.data) {
+                const results = Array.isArray(r.data.results) ? r.data.results : (Array.isArray(r.data) ? r.data : [r.data]);
+                results.forEach(m => {
+                  if (m && m.user) mentorMap[m.user] = m;
+                  if (m && m.id) mentorMap[m.id] = m;
+                });
+              }
+            });
+          }
+        }
+
+        if (isMounted) {
+          setMentorsMap(mentorMap);
+          setProfile(profileObj || {});
+          setStats(statsRes?.data || {});
+        }
+
         if (isMounted && enrolled) {
           setActiveApp(enrolled);
           if (enrolled.status === "SUSPENDED") {
@@ -144,10 +175,10 @@ function Dashboard() {
           if (!val) return null;
           return typeof val === 'string' ? val : (val.id || null);
         };
-        const cohortId = getStrId(enrolled?.assigned_cohort) 
-          || getStrId(statsRes?.data?.active_cohort) 
+        const cohortId = getStrId(enrolled?.assigned_cohort)
+          || getStrId(statsRes?.data?.active_cohort)
           || getStrId(profileObj?.current_application?.assigned_cohort)
-          || getStrId(profileObj?.cohort) 
+          || getStrId(profileObj?.cohort)
           || getStrId(profileObj?.course_batch);
         const courseId = getStrId(enrolled?.course) || getStrId(profileObj?.current_application?.course) || getStrId(profileObj?.course) || getStrId(statsRes?.data?.active_course);
 
@@ -155,7 +186,7 @@ function Dashboard() {
         const sessionParams = {};
         if (cohortId) sessionParams.cohort = cohortId;
         if (courseId) sessionParams.course = courseId;
-        
+
         // Fetch scheduled LST/SST/Domain sessions limited to their cohort
         Promise.allSettled([
           apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { params: sessionParams }),
@@ -345,7 +376,27 @@ function Dashboard() {
           <div style={{ background: 'var(--bg-nested)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
             <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Your Mentor</h4>
             {(() => {
-              const activeMentors = stats?.active_cohort?.active_mentors || activeApp?.assigned_cohort?.active_mentors || [];
+              const cohortData = stats?.active_cohort || activeApp?.assigned_cohort || {};
+              let activeMentors = cohortData.active_mentors || [];
+
+              if (activeMentors.length === 0) {
+                if (cohortData.mentors && cohortData.mentors.length > 0) {
+                  if (typeof cohortData.mentors[0] === 'object') {
+                    activeMentors = cohortData.mentors;
+                  } else {
+                    const names = cohortData.mentor_name && cohortData.mentor_name !== "Not assigned"
+                      ? cohortData.mentor_name.split(',').map(n => n.trim())
+                      : [];
+                    activeMentors = cohortData.mentors.map((id, i) => {
+                      const m = mentorsMap[id];
+                      const fallbackName = m ? `${m.first_name || ""} ${m.last_name || ""}`.trim() : (names[i] || "Assigned Mentor");
+                      return m ? m : { id, first_name: fallbackName };
+                    });
+                  }
+                } else if (cohortData.mentor_name && cohortData.mentor_name !== "Not assigned") {
+                  activeMentors = cohortData.mentor_name.split(',').map((name, i) => ({ id: `mentor-${i}`, first_name: name.trim() }));
+                }
+              }
 
               if (activeMentors.length === 0) {
                 return (
@@ -358,22 +409,27 @@ function Dashboard() {
               }
 
               return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{
+                  display: activeMentors.length > 2 ? 'grid' : 'flex',
+                  flexDirection: activeMentors.length > 2 ? 'row' : 'column',
+                  gridTemplateColumns: activeMentors.length > 2 ? 'repeat(auto-fill, minmax(200px, 1fr))' : 'none',
+                  gap: '16px'
+                }}>
                   {activeMentors.map((mentor) => {
                     const mentorName = `${mentor.first_name || ''} ${mentor.last_name || ''}`.trim() || mentor.name || mentor.email || 'Mentor';
                     const avatarChar = mentorName.charAt(0).toUpperCase();
 
                     return (
-                      <div key={mentor.id || mentor.email} style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--primary-color)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold', flexShrink: 0 }}>
+                      <div key={mentor.id || mentor.email} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', background: activeMentors.length > 2 ? 'var(--bg-primary)' : 'transparent', padding: activeMentors.length > 2 ? '12px' : '0', borderRadius: '8px', border: activeMentors.length > 2 ? '1px solid var(--border-color)' : 'none' }}>
+                        <div style={{ width: activeMentors.length > 2 ? '40px' : '48px', height: activeMentors.length > 2 ? '40px' : '48px', borderRadius: '50%', background: 'var(--primary-color)', color: 'var(--text-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: activeMentors.length > 2 ? '16px' : '20px', fontWeight: 'bold', flexShrink: 0 }}>
                           {avatarChar}
                         </div>
-                        <div>
-                          <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+                        <div style={{ overflow: 'hidden' }}>
+                          <div style={{ fontSize: activeMentors.length > 2 ? '15px' : '18px', fontWeight: 'bold', color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                             {mentorName}
                           </div>
                           {(mentor.email || mentor.phone || mentor.phone_number) && (
-                            <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                               {mentor.email} {(mentor.phone || mentor.phone_number) ? ` • ${mentor.phone || mentor.phone_number}` : ''}
                             </div>
                           )}
@@ -403,18 +459,17 @@ function Dashboard() {
               const now = new Date();
               const visibleClasses = todayClasses.filter(cls => {
                 const clsStatus = (cls.status || "").toUpperCase();
-                if (['CANCELLED'].includes(clsStatus)) return false;
-                
+
                 const classStart = new Date(`${cls.class_date}T${cls.start_time}`);
                 if (isNaN(classStart)) return false;
-                
+
                 const hoursSince = (now - classStart) / (1000 * 60 * 60);
-                
+
                 // Hide any class that is older than 24 hours, regardless of status
                 if (hoursSince > 24) {
                   return false;
                 }
-                
+
                 return true;
               });
 
@@ -438,68 +493,73 @@ function Dashboard() {
                     const windowCloseTime = new Date(classStart.getTime()); // Closes exactly at start time
                     const isNextDay = classEnd < classStart;
 
-                    if (now >= windowOpenTime && now <= new Date(windowOpenTime.getTime() + 60000) && Notification.permission === "granted" && !cls.notified) {
+                    const clsStatus = (cls.class_status || cls.status || "").toUpperCase();
+                    const isCompleted = clsStatus === 'COMPLETED' || clsStatus === 'ENDED';
+                    const isCancelled = clsStatus === 'CANCELLED';
+                    
+                    const classOpen = !isCompleted && !isCancelled && now >= windowOpenTime && now <= windowCloseTime;
+                    const isEarly = !isCompleted && !isCancelled && now < windowOpenTime;
+                    const isLate = !isCompleted && !isCancelled && now > windowCloseTime;
+                    const isTimePassed = false; // Classes don't implicitly end, they stay Ongoing until admin explicitly ends them
+                    const classOngoing = !isCompleted && !isCancelled && now > classStart;
+
+                    if (now >= windowOpenTime && now <= new Date(windowOpenTime.getTime() + 60000) && Notification.permission === "granted" && !cls.notified && !isCompleted && !isCancelled) {
                       cls.notified = true;
                       new Notification(`Live Class: ${cls.title}`, { body: "Join window is now open! Please join before class starts." });
                     }
-
-                    const clsStatus = (cls.status || "").toUpperCase();
-                    const isCompleted = clsStatus === 'COMPLETED' || clsStatus === 'ENDED';
-                    const classOpen = !isCompleted && now >= windowOpenTime && now <= windowCloseTime;
-                    const isEarly = !isCompleted && now < windowOpenTime;
-                    const isLate = !isCompleted && now > windowCloseTime && now <= classEnd;
-                    const isTimePassed = !isCompleted && now > classEnd;
-                    const classOngoing = !isCompleted && now > classStart && now <= classEnd;
 
                     return (
                       <div key={idx} style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' }}>
                         {classOpen && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#ef4444' }}></div>}
                         {classOngoing && !classOpen && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#f59e0b' }}></div>}
                         {isCompleted && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#10b981' }}></div>}
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div style={{ flex: '1 1 min-content', minWidth: '200px' }}>
+                        {isCancelled && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: '#ef4444' }}></div>}
+                        
+                        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
+                          <div style={{ flex: '1 1 auto', minWidth: 0 }}>
                             <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-primary)', wordBreak: 'break-word', lineHeight: 1.3 }}>{cls.title || cls.class_type || "Live Session"}</h4>
                             <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                               <FiClock style={{ flexShrink: 0 }} /> <span>{classStart.toLocaleDateString([], { month: 'short', day: 'numeric' })} • {classStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {classEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span> {isNextDay && <span style={{ fontSize: '11px', background: 'var(--bg-nested)', padding: '2px 6px', borderRadius: '4px' }}>(Next Day)</span>}
                             </p>
                           </div>
 
-                          {isCompleted ? (
-                            <div style={{ flexShrink: 0 }}>
+                          <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', textAlign: 'right' }}>
+                            {isCompleted ? (
                               <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#10b981', padding: '6px 12px', background: 'rgba(16,185,129,0.1)', borderRadius: '6px', display: 'inline-block' }}>✔️ Completed</span>
-                            </div>
-                          ) : classOpen ? (
-                            <button onClick={() => handleJoinClass(cls)} disabled={isJoining || !cls.meeting_link} style={{ flexShrink: 0, background: '#ef4444', color: 'var(--text-inverse)', border: 'none', padding: '10px 24px', borderRadius: '12px', fontWeight: 'bold', cursor: isJoining || !cls.meeting_link ? 'not-allowed' : 'pointer', opacity: isJoining || !cls.meeting_link ? 0.7 : 1, transition: '0.2s', whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)' }}>
-                              {isJoining ? 'Opening...' : (cls.meeting_link ? 'Join Now' : 'No Link')}
-                            </button>
-                          ) : isEarly ? (
-                            <div style={{ flexShrink: 0, textAlign: 'right' }}>
-                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🗓️ Scheduled</span>
-                              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Join opens at {windowOpenTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                            </div>
-                          ) : isLate ? (
-                            <div style={{ flexShrink: 0, textAlign: 'right', maxWidth: '200px' }}>
-                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#f59e0b', padding: '6px 12px', background: 'rgba(245,158,11,0.1)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🔴 Ongoing</span>
-                              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Window closed. Ask admin to join.</div>
-                              {cls.warning_state ? (
-                                <span style={{ fontSize: '12px', color: cls.warning_state === 'ACCEPTED' ? '#10b981' : cls.warning_state === 'REJECTED' ? '#ef4444' : '#f59e0b', fontWeight: 'bold', display: 'block', marginTop: '6px' }}>
-                                  Status: {cls.warning_state === 'APOLOGIZED' ? 'Pending Approval' : cls.warning_state}
-                                </span>
-                              ) : (
-                                <button
-                                  onClick={() => { setLateJoinClassId(cls.id); setShowLateJoinModal(true); }}
-                                  style={{ fontSize: '12px', color: '#0ea5e9', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginTop: '6px', fontWeight: 'bold' }}
-                                >
-                                  Request Late Join Permission
-                                </button>
-                              )}
-                            </div>
-                          ) : isTimePassed ? (
-                            <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                            ) : isCancelled ? (
+                              <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#ef4444', padding: '6px 12px', background: 'rgba(239,68,68,0.1)', borderRadius: '6px', display: 'inline-block' }}>❌ Cancelled</span>
+                            ) : classOpen ? (
+                              <button onClick={() => handleJoinClass(cls)} disabled={isJoining || !cls.meeting_link} style={{ background: '#ef4444', color: 'var(--text-inverse)', border: 'none', padding: '10px 24px', borderRadius: '12px', fontWeight: 'bold', cursor: isJoining || !cls.meeting_link ? 'not-allowed' : 'pointer', opacity: isJoining || !cls.meeting_link ? 0.7 : 1, transition: '0.2s', whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)' }}>
+                                {isJoining ? 'Opening...' : (cls.meeting_link ? 'Join Now' : 'No Link')}
+                              </button>
+                            ) : isEarly ? (
+                              <div style={{ textAlign: 'right' }}>
+                                <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🗓️ Scheduled</span>
+                                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Join opens at {windowOpenTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                              </div>
+                            ) : isLate ? (
+                              <div style={{ textAlign: 'right' }}>
+                                <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#f59e0b', padding: '6px 12px', background: 'rgba(245,158,11,0.1)', borderRadius: '6px', display: 'inline-block', marginBottom: '4px' }}>🔴 Ongoing</span>
+                                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Window closed. Ask admin to join.</div>
+                                {cls.warning_state ? (
+                                  <span style={{ fontSize: '12px', color: cls.warning_state === 'ACCEPTED' ? '#10b981' : cls.warning_state === 'REJECTED' ? '#ef4444' : '#f59e0b', fontWeight: 'bold', display: 'block', marginTop: '6px' }}>
+                                    Status: {cls.warning_state === 'APOLOGIZED' ? 'Pending Approval' : cls.warning_state}
+                                  </span>
+                                ) : (
+                                  <button
+                                    onClick={() => { setLateJoinClassId(cls.id); setShowLateJoinModal(true); }}
+                                    style={{ fontSize: '12px', color: '#0ea5e9', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginTop: '6px', fontWeight: 'bold' }}
+                                  >
+                                    Request Late Join Permission
+                                  </button>
+                                )}
+                              </div>
+                            ) : isTimePassed ? (
                               <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', padding: '6px 12px', background: 'var(--bg-nested)', borderRadius: '6px', display: 'inline-block' }}>Ended (Pending Admin)</span>
-                            </div>
-                          ) : null}
+                            ) : null}
+                          </div>
                         </div>
+
                         {classOpen && (
                           <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                             <h5 style={{ margin: '0 0 12px 0', color: 'var(--text-primary)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>📌 Before Joining</h5>

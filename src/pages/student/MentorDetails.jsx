@@ -51,9 +51,31 @@ function MentorDetails() {
           }
 
           if (resolvedCohort) {
-            // Find the active mentor or first mentor
-            const m = resolvedCohort.active_mentor || (resolvedCohort.mentors && resolvedCohort.mentors.length > 0 ? resolvedCohort.mentors[0] : null);
-            setMentor(m);
+            let mList = resolvedCohort.mentors && resolvedCohort.mentors.length > 0 
+                ? resolvedCohort.mentors 
+                : (resolvedCohort.active_mentor ? [resolvedCohort.active_mentor] : []);
+            
+            const fetchedMentors = await Promise.all(mList.map(async (mId) => {
+               if (typeof mId === 'object') return mId;
+               try {
+                 const url = API_ENDPOINTS.MENTORS?.PROFILE_BY_USER ? API_ENDPOINTS.MENTORS.PROFILE_BY_USER(mId) : `/api/volunteers/mentor-profiles/?user=${mId}`;
+                 const res = await apiClient.get(url);
+                 const results = Array.isArray(res.data?.results) ? res.data.results : (Array.isArray(res.data) ? res.data : [res.data]);
+                 const profile = results.find(p => p.user === mId || p.id === mId);
+                 if (profile) return profile;
+                 
+                 // Fallback if profile not found
+                 const fallbackNames = resolvedCohort.mentor_name && resolvedCohort.mentor_name !== "Not assigned" ? resolvedCohort.mentor_name.split(',').map(n => n.trim()) : [];
+                 const fallbackIndex = mList.indexOf(mId);
+                 return { id: mId, first_name: fallbackNames[fallbackIndex] || "Assigned Mentor" };
+               } catch (e) {
+                 const fallbackNames = resolvedCohort.mentor_name && resolvedCohort.mentor_name !== "Not assigned" ? resolvedCohort.mentor_name.split(',').map(n => n.trim()) : [];
+                 const fallbackIndex = mList.indexOf(mId);
+                 return { id: mId, first_name: fallbackNames[fallbackIndex] || "Assigned Mentor" };
+               }
+            }));
+            
+            setMentor(fetchedMentors);
           }
         }
       } catch (err) {
@@ -94,66 +116,73 @@ function MentorDetails() {
     );
   }
 
-  const fullName = `${mentor.first_name || ""} ${mentor.last_name || ""}`.trim() || mentor.email || "Unknown Mentor";
-  const avatarUrl = mentor.profile_picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=2563eb&color=fff&size=180`;
+  const mentorsList = Array.isArray(mentor) ? mentor : [mentor];
 
   return (
     <div className={styles.page}>
-      <div className="premium-card">
+      {mentorsList.map((m, idx) => {
+        const fullName = `${m.first_name || ""} ${m.last_name || ""}`.trim() || m.email || "Unknown Mentor";
+        const avatarUrl = m.profile_picture || m.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=2563eb&color=fff&size=180`;
 
-        <div className={styles.profile}>
-          <img src={avatarUrl} alt="Mentor Avatar" />
-          <h1>{fullName}</h1>
-          <p>{mentor.designation || "Internship Mentor"}</p>
-        </div>
+        return (
+          <div key={m.id || idx} className="premium-card" style={{ marginBottom: '24px' }}>
+            <div className={styles.profile}>
+              <img src={avatarUrl} alt="Mentor Avatar" />
+              <h1>{fullName}</h1>
+              <p>{m.designation || "Internship Mentor"}</p>
+            </div>
 
-        <div className={styles.infoGrid}>
-          <div className={styles.infoBox}>
-            <h3><FiMail style={{ marginRight: "8px" }}/> Email</h3>
-            <p>{mentor.email || "N/A"}</p>
+            <div className={styles.infoGrid}>
+              <div className={styles.infoBox}>
+                <h3><FiMail style={{ marginRight: "8px" }}/> Email</h3>
+                <p>{m.email || "N/A"}</p>
+              </div>
+
+              <div className={styles.infoBox}>
+                <h3><FiPhone style={{ marginRight: "8px" }}/> Phone</h3>
+                <p>{m.phone || m.phone_number || "N/A"}</p>
+              </div>
+
+              <div className={styles.infoBox}>
+                <h3><FiAward style={{ marginRight: "8px" }}/> Experience</h3>
+                <p>{m.experience ? `${m.experience} Years` : "N/A"}</p>
+              </div>
+
+              <div className={styles.infoBox}>
+                <h3><FiBriefcase style={{ marginRight: "8px" }}/> Specialization</h3>
+                <p>{m.specialization || m.expertise || "General"}</p>
+              </div>
+
+              <div className={styles.infoBox}>
+                <h3><FiClock style={{ marginRight: "8px" }}/> Office Hours</h3>
+                <p>{m.office_hours || "Scheduled via classes"}</p>
+              </div>
+
+              <div className={styles.infoBox}>
+                <h3><FiLinkedin style={{ marginRight: "8px" }}/> LinkedIn</h3>
+                {m.linkedin || m.linkedin_url ? (
+                  <a href={m.linkedin || m.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary-color)", fontWeight: "bold" }}>
+                    View Profile
+                  </a>
+                ) : (
+                  <p>Not Available</p>
+                )}
+              </div>
+            </div>
           </div>
+        );
+      })}
 
-          <div className={styles.infoBox}>
-            <h3><FiPhone style={{ marginRight: "8px" }}/> Phone</h3>
-            <p>{mentor.phone || mentor.phone_number || "N/A"}</p>
-          </div>
-
-          <div className={styles.infoBox}>
-            <h3><FiAward style={{ marginRight: "8px" }}/> Experience</h3>
-            <p>{mentor.experience ? `${mentor.experience} Years` : "N/A"}</p>
-          </div>
-
-          <div className={styles.infoBox}>
-            <h3><FiBriefcase style={{ marginRight: "8px" }}/> Specialization</h3>
-            <p>{mentor.specialization || mentor.expertise || "General"}</p>
-          </div>
-
-          <div className={styles.infoBox}>
-            <h3><FiClock style={{ marginRight: "8px" }}/> Office Hours</h3>
-            <p>{mentor.office_hours || "Scheduled via classes"}</p>
-          </div>
-
-          <div className={styles.infoBox}>
-            <h3><FiLinkedin style={{ marginRight: "8px" }}/> LinkedIn</h3>
-            {mentor.linkedin ? (
-              <a href={mentor.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary-color)", fontWeight: "bold" }}>
-                View Profile
-              </a>
-            ) : (
-              <p>Not Available</p>
-            )}
-          </div>
-        </div>
-
-        <div className={styles.buttons}>
-          <Link
-            to="/student/attendance"
-            className={styles.button}
-          >
-            View Attendance
-          </Link>
-        </div>
-
+      <div className={styles.buttons}>
+        <Link
+          to="/student/attendance"
+          className={styles.button}
+        >
+          View Attendance
+        </Link>
+        <Link to="/student" className={styles.buttonOutline}>
+          Back to Dashboard
+        </Link>
       </div>
     </div>
   );

@@ -119,14 +119,17 @@ function MentorDashboard() {
         const now = new Date();
         const todayStr = now.toISOString().split("T")[0];
         const activeSessions = combinedSessions.filter(cls => {
-          if (cls.class_date === todayStr) return true;
-          // Also include if it's currently active based on radar logic
           const classStart = new Date(`${cls.class_date}T${cls.start_time}`);
-          let classEnd = cls.end_time ? new Date(`${cls.class_date}T${cls.end_time}`) : new Date(classStart.getTime() + 2 * 60 * 60 * 1000);
-          if (classEnd < classStart) classEnd = new Date(classEnd.getTime() + 24 * 60 * 60 * 1000);
-          const windowOpenTime = new Date(classStart.getTime() - 10 * 60 * 1000);
-          if (now >= windowOpenTime && now <= classEnd) return true;
-          return false;
+          if (isNaN(classStart)) return false;
+          
+          const hoursSince = (now - classStart) / (1000 * 60 * 60);
+          
+          // Hide any class that is older than 24 hours
+          if (hoursSince > 24) {
+            return false;
+          }
+          
+          return true;
         });
 
         setTodaySessions(activeSessions);
@@ -222,8 +225,7 @@ function MentorDashboard() {
               <motion.div variants={item}>
                 <Card className={styles.sectionCard}>
                   <div className={styles.cardHeader}>
-                    <h2 className={styles.cardTitle}>Live Classes Today</h2>
-                    {/* View all link removed */}
+                    <h2 className={styles.cardTitle}>Recent & Upcoming Classes</h2>
                   </div>
                   <AnimatePresence mode="popLayout">
                     {todaySessions.length === 0 ? (
@@ -243,12 +245,16 @@ function MentorDashboard() {
                             exit={{ opacity: 0, x: 8 }}
                             className={styles.sessionItem}
                           >
-                            <div className={styles.sessionDot} style={{ background: session.type === 'TRAINING' ? '#8b5cf6' : 'var(--primary-color)' }} />
+                            <div className={styles.sessionDot} style={{ background: session.status === 'CANCELLED' ? '#ef4444' : session.status === 'COMPLETED' ? '#10b981' : (session.type === 'TRAINING' ? '#8b5cf6' : 'var(--primary-color)') }} />
                             <div className={styles.sessionDetails}>
-                              <span className={styles.sessionTitle}>{session.title}</span>
+                              <span className={styles.sessionTitle} style={{ textDecoration: session.status === 'CANCELLED' ? 'line-through' : 'none' }}>{session.title}</span>
                               <span className={styles.sessionTime}>{session.start_time}</span>
                             </div>
-                            {session.meeting_link ? (
+                            {session.status === 'CANCELLED' ? (
+                              <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#ef4444', padding: '4px 8px', background: 'rgba(239,68,68,0.1)', borderRadius: '4px' }}>Cancelled</span>
+                            ) : session.status === 'COMPLETED' ? (
+                              <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#10b981', padding: '4px 8px', background: 'rgba(16,185,129,0.1)', borderRadius: '4px' }}>Completed</span>
+                            ) : session.meeting_link ? (
                               <a href={session.meeting_link} target="_blank" rel="noreferrer" className={styles.joinBtn}>
                                 Join
                               </a>

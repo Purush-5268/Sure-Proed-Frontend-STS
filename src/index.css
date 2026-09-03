@@ -82,6 +82,7 @@
 }
 
 [data-theme='dark'] {
+  --native-color-scheme: dark;
   /* Brand Colors */
   --primary-color: #3b82f6;
   --primary-hover: #60a5fa;
@@ -687,13 +688,21 @@ select.premium-input {
 }
 
 input[type="datetime-local"].premium-input::-webkit-datetime-edit,
-input[type="date"].premium-input::-webkit-datetime-edit {
+input[type="date"].premium-input::-webkit-datetime-edit,
+input[type="time"].premium-input::-webkit-datetime-edit {
   color: var(--text-primary);
 }
 
 input[type="datetime-local"].premium-input,
-input[type="date"].premium-input {
-  color-scheme: light dark;
+input[type="date"].premium-input,
+input[type="time"].premium-input {
+  color-scheme: var(--native-color-scheme, light);
+}
+
+[data-theme="dark"] input[type="date"].premium-input::-webkit-calendar-picker-indicator,
+[data-theme="dark"] input[type="time"].premium-input::-webkit-calendar-picker-indicator,
+[data-theme="dark"] input[type="datetime-local"].premium-input::-webkit-calendar-picker-indicator {
+  filter: invert(1) hue-rotate(180deg);
 }
 
 .premium-input:focus {
