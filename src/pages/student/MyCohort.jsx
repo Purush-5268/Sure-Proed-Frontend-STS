@@ -166,14 +166,16 @@ function MyCohort() {
         ) : (
           <>
             <div className={styles.infoGrid}>
-              <div className={styles.infoBox}>
-                <h3>Error Details</h3>
-                <p style={{ color: 'red', fontWeight: 'bold' }}>{cohort.error}</p>
-                <pre style={{ fontSize: '12px', whiteSpace: 'pre-wrap', color: 'red' }}>{cohort.stack}</pre>
-              </div>
+              {cohort.error && (
+                <div className={styles.infoBox}>
+                  <h3>Error Details</h3>
+                  <p style={{ color: 'red', fontWeight: 'bold' }}>{cohort.error}</p>
+                  <pre style={{ fontSize: '12px', whiteSpace: 'pre-wrap', color: 'red' }}>{cohort.stack}</pre>
+                </div>
+              )}
 
               <div className={styles.infoBox}>
-                <h3>Mentor</h3>
+                <h3>Mentor(s)</h3>
                 <span className="premium-badge premium-badge-active">
                   {(() => {
                     if (cohort.active_mentors && cohort.active_mentors.length > 0) {

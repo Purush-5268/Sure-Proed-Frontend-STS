@@ -76,24 +76,7 @@ function Dashboard() {
         const enrolled = apps.find(a => ENROLLED_STATUSES.includes(a.status));
 
         const cohortData = statsRes?.data?.active_cohort || enrolled?.assigned_cohort || profileObj?.current_application?.assigned_cohort || {};
-        if (cohortData.mentors && Array.isArray(cohortData.mentors) && cohortData.mentors.length > 0) {
-          const missingIds = cohortData.mentors.filter(id => !mentorMap[id]);
-          if (missingIds.length > 0) {
-            const missingRes = await Promise.all(missingIds.map(id => {
-              const url = API_ENDPOINTS.MENTORS?.PROFILE_BY_USER ? API_ENDPOINTS.MENTORS.PROFILE_BY_USER(id) : `/api/volunteers/mentor-profiles/?user=${id}`;
-              return apiClient.get(url).catch(() => null);
-            }));
-            missingRes.forEach(r => {
-              if (r && r.data) {
-                const results = Array.isArray(r.data.results) ? r.data.results : (Array.isArray(r.data) ? r.data : [r.data]);
-                results.forEach(m => {
-                  if (m && m.user) mentorMap[m.user] = m;
-                  if (m && m.id) mentorMap[m.id] = m;
-                });
-              }
-            });
-          }
-        }
+
 
         if (isMounted) {
           setMentorsMap(mentorMap);
@@ -374,7 +357,7 @@ function Dashboard() {
           </div>
 
           <div style={{ background: 'var(--bg-nested)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
-            <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Your Mentor</h4>
+            <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Your Mentor(s)</h4>
             {(() => {
               const cohortData = stats?.active_cohort || activeApp?.assigned_cohort || {};
               let activeMentors = cohortData.active_mentors || [];
