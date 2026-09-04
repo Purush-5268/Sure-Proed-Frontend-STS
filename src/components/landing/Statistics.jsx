@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { 
-  FaExclamationTriangle, 
+import {
+  FaExclamationTriangle,
   FaUserGraduate,
   FaChalkboardTeacher,
   FaHandsHelping,
@@ -13,8 +14,10 @@ import {
 } from "react-icons/fa";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import { companyService } from "../../services/companyService";
 import AnimatedNumber from "../common/AnimatedNumber";
 import { StudentJourneyChart, EcosystemChart } from "./StatisticsCharts";
+import CompanyShowcase from "./CompanyShowcase";
 import PeopleModal from "./PeopleModal";
 import styles from "./Statistics.module.css";
 
@@ -50,7 +53,7 @@ const SkeletonSection = () => (
 );
 
 const InteractivePeopleCard = ({ icon: Icon, label, value, onClick }) => (
-  <motion.div 
+  <motion.div
     variants={fadeUp}
     className={styles.peopleCard}
     onClick={onClick}
@@ -71,12 +74,20 @@ function Statistics() {
   const [data, setData] = useState(null);
   const [activeModal, setActiveModal] = useState(null);
 
+  const [companies, setCompanies] = useState([]);
+
   const fetchStats = async () => {
     setLoading(true);
     setError(false);
     try {
-      const res = await apiClient.get(API_ENDPOINTS.ANALYTICS.PLATFORM_STATS);
-      setData(res.data);
+      const [statsRes, companiesRes] = await Promise.all([
+        apiClient.get(API_ENDPOINTS.ANALYTICS.PLATFORM_STATS),
+        companyService.getCompanies({ limit: 50 }).catch(() => null)
+      ]);
+      setData(statsRes.data);
+      if (companiesRes) {
+        setCompanies(companiesRes.results || companiesRes || []);
+      }
     } catch (err) {
       console.error("Failed to fetch platform impact statistics", err);
       setError(true);
@@ -114,8 +125,8 @@ function Statistics() {
     <section id="statistics" className={styles.statistics}>
       <div className={styles.starsOverlay}></div>
       <div className={styles.container}>
-        
-        <motion.div 
+
+        <motion.div
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "0px" }}
@@ -134,103 +145,104 @@ function Statistics() {
             whileInView="show"
             viewport={{ once: true, margin: "0px" }}
             variants={staggerContainer}
+            className={styles.dashboardContainer}
           >
-            {/* HERO KPI */}
-            <motion.div variants={fadeUp} className={styles.heroImpact}>
-              <div className={styles.heroMetric}>
-                <div className={styles.heroNumber}>
-                  <AnimatedNumber value={data.students?.benefited} duration={2500} />+
+            {/* GLOBAL IMPACT ECOSYSTEM */}
+            <motion.div variants={fadeUp} className={styles.topCardsGrid}>
+              <div className={styles.heroCard}>
+                <div className={styles.heroIconWrapper}><FaUserGraduate className={styles.heroIcon} /></div>
+                <div className={styles.heroText}>
+                  <div className={styles.heroNumber}>
+                    <AnimatedNumber value={data.students?.benefited} duration={2500} />
+                  </div>
+                  <div className={styles.heroLabel}>STUDENTS BENEFITED</div>
+                  <div className={styles.heroSubtitle}>Transforming lives through free,<br/>high-quality technical education</div>
                 </div>
-                <div className={styles.heroLabel}>Students Benefited</div>
-                <div className={styles.heroSubtitle}>Transforming lives through free, high-quality technical education</div>
               </div>
-              
-              <div className={styles.heroMetric}>
-                <div className={styles.heroNumber}>
-                  {data.students?.placed != null ? (
-                    <><AnimatedNumber value={data.students.placed} duration={2500} />+</>
-                  ) : (
-                    <span style={{ fontSize: '24px', fontWeight: '500', color: 'var(--text-muted, #9ca3af)', letterSpacing: 'normal' }}>Data coming soon</span>
-                  )}
+              <div className={styles.heroCard}>
+                <div className={styles.heroIconWrapper}><FaBriefcase className={styles.heroIcon} /></div>
+                <div className={styles.heroText}>
+                  <div className={styles.heroNumber}>
+                    <AnimatedNumber value={data.students?.placed || 0} duration={2500} />
+                  </div>
+                  <div className={styles.heroLabel}>STUDENTS PLACED</div>
+                  <div className={styles.heroSubtitle}>Successfully transitioning into<br/>industry roles and internships</div>
                 </div>
-                <div className={styles.heroLabel}>Students Placed</div>
-                <div className={styles.heroSubtitle}>Successfully transitioning into industry roles and internships</div>
               </div>
             </motion.div>
 
-            {/* STUDENT JOURNEY CHART */}
-            <motion.div variants={fadeUp} className={styles.storySection}>
-              <div className={styles.storyTitle}>Student Impact Journey</div>
-              <div className={styles.chartContainer}>
+            {/* STUDENT IMPACT JOURNEY */}
+            <motion.div variants={fadeUp} className={styles.dashboardSection}>
+              <div className={styles.sectionDivider}>
+                <span>STUDENT IMPACT JOURNEY</span>
+              </div>
+              <div className={styles.dashboardCard}>
                 <StudentJourneyChart data={data.students} />
-                
-                {data.students?.placed === null && (
-                  <p style={{ textAlign: 'center', color: 'var(--text-muted, #9ca3af)', fontSize: '13px', marginTop: '16px', fontStyle: 'italic' }}>
-                    Placement outcomes tracking coming soon.
-                  </p>
-                )}
               </div>
             </motion.div>
 
-            {/* PEOPLE / ECOSYSTEM */}
-            <motion.div variants={fadeUp} className={styles.storySection}>
-              <div className={styles.storyTitle}>People & Ecosystem</div>
-              
-              {/* Optional: We can show the bar chart for people here, alongside the interactive cards */}
-              <div className={styles.chartContainer} style={{ marginBottom: '32px' }}>
-                <EcosystemChart data={data.people} />
+            {/* PEOPLE & ECOSYSTEM */}
+            <motion.div variants={fadeUp} className={styles.dashboardSection}>
+              <div className={styles.sectionDivider}>
+                <span>PEOPLE & ECOSYSTEM</span>
               </div>
-
-              <div className={styles.peopleGrid}>
-                <InteractivePeopleCard 
-                  icon={FaChalkboardTeacher} 
-                  label="Mentors" 
-                  value={data.people?.mentors} 
-                  onClick={() => setActiveModal('Mentors')} 
-                />
-                <InteractivePeopleCard 
-                  icon={FaHandsHelping} 
-                  label="Volunteers" 
-                  value={data.people?.volunteers} 
-                  onClick={() => setActiveModal('Volunteers')} 
-                />
-                <InteractivePeopleCard 
-                  icon={FaUserTie} 
-                  label="Trustees" 
-                  value={data.people?.trustees} 
-                  onClick={() => setActiveModal('Trustees')} 
-                />
-                <InteractivePeopleCard 
-                  icon={FaUserGraduate} 
-                  label="Advisors" 
-                  value={data.people?.advisors} 
-                  onClick={() => setActiveModal('Advisors')} 
-                />
-              </div>
-            </motion.div>
-
-            {/* INDUSTRY PARTNERS */}
-            <motion.div variants={fadeUp} className={styles.storySection} style={{ marginBottom: 0 }}>
-              <div className={styles.storyTitle}>Industry Impact</div>
-              <div className={styles.metricCard}>
-                <div className={styles.metricValue}>
-                  <AnimatedNumber value={data.industry?.companies} duration={2000} />
+              <div className={`${styles.dashboardCard} ${styles.peopleEcosystemCard}`}>
+                <div className={styles.ecosystemLeft}>
+                  <EcosystemChart data={data.people} />
                 </div>
-                <div className={styles.metricLabel}>
-                  Companies & Industry Partners
+                <div className={styles.ecosystemRight}>
+                  <div className={styles.peopleGridSmall}>
+                    <InteractivePeopleCard
+                      icon={FaChalkboardTeacher}
+                      label="Mentors"
+                      value={data.people?.mentors}
+                      onClick={() => setActiveModal('Mentors')}
+                    />
+                    <InteractivePeopleCard
+                      icon={FaHandsHelping}
+                      label="Volunteers"
+                      value={data.people?.volunteers}
+                      onClick={() => setActiveModal('Volunteers')}
+                    />
+                    <InteractivePeopleCard
+                      icon={FaUserTie}
+                      label="Trustees"
+                      value={data.people?.trustees}
+                      onClick={() => setActiveModal('Trustees')}
+                    />
+                    <InteractivePeopleCard
+                      icon={FaUserGraduate}
+                      label="Advisors"
+                      value={data.people?.advisors}
+                      onClick={() => setActiveModal('Advisors')}
+                    />
+                  </div>
                 </div>
               </div>
             </motion.div>
 
+            {/* INDUSTRY IMPACT */}
+            <motion.div variants={fadeUp} className={styles.dashboardSection}>
+              <div className={styles.sectionDivider}>
+                <span>INDUSTRY IMPACT</span>
+              </div>
+              <div className={styles.dashboardCard} style={{ display: 'block' }}>
+                <h3 className={styles.industryTitle}>Companies & Industry Partners</h3>
+                <CompanyShowcase companies={companies} />
+                <div className={styles.viewAllPartners}>
+                  <Link to="/partners">View All Partners &rarr;</Link>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         ) : null}
 
       </div>
-      
-      <PeopleModal 
-        isOpen={!!activeModal} 
-        category={activeModal} 
-        onClose={() => setActiveModal(null)} 
+
+      <PeopleModal
+        isOpen={!!activeModal}
+        category={activeModal}
+        onClose={() => setActiveModal(null)}
       />
     </section>
   );

@@ -9,8 +9,9 @@
 
 /* Deep Space Dark Mode */
 :global([data-theme="dark"]) .statistics {
-  background-color: #050505; /* Deep base */
-  background-image: 
+  background-color: #050505;
+  /* Deep base */
+  background-image:
     radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.015) 0%, transparent 50%),
     radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.01) 0%, transparent 50%);
 }
@@ -19,6 +20,7 @@
 .starsOverlay {
   display: none;
 }
+
 :global([data-theme="dark"]) .starsOverlay {
   display: block;
   position: absolute;
@@ -182,7 +184,7 @@
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-color, #f1f5f9);
   border-radius: 20px;
-  padding: 32px 24px;
+  padding: 32px 24px 40px 24px; /* Added extra bottom padding */
   text-align: center;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
@@ -216,7 +218,7 @@
 }
 
 .peopleCard:hover .peopleIcon {
-  transform: scale(1.1);
+  transform: scale(1.1) translateY(-4px);
 }
 
 .peopleValue {
@@ -225,12 +227,22 @@
   color: var(--text-primary, #111827);
   line-height: 1;
   margin-bottom: 8px;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.peopleCard:hover .peopleValue {
+  transform: translateY(-4px);
 }
 
 .peopleLabel {
   font-size: 16px;
   font-weight: 600;
   color: var(--text-secondary, #4b5563);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.peopleCard:hover .peopleLabel {
+  transform: translateY(-4px);
 }
 
 .interactiveHint {
@@ -239,7 +251,8 @@
   left: 0;
   width: 100%;
   font-size: 12px;
-  color: var(--text-muted, #9ca3af);
+  color: var(--primary-color, #2563eb);
+  font-weight: 600;
   opacity: 0;
   transform: translateY(10px);
   transition: all 0.3s ease;
@@ -375,12 +388,490 @@
 }
 
 @keyframes shimmer {
-  100% { transform: translateX(100%); }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 @media (max-width: 768px) {
-  .heroNumber { font-size: 64px; }
-  .chartContainer { padding: 16px; overflow-x: auto; }
-  .header h2 { font-size: 32px; }
-  .heroImpact { gap: 40px; }
+  .heroNumber {
+    font-size: 64px;
+  }
+
+  .chartContainer {
+    padding: 16px;
+    overflow-x: auto;
+  }
+
+  .header h2 {
+    font-size: 32px;
+  }
+
+  .heroImpact {
+    gap: 40px;
+  }
+}
+
+/* Donut Grid layout */
+.donutGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.donutCard {
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* ----------------------------------
+   DASHBOARD NEW LAYOUT (MOCKUP)
+----------------------------------- */
+
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.topCardsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.heroCard {
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.heroIconWrapper {
+  width: 64px;
+  height: 64px;
+  background: rgba(37, 99, 235, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.companyNameFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary, #111827);
+  background: var(--bg-surface, #ffffff);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.heroIcon {
+  font-size: 28px;
+  color: var(--primary-color, #2563eb);
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+}
+
+.heroNumber {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-primary, #111827);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.heroLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary-color, #2563eb);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.heroSubtitle {
+  font-size: 12px;
+  color: var(--text-secondary, #6b7280);
+  line-height: 1.4;
+}
+
+.dashboardSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionDivider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.sectionDivider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border-color, #e2e8f0);
+  z-index: 0;
+}
+
+.sectionDivider span {
+  background: var(--bg-surface, #f9fafb);
+  padding: 0 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary, #6b7280);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}
+:global([data-theme="dark"]) .sectionDivider span {
+  background: #050505;
+}
+
+.dashboardCard {
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+}
+
+.peopleEcosystemCard {
+  padding: 24px;
+}
+
+/* Chart Layouts */
+.chartLegendWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  gap: 40px;
+}
+
+.donutWrapper {
+  position: relative;
+  flex: 0 0 350px;
+  height: 350px;
+}
+
+.donutCenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.donutCenterLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary, #6b7280);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.donutCenterValue {
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--text-primary, #111827);
+  line-height: 1;
+}
+
+.legendContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.legendRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color, #f1f5f9);
+}
+
+.legendRow:last-child {
+  border-bottom: none;
+}
+
+.legendLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legendName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary, #374151);
+}
+
+.legendRight {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.legendCount {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #111827);
+  width: 80px;
+  text-align: right;
+}
+
+.legendPercentage {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary, #6b7280);
+  width: 60px;
+  text-align: right;
+}
+
+.legendChevron {
+  font-size: 14px;
+  color: var(--text-muted, #9ca3af);
+  font-family: monospace;
+  width: 16px;
+  text-align: right;
+}
+
+/* People & Ecosystem Split */
+.ecosystemLeft {
+  flex: 0 0 400px;
+  border-right: 1px solid var(--border-color, #e2e8f0);
+  padding-right: 32px;
+}
+
+.peopleChartWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 24px;
+  height: 100%;
+}
+
+.peopleDonutWrapper {
+  position: relative;
+  flex: 0 0 160px;
+  height: 160px;
+}
+
+.peopleDonutWrapper .donutCenterLabel {
+  font-size: 10px;
+}
+
+.peopleDonutWrapper .donutCenterValue {
+  font-size: 28px;
+}
+
+.peopleLegendContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.peopleLegendRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.peopleLegendRow .legendName {
+  font-size: 13px;
+}
+
+.peopleLegendRow .legendCount {
+  font-size: 13px;
+  width: auto;
+  text-align: left;
+}
+
+.ecosystemRight {
+  flex: 1;
+  padding-left: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.peopleGridSmall {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+/* Override existing peopleCard for this small grid */
+.peopleGridSmall .peopleCard {
+  padding: 16px 16px 28px 16px;
+  min-height: 120px;
+}
+
+.peopleGridSmall .peopleIcon {
+  font-size: 20px;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 8px;
+}
+
+.peopleGridSmall .peopleValue {
+  font-size: 20px;
+}
+
+.peopleGridSmall .peopleLabel {
+  font-size: 12px;
+}
+
+.peopleGridSmall .interactiveHint {
+  font-size: 11px;
+  bottom: 8px;
+}
+
+/* Industry Showcase styles */
+.industryTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary, #111827);
+  margin-bottom: 24px;
+  margin-top: 0;
+}
+
+.emptyCompanies {
+  background: transparent;
+  padding: 20px;
+  text-align: center;
+}
+
+.companyGrid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 24px;
+}
+
+.companyCard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.companyLogo {
+  max-width: 120px;
+  max-height: 40px;
+  object-fit: contain;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  filter: grayscale(100%);
+}
+
+.companyLogo:hover {
+  opacity: 1;
+  filter: grayscale(0%);
+}
+
+.companyLogoFallback {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary, #111827);
+}
+
+.viewAllPartners {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.viewAllPartners a {
+  color: var(--primary-color, #2563eb);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.viewAllPartners a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1024px) {
+  .topCardsGrid {
+    grid-template-columns: 1fr;
+  }
+  .chartLegendWrapper {
+    flex-direction: column;
+  }
+  .peopleEcosystemCard {
+    flex-direction: column !important;
+  }
+  .ecosystemLeft {
+    flex: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    padding-right: 0;
+    padding-bottom: 24px;
+    margin-bottom: 24px;
+  }
+  .ecosystemRight {
+    padding-left: 0;
+  }
+  .peopleGridSmall {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .donutGrid {
+    grid-template-columns: 1fr;
+  }
+  .heroCard {
+    flex-direction: column;
+    text-align: center;
+  }
 }

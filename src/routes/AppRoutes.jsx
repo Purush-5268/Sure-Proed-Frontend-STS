@@ -14,6 +14,7 @@ import TrusteeLayout from "../layouts/TrusteeLayout";
 
 /* Auth & Public */
 import Landing from "../pages/landing/Landing";
+import Partners from "../pages/landing/Partners";
 import Signup from "../pages/signup/Signup";
 import Login from "../pages/auth/Login";
 import ForgotPassword from "../pages/auth/ForgotPassword";
@@ -32,7 +33,7 @@ function ThemeEnforcer() {
   const { theme } = useTheme();
 
   useEffect(() => {
-    const publicPaths = ['/', '/login', '/signup', '/setup-password', '/forgot-password', '/reset-password', '/email-verification', '/open-cohorts'];
+    const publicPaths = ['/', '/partners', '/login', '/signup', '/setup-password', '/forgot-password', '/reset-password', '/email-verification', '/open-cohorts'];
     const isPublic = publicPaths.includes(location.pathname) || location.pathname.startsWith('/verify-offer-letter') || location.pathname.startsWith('/certificate/verify') || location.pathname.startsWith('/cohort-info');
 
     const applyTheme = () => {
@@ -237,6 +238,7 @@ function AppRoutes() {
           {/* ================= PUBLIC MODULE ================= */}
           <Route element={<PublicLayout />}>
             <Route path="/" element={<Landing />} />
+            <Route path="/partners" element={<Partners />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

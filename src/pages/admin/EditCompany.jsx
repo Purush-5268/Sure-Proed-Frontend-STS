@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
@@ -17,6 +17,7 @@ function EditCompany() {
     location: "",
     is_verified: false,
   });
+  const [logo, setLogo] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
@@ -63,6 +64,12 @@ function EditCompany() {
     }));
   };
 
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setLogo(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -76,17 +83,25 @@ function EditCompany() {
     setLoading(true);
 
     try {
-      const payload = {
-        user: form.user,
-        name: form.name.trim(),
-        description: form.description.trim() || null,
-        website: form.website.trim() || null,
-        industry: form.industry.trim() || null,
-        location: form.location.trim() || null,
-        is_verified: form.is_verified,
-      };
+      const formData = new FormData();
+      formData.append("user", form.user);
+      formData.append("name", form.name.trim());
+      // For PUT, we append fields. If they are empty, we might need to send empty string or handle null
+      formData.append("description", form.description.trim());
+      formData.append("website", form.website.trim());
+      formData.append("industry", form.industry.trim());
+      formData.append("location", form.location.trim());
+      formData.append("is_verified", form.is_verified);
+      
+      if (logo) {
+        formData.append("logo", logo);
+      }
 
-      await apiClient.put(API_ENDPOINTS.COMPANIES.BY_ID(id), payload);
+      await apiClient.put(API_ENDPOINTS.COMPANIES.BY_ID(id), formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       setSuccess("Company updated successfully.");
       navigate("/admin/companies");
     } catch (err) {
@@ -156,6 +171,14 @@ function EditCompany() {
             <div>
               <label>Description</label>
               <textarea name="description" rows="4" value={form.description} onChange={handleChange} />
+            </div>
+
+            <div>
+              <label>Company Logo</label>
+              <input type="file" name="logo" accept="image/*" onChange={handleFileChange} />
+              <small style={{ color: "var(--text-secondary)", marginTop: "4px", display: "block" }}>
+                Optional. Upload a new image to replace the existing logo.
+              </small>
             </div>
 
             <div className={styles.buttons}>
