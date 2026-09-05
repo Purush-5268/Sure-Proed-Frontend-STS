@@ -84,6 +84,13 @@ export function AuthProvider({ children }) {
   };
 
   const login = async (identifier, password, rememberMe = true) => {
+    // 1. Instantly trigger the native prompt on the synchronous click event, 
+    // bypassing strict browser spam-blocking rules (Edge/Chrome).
+    let permissionPromise = null;
+    if ("Notification" in window && Notification.permission === "default") {
+      permissionPromise = Notification.requestPermission().catch(console.warn);
+    }
+
     setLoading(true);
     const cleanId = (identifier || "").trim().toLowerCase();
     
@@ -143,6 +150,21 @@ export function AuthProvider({ children }) {
       setAccessToken(data.access);
       setRefreshToken(data.refresh);
       setLoading(false);
+      
+      // Subscribe to web push notifications right after successful login
+      const setupPush = async () => {
+        if (permissionPromise) {
+          const perm = await permissionPromise;
+          if (perm === "granted") await pushNotificationService.subscribe();
+        } else if ("Notification" in window && Notification.permission === "granted") {
+          await pushNotificationService.subscribe();
+        }
+      };
+      
+      setupPush().catch(err => {
+        console.warn("Failed to subscribe to web push notifications on login:", err);
+      });
+
       return { ...data, user: userObj };
     } catch (err) {
       setLoading(false);

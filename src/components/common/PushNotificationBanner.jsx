@@ -8,6 +8,15 @@ const PushNotificationBanner = () => {
   useEffect(() => {
     if ("Notification" in window) {
       setPushStatus(Notification.permission);
+      
+      // Listen for permission changes dynamically
+      if (navigator.permissions && navigator.permissions.query) {
+        navigator.permissions.query({ name: "notifications" }).then(permissionStatus => {
+          permissionStatus.onchange = () => {
+            setPushStatus(permissionStatus.state);
+          };
+        }).catch(err => console.warn("Permissions query failed", err));
+      }
     }
   }, []);
 

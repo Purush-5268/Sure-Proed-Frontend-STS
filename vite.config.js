@@ -109,6 +109,29 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   assetsInclude: ['**/*.lottie'],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/react-router-dom/')) {
+            return 'vendor';
+          }
+          if (id.includes('node_modules/framer-motion/') || id.includes('node_modules/react-icons/')) {
+            return 'ui';
+          }
+          if (id.includes('node_modules/@tiptap/')) {
+            return 'editor';
+          }
+          if (id.includes('node_modules/recharts/')) {
+            return 'charts';
+          }
+          if (id.includes('node_modules/lottie-react/') || id.includes('node_modules/@lottiefiles/')) {
+            return 'lottie';
+          }
+        }
+      }
+    }
+  },
   server: {
     allowedHosts: [
       'turret-suing-snub.ngrok-free.dev', // Add your ngrok domain here

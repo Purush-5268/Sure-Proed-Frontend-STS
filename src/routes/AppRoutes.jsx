@@ -13,19 +13,19 @@ import MentorLayout from "../layouts/MentorLayout";
 import TrusteeLayout from "../layouts/TrusteeLayout";
 
 /* Auth & Public */
-import Landing from "../pages/landing/Landing";
-import Partners from "../pages/landing/Partners";
-import Signup from "../pages/signup/Signup";
-import Login from "../pages/auth/Login";
-import ForgotPassword from "../pages/auth/ForgotPassword";
-import ResetPassword from "../pages/auth/ResetPassword";
-import EmailVerification from "../pages/auth/EmailVerification";
-import SetupPassword from "../pages/auth/SetupPassword";
-import NotFound from "../pages/errors/Error404";
-import OfferLetterVerify from "../pages/public/OfferLetterVerify";
-import CohortChat from "../pages/student/CohortChat";
-import OpenCohorts from "../pages/landing/OpenCohorts";
-import CohortInfo from "../pages/landing/CohortInfo";
+const Landing = lazy(() => import("../pages/landing/Landing"));
+const Partners = lazy(() => import("../pages/landing/Partners"));
+const Signup = lazy(() => import("../pages/signup/Signup"));
+const Login = lazy(() => import("../pages/auth/Login"));
+const ForgotPassword = lazy(() => import("../pages/auth/ForgotPassword"));
+const ResetPassword = lazy(() => import("../pages/auth/ResetPassword"));
+const EmailVerification = lazy(() => import("../pages/auth/EmailVerification"));
+const SetupPassword = lazy(() => import("../pages/auth/SetupPassword"));
+const NotFound = lazy(() => import("../pages/errors/Error404"));
+const OfferLetterVerify = lazy(() => import("../pages/public/OfferLetterVerify"));
+const CohortChat = lazy(() => import("../pages/student/CohortChat"));
+const OpenCohorts = lazy(() => import("../pages/landing/OpenCohorts"));
+const CohortInfo = lazy(() => import("../pages/landing/CohortInfo"));
 
 /* Theme Enforcer for Public Pages */
 function ThemeEnforcer() {
@@ -61,43 +61,43 @@ function ThemeEnforcer() {
 
 /* Volunteer Trustee */
 const VolunteerDashboard = lazy(() => import("../pages/trustee/volunteer/Dashboard"));
-import VolunteerAlerts from "../pages/trustee/volunteer/Alerts";
-import VolunteerSchedule from "../pages/trustee/volunteer/Schedule";
-import VolunteerAttendance from "../pages/trustee/volunteer/Attendance";
-import VolunteerUsers from "../pages/trustee/volunteer/Users";
+const VolunteerAlerts = lazy(() => import("../pages/trustee/volunteer/Alerts"));
+const VolunteerSchedule = lazy(() => import("../pages/trustee/volunteer/Schedule"));
+const VolunteerAttendance = lazy(() => import("../pages/trustee/volunteer/Attendance"));
+const VolunteerUsers = lazy(() => import("../pages/trustee/volunteer/Users"));
 
 /* Commercial Trustee */
 const CommercialDashboard = lazy(() => import("../pages/trustee/commercial/Dashboard"));
-import Announcements from "../pages/trustee/commercial/Announcements";
-import Achievements from "../pages/trustee/commercial/Achievements";
-import Updates from "../pages/trustee/commercial/Updates";
+const Announcements = lazy(() => import("../pages/trustee/commercial/Announcements"));
+const Achievements = lazy(() => import("../pages/trustee/commercial/Achievements"));
+const Updates = lazy(() => import("../pages/trustee/commercial/Updates"));
 
 /* Student */
 const StudentDashboard = lazy(() => import("../pages/student/Dashboard"));
-import Profile from "../pages/student/Profile";
-import ApplyCourse from "../pages/student/ApplyCourse";
-import CourseDetails from "../pages/student/CourseDetails";
-import ApplicationSuccess from "../pages/student/ApplicationSuccess";
-import MyApplications from "../pages/student/MyApplications";
-import ApplicationStatus from "../pages/student/ApplicationStatus";
-import StudentSettings from "../pages/student/Settings";
+const Profile = lazy(() => import("../pages/student/Profile"));
+const ApplyCourse = lazy(() => import("../pages/student/ApplyCourse"));
+const CourseDetails = lazy(() => import("../pages/student/CourseDetails"));
+const ApplicationSuccess = lazy(() => import("../pages/student/ApplicationSuccess"));
+const MyApplications = lazy(() => import("../pages/student/MyApplications"));
+const ApplicationStatus = lazy(() => import("../pages/student/ApplicationStatus"));
+const StudentSettings = lazy(() => import("../pages/student/Settings"));
 
-import MyCohort from "../pages/student/MyCohort";
-import ClassSchedule from "../pages/student/ClassSchedule";
-import MentorDetails from "../pages/student/MentorDetails";
+const MyCohort = lazy(() => import("../pages/student/MyCohort"));
+const ClassSchedule = lazy(() => import("../pages/student/ClassSchedule"));
+const MentorDetails = lazy(() => import("../pages/student/MentorDetails"));
 
-import Attendance from "../pages/student/Attendance";
-import AttendanceHistory from "../pages/student/AttendanceHistory";
+const Attendance = lazy(() => import("../pages/student/Attendance"));
+const AttendanceHistory = lazy(() => import("../pages/student/AttendanceHistory"));
 
-import AssignmentList from "../pages/student/AssignmentList";
-import AssignmentDetails from "../pages/student/AssignmentDetails";
-import AssignmentSubmission from "../pages/student/AssignmentSubmission";
-import AssignmentFeedback from "../pages/student/AssignmentFeedback";
+const AssignmentList = lazy(() => import("../pages/student/AssignmentList"));
+const AssignmentDetails = lazy(() => import("../pages/student/AssignmentDetails"));
+const AssignmentSubmission = lazy(() => import("../pages/student/AssignmentSubmission"));
+const AssignmentFeedback = lazy(() => import("../pages/student/AssignmentFeedback"));
 const Placements = lazy(() => import("../pages/student/Placements"));
 
-import CertificateList from "../pages/student/CertificateList";
-import CertificateView from "../pages/student/CertificateView";
-import CertificateVerify from "../pages/student/CertificateVerify";
+const CertificateList = lazy(() => import("../pages/student/CertificateList"));
+const CertificateView = lazy(() => import("../pages/student/CertificateView"));
+const CertificateVerify = lazy(() => import("../pages/student/CertificateVerify"));
 
 /* Exams */
 
@@ -105,110 +105,110 @@ import CertificateVerify from "../pages/student/CertificateVerify";
 const Dashboard = lazy(() => import("../pages/admin/Dashboard"));
 
 /* Student Management */
-import Students from "../pages/admin/Students";
-import StudentDetails from "../pages/admin/StudentDetails";
-import AddStudent from "../pages/admin/AddStudent";
-import EditStudent from "../pages/admin/EditStudent";
+const Students = lazy(() => import("../pages/admin/Students"));
+const StudentDetails = lazy(() => import("../pages/admin/StudentDetails"));
+const AddStudent = lazy(() => import("../pages/admin/AddStudent"));
+const EditStudent = lazy(() => import("../pages/admin/EditStudent"));
 
 /* Course Management */
-import Courses from "../pages/admin/Courses";
-import AdminCourseDetails from "../pages/admin/CourseDetails";
-import AddCourse from "../pages/admin/AddCourse";
-import EditCourse from "../pages/admin/EditCourse";
+const Courses = lazy(() => import("../pages/admin/Courses"));
+const AdminCourseDetails = lazy(() => import("../pages/admin/CourseDetails"));
+const AddCourse = lazy(() => import("../pages/admin/AddCourse"));
+const EditCourse = lazy(() => import("../pages/admin/EditCourse"));
 
 /* Mentor Management */
-import Mentors from "../pages/admin/Mentors";
-import AdminMentorDetails from "../pages/admin/MentorDetails";
-import AddMentor from "../pages/admin/AddMentor";
-import EditMentor from "../pages/admin/EditMentor";
+const Mentors = lazy(() => import("../pages/admin/Mentors"));
+const AdminMentorDetails = lazy(() => import("../pages/admin/MentorDetails"));
+const AddMentor = lazy(() => import("../pages/admin/AddMentor"));
+const EditMentor = lazy(() => import("../pages/admin/EditMentor"));
 
 /* Trustee Management (Global) */
-import Trustees from "../pages/admin/Trustees";
-import AddTrustee from "../pages/admin/AddTrustee";
-import TrusteeDetails from "../pages/admin/TrusteeDetails";
+const Trustees = lazy(() => import("../pages/admin/Trustees"));
+const AddTrustee = lazy(() => import("../pages/admin/AddTrustee"));
+const TrusteeDetails = lazy(() => import("../pages/admin/TrusteeDetails"));
 
 /* Company Management */
-import Companies from "../pages/admin/Companies";
-import CompanyDetails from "../pages/admin/CompanyDetails";
-import AddCompany from "../pages/admin/AddCompany";
-import EditCompany from "../pages/admin/EditCompany";
+const Companies = lazy(() => import("../pages/admin/Companies"));
+const CompanyDetails = lazy(() => import("../pages/admin/CompanyDetails"));
+const AddCompany = lazy(() => import("../pages/admin/AddCompany"));
+const EditCompany = lazy(() => import("../pages/admin/EditCompany"));
 
 /* Application Management */
-import Applications from "../pages/admin/Applications";
-import ApplicationDetails from "../pages/admin/ApplicationDetails";
-import ApproveApplication from "../pages/admin/ApproveApplication";
-import RejectApplication from "../pages/admin/RejectApplication";
+const Applications = lazy(() => import("../pages/admin/Applications"));
+const ApplicationDetails = lazy(() => import("../pages/admin/ApplicationDetails"));
+const ApproveApplication = lazy(() => import("../pages/admin/ApproveApplication"));
+const RejectApplication = lazy(() => import("../pages/admin/RejectApplication"));
 
 /* Exam Management */
 
 /* Reports */
-import Reports from "../pages/admin/Reports";
-import StudentReport from "../pages/admin/StudentReport";
-import CourseReport from "../pages/admin/CourseReport";
-import RequestsSupport from "../pages/admin/RequestsSupport";
+const Reports = lazy(() => import("../pages/admin/Reports"));
+const StudentReport = lazy(() => import("../pages/admin/StudentReport"));
+const CourseReport = lazy(() => import("../pages/admin/CourseReport"));
+const RequestsSupport = lazy(() => import("../pages/admin/RequestsSupport"));
 
 /* Cohort Management */
-import Cohorts from "../pages/admin/Cohorts";
-import CohortDetails from "../pages/admin/CohortDetails";
-import AddCohort from "../pages/admin/AddCohort";
-import EditCohort from "../pages/admin/EditCohort";
+const Cohorts = lazy(() => import("../pages/admin/Cohorts"));
+const CohortDetails = lazy(() => import("../pages/admin/CohortDetails"));
+const AddCohort = lazy(() => import("../pages/admin/AddCohort"));
+const EditCohort = lazy(() => import("../pages/admin/EditCohort"));
 
 /* Session Scheduling */
-import ScheduleClass from "../pages/admin/ScheduleClass";
+const ScheduleClass = lazy(() => import("../pages/admin/ScheduleClass"));
 
 /* Attendance Management */
-import AttendanceManagement from "../pages/admin/AttendanceManagement";
-import AttendanceDetails from "../pages/admin/AttendanceDetails";
-import UpdateAttendance from "../pages/admin/UpdateAttendance";
-import AttendanceHistoryAdmin from "../pages/admin/AttendanceHistoryAdmin";
-import PermissionsAdmin from "../pages/admin/PermissionsAdmin";
-import PermissionsStudent from "../pages/student/PermissionsStudent";
+const AttendanceManagement = lazy(() => import("../pages/admin/AttendanceManagement"));
+const AttendanceDetails = lazy(() => import("../pages/admin/AttendanceDetails"));
+const UpdateAttendance = lazy(() => import("../pages/admin/UpdateAttendance"));
+const AttendanceHistoryAdmin = lazy(() => import("../pages/admin/AttendanceHistoryAdmin"));
+const PermissionsAdmin = lazy(() => import("../pages/admin/PermissionsAdmin"));
+const PermissionsStudent = lazy(() => import("../pages/student/PermissionsStudent"));
 
 /* Assignment Management */
-import AssignmentsAdmin from "../pages/admin/AssignmentsAdmin";
-import AssignmentAdminDetails from "../pages/admin/AssignmentAdminDetails";
-import AddAssignment from "../pages/admin/AddAssignment";
-import EditAssignment from "../pages/admin/EditAssignment";
-import AdminMentorAssignments from "../pages/admin/MentorAssignments";
+const AssignmentsAdmin = lazy(() => import("../pages/admin/AssignmentsAdmin"));
+const AssignmentAdminDetails = lazy(() => import("../pages/admin/AssignmentAdminDetails"));
+const AddAssignment = lazy(() => import("../pages/admin/AddAssignment"));
+const EditAssignment = lazy(() => import("../pages/admin/EditAssignment"));
+const AdminMentorAssignments = lazy(() => import("../pages/admin/MentorAssignments"));
 
 /* Certificate Management */
-import CertificatesAdmin from "../pages/admin/CertificatesAdmin";
-import CertificateAdminDetails from "../pages/admin/CertificateAdminDetails";
-import AddCertificate from "../pages/admin/AddCertificate";
-import EditCertificate from "../pages/admin/EditCertificate";
+const CertificatesAdmin = lazy(() => import("../pages/admin/CertificatesAdmin"));
+const CertificateAdminDetails = lazy(() => import("../pages/admin/CertificateAdminDetails"));
+const AddCertificate = lazy(() => import("../pages/admin/AddCertificate"));
+const EditCertificate = lazy(() => import("../pages/admin/EditCertificate"));
 
 /* Notification Management */
-import Notifications from "../pages/admin/Notifications";
-import NotificationDetails from "../pages/admin/NotificationDetails";
-import AddNotification from "../pages/admin/AddNotification";
-import EditNotification from "../pages/admin/EditNotification";
+const Notifications = lazy(() => import("../pages/admin/Notifications"));
+const NotificationDetails = lazy(() => import("../pages/admin/NotificationDetails"));
+const AddNotification = lazy(() => import("../pages/admin/AddNotification"));
+const EditNotification = lazy(() => import("../pages/admin/EditNotification"));
 
 /* Settings */
-import Settings from "../pages/admin/Settings";
-import ProfileSettings from "../pages/admin/ProfileSettings";
-import SecuritySettings from "../pages/admin/SecuritySettings";
-import SystemSettings from "../pages/admin/SystemSettings";
+const Settings = lazy(() => import("../pages/admin/Settings"));
+const ProfileSettings = lazy(() => import("../pages/admin/ProfileSettings"));
+const SecuritySettings = lazy(() => import("../pages/admin/SecuritySettings"));
+const SystemSettings = lazy(() => import("../pages/admin/SystemSettings"));
 
 /* Mentor */
 const MentorDashboard = lazy(() => import("../pages/mentor/MentorDashboard"));
-import MyCohorts from "../pages/mentor/MyCohorts";
-import MentorCohortDetails from "../pages/mentor/CohortDetails";
-import MentorClassSchedule from "../pages/mentor/ClassSchedule";
-import MentorApplications from "../pages/mentor/Applications";
-import MentorAssessments from "../pages/mentor/Assessments";
-import MentorTasks from "../pages/mentor/Tasks";
-import MeetingLinks from "../pages/mentor/MeetingLinks";
-import EditMeetingLink from "../pages/mentor/EditMeetingLink";
+const MyCohorts = lazy(() => import("../pages/mentor/MyCohorts"));
+const MentorCohortDetails = lazy(() => import("../pages/mentor/CohortDetails"));
+const MentorClassSchedule = lazy(() => import("../pages/mentor/ClassSchedule"));
+const MentorApplications = lazy(() => import("../pages/mentor/Applications"));
+const MentorAssessments = lazy(() => import("../pages/mentor/Assessments"));
+const MentorTasks = lazy(() => import("../pages/mentor/Tasks"));
+const MeetingLinks = lazy(() => import("../pages/mentor/MeetingLinks"));
+const EditMeetingLink = lazy(() => import("../pages/mentor/EditMeetingLink"));
 
-import MyStudents from "../pages/mentor/MyStudents";
-import MentorStudentDetails from "../pages/mentor/StudentDetails";
-import MentorAttendance from "../pages/mentor/Attendance";
-import MentorAttendanceHistory from "../pages/mentor/AttendanceHistory";
-import MentorAssignments from "../pages/mentor/Assignments";
-import MentorAssignmentFeedback from "../pages/mentor/AssignmentFeedback";
-import CreateAssignment from "../pages/mentor/Assignments/CreateAssignment";
-import MentorProfile from "../pages/mentor/Profile";
-import MentorSettings from "../pages/mentor/Settings";
+const MyStudents = lazy(() => import("../pages/mentor/MyStudents"));
+const MentorStudentDetails = lazy(() => import("../pages/mentor/StudentDetails"));
+const MentorAttendance = lazy(() => import("../pages/mentor/Attendance"));
+const MentorAttendanceHistory = lazy(() => import("../pages/mentor/AttendanceHistory"));
+const MentorAssignments = lazy(() => import("../pages/mentor/Assignments"));
+const MentorAssignmentFeedback = lazy(() => import("../pages/mentor/AssignmentFeedback"));
+const CreateAssignment = lazy(() => import("../pages/mentor/Assignments/CreateAssignment"));
+const MentorProfile = lazy(() => import("../pages/mentor/Profile"));
+const MentorSettings = lazy(() => import("../pages/mentor/Settings"));
 
 import ScrollToTop from "../components/common/ScrollToTop";
 
