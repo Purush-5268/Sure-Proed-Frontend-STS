@@ -213,21 +213,7 @@ function ScheduleClass() {
     }
   };
 
-  const handleToggleAutomation = async (isPaused) => {
-    if (!automationInfo?.starting_batch) {
-      alert("Please select an LST Batch first.");
-      return;
-    }
-    try {
-      const res = await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BASE}toggle-lst-automation/`, {
-        lst_batch: automationInfo?.starting_batch,
-        is_paused: isPaused
-      });
-      alert(`✅ ${res.data.message}`);
-    } catch (err) {
-      alert(`❌ ${err.response?.data?.error || "Failed to toggle automation. Ensure the schedule exists."}`);
-    }
-  };
+
 
   const scheduleClass = async (e) => {
     e.preventDefault();
@@ -256,7 +242,7 @@ function ScheduleClass() {
       const finalGroupName = request.groupName ? request.groupName.trim().toUpperCase() : "";
 
       const formattedData = {
-        title: `${request.sessionType} Session - ${finalGroupName || automationInfo?.starting_batch || 'General'}`.toUpperCase(),
+        title: `${request.sessionType} Session - ${finalGroupName || request.lstBatchNumber || 'General'}`.toUpperCase(),
         class_date: request.classDate,
         start_time: request.startTime.length === 5 ? request.startTime + ":00" : request.startTime,
         end_time: request.endTime.length === 5 ? request.endTime + ":00" : request.endTime,
@@ -392,16 +378,7 @@ function ScheduleClass() {
                 </div>
               </div>
 
-              {automationInfo?.starting_batch && (
-                <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '8px', border: '1px dashed rgba(59, 130, 246, 0.3)' }}>
-                  <p style={{ margin: '0 0 0.5rem 0', fontSize: '13px', color: 'var(--text-primary)', fontWeight: 'bold' }}>🤖 Sunday Automation Controls</p>
-                  <p style={{ margin: '0 0 1rem 0', fontSize: '12px', color: 'var(--text-secondary)' }}>Automated Google Meets are generated every Sunday by the Celery worker for this batch. You can pause or resume this background process.</p>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button type="button" onClick={() => handleToggleAutomation(true)} className="premium-btn premium-btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }}>⏸️ Pause Automation</button>
-                    <button type="button" onClick={() => handleToggleAutomation(false)} className="premium-btn premium-btn-primary" style={{ padding: '6px 12px', fontSize: '12px' }}>▶️ Resume Automation</button>
-                  </div>
-                </div>
-              )}
+
             </div>
           )}
 
