@@ -24,12 +24,11 @@ import {
   FiBookOpen,
 } from "react-icons/fi";
 
-// Generates "Sir", "Madam" or nothing based on gender
 function getSalutation(gender) {
   if (!gender) return "";
   const g = String(gender).toUpperCase().trim();
-  if (g === "MALE" || g === "M") return " Sir";
   if (g === "FEMALE" || g === "F") return " Madam";
+  if (g === "MALE" || g === "M") return " Sir";
   return "";
 }
 
