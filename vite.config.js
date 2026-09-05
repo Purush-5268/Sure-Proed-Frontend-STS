@@ -114,11 +114,25 @@ export default defineConfig({
   ],
   assetsInclude: ['**/*.lottie'],
   build: {
-    minify: false,
-    sourcemap: true,
     rollupOptions: {
       output: {
-        // Let Rolldown handle native code-splitting for React.lazy()
+        manualChunks(id) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router')) {
+            return 'vendor';
+          }
+          if (id.includes('node_modules/framer-motion') || id.includes('node_modules/react-icons')) {
+            return 'ui';
+          }
+          if (id.includes('node_modules/@tiptap') || id.includes('node_modules/tiptap') || id.includes('node_modules/prosemirror')) {
+            return 'editor';
+          }
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3')) {
+            return 'charts';
+          }
+          if (id.includes('node_modules/lottie-react') || id.includes('node_modules/@lottiefiles')) {
+            return 'lottie';
+          }
+        }
       }
     }
   },

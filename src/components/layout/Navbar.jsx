@@ -47,7 +47,7 @@ function Navbar() {
     <nav className={styles.navbar}>
       <div className={styles.logo}>
         <Link to="/" onClick={closeMenu} style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: "10px" }}>
-          <img src="/sure-logo.jpg" alt="SURE Trust Logo" style={{ height: "32px", width: "32px", borderRadius: "4px", objectFit: "cover" }} />
+          <img src="/sure-logo.jpg" alt="SURE Trust Logo" width="32" height="32" style={{ height: "32px", width: "32px", borderRadius: "4px", objectFit: "cover" }} />
           <span style={{ fontWeight: "700" }}>
             SURE ProEd
           </span>

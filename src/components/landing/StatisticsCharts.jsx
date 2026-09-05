@@ -33,12 +33,12 @@ export const StudentJourneyChart = ({ data }) => {
   // The backend payload returns the mutually exclusive slices inside data.journey
   const journey = data.journey || {};
   
-  // Safe extraction matching backend properties or defaulting to the old root properties for backward compatibility
-  const activeBeforeCohort = journey.active_before_cohort ?? (data.active_before_cohort || 0);
-  const training = journey.training ?? (data.training || 0);
-  const internship = journey.internship ?? (data.internship || 0);
-  const softSkills = journey.soft_skills_completed ?? (data.soft_skills || data.completed || 0);
-  const placed = journey.placed ?? (data.placed || 0);
+  // Safe extraction matching backend properties, coerced to numbers to prevent string concatenation bugs
+  const activeBeforeCohort = Number(journey.active_before_cohort ?? (data.active_before_cohort || 0));
+  const training = Number(journey.training ?? (data.training || 0));
+  const internship = Number(journey.internship ?? (data.internship || 0));
+  const softSkills = Number(journey.soft_skills_completed ?? (data.soft_skills || data.completed || 0));
+  const placed = Number(journey.placed ?? (data.placed || 0));
 
   const calculatedSum = activeBeforeCohort + training + internship + softSkills + placed;
   const remaining = total > calculatedSum ? total - calculatedSum : 0;
@@ -59,7 +59,6 @@ export const StudentJourneyChart = ({ data }) => {
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const item = payload[0].payload;
-      if (item.name === 'Remaining') return null; // Hide tooltip for the empty track
       const percentage = total > 0 ? ((item.value / total) * 100).toFixed(2) : 0;
       return (
         <div style={{
@@ -112,7 +111,6 @@ export const StudentJourneyChart = ({ data }) => {
       
       <div className={styles.legendContainer}>
         {chartData.map((item, i) => {
-          if (item.name === 'Remaining') return null;
           const percentage = total > 0 ? ((item.value / total) * 100).toFixed(2) : 0;
           const isActive = activeLegend === i;
           return (

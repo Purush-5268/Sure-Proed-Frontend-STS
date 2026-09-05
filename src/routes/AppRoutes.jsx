@@ -13,7 +13,7 @@ import MentorLayout from "../layouts/MentorLayout";
 import TrusteeLayout from "../layouts/TrusteeLayout";
 
 /* Auth & Public */
-const Landing = lazy(() => import("../pages/landing/Landing"));
+import Landing from "../pages/landing/Landing";
 const Partners = lazy(() => import("../pages/landing/Partners"));
 const Signup = lazy(() => import("../pages/signup/Signup"));
 const Login = lazy(() => import("../pages/auth/Login"));

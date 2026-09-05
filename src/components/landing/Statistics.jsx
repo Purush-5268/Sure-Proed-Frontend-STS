@@ -23,6 +23,24 @@ import styles from "./Statistics.module.css";
 const StudentJourneyChart = lazy(() => import("./StatisticsCharts").then(module => ({ default: module.StudentJourneyChart })));
 const EcosystemChart = lazy(() => import("./StatisticsCharts").then(module => ({ default: module.EcosystemChart })));
 
+function useInViewOnce(options = { rootMargin: '400px' }) {
+  const [inView, setInView] = useState(false);
+  const ref = React.useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setInView(true);
+        observer.disconnect();
+      }
+    }, options);
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [options.rootMargin]);
+
+  return [ref, inView];
+}
+
 // Animation Variants
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -77,6 +95,7 @@ function Statistics() {
   const [activeModal, setActiveModal] = useState(null);
 
   const [companies, setCompanies] = useState([]);
+  const [chartsRef, chartsInView] = useInViewOnce({ rootMargin: '400px' });
 
   const fetchStats = async () => {
     setLoading(true);
@@ -125,7 +144,7 @@ function Statistics() {
   }
 
   return (
-    <section id="statistics" className={styles.statistics}>
+    <section id="statistics" className={styles.statistics} ref={chartsRef}>
       <div className={styles.starsOverlay}></div>
       <div className={styles.container}>
 
@@ -180,9 +199,13 @@ function Statistics() {
                 <span>STUDENT IMPACT JOURNEY</span>
               </div>
               <div className={styles.dashboardCard}>
-                <Suspense fallback={<div className={styles.chartFallback}>Loading chart...</div>}>
-                  <StudentJourneyChart data={data.students} />
-                </Suspense>
+                {chartsInView ? (
+                  <Suspense fallback={<div className={styles.chartFallback}>Loading chart...</div>}>
+                    <StudentJourneyChart data={data.students} />
+                  </Suspense>
+                ) : (
+                  <div className={styles.chartFallback}>Loading chart...</div>
+                )}
               </div>
             </motion.div>
 
@@ -193,9 +216,13 @@ function Statistics() {
               </div>
               <div className={`${styles.dashboardCard} ${styles.peopleEcosystemCard}`}>
                 <div className={styles.ecosystemLeft}>
-                  <Suspense fallback={<div className={styles.chartFallback}>Loading chart...</div>}>
-                    <EcosystemChart data={data.people} />
-                  </Suspense>
+                  {chartsInView ? (
+                    <Suspense fallback={<div className={styles.chartFallback}>Loading chart...</div>}>
+                      <EcosystemChart data={data.people} />
+                    </Suspense>
+                  ) : (
+                    <div className={styles.chartFallback}>Loading chart...</div>
+                  )}
                 </div>
                 <div className={styles.ecosystemRight}>
                   <div className={styles.peopleGridSmall}>

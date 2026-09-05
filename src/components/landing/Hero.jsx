@@ -50,6 +50,8 @@ function Hero() {
               src={heroImage}
               alt="SURE ProEd Platform"
               className={styles.heroImage}
+              width="394"
+              height="800"
             />
 
             {/* Glassmorphic floating elements */}
