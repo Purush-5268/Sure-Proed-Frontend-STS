@@ -233,10 +233,10 @@ function AttendanceDetails() {
                   const attPercentage = isObject && student.attendance_percentage !== undefined ? student.attendance_percentage : (isJoined ? 100 : 0);
 
                   const isLowAttendance = attPercentage > 0 && attPercentage < 40;
-                  const isAbsent = attPercentage === 0;
+                  const isAbsent = attPercentage === 0 || (student.status && student.status.toUpperCase() === 'ABSENT');
 
                   return (
-                    <tr key={studentId || idx} style={{ background: isLowAttendance || isAbsent ? "rgba(239, 68, 68, 0.05)" : "transparent" }}>
+                    <tr key={studentId || idx} style={{ background: isAbsent ? "rgba(239, 68, 68, 0.15)" : isLowAttendance ? "rgba(239, 68, 68, 0.05)" : "transparent" }}>
                       <td style={{ verticalAlign: "middle" }}>{studentName}</td>
                       <td style={{ verticalAlign: "middle" }}>{studentEmail}</td>
                       <td style={{ verticalAlign: "middle", color: isLowAttendance || isAbsent ? "#ef4444" : "inherit", fontWeight: isLowAttendance || isAbsent ? "bold" : "normal" }}>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
+import TimePicker from "../../components/common/TimePicker";
 import { motion, AnimatePresence } from "framer-motion";
 import apiClient, { fetchAllPages } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
@@ -102,6 +103,7 @@ function ClassSchedule() {
     title: "", 
     cohortId: "", 
     trainingId: "",
+    classDate: "", 
     startTime: "", 
     endTime: "", 
     guestEmails: [] 
@@ -120,11 +122,15 @@ function ClassSchedule() {
         return;
       }
 
-      const startDt = new Date(scheduleForm.startTime);
-      const endDt = new Date(scheduleForm.endTime);
-      const class_date = startDt.toISOString().split("T")[0];
-      const start_time = startDt.toTimeString().split(" ")[0];
-      const end_time = endDt.toTimeString().split(" ")[0];
+      if (!scheduleForm.classDate || !scheduleForm.startTime || !scheduleForm.endTime) {
+        alert("Please fill all required fields.");
+        setIsScheduling(false);
+        return;
+      }
+
+      const class_date = scheduleForm.classDate;
+      const start_time = scheduleForm.startTime.length === 5 ? scheduleForm.startTime + ":00" : scheduleForm.startTime;
+      const end_time = scheduleForm.endTime.length === 5 ? scheduleForm.endTime + ":00" : scheduleForm.endTime;
       const selectedCohort = schedules.find(c => String(c.id) === scheduleForm.cohortId);
 
       if (sessionType === "DOMAIN") {
@@ -158,7 +164,7 @@ function ClassSchedule() {
         alert("✅ Training Session Scheduled!");
       }
 
-      setScheduleForm({ title: "", cohortId: "", trainingId: "", startTime: "", endTime: "", guestEmails: [] });
+      setScheduleForm({ title: "", cohortId: "", trainingId: "", classDate: "", startTime: "", endTime: "", guestEmails: [] });
       setShowScheduleForm(false);
       // Reload logic could be added here, but preserving existing behavior which did not reload.
     } catch (err) {
@@ -303,25 +309,35 @@ function ClassSchedule() {
                   </select>
                 </div>
 
+                <div className={styles.fullWidth} style={{ marginBottom: "1.5rem" }}>
+                  <label className={styles.label}>Class Date <span className={styles.required}>*</span></label>
+                  <input 
+                    type="date" 
+                    value={scheduleForm.classDate} 
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, classDate: e.target.value })} 
+                    className={styles.input} 
+                    required 
+                    style={{ width: "100%" }}
+                  />
+                </div>
+
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Start Time <span className={styles.required}>*</span></label>
-                  <input 
-                    type="datetime-local" 
-                    required 
+                  <TimePicker 
                     value={scheduleForm.startTime} 
-                    onChange={e => setScheduleForm({ ...scheduleForm, startTime: e.target.value })} 
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, startTime: e.target.value })} 
                     className={styles.input} 
+                    required 
                   />
                 </div>
                 
                 <div className={styles.formGroup}>
                   <label className={styles.label}>End Time <span className={styles.required}>*</span></label>
-                  <input 
-                    type="datetime-local" 
-                    required 
+                  <TimePicker 
                     value={scheduleForm.endTime} 
-                    onChange={e => setScheduleForm({ ...scheduleForm, endTime: e.target.value })} 
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, endTime: e.target.value })} 
                     className={styles.input} 
+                    required 
                   />
                 </div>
 

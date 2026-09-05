@@ -77,19 +77,20 @@ function PermissionsStudent() {
         </div>
       )}
 
-      <div className={styles.list}>
+      <div className={styles.permissionsList}>
         {(warnings || []).length === 0 ? (
-          <p>You have no pending warnings.</p>
+          <p className={styles.emptyState}>You have no pending warnings.</p>
         ) : (
           (warnings || []).map(w => (
-            <div key={w.id} className={styles.card}>
-              <div className={styles.cardHeader}>
-                <h3>Low Attendance Warning</h3>
-                <span className={styles[w.status.toLowerCase()]}>{w.status}</span>
-              </div>
-              <div className={styles.cardBody}>
+            <div key={w.id} className={styles.permissionCard}>
+              <div className={styles.permissionInfo}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                  <h3>Low Attendance Warning</h3>
+                  <span className={styles[w.status?.toLowerCase()] || styles.pending}>{w.status}</span>
+                </div>
                 <p><strong>Session:</strong> {w.session_title}</p>
                 <p><strong>Date:</strong> {w.class_date}</p>
+                
                 {w.apology_text ? (
                   <div className={styles.submittedApology}>
                     <strong>Your Apology:</strong>

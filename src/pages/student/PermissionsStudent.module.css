@@ -137,8 +137,49 @@
 
 .permissionInfo p {
   color: var(--text-secondary);
-  font-size: 13px;
-  margin: 0;
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.apologyForm {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.apologyForm textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-nested);
+  color: var(--text-primary);
+  font-size: 14px;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+.apologyForm textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.submittedApology {
+  margin-top: 16px;
+  background: var(--bg-nested);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.submittedApology p {
+  color: var(--text-primary);
+  margin-top: 4px;
+  font-style: italic;
 }
 
 .chatBtn {

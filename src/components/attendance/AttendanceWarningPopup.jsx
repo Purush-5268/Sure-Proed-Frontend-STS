@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { FiAlertTriangle, FiX } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 
-/**
- * Attendance Warning Popup.
- * Uses CSS design tokens to be theme-aware (light + dark).
- * Does NOT modify PermissionChatConsumer.
- */
 function AttendanceWarningPopup() {
   const [warnings, setWarnings] = useState([]);
   const [isVisible, setIsVisible] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let isMounted = true;
@@ -33,21 +29,13 @@ function AttendanceWarningPopup() {
 
   return (
     <div style={{
-      position: "fixed",
-      bottom: "24px",
-      right: "24px",
-      background: "var(--bg-surface)",
-      backdropFilter: "blur(12px)",
+      position: "fixed", bottom: "24px", right: "24px",
+      background: "var(--bg-surface)", backdropFilter: "blur(12px)",
       border: "1px solid var(--color-danger, #ef4444)",
       borderLeft: "4px solid var(--color-danger, #ef4444)",
-      borderRadius: "16px",
-      padding: "20px",
+      borderRadius: "16px", padding: "20px",
       boxShadow: "var(--shadow-lg, 0 20px 40px rgba(0, 0, 0, 0.15))",
-      maxWidth: "350px",
-      zIndex: 9999,
-      display: "flex",
-      flexDirection: "column",
-      gap: "12px",
+      maxWidth: "350px", zIndex: 9999, display: "flex", flexDirection: "column", gap: "12px",
       animation: "attendanceWarnSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)"
     }}>
       <style>{`
@@ -75,25 +63,19 @@ function AttendanceWarningPopup() {
         Your attendance has dropped below the 40% threshold.
       </p>
 
-      <Link 
-        to="/student/permissions" 
-        style={{
-          background: "var(--color-danger, #ef4444)",
-          color: "white",
-          textDecoration: "none",
-          padding: "10px",
-          borderRadius: "8px",
-          textAlign: "center",
-          fontWeight: "600",
-          fontSize: "14px",
-          marginTop: "4px",
-          transition: "opacity 0.2s",
-          display: "block"
+      <button 
+        onClick={() => {
+          setIsVisible(false);
+          navigate("/student/permissions");
         }}
-        onClick={() => setIsVisible(false)}
+        style={{
+          background: "var(--color-danger, #ef4444)", color: "white", border: "none", cursor: "pointer",
+          padding: "10px", borderRadius: "8px", textAlign: "center", fontWeight: "600",
+          fontSize: "14px", marginTop: "4px", transition: "opacity 0.2s", display: "block"
+        }}
       >
-        Review &amp; Seek Permission
-      </Link>
+        Review & Seek Permission
+      </button>
     </div>
   );
 }

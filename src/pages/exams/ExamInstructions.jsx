@@ -6,6 +6,8 @@ import {
   startInternalExam,
 } from "../../services/examService";
 import { studentService } from "../../services/studentService";
+import apiClient from "../../services/apiClient";
+import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { SureProEdLogo } from "../../components/common/SureProEdLogo";
 import {
   FiClock,
@@ -46,6 +48,7 @@ function ExamInstructions() {
   const [isQualifiedCandidate, setIsQualifiedCandidate] = useState(false);
   const [isDisqualified, setIsDisqualified] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const [statistics, setStatistics] = useState({});
 
   // Mandatory Camera & Microphone State
   const [cameraActive, setCameraActive] = useState(false);
@@ -293,9 +296,10 @@ function ExamInstructions() {
         setFetchingData(true);
         setError(null);
 
-        const [authContext, studentProfile] = await Promise.all([
+        const [authContext, studentProfile, statsRes] = await Promise.all([
           fetchAuthoritativeExamContext(),
           user?.email ? studentService.getProfile(user.email).catch(() => null) : Promise.resolve(null),
+          apiClient.get(API_ENDPOINTS.STUDENTS.STATISTICS).catch(() => ({ data: {} })),
         ]);
 
         if (!isMounted) return;
@@ -325,6 +329,7 @@ function ExamInstructions() {
             setIsDisqualified(true);
           }
 
+          setStatistics(statsRes?.data || {});
           setProfileComplete(studentProfile ? studentService.isProfileComplete(studentProfile) : true);
         }
       } catch (err) {
@@ -588,7 +593,7 @@ function ExamInstructions() {
               <div className={styles.authField}>
                 <span className={styles.authFieldLabel}>Assessment Track</span>
                 <span className={styles.authFieldValueHighlight}>
-                  {activeCourseTrack?.name || "General Assessment Track"}
+                  {activeCourseTrack?.name || activeApplication?.course_name || activeApplication?.course_details?.name || statistics?.application_course_title || statistics?.assessment_track || statistics?.active_cohort?.course_title || "General Assessment Track"}
                 </span>
               </div>
               <div className={styles.authField}>
@@ -623,7 +628,7 @@ function ExamInstructions() {
                 <strong>Active Cohort Journey Detected</strong>
               </div>
               <p className={styles.alertText}>
-                You are already enrolled in <strong>{activeCourseTrack?.name}</strong>. An older screening or
+                You are already enrolled in <strong>{activeCourseTrack?.name || activeApplication?.course_name || activeApplication?.course_details?.name || statistics?.application_course_title || statistics?.assessment_track || statistics?.active_cohort?.course_title || "your assigned cohort"}</strong>. An older screening or
                 rescheduling record cannot start an examination for another cohort.
               </p>
               <div className={styles.bannerBtnGroup}>
@@ -646,7 +651,7 @@ function ExamInstructions() {
                 <strong>Examination Successfully Completed & Qualified</strong>
               </div>
               <p className={styles.alertText}>
-                You have met the qualifying criteria for <strong>{activeCourseTrack?.name}</strong>. Your result and admission qualification have been recorded in the central registry.
+                You have met the qualifying criteria for <strong>{activeCourseTrack?.name || activeApplication?.course_name || activeApplication?.course_details?.name || statistics?.application_course_title || statistics?.assessment_track || statistics?.active_cohort?.course_title || "your assigned cohort"}</strong>. Your result and admission qualification have been recorded in the central registry.
               </p>
               <div className={styles.bannerBtnGroup}>
                 <button
@@ -675,7 +680,7 @@ function ExamInstructions() {
                 <strong>Examination Submission Recorded</strong>
               </div>
               <p className={styles.alertText}>
-                Your examination response for <strong>{activeCourseTrack?.name}</strong> has been evaluated.
+                Your examination response for <strong>{activeCourseTrack?.name || activeApplication?.course_name || activeApplication?.course_details?.name || statistics?.application_course_title || statistics?.assessment_track || statistics?.active_cohort?.course_title || "your assigned cohort"}</strong> has been evaluated.
               </p>
               <div>
                 <button

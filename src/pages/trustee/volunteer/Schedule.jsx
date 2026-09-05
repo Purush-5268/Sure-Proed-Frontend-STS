@@ -7,19 +7,13 @@ import apiClient from "../../../services/apiClient";
 import { API_ENDPOINTS } from "../../../constants/apiEndpoints";
 import styles from "./Schedule.module.css";
 import SkeletonLoader from "../../../components/common/SkeletonLoader";
+import TimePicker from "../../../components/common/TimePicker";
 
 function ScheduleClass() {
   const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [activeTab, setActiveTab] = useState("MANUAL");
-  const [automationForm, setAutomationForm] = useState({
-    firstSunday: "",
-    startTime: "",
-    endTime: "",
-    startingBatch: "BATCH_1"
-  });
-  const [automationInfo, setAutomationInfo] = useState(null);
+
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -32,6 +26,7 @@ function ScheduleClass() {
     streamId: "",
     groupName: "",
     lstBatchNumber: "",
+    classDate: "",
     startTime: "",
     endTime: "",
     guestEmails: [],
@@ -78,17 +73,7 @@ function ScheduleClass() {
         console.error("Failed to load courses:", err);
       }
     }
-    
-    async function fetchAutomation() {
-      try {
-        const res = await apiClient.get('/api/attendance/get-lst-automation/');
-        setAutomationInfo(res.data);
-      } catch (err) {
-        console.error("Failed to load automation info", err);
-      }
-    }
-
-    Promise.all([loadCourses(), loadActiveClasses(), fetchAutomation()]);
+    Promise.all([loadCourses(), loadActiveClasses()]);
   }, []);
 
   useEffect(() => {
@@ -112,50 +97,6 @@ function ScheduleClass() {
     }
   }, [request.streamId]);
 
-  const handleSetupAutomation = async (e) => {
-    e.preventDefault();
-    
-    // Sunday Validation
-    if (automationForm.firstSunday) {
-      const selectedDate = new Date(automationForm.firstSunday);
-      if (selectedDate.getDay() !== 0) {
-         alert("❌ Please select a Sunday date for automatic LST meetings.");
-         return;
-      }
-    }
-    
-    setIsLoading(true);
-    try {
-       const res = await apiClient.post('/api/attendance/setup-lst-automation/', {
-          first_sunday: automationForm.firstSunday,
-          start_time: automationForm.startTime + ":00",
-          end_time: automationForm.endTime + ":00",
-          starting_batch: automationForm.startingBatch,
-          is_paused: false
-       });
-       alert("✅ " + res.data.message);
-       const getRes = await apiClient.get('/api/attendance/get-lst-automation/');
-       setAutomationInfo(getRes.data);
-    } catch (err) {
-       alert("❌ Failed to setup automation: " + (err.response?.data?.error || err.message));
-    } finally {
-       setIsLoading(false);
-    }
-  };
-
-  const handleToggleGlobalAutomation = async (isPaused) => {
-    try {
-      const res = await apiClient.post('/api/attendance/toggle-lst-automation/', {
-        is_paused: isPaused
-      });
-      alert(`✅ ${res.data.message}`);
-      const getRes = await apiClient.get('/api/attendance/get-lst-automation/');
-      setAutomationInfo(getRes.data);
-    } catch (err) {
-      alert(`❌ ${err.response?.data?.error || "Failed to toggle automation."}`);
-    }
-  };
-
 
   const addGuestEmail = (e) => {
     if (e) e.preventDefault();
@@ -177,6 +118,7 @@ function ScheduleClass() {
 
   // 🚨 New States for Inline Rescheduling
   const [editingClassId, setEditingClassId] = useState(null);
+  const [editDate, setEditDate] = useState("");
   const [editStartTime, setEditStartTime] = useState("");
   const [editEndTime, setEditEndTime] = useState("");
 
@@ -187,15 +129,16 @@ function ScheduleClass() {
     const startPart = cls.start_time ? cls.start_time.substring(0, 5) : "00:00";
     const endPart = cls.end_time ? cls.end_time.substring(0, 5) : "23:59";
 
-    setEditStartTime(`${datePart}T${startPart}`);
-    setEditEndTime(`${datePart}T${endPart}`);
+    setEditDate(datePart);
+    setEditStartTime(startPart);
+    setEditEndTime(endPart);
   };
 
   const handleSaveReschedule = async (classId) => {
     try {
       const updatedData = {
-        class_date: editStartTime.split("T")[0],
-        start_time: editStartTime.split("T")[1] + ":00",
+        class_date: editDate,
+        start_time: editStartTime + ":00",
         end_time: editEndTime.split("T")[1] + ":00"
       };
 
@@ -314,9 +257,9 @@ function ScheduleClass() {
 
       const formattedData = {
         title: `${request.sessionType} Session - ${finalGroupName || automationInfo?.starting_batch || 'General'}`.toUpperCase(),
-        class_date: request.startTime.split("T")[0],
-        start_time: request.startTime.split("T")[1] + ":00",
-        end_time: request.endTime.split("T")[1] + ":00",
+        class_date: request.classDate,
+        start_time: request.startTime.length === 5 ? request.startTime + ":00" : request.startTime,
+        end_time: request.endTime.length === 5 ? request.endTime + ":00" : request.endTime,
         conducted_by: currentUserId,
         cohort: matchedCohort ? matchedCohort.id : null,
         attendees: [],
@@ -332,9 +275,9 @@ function ScheduleClass() {
       if (request.sessionType === "LST") {
         res = await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BASE}generate-lst/`, {
           lst_batch: request.lstBatchNumber,
-          class_date: request.startTime.split("T")[0],
-          start_time: request.startTime.split("T")[1] + ":00",
-          end_time: request.endTime.split("T")[1] + ":00",
+          class_date: request.classDate,
+          start_time: request.startTime.length === 5 ? request.startTime + ":00" : request.startTime,
+          end_time: request.endTime.length === 5 ? request.endTime + ":00" : request.endTime,
           title: request.title,
           guest_emails: request.guestEmails
         });
@@ -352,6 +295,7 @@ function ScheduleClass() {
         streamId: "",
         groupName: "",
         lstBatchNumber: "",
+        classDate: "",
         startTime: "",
         endTime: "",
         guestEmails: [],
@@ -387,80 +331,6 @@ function ScheduleClass() {
         {successMessage && <div className="premium-alert-success">✅ {successMessage}</div>}
         {errorMessage && <div className="premium-alert-error">❌ {errorMessage}</div>}
 
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
-          <button 
-            onClick={() => setActiveTab("MANUAL")} 
-            className={`premium-btn ${activeTab === "MANUAL" ? "premium-btn-primary" : "premium-btn-secondary"}`}
-          >
-            Manual Live Class
-          </button>
-          <button 
-            onClick={() => setActiveTab("AUTO")} 
-            className={`premium-btn ${activeTab === "AUTO" ? "premium-btn-primary" : "premium-btn-secondary"}`}
-          >
-            Automatic LST Schedule
-          </button>
-        </div>
-
-        {activeTab === "AUTO" && (
-          <div className="premium-form">
-            <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Automate LST Meetings</h2>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-              Automatically generate LST meetings every Sunday.
-              Batch 1 and Batch 2 will alternate automatically.
-            </p>
-
-            {automationInfo?.configured && (
-              <div style={{ marginBottom: '2rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '8px' }}>
-                <h3 style={{ fontSize: '14px', margin: '0 0 10px 0', color: '#047857' }}>✅ Automation is Currently Active</h3>
-                <ul style={{ fontSize: '13px', color: 'var(--text-primary)', margin: 0, paddingLeft: '20px' }}>
-                  <li>First Sunday: <strong>{automationInfo.first_sunday}</strong></li>
-                  <li>Starting Batch: <strong>{automationInfo.starting_batch === "BATCH_1" ? "Batch 1" : "Batch 2"}</strong></li>
-                  <li>Time: <strong>{automationInfo.start_time} - {automationInfo.end_time}</strong></li>
-                  <li>Status: <strong>{automationInfo.is_paused ? "⏸️ PAUSED" : "▶️ RUNNING"}</strong></li>
-                </ul>
-                <div style={{ marginTop: '1rem' }}>
-                  {automationInfo.is_paused ? (
-                    <button type="button" onClick={() => handleToggleGlobalAutomation(false)} className="premium-btn premium-btn-primary">▶️ Resume Automation</button>
-                  ) : (
-                    <button type="button" onClick={() => handleToggleGlobalAutomation(true)} className="premium-btn premium-btn-secondary">⏸️ Pause Automation</button>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <form onSubmit={handleSetupAutomation}>
-              <div className="premium-grid-2" style={{ marginBottom: '1rem' }}>
-                <div>
-                  <label className="premium-label">First Sunday Date *</label>
-                  <input type="date" value={automationForm.firstSunday} onChange={e => setAutomationForm({...automationForm, firstSunday: e.target.value})} required className="premium-input" />
-                </div>
-                <div>
-                  <label className="premium-label">Starting Batch *</label>
-                  <select value={automationForm.startingBatch} onChange={e => setAutomationForm({...automationForm, startingBatch: e.target.value})} className="premium-input">
-                    <option value="BATCH_1">Batch 1</option>
-                    <option value="BATCH_2">Batch 2</option>
-                  </select>
-                </div>
-              </div>
-              <div className="premium-grid-2" style={{ marginBottom: '1.5rem' }}>
-                <div>
-                  <label className="premium-label">Start Time *</label>
-                  <input type="time" value={automationForm.startTime} onChange={e => setAutomationForm({...automationForm, startTime: e.target.value})} required className="premium-input" />
-                </div>
-                <div>
-                  <label className="premium-label">End Time *</label>
-                  <input type="time" value={automationForm.endTime} onChange={e => setAutomationForm({...automationForm, endTime: e.target.value})} required className="premium-input" />
-                </div>
-              </div>
-              <button type="submit" disabled={isLoading} className="premium-btn premium-btn-accent" style={{ width: '100%' }}>
-                {isLoading ? "Saving..." : "Enable Automation"}
-              </button>
-            </form>
-          </div>
-        )}
-
-        {activeTab === "MANUAL" && (
         <form onSubmit={scheduleClass} className="premium-form">
           <div>
             <label className="premium-label">Target Audience (Session Type) *</label>
@@ -567,14 +437,19 @@ function ScheduleClass() {
               )}
             </div>
 
+          <div style={{ marginBottom: "1.5rem" }}>
+            <label className="premium-label">Class Date *</label>
+            <input type="date" value={request.classDate} onChange={(e) => setRequest({ ...request, classDate: e.target.value })} required className="premium-input" style={{ width: "100%" }} />
+          </div>
+
           <div className="premium-grid-2">
             <div>
               <label className="premium-label">Start Time *</label>
-              <input type="datetime-local" value={request.startTime} onChange={(e) => setRequest({ ...request, startTime: e.target.value })} required className="premium-input" />
+              <TimePicker value={request.startTime} onChange={(e) => setRequest({ ...request, startTime: e.target.value })} required className="premium-input" />
             </div>
             <div>
               <label className="premium-label">End Time *</label>
-              <input type="datetime-local" value={request.endTime} onChange={(e) => setRequest({ ...request, endTime: e.target.value })} required className="premium-input" />
+              <TimePicker value={request.endTime} onChange={(e) => setRequest({ ...request, endTime: e.target.value })} required className="premium-input" />
             </div>
           </div>
 
@@ -584,7 +459,6 @@ function ScheduleClass() {
             </button>
           </div>
         </form>
-        )}
       </div>
 
       {/* 🚨 ADMIN LIVE RADAR UI 🚨 */}
@@ -648,11 +522,11 @@ function ScheduleClass() {
                 <div className={styles.animatedField} style={{ background: 'var(--bg-nested)', padding: '1rem', borderRadius: '8px', display: 'flex', gap: '1rem', border: '1px solid var(--border-color)' }}>
                   <div style={{ flex: 1 }}>
                     <label className="premium-label" style={{ fontSize: '12px' }}>New Start Time</label>
-                    <input type="datetime-local" value={editStartTime} onChange={(e) => setEditStartTime(e.target.value)} className={`premium-input ${styles.formInput}`} style={{ minHeight: '40px' }} />
+                    <div style={{display:"flex", gap:"5px", flexWrap:"wrap"}}><input type="date" value={editDate} onChange={e=>setEditDate(e.target.value)} className={`premium-input ${styles.formInput}`} style={{minHeight:"40px", flex:1}}/><TimePicker value={editStartTime} onChange={e=>setEditStartTime(e.target.value)} className={`premium-input ${styles.formInput}`} /></div>
                   </div>
                   <div style={{ flex: 1 }}>
                     <label className="premium-label" style={{ fontSize: '12px' }}>New End Time</label>
-                    <input type="datetime-local" value={editEndTime} onChange={(e) => setEditEndTime(e.target.value)} className={`premium-input ${styles.formInput}`} style={{ minHeight: '40px' }} />
+                    <TimePicker value={editEndTime} onChange={e=>setEditEndTime(e.target.value)} className={`premium-input ${styles.formInput}`} />
                   </div>
                 </div>
               )}

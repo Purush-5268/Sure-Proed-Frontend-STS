@@ -182,6 +182,23 @@ function CohortDetails() {
     }
   };
 
+  const [updatingMentor, setUpdatingMentor] = useState(false);
+  const handleSetCurrentMentor = async (mentorId) => {
+    setUpdatingMentor(true);
+    try {
+      await apiClient.post(`/api/cohorts/${id}/set-current-mentor/`, { mentor_id: mentorId });
+      // Refresh cohort details to get updated mentor info
+      const cohortRes = await apiClient.get(API_ENDPOINTS.COHORTS.BY_ID(id));
+      setCohort(cohortRes.data);
+      alert("Current mentor updated successfully");
+    } catch (err) {
+      console.error("Failed to update mentor:", err);
+      alert("Failed to update mentor: " + (err.response?.data?.detail || err.message));
+    } finally {
+      setUpdatingMentor(false);
+    }
+  };
+
   useEffect(() => {
     let isMounted = true;
     const loadData = async () => {
@@ -348,7 +365,23 @@ function CohortDetails() {
             <FiUser size={16} aria-hidden="true" />
             <span className={styles.metricLabel}>Assigned Mentor</span>
           </div>
-          <p className={styles.metricValue}>{mentorName}</p>
+          <p className={styles.metricValue}>{cohort.current_mentor_details ? cohort.current_mentor_details.name || cohort.current_mentor_details.first_name : mentorName}</p>
+          
+          {cohort.active_mentors && cohort.active_mentors.length > 0 && (
+            <div style={{ marginTop: '12px' }}>
+              <select 
+                style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-nested)', fontSize: '0.85rem' }}
+                value={cohort.current_mentor_details?.id || ""}
+                onChange={(e) => handleSetCurrentMentor(e.target.value)}
+                disabled={updatingMentor}
+              >
+                <option value="">-- Set Current Mentor --</option>
+                {cohort.active_mentors.map(am => (
+                  <option key={am.id} value={am.id}>{am.name || am.first_name || am.email}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         <div className={styles.metricCard}>

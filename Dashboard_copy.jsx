@@ -11,7 +11,7 @@ import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import styles from "./Dashboard.module.css";
-import { FiCheckCircle, FiClock, FiAlertCircle, FiCpu, FiUsers, FiBarChart2, FiUser, FiVideo, FiFileText, FiEdit, FiBookOpen, FiArrowRight, FiLock, FiCalendar, FiAward, FiX } from "react-icons/fi";
+import { FiCheckCircle, FiClock, FiAlertCircle, FiCpu, FiUsers, FiBarChart2, FiUser, FiVideo, FiFileText, FiEdit, FiBookOpen } from "react-icons/fi";
 import { FaLaptopCode, FaRegCalendarAlt } from "react-icons/fa";
 import FeedbackWidget from "../../components/common/FeedbackWidget";
 import AttendanceWarningPopup from "../../components/attendance/AttendanceWarningPopup";
@@ -348,43 +348,37 @@ function Dashboard() {
     <div className={styles.dashboardContainer}>
       <PushNotificationBanner />
 
-      
-      {/* SECTION 1: Top Layer (Hero + Calendar) */}
-      <div className={styles.topSection}>
-        <div className={styles.heroBanner}>
-          <div className={styles.heroLeft}>
-            <p className={styles.heroGreeting}>Welcome back,</p>
-            <h1 className={styles.heroName}>
-              {`${user?.first_name || ''} ${user?.last_name || ''}`.trim() || profile?.first_name || "Student"}!
-            </h1>
-            <p className={styles.heroSubtitle}>Keep learning, keep building. You're one step closer to your goals.</p>
-            
-            <div className={styles.heroQuote}>
-              <p className={styles.heroQuoteText}>"Discipline today builds the career you deserve tomorrow."</p>
-              <p className={styles.heroQuoteAuthor}>— SURE ProEd</p>
-            </div>
-          </div>
+      {/* SECTION 1: Welcome Hero Banner */}
+      <div className={styles.heroBanner}>
+        <div className={styles.heroLeft}>
+          <p className={styles.heroGreeting}>Welcome back,</p>
+          <h1 className={styles.heroName}>{`${user?.first_name || ''} ${user?.last_name || ''}`.trim() || profile?.first_name || "Student"}!</h1>
+          <p className={styles.heroSubtitle}>Keep learning, keep building. You're one step closer to your goals.</p>
           
-          <div className={styles.heroRight}>
-            <div style={{ textAlign: 'right' }}>
-               <h3 className={styles.heroValues}>Learn<br/>Build<br/>Grow<br/>Belong</h3>
-            </div>
+          <div className={styles.heroQuote}>
+            <p className={styles.heroQuoteText}>"Discipline today builds the career you deserve tomorrow."</p>
+            <p className={styles.heroQuoteAuthor}>— SURE ProEd</p>
           </div>
         </div>
-
-        <div className={styles.calendarCard}>
-          <div className={styles.calendarHeader}>
-            <h4 className={styles.calendarTitle}>
-              {new Date(calMonth.year, calMonth.month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-            </h4>
-            <div className={styles.calendarNav}>
-              <button className={styles.calendarNavBtn} onClick={() => setCalMonth(prev => ({ year: prev.month === 0 ? prev.year - 1 : prev.year, month: prev.month === 0 ? 11 : prev.month - 1 }))}>&lt;</button>
-              <button className={styles.calendarNavBtn} onClick={() => setCalMonth(prev => ({ year: prev.month === 11 ? prev.year + 1 : prev.year, month: prev.month === 11 ? 0 : prev.month + 1 }))}>&gt;</button>
-            </div>
+        
+        <div className={styles.heroRight}>
+          <div style={{ textAlign: 'right', marginBottom: '8px' }}>
+             <h3 style={{ color: 'white', margin: 0, fontSize: '18px', fontWeight: 800, lineHeight: 1.2 }}>Learn<br/>Build<br/>Grow<br/>Belong</h3>
           </div>
-          <div className={styles.calendarGrid}>
-            {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => <div key={d} className={styles.calendarDayLabel}>{d}</div>)}
-            {renderCalendar()}
+          <div className={styles.calendarWidget}>
+            <div className={styles.calendarHeader}>
+              <h4 className={styles.calendarTitle}>
+                {new Date(calMonth.year, calMonth.month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </h4>
+              <div className={styles.calendarNav}>
+                <button className={styles.calendarNavBtn} onClick={() => setCalMonth(prev => ({ year: prev.month === 0 ? prev.year - 1 : prev.year, month: prev.month === 0 ? 11 : prev.month - 1 }))}>&lt;</button>
+                <button className={styles.calendarNavBtn} onClick={() => setCalMonth(prev => ({ year: prev.month === 11 ? prev.year + 1 : prev.year, month: prev.month === 11 ? 0 : prev.month + 1 }))}>&gt;</button>
+              </div>
+            </div>
+            <div className={styles.calendarGrid}>
+              {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => <div key={d} className={styles.calendarDayLabel}>{d}</div>)}
+              {renderCalendar()}
+            </div>
           </div>
         </div>
       </div>
@@ -400,61 +394,44 @@ function Dashboard() {
         </div>
       )}
 
-      
-      {/* SECTION 2: Summary Cards */}
-      <div className={styles.summaryGrid}>
-        <div className={styles.summaryCard}>
-          <div className={`${styles.summaryIcon} ${styles.summaryIconCourse}`}><FiCpu size={24} /></div>
-          <div style={{ flexGrow: 1, minWidth: 0 }}>
-            <p className={styles.summaryLabel}>Current Course</p>
-            <h4 className={styles.summaryValue} title={resolvedEnrollment?.courseName || profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "Awaiting Course"}>
-              {resolvedEnrollment?.courseName || profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "Awaiting Course"}
-            </h4>
+      {/* SECTION 2: Info Strip */}
+      <div className={styles.infoStrip}>
+        <div className={styles.infoItem}>
+          <div className={`${styles.infoIcon} ${styles.infoIconCourse}`}><FiCpu size={24} /></div>
+          <div>
+            <p className={styles.infoLabel}>Current Course</p>
+            <h4 className={styles.infoValue}>{profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "Awaiting Course"}</h4>
           </div>
         </div>
-        
-        <div className={styles.summaryCard}>
-          <div className={`${styles.summaryIcon} ${styles.summaryIconCohort}`}><FiUsers size={24} /></div>
-          <div style={{ flexGrow: 1, minWidth: 0 }}>
-            <p className={styles.summaryLabel}>Cohort</p>
-            <h4 className={styles.summaryValue}>{resolvedEnrollment?.group || profile?.current_application?.assigned_cohort?.code || stats?.active_cohort?.code || profile?.cohort_code || "Awaiting Cohort"}</h4>
+        <div className={styles.infoItem}>
+          <div className={`${styles.infoIcon} ${styles.infoIconCohort}`}><FiUsers size={24} /></div>
+          <div>
+            <p className={styles.infoLabel}>Cohort</p>
+            <h4 className={styles.infoValue}>{profile?.current_application?.assigned_cohort?.code || stats?.active_cohort?.code || profile?.cohort_code || "Awaiting Cohort"}</h4>
           </div>
         </div>
-
-        <div className={styles.summaryCard}>
-          <div className={`${styles.summaryIcon} ${styles.summaryIconStatus}`}><FiBarChart2 size={24} /></div>
-          <div style={{ flexGrow: 1, minWidth: 0 }}>
-            <p className={styles.summaryLabel}>Learning Status</p>
-            <h4 className={styles.summaryValue}>{resolvedEnrollment?.status ? resolvedEnrollment.status.replace(/_/g, " ") : "ACTIVE"}</h4>
+        <div className={styles.infoItem}>
+          <div className={`${styles.infoIcon} ${styles.infoIconStatus}`}><FiBarChart2 size={24} /></div>
+          <div>
+            <p className={styles.infoLabel}>Learning Status</p>
+            <h4 className={styles.infoValue}>{resolvedEnrollment?.status ? resolvedEnrollment.status.replace(/_/g, " ") : "ACTIVE"}</h4>
           </div>
         </div>
-
-        <div className={styles.summaryCard} onClick={() => setShowMentorModal(true)} style={{ cursor: 'pointer' }}>
-          <div className={`${styles.summaryIcon} ${styles.summaryIconMentors}`}><FiUser size={24} /></div>
-          <div style={{ flexGrow: 1, minWidth: 0 }}>
-            <p className={styles.summaryLabel}>Mentors</p>
-            <h4 className={styles.summaryValue}>
+        <div className={styles.infoItem}>
+          <div className={`${styles.infoIcon} ${styles.infoIconMentors}`}><FiUser size={24} /></div>
+          <div>
+            <p className={styles.infoLabel}>Mentors</p>
+            <h4 className={styles.infoValue}>
               {(() => {
-                const cohortData = stats?.active_cohort || profile?.current_application?.assigned_cohort || {};
+                const cohortData = stats?.active_cohort || activeApp?.assigned_cohort || {};
                 let count = 0;
-                let mentorName = null;
-                if (cohortData.active_mentors) {
-                  count = cohortData.active_mentors.length;
-                  if(cohortData.current_mentor_details) {
-                    mentorName = cohortData.current_mentor_details.first_name || cohortData.current_mentor_details.name;
-                  }
-                }
+                if (cohortData.active_mentors) count = cohortData.active_mentors.length;
                 else if (cohortData.mentors) count = cohortData.mentors.length;
                 else if (cohortData.mentor_name && cohortData.mentor_name !== "Not assigned") count = cohortData.mentor_name.split(',').length;
-                
-                if (count > 0) {
-                  return mentorName ? `${count} Assigned · ${mentorName}` : `${count} Assigned`;
-                }
-                return "Pending";
+                return count > 0 ? `${count} Assigned` : "Pending";
               })()}
             </h4>
           </div>
-          <FiArrowRight size={18} color="var(--text-muted)" />
         </div>
       </div>
 
@@ -485,16 +462,16 @@ function Dashboard() {
             
             <div className={styles.progressLegend}>
               <div className={styles.progressLegendItem}>
-                <span><span className={styles.progressLegendDot} style={{background: '#10b981'}}></span> Attended</span>
-                <span className={styles.progressLegendCount}>{attendanceStats?.present_sessions || 0}</span>
+                <span><span className={styles.progressLegendDot} style={{background: '#10b981'}}></span> Completed</span>
+                <span className={styles.progressLegendCount}>{assignmentStats.completed}</span>
               </div>
               <div className={styles.progressLegendItem}>
-                <span><span className={styles.progressLegendDot} style={{background: '#ef4444'}}></span> Missed</span>
-                <span className={styles.progressLegendCount}>{attendanceStats?.absent_sessions || 0}</span>
+                <span><span className={styles.progressLegendDot} style={{background: '#3b82f6'}}></span> In Progress</span>
+                <span className={styles.progressLegendCount}>{assignmentStats.pending}</span>
               </div>
               <div className={styles.progressLegendItem}>
-                <span><span className={styles.progressLegendDot} style={{background: 'var(--text-muted)'}}></span> Total</span>
-                <span className={styles.progressLegendCount}>{attendanceStats?.total_sessions || 0}</span>
+                <span><span className={styles.progressLegendDot} style={{background: 'var(--text-muted)'}}></span> Not Started</span>
+                <span className={styles.progressLegendCount}>{stats?.upcoming_exams?.length || 0}</span>
               </div>
             </div>
             
@@ -504,177 +481,93 @@ function Dashboard() {
           </div>
         </div>
 
-        
         {/* Col 2: Current Enrollment */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <h3 className={styles.cardTitle}>Current Enrollment</h3>
-            <span className={styles.enrollmentBadge}>{resolvedEnrollment?.status ? resolvedEnrollment.status.replace(/_/g, " ") : "ACTIVE"}</span>
+            <span className={styles.enrollmentBadge}>Active</span>
           </div>
           <div className={styles.enrollmentCard}>
             <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: 'var(--primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                 {(() => {
-                   const cName = (resolvedEnrollment?.courseName || profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "").toLowerCase();
-                   if (cName.includes("vlsi") || cName.includes("silicon") || cName.includes("circuit")) return <FiCpu size={28} />;
-                   if (cName.includes("data") || cName.includes("sql") || cName.includes("analytics")) return <FiBarChart2 size={28} />;
-                   if (cName.includes("web") || cName.includes("stack") || cName.includes("developer") || cName.includes("software")) return <FaLaptopCode size={28} />;
-                   if (cName.includes("security") || cName.includes("cyber") || cName.includes("hack")) return <FiLock size={28} />;
-                   if (cName.includes("ui") || cName.includes("ux") || cName.includes("graphic")) return <FiEdit size={28} />;
-                   if (cName.includes("cloud") || cName.includes("aws")) return <FiCpu size={28} />;
-                   return <FiBookOpen size={28} />;
-                 })()}
-              </div>
-              <h4 className={styles.enrollmentTitle} style={{ margin: 0, fontSize: '15px', fontWeight: 'bold', color: 'var(--text-primary)', lineHeight: 1.4 }}>
-                 {resolvedEnrollment?.courseName || profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "Awaiting Course"}
-              </h4>
+              <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'url(https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80) center/cover' }}></div>
+              <h4 className={styles.enrollmentTitle}>{profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "Awaiting Course"} - Concept to Silicon</h4>
             </div>
             
-            <div className={styles.enrollmentMetaWrapper}>
+            <div className={styles.enrollmentMeta}>
               <div className={styles.enrollmentMetaItem}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <FiLock size={14} color="var(--text-muted)" />
-                  <span className={styles.enrollmentMetaLabel}>Domain</span>
-                </div>
-                <span className={styles.enrollmentMetaValue}>
-                  {resolvedEnrollment?.courseDomain || profile?.current_application?.course?.domain || stats?.active_cohort?.course_domain || stats?.application_course_domain || (resolvedEnrollment?.courseName || stats?.application_course_title || profile?.course_name || "").split(" ")[0] || "General"}
-                </span>
+                <span className={styles.enrollmentMetaLabel}>Domain</span>
+                <span className={styles.enrollmentMetaValue}>{resolvedEnrollment?.courseDomain || profile?.current_application?.course?.domain || stats?.application_course_domain || stats?.application_course_title?.split(' ')?.[0] || profile?.course_name?.split(' ')?.[0] || "General"}</span>
               </div>
               <div className={styles.enrollmentMetaItem}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <FiCalendar size={14} color="var(--text-muted)" />
-                  <span className={styles.enrollmentMetaLabel}>Start Date</span>
-                </div>
-                <span className={styles.enrollmentMetaValue}>
-                  {(() => {
-                    const cohortData = stats?.active_cohort || profile?.current_application?.assigned_cohort || {};
-                    const d = resolvedEnrollment?.startDate || cohortData.start_date || cohortData.startDate || profile?.current_application?.applied_at || profile?.current_application?.created_at || profile?.created_at || new Date().toISOString();
-                    return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                  })()}
-                </span>
+                <span className={styles.enrollmentMetaLabel}>Start Date</span>
+                <span className={styles.enrollmentMetaValue}>{resolvedEnrollment?.startDate ? new Date(resolvedEnrollment.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : (profile?.current_application?.created_at ? new Date(profile.current_application.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "Recently")}</span>
               </div>
             </div>
             
-            <div className={styles.enrollmentProgressContainer}>
-              <div className={styles.enrollmentProgressBarBg}>
+            <div className={styles.enrollmentProgress}>
+              <div className={styles.enrollmentProgressBar}>
                 <div className={styles.enrollmentProgressFill} style={{ width: `${Math.round(attendanceStats?.attendance_percentage || 0)}%` }}></div>
               </div>
-              <span className={styles.enrollmentProgressText}>{Math.round(attendanceStats?.attendance_percentage || 0)}%</span>
+              <div className={styles.enrollmentProgressPct}>{Math.round(attendanceStats?.attendance_percentage || 0)}%</div>
             </div>
-
-            <button className={styles.enrollmentViewBtn} onClick={() => navigate('/student/applications')}>
-              View Course Details &rarr;
-            </button>
           </div>
         </div>
 
-
-        
         {/* Col 3: Upcoming Live Classes */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <h3 className={styles.cardTitle}>Upcoming Live Classes</h3>
-            <button className={styles.cardViewAll} onClick={() => navigate('/student/class-schedule')}>View All &rarr;</button>
+            <button className={styles.cardViewAll} onClick={() => navigate('/student/class-schedule')}>View All</button>
           </div>
           <div className={styles.classesListContainer}>
             {(() => {
               const now = new Date();
-              const allVisibleClasses = todayClasses.filter(cls => {
+              const visibleClasses = todayClasses.filter(cls => {
                 const classStart = new Date(`${cls.class_date}T${cls.start_time}`);
                 if (isNaN(classStart)) return false;
                 const hoursSince = (now - classStart) / (1000 * 60 * 60);
                 return hoursSince <= 24;
-              });
-              const visibleClasses = allVisibleClasses.slice(0, 3);
+              }).slice(0, 4);
 
               if (visibleClasses.length === 0) {
                 return <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>No live classes scheduled currently.</p>;
               }
 
-              const classesList = visibleClasses.map((cls, idx) => {
+              return visibleClasses.map((cls, idx) => {
                 const classStart = new Date(`${cls.class_date}T${cls.start_time}`);
                 let classEnd = cls.end_time ? new Date(`${cls.class_date}T${cls.end_time}`) : new Date(classStart.getTime() + 2 * 60 * 60 * 1000);
                 if (classEnd < classStart) classEnd = new Date(classEnd.getTime() + 24 * 60 * 60 * 1000);
                 
                 const clsStatus = (cls.class_status || cls.status || "").toUpperCase();
-                const isCompleted = clsStatus === 'COMPLETED' || clsStatus === 'ENDED' || now >= classEnd;
+                const isCompleted = clsStatus === 'COMPLETED' || clsStatus === 'ENDED';
                 const isCancelled = clsStatus === 'CANCELLED';
                 const windowOpenTime = new Date(classStart.getTime() - 10 * 60 * 1000);
-                const classOpen = !isCompleted && !isCancelled && now >= windowOpenTime && now <= classEnd;
-                const isLate = !isCompleted && !isCancelled && now > classEnd;
-                const startsIn = Math.floor((classStart - now) / 60000);
+                const classOpen = !isCompleted && !isCancelled && now >= windowOpenTime;
 
-                let rightElement;
-                if (isCompleted) { 
-                  rightElement = <span className={styles.badgeCompleted}>Completed</span>;
-                } else if (isCancelled) { 
-                  rightElement = <span className={styles.badgeCancelled}>Cancelled</span>;
-                } else if (classOpen) { 
-                  rightElement = <button className={styles.btnJoinClass} onClick={() => handleJoinClass(cls)}>Join Class</button>;
-                } else if (isLate) {
-                  rightElement = (
-                    <div style={{ textAlign: 'right' }}>
-                      <span className={styles.badgeOngoing}>Ongoing</span>
-                      <button onClick={() => { setLateJoinClassId(cls.id || cls.realId); setShowLateJoinModal(true); }} className={styles.btnAskAdmin}>Ask Admin</button>
-                    </div>
-                  );
-                } else if (startsIn > 0) {
-                  const hrs = Math.floor(startsIn / 60);
-                  const mins = startsIn % 60;
-                  const timeText = hrs > 0 ? `${hrs} hr ${mins} min` : `${mins} min`;
-                  rightElement = (
-                    <div className={styles.startsInBadge}>
-                      <span className={styles.startsInLabel}>Starts in</span>
-                      <span className={styles.startsInTime}>{timeText}</span>
-                    </div>
-                  );
-                }
+                let badgeClass = styles.classBadgeUpcoming;
+                let badgeText = "Upcoming";
+                if (isCompleted) { badgeClass = styles.classBadgeCompleted; badgeText = "Completed"; }
+                else if (isCancelled) { badgeClass = styles.classBadgeCancelled; badgeText = "Cancelled"; }
+                else if (classOpen) { badgeClass = styles.classBadgeLive; badgeText = "Live"; }
 
                 return (
-                  <div key={idx} style={{ marginBottom: '16px' }}>
-                    <div className={styles.classItemContainer}>
-                      <div className={styles.classItemIconBox}>
-                        <FiCalendar size={18} />
-                      </div>
-                      <div className={styles.classItemDetails}>
-                        <h4 className={styles.classItemName}>{cls.title || cls.class_type || "Live Session"}</h4>
-                        <p className={styles.classItemTime}>
-                          <FiClock size={12} style={{marginRight: '4px'}}/>
-                          {classStart.toLocaleDateString([], { month: 'short', day: 'numeric' })} • {classStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
-                      <div className={styles.classItemRight}>
-                        {rightElement}
-                      </div>
+                  <div key={idx} className={styles.classItem}>
+                    <div style={{ flexShrink: 0, width: '32px', height: '32px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      📅
                     </div>
-                    {classOpen && (
-                      <div className={styles.classInstructions}>
-                        <h5 style={{ margin: '0 0 8px 0', fontSize: '13px', color: 'var(--text-primary)' }}>📌 Before Joining</h5>
-                        <ul style={{ margin: 0, paddingLeft: '16px', color: 'var(--text-secondary)', fontSize: '12px', lineHeight: '1.4' }}>
-                          <li>Keep your camera ON during the class.</li>
-                          <li>Keep your microphone available.</li>
-                          <li>Do not leave the Meet before the class ends.</li>
-                        </ul>
-                      </div>
-                    )}
+                    <div className={styles.classItemInfo}>
+                      <h4 className={styles.classItemTitle}>{cls.title || cls.class_type}</h4>
+                      <p className={styles.classItemTime}>
+                        {classStart.toLocaleDateString([], { month: 'short', day: 'numeric' })} • {classStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {classEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    <div className={`${styles.classBadge} ${badgeClass}`}>{badgeText}</div>
                   </div>
                 );
               });
-              
-              return (
-                <>
-                  {classesList}
-                  {allVisibleClasses.length > 0 && (
-                     <button className={styles.viewAllClassesBtn} onClick={() => navigate('/student/class-schedule')}>
-                       {allVisibleClasses.length > 3 ? `+ ${allVisibleClasses.length - 3} more classes available. View All Classes →` : "View All Classes →"}
-                     </button>
-                  )}
-                </>
-              );
             })()}
           </div>
         </div>
-
 
         {/* Col 4: Recent Announcements */}
         <div className={styles.card}>
@@ -716,56 +609,46 @@ function Dashboard() {
         
       </div>
 
-      
       {/* SECTION 4: Quick Actions Row */}
-      <div className={styles.quickActionsWrapper}>
-        <h3 className={styles.quickActionsHeading}>Quick Actions</h3>
-        <div className={styles.quickActions}>
-          <div className={styles.quickAction} onClick={() => navigate('/student/assignments')}>
-            <div className={styles.quickActionIcon} style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}><FiFileText size={24} /></div>
-            <div style={{ flexGrow: 1 }}>
-              <h4 className={styles.quickActionTitle}>View Assignments</h4>
-              <p className={styles.quickActionDesc}>Check and submit your work</p>
-            </div>
-            <FiArrowRight size={18} color="var(--text-muted)" />
+      <div className={styles.quickActions}>
+        <div className={styles.quickAction} onClick={() => {
+          // Find first open/live class
+          const now = new Date();
+          const liveCls = todayClasses.find(c => {
+             const start = new Date(`${c.class_date}T${c.start_time}`);
+             return now >= new Date(start.getTime() - 10*60000) && !(c.status === 'COMPLETED' || c.status === 'ENDED' || c.status === 'CANCELLED');
+          });
+          if (liveCls && liveCls.meeting_link) handleJoinClass(liveCls);
+          else navigate('/student/class-schedule');
+        }}>
+          <div className={styles.quickActionIcon}><FiVideo size={24} /></div>
+          <div>
+            <h4 className={styles.quickActionTitle}>Join Live Class</h4>
+            <p className={styles.quickActionDesc}>Attend your scheduled class</p>
           </div>
-
-          {(stats?.upcoming_exams?.length > 0 || profile?.current_application?.requires_exam) && (
-            <div className={styles.quickAction} onClick={() => navigate('/student/exams')}>
-              <div className={styles.quickActionIcon} style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}><FiEdit size={24} /></div>
-              <div style={{ flexGrow: 1 }}>
-                <h4 className={styles.quickActionTitle}>Take Exam</h4>
-                <p className={styles.quickActionDesc}>Go to exam instructions</p>
-              </div>
-              <FiArrowRight size={18} color="var(--text-muted)" />
-            </div>
-          )}
-
-          <div className={styles.quickAction} onClick={() => navigate('/student/resources')}>
-            <div className={styles.quickActionIcon} style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}><FiBookOpen size={24} /></div>
-            <div style={{ flexGrow: 1 }}>
-              <h4 className={styles.quickActionTitle}>View Resources</h4>
-              <p className={styles.quickActionDesc}>Notes, recordings & more</p>
-            </div>
-            <FiArrowRight size={18} color="var(--text-muted)" />
+        </div>
+        
+        <div className={styles.quickAction} onClick={() => navigate('/student/assignments')}>
+          <div className={styles.quickActionIcon} style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}><FiFileText size={24} /></div>
+          <div>
+            <h4 className={styles.quickActionTitle}>View Assignments</h4>
+            <p className={styles.quickActionDesc}>Check and submit your work</p>
           </div>
+        </div>
 
-          <div className={styles.quickAction} onClick={() => navigate('/student/attendance')}>
-            <div className={styles.quickActionIcon} style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' }}><FiBarChart2 size={24} /></div>
-            <div style={{ flexGrow: 1 }}>
-              <h4 className={styles.quickActionTitle}>My Attendance</h4>
-              <p className={styles.quickActionDesc}>View your attendance</p>
-            </div>
-            <FiArrowRight size={18} color="var(--text-muted)" />
+        <div className={styles.quickAction} onClick={() => navigate('/student/exams')}>
+          <div className={styles.quickActionIcon} style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' }}><FiEdit size={24} /></div>
+          <div>
+            <h4 className={styles.quickActionTitle}>Take Exam</h4>
+            <p className={styles.quickActionDesc}>Attempt assessments</p>
           </div>
+        </div>
 
-          <div className={styles.quickAction} onClick={() => navigate('/student/certificates')}>
-            <div className={styles.quickActionIcon} style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}><FiAward size={24} /></div>
-            <div style={{ flexGrow: 1 }}>
-              <h4 className={styles.quickActionTitle}>My Certificates</h4>
-              <p className={styles.quickActionDesc}>View earned certificates</p>
-            </div>
-            <FiArrowRight size={18} color="var(--text-muted)" />
+        <div className={styles.quickAction} onClick={() => navigate('/student/resources')}>
+          <div className={styles.quickActionIcon} style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}><FiBookOpen size={24} /></div>
+          <div>
+            <h4 className={styles.quickActionTitle}>View Resources</h4>
+            <p className={styles.quickActionDesc}>Notes, recordings & more</p>
           </div>
         </div>
       </div>
@@ -821,43 +704,17 @@ function Dashboard() {
             <h3 style={{ margin: '0 0 20px 0', fontSize: '20px', color: 'var(--text-primary)' }}>All Assigned Mentors</h3>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '400px', overflowY: 'auto' }}>
-                    {(() => {
-                const cohortData = stats?.active_cohort || profile?.current_application?.assigned_cohort || {};
-                let activeMentors = cohortData.active_mentors || [];
-                
-                if (activeMentors.length === 0) {
-                  if (cohortData.mentors && cohortData.mentors.length > 0) {
-                    if (typeof cohortData.mentors[0] === 'object') {
-                      activeMentors = cohortData.mentors;
-                    } else {
-                      const isNameArray = typeof cohortData.mentors[0] === 'string' && cohortData.mentors[0].includes(' ');
-                      if (isNameArray && !mentorsMap[cohortData.mentors[0]]) {
-                        activeMentors = cohortData.mentors.map((name, i) => ({ id: `mentor-${i}`, first_name: name }));
-                      } else {
-                        const names = cohortData.mentor_name && cohortData.mentor_name !== "Not assigned" ? cohortData.mentor_name.split(',').map(n => n.trim()) : [];
-                        activeMentors = cohortData.mentors.map((id, i) => {
-                          const m = mentorsMap[id];
-                          return m ? m : { id, first_name: names[i] || "Assigned Mentor" };
-                        });
-                      }
-                    }
-                  } else if (cohortData.mentor_name && cohortData.mentor_name !== "Not assigned") {
-                    activeMentors = cohortData.mentor_name.split(',').map((name, i) => ({ id: `mentor-${i}`, first_name: name.trim() }));
-                  }
-                }
-                
+              {(() => {
+                const cohortData = stats?.active_cohort || activeApp?.assigned_cohort || {};
+                const activeMentors = cohortData.active_mentors || (cohortData.mentors ? cohortData.mentors : []);
                 const currentMentor = cohortData.current_mentor_details;
                 
                 return (
                   <>
                     {currentMentor && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '12px' }}>
-                         <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#10b981', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', overflow: 'hidden' }}>
-                           {(currentMentor.profile_photo || currentMentor.photo || currentMentor.avatar || currentMentor.profile_picture) ? (
-                             <img src={currentMentor.profile_photo || currentMentor.photo || currentMentor.avatar || currentMentor.profile_picture} alt="Mentor" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                           ) : (
-                             currentMentor.first_name?.[0] || currentMentor.name?.[0] || "M"
-                           )}
+                         <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#10b981', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                           {currentMentor.first_name?.[0] || currentMentor.name?.[0] || "M"}
                          </div>
                          <div style={{ flexGrow: 1 }}>
                            <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '15px' }}>{currentMentor.first_name || currentMentor.name}</h4>
@@ -870,18 +727,12 @@ function Dashboard() {
                     
                     {activeMentors.map((m, i) => {
                       if (currentMentor && (m.id === currentMentor.id || m.email === currentMentor.email)) return null;
-                      const mName = `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.name || m.username || "Mentor";
-                      const mPhoto = m.profile_photo || m.photo || m.avatar || m.profile_picture;
                       return (
                         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
-                           <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--bg-nested)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', overflow: 'hidden' }}>
-                             {mPhoto ? (
-                               <img src={mPhoto} alt={mName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                             ) : (
-                               mName.charAt(0).toUpperCase()
-                             )}
+                           <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--bg-nested)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                             {m.first_name?.[0] || m.name?.[0] || m.username?.[0] || "M"}
                            </div>
-                           <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '15px' }}>{mName}</h4>
+                           <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '15px' }}>{m.first_name || m.name || m.username}</h4>
                         </div>
                       );
                     })}

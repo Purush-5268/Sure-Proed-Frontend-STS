@@ -39,10 +39,6 @@ function PermissionChatModal({ warningId, onClose }) {
       wsHost = window.location.host;
     }
     
-    if (wsHost.endsWith("/")) {
-      wsHost = wsHost.slice(0, -1);
-    }
-
     const wsUrl = `${wsProtocol}://${wsHost}/ws/chat/${warningId}/`;
     
     wsRef.current = new WebSocket(wsUrl, ["Bearer", token]);

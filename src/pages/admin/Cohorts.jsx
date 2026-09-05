@@ -41,6 +41,7 @@ function Cohorts() {
 
   const [courses, setCourses] = useState([]);
   const [activeFilter, setActiveFilter] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -97,8 +98,15 @@ function Cohorts() {
   };
 
   const filteredCohorts = cohorts.filter((c) => {
-    if (activeFilter === "ALL") return true;
-    return c.status?.toUpperCase() === activeFilter.toUpperCase();
+    const matchesStatus = activeFilter === "ALL" || c.status?.toUpperCase() === activeFilter.toUpperCase();
+    
+    const query = searchQuery.toLowerCase();
+    const courseName = (c.course?.name || getCourseName(c.course) || "").toLowerCase();
+    const cohortName = (c.name || c.code || "").toLowerCase();
+    
+    const matchesSearch = !query || courseName.includes(query) || cohortName.includes(query);
+
+    return matchesStatus && matchesSearch;
   });
 
   return (
@@ -115,22 +123,36 @@ function Cohorts() {
       </div>
       
       <div className={styles.filterSection}>
-        <label className={styles.filterLabel}>Status: </label>
-        <select 
-          value={activeFilter} 
-          onChange={(e) => setActiveFilter(e.target.value)}
-          className={styles.statusDropdown}
-        >
-          <option value="ALL">All</option>
-          <option value="DRAFT">Draft</option>
-          <option value="OPEN">Open (Enrollment)</option>
-          <option value="ACTIVE">Active (Pre-Training)</option>
-          <option value="TRAINING">Training</option>
-          <option value="INTERNSHIP">Internship</option>
-          <option value="SOFT SKILLS">Soft Skills</option>
-          <option value="COMPLETED">Completed (Graduated)</option>
-          <option value="CANCELLED">Cancelled</option>
-        </select>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap", width: "100%" }}>
+          <div>
+            <label className={styles.filterLabel}>Status: </label>
+            <select 
+              value={activeFilter} 
+              onChange={(e) => setActiveFilter(e.target.value)}
+              className={styles.statusDropdown}
+            >
+              <option value="ALL">All</option>
+              <option value="DRAFT">Draft</option>
+              <option value="OPEN">Open (Enrollment)</option>
+              <option value="ACTIVE">Active (Pre-Training)</option>
+              <option value="TRAINING">Training</option>
+              <option value="INTERNSHIP">Internship</option>
+              <option value="SOFT SKILLS">Soft Skills</option>
+              <option value="COMPLETED">Completed (Graduated)</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+          </div>
+          <div style={{ flex: 1, minWidth: "200px" }}>
+            <input 
+              type="text" 
+              placeholder="Search by course or cohort name..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={styles.searchInput}
+              style={{ width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)", color: "var(--text-primary)" }}
+            />
+          </div>
+        </div>
       </div>
 
       {loading ? (

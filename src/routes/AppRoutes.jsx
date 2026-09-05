@@ -85,6 +85,7 @@ const StudentSettings = lazy(() => import("../pages/student/Settings"));
 const MyCohort = lazy(() => import("../pages/student/MyCohort"));
 const ClassSchedule = lazy(() => import("../pages/student/ClassSchedule"));
 const MentorDetails = lazy(() => import("../pages/student/MentorDetails"));
+const Resources = lazy(() => import("../pages/student/Resources"));
 
 const Attendance = lazy(() => import("../pages/student/Attendance"));
 const AttendanceHistory = lazy(() => import("../pages/student/AttendanceHistory"));
@@ -277,6 +278,7 @@ function AppRoutes() {
               <Route path="exam-instructions" element={<ExamInstructions />} />
               <Route path="class-schedule" element={<ClassSchedule />} />
               <Route path="mentor-details" element={<MentorDetails />} />
+              <Route path="resources" element={<Resources />} />
               <Route path="course/:id" element={<CourseDetails />} />
 
               <Route path="attendance" element={<Attendance />} />

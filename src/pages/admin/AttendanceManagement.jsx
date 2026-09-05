@@ -13,7 +13,7 @@ function AttendanceManagement() {
   const [loading, setLoading] = useState(true);
   const [errorState, setErrorState] = useState(null); // null, '403', '500', 'NETWORK'
   const [selectedCourse, setSelectedCourse] = useState("");
-  const [filterGroup, setFilterGroup] = useState("");
+  const [selectedCohort, setSelectedCohort] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -21,10 +21,24 @@ function AttendanceManagement() {
 
     const loadData = async () => {
       try {
+        setLoading(true);
+        
+        let attendanceUrl = API_ENDPOINTS.ATTENDANCE.BASE;
+        const params = new URLSearchParams();
+        if (selectedCourse) params.append("course", selectedCourse);
+        if (selectedCohort) params.append("cohort", selectedCohort);
+        
+        if (params.toString()) {
+          attendanceUrl += `?${params.toString()}`;
+        }
+
+        let cohortUrl = API_ENDPOINTS.COHORTS.BASE;
+        if (selectedCourse) cohortUrl += `?course=${selectedCourse}`;
+
         const [attendanceResponse, cohortsResponse, coursesResponse] = await Promise.all([
-          apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { signal: abortController.signal }),
-          apiClient.get(API_ENDPOINTS.COHORTS.BASE, { signal: abortController.signal }),
-          apiClient.get(API_ENDPOINTS.COURSES?.BASE || "/api/courses/", { signal: abortController.signal }),
+          apiClient.get(attendanceUrl, { signal: abortController.signal }),
+          apiClient.get(cohortUrl, { signal: abortController.signal }),
+          apiClient.get(`${API_ENDPOINTS.COURSES?.BASE || "/api/courses/"}?page_size=1000`, { signal: abortController.signal }),
         ]);
 
         if (isMounted) {
@@ -53,12 +67,16 @@ function AttendanceManagement() {
       }
     };
 
-    loadData();
+    const delayDebounceFn = setTimeout(() => {
+      loadData();
+    }, 500);
+
     return () => {
       isMounted = false;
+      clearTimeout(delayDebounceFn);
       abortController.abort();
     };
-  }, []);
+  }, [selectedCourse, selectedCohort]);
 
   const getCohortName = (cohortId, title) => {
     const cohort = cohorts.find((item) => String(item.id) === String(cohortId));
@@ -107,15 +125,7 @@ function AttendanceManagement() {
     return "N/A";
   };
 
-  const filteredAttendance = attendance.filter((item) => {
-    const domainName = getDomainName(item.cohort, item.title);
-    const groupName = getGroupNumber(item.cohort, item.title);
-
-    const matchesCourse = selectedCourse === "" || domainName.toLowerCase().includes(selectedCourse.toLowerCase());
-    const matchesGroup = filterGroup === "" || groupName.toLowerCase().includes(filterGroup.toLowerCase());
-
-    return matchesCourse && matchesGroup;
-  });
+  const filteredAttendance = attendance;
 
   const handleDownloadExcel = async (sessionId, sessionTitle, sessionDate) => {
     try {
@@ -200,32 +210,45 @@ function AttendanceManagement() {
         </Link>
       </div>
 
-      <div style={{ display: "flex", gap: "16px", marginBottom: "24px", backgroundColor: "var(--bg-surface)", padding: "16px", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+      <div style={{ display: "flex", gap: "16px", marginBottom: "24px", backgroundColor: "var(--bg-surface)", padding: "16px", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", flexWrap: "wrap" }}>
         <select
           value={selectedCourse}
-          onChange={(e) => setSelectedCourse(e.target.value)}
-          style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}
+          onChange={(e) => {
+            setSelectedCourse(e.target.value);
+            setSelectedCohort(""); // Reset cohort when course changes
+          }}
+          style={{ flex: 1, minWidth: "200px", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}
         >
-          <option value="">-- Select Course / Stream --</option>
+          <option value="">-- All Courses --</option>
           {courses.map((c) => (
-            <option key={c.id} value={c.name || c.title}>
+            <option key={c.id} value={c.id}>
               {c.name || c.title}
             </option>
           ))}
         </select>
 
-        <input
-          type="text" className="premium-input" placeholder="Filter by Group Number (e.g. G2-26)"
-          value={filterGroup}
-          onChange={(e) => setFilterGroup(e.target.value)}
-          style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)" }}
-        />
-
-        <button
-          onClick={() => { setSelectedCourse(""); setFilterGroup(""); }}
-          style={{ padding: "10px 16px", backgroundColor: "var(--bg-nested)", border: "1px solid var(--border-color)", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}
+        <select
+          value={selectedCohort}
+          onChange={(e) => setSelectedCohort(e.target.value)}
+          style={{ flex: 1, minWidth: "200px", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}
+          disabled={!selectedCourse}
         >
-          Clear
+          <option value="">-- All Cohorts --</option>
+          {cohorts.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name || c.code}
+            </option>
+          ))}
+        </select>
+        
+        <button 
+          onClick={() => {
+            setSelectedCourse("");
+            setSelectedCohort("");
+          }}
+          className="btn btnSecondary"
+        >
+          Clear Filters
         </button>
       </div>
 

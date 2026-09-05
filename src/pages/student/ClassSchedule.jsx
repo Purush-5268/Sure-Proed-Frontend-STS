@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import apiClient, { normalizeListResponse } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import { requestService } from "../../services/requestService";
 import { motion } from "framer-motion";
 import PageHeader from "../../components/ui/PageHeader";
 import EmptyState from "../../components/ui/EmptyState";
@@ -12,6 +13,34 @@ function ClassSchedule() {
   const [schedule, setSchedule] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  const [showLateJoinModal, setShowLateJoinModal] = useState(false);
+  const [lateJoinReason, setLateJoinReason] = useState("");
+  const [lateJoinClassId, setLateJoinClassId] = useState(null);
+  const [isSubmittingLateJoin, setIsSubmittingLateJoin] = useState(false);
+
+  const handleRequestPermission = async () => {
+    if (!lateJoinReason.trim() || !lateJoinClassId) {
+      alert("Please provide a reason for joining late.");
+      return;
+    }
+    setIsSubmittingLateJoin(true);
+    try {
+      await requestService.createRequest({
+        title: `Late Join Request (Class ID: ${lateJoinClassId})`,
+        description: lateJoinReason,
+        category: 'PERMISSION'
+      });
+      alert("Permission request submitted successfully.");
+      setShowLateJoinModal(false);
+      setLateJoinReason("");
+    } catch (error) {
+      console.error("Permission request failed", error);
+      alert(error?.response?.data?.detail || "Failed to submit permission request.");
+    } finally {
+      setIsSubmittingLateJoin(false);
+    }
+  };
 
   // Update clock every 30 seconds to dynamically open/close the -10min/+5min window
   useEffect(() => {
@@ -101,7 +130,7 @@ function ClassSchedule() {
         description="View your internship schedule and join active secure Google Meet rooms."
       />
 
-      <div className="premium-card" style={{ maxWidth: '900px', margin: '0 auto', padding: '1.75rem' }}>
+      <div className="premium-card" style={{ width: '100%', padding: '1.75rem' }}>
         {loading ? (
           <SkeletonLoader variant="table" rows={3} />
         ) : schedule.length === 0 ? (
@@ -165,6 +194,14 @@ function ClassSchedule() {
                       >
                         🔗 Connect
                       </a>
+                    ) : status.label.includes("Ask Admin") ? (
+                      <button 
+                        onClick={() => { setLateJoinClassId(item.id); setShowLateJoinModal(true); }}
+                        className="premium-badge premium-badge-inactive" 
+                        style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer', fontWeight: 'bold', textDecoration: 'underline' }}
+                      >
+                        {status.label}
+                      </button>
                     ) : (
                       <span className="premium-badge premium-badge-inactive" style={{ background: canJoin ? 'transparent' : 'var(--bg-subtle)' }}>
                         {status.label}
@@ -183,6 +220,28 @@ function ClassSchedule() {
           </Link>
         </div>
       </div>
+      {showLateJoinModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'var(--bg-card)', padding: '32px', borderRadius: '24px', width: '90%', maxWidth: '400px', boxShadow: '0 24px 48px rgba(0,0,0,0.1)', border: '1px solid var(--border-color)', position: 'relative' }}>
+            <button onClick={() => setShowLateJoinModal(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'var(--bg-nested)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-secondary)' }}>✕</button>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '20px', color: 'var(--text-primary)' }}>Request Late Join</h3>
+            <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>Please provide a reason for joining late. This will be reviewed by your mentor.</p>
+            <textarea
+              value={lateJoinReason}
+              onChange={(e) => setLateJoinReason(e.target.value)}
+              placeholder="E.g., I had an emergency..."
+              style={{ width: '100%', minHeight: '100px', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-nested)', color: 'var(--text-primary)', fontSize: '14px', resize: 'none', marginBottom: '20px', fontFamily: 'inherit' }}
+            />
+            <button
+              onClick={handleRequestPermission}
+              disabled={isSubmittingLateJoin || !lateJoinReason.trim()}
+              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--brand-color, #2563eb)', color: 'white', fontWeight: 'bold', fontSize: '15px', cursor: isSubmittingLateJoin || !lateJoinReason.trim() ? 'not-allowed' : 'pointer', opacity: isSubmittingLateJoin || !lateJoinReason.trim() ? 0.7 : 1, transition: '0.2s' }}
+            >
+              {isSubmittingLateJoin ? 'Submitting...' : 'Submit Request'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

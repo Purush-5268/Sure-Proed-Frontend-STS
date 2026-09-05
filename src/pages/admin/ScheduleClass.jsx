@@ -8,6 +8,7 @@ import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./ScheduleClass.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
+import TimePicker from "../../components/common/TimePicker";
 
 function ScheduleClass() {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ function ScheduleClass() {
   const [activeTab, setActiveTab] = useState("MANUAL");
   const [automationForm, setAutomationForm] = useState({
     firstSunday: "",
+    classDate: "",
     startTime: "",
     endTime: "",
     startingBatch: "BATCH_1"
@@ -34,6 +36,7 @@ function ScheduleClass() {
     streamId: "",
     groupName: "",
     lstBatchNumber: "",
+    classDate: "",
     startTime: "",
     endTime: "",
     guestEmails: [],
@@ -179,6 +182,7 @@ function ScheduleClass() {
 
   // 🚨 New States for Inline Rescheduling
   const [editingClassId, setEditingClassId] = useState(null);
+  const [editDate, setEditDate] = useState("");
   const [editStartTime, setEditStartTime] = useState("");
   const [editEndTime, setEditEndTime] = useState("");
 
@@ -189,15 +193,16 @@ function ScheduleClass() {
     const startPart = cls.start_time ? cls.start_time.substring(0, 5) : "00:00";
     const endPart = cls.end_time ? cls.end_time.substring(0, 5) : "23:59";
 
-    setEditStartTime(`${datePart}T${startPart}`);
-    setEditEndTime(`${datePart}T${endPart}`);
+    setEditDate(datePart);
+    setEditStartTime(startPart);
+    setEditEndTime(endPart);
   };
 
   const handleSaveReschedule = async (classId) => {
     try {
       const updatedData = {
-        class_date: editStartTime.split("T")[0],
-        start_time: editStartTime.split("T")[1] + ":00",
+        class_date: editDate,
+        start_time: editStartTime + ":00",
         end_time: editEndTime.split("T")[1] + ":00"
       };
 
@@ -316,9 +321,9 @@ function ScheduleClass() {
 
       const formattedData = {
         title: `${request.sessionType} Session - ${finalGroupName || automationInfo?.starting_batch || 'General'}`.toUpperCase(),
-        class_date: request.startTime.split("T")[0],
-        start_time: request.startTime.split("T")[1] + ":00",
-        end_time: request.endTime.split("T")[1] + ":00",
+        class_date: request.classDate,
+        start_time: request.startTime.length === 5 ? request.startTime + ":00" : request.startTime,
+        end_time: request.endTime.length === 5 ? request.endTime + ":00" : request.endTime,
         conducted_by: currentUserId,
         cohort: matchedCohort ? matchedCohort.id : null,
         attendees: [],
@@ -334,9 +339,9 @@ function ScheduleClass() {
       if (request.sessionType === "LST") {
         res = await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BASE}generate-lst/`, {
           lst_batch: request.lstBatchNumber,
-          class_date: request.startTime.split("T")[0],
-          start_time: request.startTime.split("T")[1] + ":00",
-          end_time: request.endTime.split("T")[1] + ":00",
+          class_date: request.classDate,
+          start_time: request.startTime.length === 5 ? request.startTime + ":00" : request.startTime,
+          end_time: request.endTime.length === 5 ? request.endTime + ":00" : request.endTime,
           title: request.title,
           guest_emails: request.guestEmails
         });
@@ -354,6 +359,7 @@ function ScheduleClass() {
         streamId: "",
         groupName: "",
         lstBatchNumber: "",
+        classDate: "",
         startTime: "",
         endTime: "",
         guestEmails: [],
@@ -450,11 +456,11 @@ function ScheduleClass() {
               <div className="premium-grid-2" style={{ marginBottom: '1.5rem' }}>
                 <div>
                   <label className="premium-label">Start Time *</label>
-                  <input type="time" value={automationForm.startTime} onChange={e => setAutomationForm({...automationForm, startTime: e.target.value})} required className="premium-input" />
+                  <TimePicker value={automationForm.startTime} onChange={e => setAutomationForm({...automationForm, startTime: e.target.value})} required className="premium-input" />
                 </div>
                 <div>
                   <label className="premium-label">End Time *</label>
-                  <input type="time" value={automationForm.endTime} onChange={e => setAutomationForm({...automationForm, endTime: e.target.value})} required className="premium-input" />
+                  <TimePicker value={automationForm.endTime} onChange={e => setAutomationForm({...automationForm, endTime: e.target.value})} required className="premium-input" />
                 </div>
               </div>
               <button type="submit" disabled={isLoading} className="premium-btn premium-btn-accent" style={{ width: '100%' }}>
@@ -571,14 +577,19 @@ function ScheduleClass() {
               )}
             </div>
 
+          <div style={{ marginBottom: "1.5rem" }}>
+            <label className="premium-label">Class Date *</label>
+            <input type="date" value={request.classDate} onChange={(e) => setRequest({ ...request, classDate: e.target.value })} required className="premium-input" style={{ width: "100%" }} />
+          </div>
+
           <div className="premium-grid-2">
             <div>
               <label className="premium-label">Start Time *</label>
-              <input type="datetime-local" value={request.startTime} onChange={(e) => setRequest({ ...request, startTime: e.target.value })} required className="premium-input" />
+              <TimePicker value={request.startTime} onChange={(e) => setRequest({ ...request, startTime: e.target.value })} required className="premium-input" />
             </div>
             <div>
               <label className="premium-label">End Time *</label>
-              <input type="datetime-local" value={request.endTime} onChange={(e) => setRequest({ ...request, endTime: e.target.value })} required className="premium-input" />
+              <TimePicker value={request.endTime} onChange={(e) => setRequest({ ...request, endTime: e.target.value })} required className="premium-input" />
             </div>
           </div>
 
@@ -653,11 +664,11 @@ function ScheduleClass() {
                 <div className={styles.animatedField} style={{ background: 'var(--bg-nested)', padding: '1rem', borderRadius: '8px', display: 'flex', gap: '1rem', border: '1px solid var(--border-color)' }}>
                   <div style={{ flex: 1 }}>
                     <label className="premium-label" style={{ fontSize: '12px' }}>New Start Time</label>
-                    <input type="datetime-local" value={editStartTime} onChange={(e) => setEditStartTime(e.target.value)} className={`premium-input ${styles.formInput}`} style={{ minHeight: '40px' }} />
+                    <div style={{display:"flex", gap:"5px", flexWrap:"wrap"}}><input type="date" value={editDate} onChange={e=>setEditDate(e.target.value)} className={`premium-input ${styles.formInput}`} style={{minHeight:"40px", flex:1}}/><TimePicker value={editStartTime} onChange={e=>setEditStartTime(e.target.value)} className={`premium-input ${styles.formInput}`} /></div>
                   </div>
                   <div style={{ flex: 1 }}>
                     <label className="premium-label" style={{ fontSize: '12px' }}>New End Time</label>
-                    <input type="datetime-local" value={editEndTime} onChange={(e) => setEditEndTime(e.target.value)} className={`premium-input ${styles.formInput}`} style={{ minHeight: '40px' }} />
+                    <TimePicker value={editEndTime} onChange={e=>setEditEndTime(e.target.value)} className={`premium-input ${styles.formInput}`} />
                   </div>
                 </div>
               )}

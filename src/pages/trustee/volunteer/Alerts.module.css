@@ -28,15 +28,15 @@
 }
 
 .infoBanner {
-  background: var(--bg-surface);
+  background: var(--bg-nested);
   padding: 1.5rem;
   border-radius: var(--radius-md);
-  border: 1px solid #fee2e2;
+  border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
 }
 
 .infoBanner p {
-  color: #475569;
+  color: var(--text-secondary);
   font-weight: 500;
   margin: 0;
 }
@@ -50,8 +50,8 @@
 }
 
 .successState {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  background: rgba(34, 197, 94, 0.05);
+  border: 1px solid rgba(34, 197, 94, 0.2);
   border-radius: var(--radius-xl);
   padding: 4rem;
   text-align: center;
@@ -67,13 +67,13 @@
 }
 
 .successState h3 {
-  color: #166534;
+  color: #22c55e;
   font-size: 1.5rem;
   margin: 0;
 }
 
 .successState p {
-  color: #15803d;
+  color: var(--text-secondary);
   font-weight: 500;
   margin: 0;
 }
@@ -113,8 +113,8 @@
 }
 
 .badgeLabel {
-  background: var(--bg-nested);
-  color: #1e293b;
+  background: var(--bg-surface);
+  color: var(--text-primary);
   font-weight: 700;
   padding: 0.15rem 0.5rem;
   border-radius: 4px;
@@ -128,7 +128,7 @@
 
 .missedDate {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;

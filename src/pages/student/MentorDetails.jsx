@@ -13,6 +13,7 @@ function MentorDetails() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [mentor, setMentor] = useState(null);
+  const [cohortInfo, setCohortInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,6 +52,7 @@ function MentorDetails() {
           }
 
           if (resolvedCohort) {
+            setCohortInfo(resolvedCohort);
             let mList = resolvedCohort.mentors && resolvedCohort.mentors.length > 0 
                 ? resolvedCohort.mentors 
                 : (resolvedCohort.active_mentor ? [resolvedCohort.active_mentor] : []);
@@ -99,7 +101,7 @@ function MentorDetails() {
     );
   }
 
-  if (!mentor) {
+  if (!mentor || mentor.length === 0) {
     return (
       <div className={styles.page}>
         <div className="premium-card" style={{ textAlign: "center", padding: "40px" }}>
@@ -120,6 +122,36 @@ function MentorDetails() {
 
   return (
     <div className={styles.page}>
+      {cohortInfo && (
+        <div className="premium-card" style={{ marginBottom: '24px', backgroundColor: 'var(--bg-surface)' }}>
+          {cohortInfo.current_mentor_details ? (
+            <>
+              <h2 style={{ marginBottom: '16px', fontSize: '1.2rem', color: 'var(--text-secondary)' }}>Your Current Mentor:</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px', padding: '12px', backgroundColor: 'rgba(34, 197, 94, 0.1)', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+                <span style={{ fontSize: '1.2rem' }}>🟢</span>
+                <span style={{ fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--text-primary)' }}>
+                  {cohortInfo.current_mentor_details.name || cohortInfo.current_mentor_details.first_name || 'Assigned Mentor'} — CURRENT MENTOR
+                </span>
+              </div>
+            </>
+          ) : null}
+
+          <h2 style={{ marginBottom: '16px', fontSize: '1.2rem', color: 'var(--text-secondary)' }}>All Assigned Mentors:</h2>
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            {cohortInfo.active_mentors && cohortInfo.active_mentors.length > 0 ? (
+              cohortInfo.active_mentors.map((am, i) => (
+                <li key={i} style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: 'var(--primary-color)' }}>•</span>
+                  <span>{am.name || am.first_name || 'Assigned Mentor'}</span>
+                </li>
+              ))
+            ) : (
+              <li style={{ color: 'var(--text-secondary)' }}>No active mentors found.</li>
+            )}
+          </ul>
+        </div>
+      )}
+
       {mentorsList.map((m, idx) => {
         const fullName = `${m.first_name || ""} ${m.last_name || ""}`.trim() || m.email || "Unknown Mentor";
         const avatarUrl = m.profile_picture || m.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=2563eb&color=fff&size=180`;
@@ -174,12 +206,6 @@ function MentorDetails() {
       })}
 
       <div className={styles.buttons}>
-        <Link
-          to="/student/attendance"
-          className={styles.button}
-        >
-          View Attendance
-        </Link>
         <Link to="/student" className={styles.buttonOutline}>
           Back to Dashboard
         </Link>
