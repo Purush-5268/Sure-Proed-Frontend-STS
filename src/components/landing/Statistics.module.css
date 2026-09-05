@@ -874,4 +874,4 @@
     flex-direction: column;
     text-align: center;
   }
-}
+}.chartFallback { display: flex; justify-content: center; align-items: center; height: 300px; color: var(--text-muted); font-size: 0.9rem; }

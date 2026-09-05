@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -16,10 +16,12 @@ import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { companyService } from "../../services/companyService";
 import AnimatedNumber from "../common/AnimatedNumber";
-import { StudentJourneyChart, EcosystemChart } from "./StatisticsCharts";
 import CompanyShowcase from "./CompanyShowcase";
 import PeopleModal from "./PeopleModal";
 import styles from "./Statistics.module.css";
+
+const StudentJourneyChart = lazy(() => import("./StatisticsCharts").then(module => ({ default: module.StudentJourneyChart })));
+const EcosystemChart = lazy(() => import("./StatisticsCharts").then(module => ({ default: module.EcosystemChart })));
 
 // Animation Variants
 const staggerContainer = {
@@ -80,8 +82,9 @@ function Statistics() {
     setLoading(true);
     setError(false);
     try {
+      const timestamp = new Date().getTime();
       const [statsRes, companiesRes] = await Promise.all([
-        apiClient.get(API_ENDPOINTS.ANALYTICS.PLATFORM_STATS),
+        apiClient.get(`${API_ENDPOINTS.ANALYTICS.PLATFORM_STATS}?t=${timestamp}`),
         companyService.getCompanies({ limit: 50 }).catch(() => null)
       ]);
       setData(statsRes.data);
@@ -177,7 +180,9 @@ function Statistics() {
                 <span>STUDENT IMPACT JOURNEY</span>
               </div>
               <div className={styles.dashboardCard}>
-                <StudentJourneyChart data={data.students} />
+                <Suspense fallback={<div className={styles.chartFallback}>Loading chart...</div>}>
+                  <StudentJourneyChart data={data.students} />
+                </Suspense>
               </div>
             </motion.div>
 
@@ -188,7 +193,9 @@ function Statistics() {
               </div>
               <div className={`${styles.dashboardCard} ${styles.peopleEcosystemCard}`}>
                 <div className={styles.ecosystemLeft}>
-                  <EcosystemChart data={data.people} />
+                  <Suspense fallback={<div className={styles.chartFallback}>Loading chart...</div>}>
+                    <EcosystemChart data={data.people} />
+                  </Suspense>
                 </div>
                 <div className={styles.ecosystemRight}>
                   <div className={styles.peopleGridSmall}>

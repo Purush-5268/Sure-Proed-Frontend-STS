@@ -104,31 +104,21 @@
 
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    visualizer({ filename: 'stats.html', template: 'treemap', open: false })
+  ],
   assetsInclude: ['**/*.lottie'],
   build: {
+    minify: false,
+    sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/react-router-dom/')) {
-            return 'vendor';
-          }
-          if (id.includes('node_modules/framer-motion/') || id.includes('node_modules/react-icons/')) {
-            return 'ui';
-          }
-          if (id.includes('node_modules/@tiptap/')) {
-            return 'editor';
-          }
-          if (id.includes('node_modules/recharts/')) {
-            return 'charts';
-          }
-          if (id.includes('node_modules/lottie-react/') || id.includes('node_modules/@lottiefiles/')) {
-            return 'lottie';
-          }
-        }
+        // Let Rolldown handle native code-splitting for React.lazy()
       }
     }
   },
