@@ -9,6 +9,7 @@ import {
   configureModuleTestProctoring,
   getProctoringRooms,
   getModuleTestProctoringRooms,
+  adminStartModuleTest,
 } from "../../services/examService";
 import JitsiExamRoom from "../../components/exams/JitsiExamRoom";
 import styles from "./ProctorDashboard.module.css";
@@ -38,6 +39,10 @@ function ProctorDashboard() {
   const [streamData, setStreamData] = useState({ active_attempts: [], recent_events: [], total_active: 0 });
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [actionBusy, setActionBusy] = useState("");
+
+  // Admin START TEST state
+  const [adminStartBusy, setAdminStartBusy] = useState(false);
+  const [adminStartResult, setAdminStartResult] = useState(null); // { success, message } or null
 
   const fetchLiveStream = useCallback(async () => {
     try {
@@ -224,6 +229,143 @@ function ProctorDashboard() {
         <label>{assessmentType === "MODULE_TEST" ? "Module Test" : "Exam"}<select value={examId} onChange={(event) => setExamId(event.target.value)} disabled={!cohortId}><option value="">Select assessment</option>{examOptions.map((exam) => <option key={exam.id} value={exam.id}>{exam.title || exam.application_number || exam.id} · {exam.module_name || exam.student_name || exam.status || "Ready"}</option>)}</select></label>
         {isAdmin && <form onSubmit={configure}><label>Rooms<input type="number" min="1" max="26" value={roomCount} onChange={(event) => setRoomCount(event.target.value)} /></label><label>Planning limit / room<input type="number" min="1" max="500" value={capacity} onChange={(event) => setCapacity(event.target.value)} /></label><button disabled={!examId || busy}>Create/update rooms</button></form>}
       </div>
+
+      {/* ── Admin START TEST Panel (Module Tests Only) ── */}
+      {isAdmin && assessmentType === "MODULE_TEST" && examId && (() => {
+        const selectedTest = moduleTests.find((t) => String(t.id) === String(examId));
+        if (!selectedTest) return null;
+        const alreadyStarted = Boolean(selectedTest.admin_started_at);
+        const scheduledAt = selectedTest.scheduled_at ? new Date(selectedTest.scheduled_at) : null;
+        const endTime = selectedTest.end_time ? new Date(selectedTest.end_time) : null;
+        const now = new Date();
+        const isBeforeSchedule = scheduledAt && now < scheduledAt;
+        const isPastEnd = endTime && now > endTime;
+
+        const handleAdminStart = async () => {
+          if (alreadyStarted) return;
+          if (!window.confirm(`Are you sure you want to START TEST "${selectedTest.title}"? Students will be able to begin their exam immediately.`)) return;
+          setAdminStartBusy(true);
+          setAdminStartResult(null);
+          const result = await adminStartModuleTest(examId);
+          if (result.success) {
+            setAdminStartResult({ success: true, message: "Test started successfully!" });
+            // Update local state so UI reflects the change immediately
+            setModuleTests((prev) =>
+              prev.map((t) =>
+                String(t.id) === String(examId)
+                  ? { ...t, admin_started_at: result.admin_started_at || new Date().toISOString() }
+                  : t
+              )
+            );
+          } else {
+            // If already started by another admin, treat as success
+            if (result.code === "ALREADY_STARTED" || (result.status === 409)) {
+              setAdminStartResult({ success: true, message: "Test was already started." });
+              setModuleTests((prev) =>
+                prev.map((t) =>
+                  String(t.id) === String(examId) ? { ...t, admin_started_at: t.admin_started_at || new Date().toISOString() } : t
+                )
+              );
+            } else {
+              setAdminStartResult({ success: false, message: result.error || "Failed to start the test." });
+            }
+          }
+          setAdminStartBusy(false);
+        };
+
+        return (
+          <div style={{
+            margin: "16px 0",
+            padding: "18px 22px",
+            borderRadius: "var(--radius-lg, 12px)",
+            border: alreadyStarted
+              ? "1px solid rgba(16, 185, 129, 0.3)"
+              : "1px solid var(--border-color)",
+            background: alreadyStarted
+              ? "rgba(16, 185, 129, 0.06)"
+              : "var(--bg-surface)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+              <div>
+                <h3 style={{ margin: "0 0 4px", fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
+                  {selectedTest.title}
+                </h3>
+                <div style={{ fontSize: "12.5px", color: "var(--text-secondary)" }}>
+                  {scheduledAt && (
+                    <span>
+                      Scheduled: {scheduledAt.toLocaleDateString()} {scheduledAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      {endTime && <> — {endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</>}
+                    </span>
+                  )}
+                  {selectedTest.meeting_link && (
+                    <span style={{ marginLeft: "12px" }}>
+                      <a href={selectedTest.meeting_link} target="_blank" rel="noopener noreferrer" style={{ color: "#00897b", fontWeight: "600" }}>
+                        Open Google Meet ↗
+                      </a>
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                {alreadyStarted ? (
+                  <span style={{
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    background: "rgba(16, 185, 129, 0.12)",
+                    color: "#059669",
+                    fontWeight: "700",
+                    fontSize: "13px",
+                  }}>
+                    ✅ TEST STARTED · {new Date(selectedTest.admin_started_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                ) : (
+                  <button
+                    onClick={handleAdminStart}
+                    disabled={adminStartBusy || isBeforeSchedule || isPastEnd}
+                    style={{
+                      padding: "10px 24px",
+                      borderRadius: "8px",
+                      background: (isBeforeSchedule || isPastEnd)
+                        ? "#9ca3af"
+                        : "linear-gradient(135deg, #059669, #047857)",
+                      color: "#fff",
+                      border: "none",
+                      fontWeight: "700",
+                      fontSize: "14px",
+                      cursor: (adminStartBusy || isBeforeSchedule || isPastEnd) ? "not-allowed" : "pointer",
+                      opacity: adminStartBusy ? 0.7 : 1,
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    {adminStartBusy
+                      ? "Starting…"
+                      : isBeforeSchedule
+                      ? "Before Schedule"
+                      : isPastEnd
+                      ? "Window Closed"
+                      : "🚀 START TEST"}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {adminStartResult && (
+              <div style={{
+                marginTop: "10px",
+                padding: "8px 12px",
+                borderRadius: "6px",
+                fontSize: "13px",
+                fontWeight: "600",
+                background: adminStartResult.success ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)",
+                color: adminStartResult.success ? "#059669" : "#dc2626",
+              }}>
+                {adminStartResult.message}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {roomData && (
         <div className={styles.workspace}>

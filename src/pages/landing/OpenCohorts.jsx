@@ -20,7 +20,9 @@ const OpenCohorts = () => {
           { signal: abortController.signal }
         );
         const list = Array.isArray(data) ? data : data.results || [];
-        setOpenCohorts(list);
+        const now = new Date();
+        const activeCohorts = list.filter(c => !c.application_end_date || new Date(c.application_end_date) > now);
+        setOpenCohorts(activeCohorts);
       } catch (error) {
         if (error.name !== 'CanceledError' && error.code !== 'ERR_CANCELED') {
           console.error("Error fetching open cohorts", error);

@@ -178,99 +178,101 @@ function Placements() {
               </div>
 
               <form onSubmit={handleSubmit}>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Company Name *</label>
-                  <input
-                    type="text"
-                    name="company_name"
-                    value={formData.company_name}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    required
-                  />
-                </div>
+                <div className={styles.formGrid}>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Company Name *</label>
+                    <input
+                      type="text"
+                      name="company_name"
+                      value={formData.company_name}
+                      onChange={handleInputChange}
+                      className={styles.input}
+                      required
+                    />
+                  </div>
 
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Designation *</label>
-                  <input
-                    type="text"
-                    name="designation"
-                    value={formData.designation}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    required
-                  />
-                </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Designation *</label>
+                    <input
+                      type="text"
+                      name="designation"
+                      value={formData.designation}
+                      onChange={handleInputChange}
+                      className={styles.input}
+                      required
+                    />
+                  </div>
 
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Employment Type *</label>
-                  <select
-                    name="employment_type"
-                    value={formData.employment_type}
-                    onChange={handleInputChange}
-                    className={styles.select}
-                    required
-                  >
-                    {EMPLOYMENT_TYPES.map(type => (
-                      <option key={type.value} value={type.value}>{type.label}</option>
-                    ))}
-                  </select>
-                </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Employment Type *</label>
+                    <select
+                      name="employment_type"
+                      value={formData.employment_type}
+                      onChange={handleInputChange}
+                      className={styles.select}
+                      required
+                    >
+                      {EMPLOYMENT_TYPES.map(type => (
+                        <option key={type.value} value={type.value}>{type.label}</option>
+                      ))}
+                    </select>
+                  </div>
 
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Joining Date *</label>
-                  <input
-                    type="date"
-                    name="joining_date"
-                    value={formData.joining_date}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    required
-                  />
-                </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Joining Date *</label>
+                    <input
+                      type="date"
+                      name="joining_date"
+                      value={formData.joining_date}
+                      onChange={handleInputChange}
+                      className={styles.input}
+                      required
+                    />
+                  </div>
 
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Official Company Email (Optional)</label>
-                  <input
-                    type="email"
-                    name="official_email"
-                    value={formData.official_email}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                  />
-                </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Official Company Email (Optional)</label>
+                    <input
+                      type="email"
+                      name="official_email"
+                      value={formData.official_email}
+                      onChange={handleInputChange}
+                      className={styles.input}
+                    />
+                  </div>
 
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>LinkedIn URL (Optional)</label>
-                  <input
-                    type="url"
-                    name="linkedin_url"
-                    value={formData.linkedin_url}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    placeholder="https://linkedin.com/in/yourprofile"
-                  />
-                </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>LinkedIn URL (Optional)</label>
+                    <input
+                      type="url"
+                      name="linkedin_url"
+                      value={formData.linkedin_url}
+                      onChange={handleInputChange}
+                      className={styles.input}
+                      placeholder="https://linkedin.com/in/yourprofile"
+                    />
+                  </div>
 
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Employment Evidence / Offer Letter (Optional)</label>
-                  <input
-                    type="file"
-                    onChange={handleFileChange}
-                    className={styles.fileInput}
-                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                  />
-                </div>
+                  <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                    <label className={styles.label}>Employment Evidence / Offer Letter (Optional)</label>
+                    <input
+                      type="file"
+                      onChange={handleFileChange}
+                      className={styles.fileInput}
+                      accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                    />
+                  </div>
 
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  {placements.length > 0 && (
-                    <button type="button" className={styles.editBtn} onClick={resetForm} style={{ flex: 1, marginTop: 0 }}>
-                      Cancel
+                  <div className={styles.fullWidth} style={{ display: 'flex', gap: '12px' }}>
+                    {placements.length > 0 && (
+                      <button type="button" className={styles.editBtn} onClick={resetForm} style={{ flex: 1, marginTop: 0 }}>
+                        Cancel
+                      </button>
+                    )}
+                    <button type="submit" className={styles.submitBtn} disabled={submitting} style={{ flex: 2 }}>
+                      {submitting ? <FaSpinner className={styles.spinner} /> : (editingId ? "Update Submission" : "Submit Placement")}
                     </button>
-                  )}
-                  <button type="submit" className={styles.submitBtn} disabled={submitting} style={{ flex: 2 }}>
-                    {submitting ? <FaSpinner className={styles.spinner} /> : (editingId ? "Update Submission" : "Submit Placement")}
-                  </button>
+                  </div>
                 </div>
               </form>
             </div>

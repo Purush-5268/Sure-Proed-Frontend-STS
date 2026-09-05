@@ -155,6 +155,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./AddExam.module.css";
+import AsyncSelect from "../../components/common/AsyncSelect";
 
 function AddExam() {
   const navigate = useNavigate();
@@ -162,7 +163,15 @@ function AddExam() {
   const queryParams = new URLSearchParams(location.search);
   const initialAppId = queryParams.get("appId") || "";
 
-  const [applications, setApplications] = useState([]);
+  const getCourseName = (app) => {
+    if (!app.course) return "Unknown course";
+    if (typeof app.course === "object") return app.course.name || app.course.title || "Unknown course";
+    return String(app.course);
+  };
+
+  const [initialApp, setInitialApp] = useState(location.state?.application || null);
+  const [appError, setAppError] = useState("");
+
   const [form, setForm] = useState({
     application: initialAppId,
     level: "MIXED",
@@ -181,20 +190,41 @@ function AddExam() {
 
   useEffect(() => {
     let isMounted = true;
-    const loadApplications = async () => {
+    const reconcileApp = async () => {
+      if (!initialAppId) return;
       try {
-        const response = await apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE);
-        if (isMounted) setApplications(Array.isArray(response.data) ? response.data : []);
+        const response = await apiClient.get(API_ENDPOINTS.APPLICATIONS.BY_ID(initialAppId));
+        if (isMounted) {
+          setInitialApp(response.data);
+          if (form.application !== response.data.id) {
+            setForm(prev => ({ ...prev, application: response.data.id }));
+          }
+        }
       } catch (err) {
-        console.error("Failed to load applications:", err);
+        console.error("Failed to reconcile application:", err);
+        if (isMounted) {
+          setAppError("The specified application could not be verified. It may have been deleted.");
+          setForm(prev => ({ ...prev, application: "" }));
+          setInitialApp(null);
+        }
       }
     };
-
-    loadApplications();
+    reconcileApp();
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [initialAppId]);
+
+  const loadApplicationOptions = async (inputValue) => {
+    if (!inputValue) return [];
+    try {
+      const response = await apiClient.get(`${API_ENDPOINTS.APPLICATIONS.BASE}?search=${encodeURIComponent(inputValue)}&limit=15`);
+      return Array.isArray(response.data) ? response.data : response.data?.results || [];
+    } catch (err) {
+      console.error("Failed to search applications:", err);
+      return [];
+    }
+  };
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -208,6 +238,11 @@ function AddExam() {
 
     if (!form.application) {
       setError("Please select an application before creating an exam.");
+      return;
+    }
+
+    if (appError) {
+      setError("Cannot submit: " + appError);
       return;
     }
 
@@ -238,12 +273,7 @@ function AddExam() {
     }
   };
 
-  // Safe renderer for course names
-  const getCourseName = (app) => {
-    if (!app.course) return "Unknown course";
-    if (typeof app.course === "object") return app.course.name || app.course.title || "Unknown course";
-    return String(app.course);
-  };
+
 
   return (
     <div className={styles.container}>
@@ -254,24 +284,28 @@ function AddExam() {
         </div>
 
         {error ? <p style={{ color: "#b91c1c", fontWeight: "bold" }}>{error}</p> : null}
+        {appError ? <p style={{ color: "#b91c1c", fontWeight: "bold" }}>{appError}</p> : null}
         {success ? <p style={{ color: "#166534", fontWeight: "bold" }}>{success}</p> : null}
 
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <div className={styles.full}>
-            <label>Application *</label>
-            <select name="application" value={form.application} onChange={handleChange} required>
-              <option value="">Select an application</option>
-              {applications.map((app) => (
-                <option key={app.id} value={app.id}>
-                  {app.application_number || app.id} - {getCourseName(app)}
-                </option>
-              ))}
-            </select>
+        <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+          <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontWeight: '600', color: 'var(--text-secondary)' }}>Application *</label>
+            <AsyncSelect
+              name="application"
+              value={form.application}
+              onChange={handleChange}
+              loadOptions={loadApplicationOptions}
+              getOptionLabel={(app) => `${app.application_number || app.id} - ${getCourseName(app)}`}
+              getOptionValue={(app) => app.id}
+              placeholder="Search by application number, email, or name..."
+              defaultOption={initialApp}
+              required={true}
+            />
           </div>
 
-          <div className={styles.group}>
-            <label>Level</label>
-            <select name="level" value={form.level} onChange={handleChange}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontWeight: '600', color: 'var(--text-secondary)' }}>Level</label>
+            <select name="level" value={form.level} onChange={handleChange} className="premium-input">
               <option value="EASY">Easy</option>
               <option value="MEDIUM">Medium</option>
               <option value="HARD">Hard</option>
@@ -279,24 +313,24 @@ function AddExam() {
             </select>
           </div>
 
-          <div className={styles.group}>
-            <label>Duration (Minutes) *</label>
-            <input type="number" name="duration_minutes" value={form.duration_minutes} onChange={handleChange} min="1" required />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontWeight: '600', color: 'var(--text-secondary)' }}>Duration (Minutes) *</label>
+            <input type="number" name="duration_minutes" value={form.duration_minutes} onChange={handleChange} min="1" required className="premium-input" />
           </div>
 
-          <div className={styles.group}>
-            <label>Pass Percentage *</label>
-            <input type="number" name="pass_percentage" value={form.pass_percentage} onChange={handleChange} min="0" max="100" required />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontWeight: '600', color: 'var(--text-secondary)' }}>Pass Percentage *</label>
+            <input type="number" name="pass_percentage" value={form.pass_percentage} onChange={handleChange} min="0" max="100" required className="premium-input" />
           </div>
 
-          <div className={styles.group}>
-            <label>Total Marks *</label>
-            <input type="number" name="total_marks" value={form.total_marks} onChange={handleChange} min="1" required />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontWeight: '600', color: 'var(--text-secondary)' }}>Total Marks *</label>
+            <input type="number" name="total_marks" value={form.total_marks} onChange={handleChange} min="1" required className="premium-input" />
           </div>
 
-          <div className={styles.group}>
-            <label>Status</label>
-            <select name="status" value={form.status} onChange={handleChange}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontWeight: '600', color: 'var(--text-secondary)' }}>Status</label>
+            <select name="status" value={form.status} onChange={handleChange} className="premium-input">
               <option value="PENDING">Pending</option>
               <option value="IN_PROGRESS">In Progress</option>
               <option value="SUBMITTED">Submitted</option>
@@ -304,29 +338,31 @@ function AddExam() {
             </select>
           </div>
 
-          <div className={styles.group}>
-            <label>Proctoring Rooms</label>
-            <input type="number" name="proctoring_room_count" value={form.proctoring_room_count} onChange={handleChange} min="1" max="26" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontWeight: '600', color: 'var(--text-secondary)' }}>Proctoring Rooms</label>
+            <input type="number" name="proctoring_room_count" value={form.proctoring_room_count} onChange={handleChange} min="1" max="26" className="premium-input" />
           </div>
 
-          <div className={styles.group}>
-            <label>Planning Limit per Room</label>
-            <input type="number" name="proctoring_capacity_per_room" value={form.proctoring_capacity_per_room} onChange={handleChange} min="1" max="500" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontWeight: '600', color: 'var(--text-secondary)' }}>Limit per Room</label>
+            <input type="number" name="proctoring_capacity_per_room" value={form.proctoring_capacity_per_room} onChange={handleChange} min="1" max="500" className="premium-input" />
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', gridColumn: 'span 1' }}>
+            <input type="checkbox" name="proctoring_enabled" checked={form.proctoring_enabled} onChange={handleChange} id="proc_enabled" style={{ width: 'auto' }} />
+            <label htmlFor="proc_enabled" style={{ margin: 0, fontWeight: '500', color: 'var(--text-primary)' }}>Jitsi Proctoring</label>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', gridColumn: 'span 1' }}>
+            <input type="checkbox" name="proctoring_required" checked={form.proctoring_required} onChange={handleChange} id="proc_req" style={{ width: 'auto' }} />
+            <label htmlFor="proc_req" style={{ margin: 0, fontWeight: '500', color: 'var(--text-primary)' }}>Live Required</label>
           </div>
 
-          <div className={styles.group}>
-            <label><input type="checkbox" name="proctoring_enabled" checked={form.proctoring_enabled} onChange={handleChange} /> Embedded Jitsi enabled</label>
-          </div>
-
-          <div className={styles.group}>
-            <label><input type="checkbox" name="proctoring_required" checked={form.proctoring_required} onChange={handleChange} /> Live connection required</label>
-          </div>
-
-          <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-            <button type="submit" disabled={loading} className="premium-btn" style={{ cursor: loading ? "not-allowed" : "pointer" }}>
+          <div style={{ display: "flex", gap: "1rem", marginTop: "1rem", gridColumn: '1 / -1', borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
+            <button type="submit" disabled={loading} className="premium-btn premium-btn-primary" style={{ cursor: loading ? "not-allowed" : "pointer", padding: '12px 32px' }}>
               {loading ? "Saving..." : "Add Exam"}
             </button>
-            <Link to="/admin/exams" style={{ padding: "12px 24px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold", display: "flex", alignItems: "center" }}>
+            <Link to="/admin/exams" className="premium-btn premium-btn-secondary" style={{ padding: "12px 32px", textDecoration: "none" }}>
               Cancel
             </Link>
           </div>

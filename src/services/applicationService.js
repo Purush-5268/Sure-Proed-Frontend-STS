@@ -14,6 +14,16 @@ export const applicationService = {
     return response.data;
   },
 
+  async getPrescreening(id) {
+    const response = await apiClient.get(API_ENDPOINTS.APPLICATIONS.PRESCREENING(id));
+    return response.data;
+  },
+
+  async adminStartPrescreening(id) {
+    const response = await apiClient.post(API_ENDPOINTS.APPLICATIONS.PRESCREENING_ADMIN_START(id));
+    return response.data;
+  },
+
   async createApplication(data) {
     const response = await apiClient.post(API_ENDPOINTS.APPLICATIONS.BASE, data);
     return response.data;

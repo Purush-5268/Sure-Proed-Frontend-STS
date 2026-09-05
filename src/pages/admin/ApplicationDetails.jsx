@@ -6,6 +6,7 @@ import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { applicationService } from "../../services/applicationService";
 import styles from "./ApplicationDetails.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
+import AsyncSelect from "../../components/common/AsyncSelect";
 
 function ApplicationDetails() {
   const navigate = useNavigate();
@@ -15,9 +16,8 @@ function ApplicationDetails() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   
-  // Available Cohorts for Assignment
-  const [cohorts, setCohorts] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [selectedCohort, setSelectedCohort] = useState("");
 
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -26,12 +26,8 @@ function ApplicationDetails() {
       const response = await apiClient.get(API_ENDPOINTS.APPLICATIONS.BY_ID(id));
       setApplication(response.data || null);
       if (response.data?.course) {
-        // Fetch cohorts and courses
-        const [cohortsRes, coursesRes] = await Promise.all([
-          apiClient.get(API_ENDPOINTS.COHORTS.BASE, { params: { course: response.data.course } }).catch(() => ({ data: [] })),
-          apiClient.get(API_ENDPOINTS.COURSES.BASE).catch(() => ({ data: [] }))
-        ]);
-        setCohorts(cohortsRes.data?.results || cohortsRes.data || []);
+        // Fetch only courses
+        const coursesRes = await apiClient.get(`${API_ENDPOINTS.COURSES.BASE}?limit=1000`).catch(() => ({ data: [] }));
         setCourses(coursesRes.data?.results || coursesRes.data || []);
       }
     } catch (err) {
@@ -92,14 +88,13 @@ function ApplicationDetails() {
 
   const handleAssignCohort = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const cohortId = formData.get("cohort");
-    if (!cohortId) return alert("Please select a cohort.");
+    if (!selectedCohort) return alert("Please select a cohort.");
 
     setSubmitting(true);
     try {
-      await apiClient.post(API_ENDPOINTS.APPLICATIONS.ASSIGN_COHORT(id), { cohort_id: cohortId });
+      await apiClient.post(API_ENDPOINTS.APPLICATIONS.ASSIGN_COHORT(id), { cohort_id: selectedCohort });
       alert("Cohort assigned successfully.");
+      setSelectedCohort("");
       loadApplication();
     } catch (err) {
       alert(err.response?.data?.error || "Failed to assign cohort.");
@@ -118,6 +113,18 @@ function ApplicationDetails() {
       alert(err.response?.data?.error || "Failed to process completion. Ensure requirements are met.");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const loadCohortOptions = async (inputValue) => {
+    if (!application?.course) return [];
+    try {
+      const courseId = application.course?.id || application.course;
+      const response = await apiClient.get(`${API_ENDPOINTS.COHORTS.BASE}?search=${encodeURIComponent(inputValue)}&course=${courseId}&limit=10`);
+      return Array.isArray(response.data) ? response.data : response.data?.results || [];
+    } catch (err) {
+      console.error("Failed to search cohorts:", err);
+      return [];
     }
   };
 
@@ -278,8 +285,7 @@ function ApplicationDetails() {
   const courseName = courseObj.name || courseId || "N/A";
   
   const currentCohortId = application.assigned_cohort?.id || application.assigned_cohort;
-  const currentCohortObj = cohorts.find(c => c.id === currentCohortId) || {};
-  const currentCohortName = currentCohortObj.name || currentCohortId || "Unassigned";
+  const currentCohortName = application.assigned_cohort?.name || currentCohortId || "Unassigned";
 
   return (
     <div className={styles.pageContainer}>
@@ -402,7 +408,7 @@ function ApplicationDetails() {
               <div style={{ padding: "20px", background: "var(--bg-secondary)", borderRadius: "8px", textAlign: "center" }}>
                 <p style={{ color: "var(--text-secondary)", marginBottom: "16px" }}>No pre-screening exam record exists for this application yet.</p>
                 <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
-                  <Link to={`/admin/add-exam?appId=${application.id}`} className="premium-btn premium-btn-primary">
+                  <Link to={`/admin/add-exam?appId=${application.id}`} state={{ application }} className="premium-btn premium-btn-primary">
                     Assign Exam Now
                   </Link>
                   <Link to="/admin/exams" className="premium-btn premium-btn-secondary">
@@ -475,18 +481,21 @@ function ApplicationDetails() {
             
             {(!currentCohortId || application.status === "SUSPENDED") ? (
               <form onSubmit={handleAssignCohort}>
-                <div className={styles.formGroup}>
+                <div className={styles.formGroup} style={{ position: "relative", zIndex: 10 }}>
                   <label>{currentCohortId ? "Change Cohort (Suspended Student)" : "Assign to Cohort"}</label>
-                  <select name="cohort" className="premium-input" required disabled={cohorts.length === 0} defaultValue={currentCohortId || ""}>
-                    <option value="">Select a Cohort...</option>
-                    {cohorts.map(c => (
-                      <option key={c.id} value={c.id}>{c.code} - {c.name}</option>
-                    ))}
-                  </select>
-                  {cohorts.length === 0 && <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>No cohorts available for this course.</span>}
+                  <AsyncSelect
+                    name="cohort"
+                    value={selectedCohort}
+                    onChange={(e) => setSelectedCohort(e.target.value)}
+                    loadOptions={loadCohortOptions}
+                    getOptionLabel={(c) => `${c.code} - ${c.name}`}
+                    getOptionValue={(c) => c.id}
+                    placeholder="Search by cohort name or code..."
+                    required={true}
+                  />
                 </div>
                 <div className={styles.actionRow}>
-                  <button type="submit" className="premium-btn premium-btn-primary" disabled={submitting || cohorts.length === 0}>
+                  <button type="submit" className="premium-btn premium-btn-primary" disabled={submitting || !selectedCohort}>
                     {currentCohortId ? "Transfer Cohort" : "Assign Cohort"}
                   </button>
                 </div>

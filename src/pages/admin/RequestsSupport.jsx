@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { requestService } from "../../services/requestService";
 import styles from "./RequestsSupport.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
-import { FiRefreshCw, FiInbox, FiAlertCircle, FiCheckCircle, FiXCircle, FiClock, FiFilter } from "react-icons/fi";
+import { FiRefreshCw, FiInbox, FiAlertCircle, FiCheckCircle, FiXCircle, FiClock, FiFilter, FiBriefcase } from "react-icons/fi";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import AdminPlacements from "./AdminPlacements";
 
 /**
  * Admin Requests & Support page.
@@ -39,9 +40,10 @@ const CATEGORY_LABELS = {
   ATTENDANCE: '📋 Attendance',
   QUERY: '💬 Student Query',
   OTHER: '📌 Other',
+  PLACEMENTS: '💼 Placements',
 };
 
-const TABS = ['ALL', 'OFFER_LETTER', 'PERMISSION', 'ATTENDANCE', 'QUERY', 'OTHER'];
+const TABS = ['ALL', 'OFFER_LETTER', 'PERMISSION', 'ATTENDANCE', 'QUERY', 'PLACEMENTS', 'OTHER'];
 
 function StatusBadge({ status }) {
   const s = STATUS_COLORS[status] || STATUS_COLORS.CLOSED;
@@ -310,7 +312,9 @@ function RequestsSupport() {
       </div>
 
       {/* Content */}
-      {loading ? (
+      {activeTab === 'PLACEMENTS' ? (
+        <AdminPlacements />
+      ) : loading ? (
         <SkeletonLoader variant="table" rows={5} />
       ) : requests.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-secondary)' }}>

@@ -83,6 +83,7 @@
 
 [data-theme='dark'] {
   --native-color-scheme: dark;
+  color-scheme: dark !important;
   /* Brand Colors */
   --primary-color: #3b82f6;
   --primary-hover: #60a5fa;
@@ -514,6 +515,12 @@ textarea::placeholder {
   color: var(--text-muted);
 }
 
+/* Fix Native Input Icons in Dark Mode */
+[data-theme='dark'] select,
+[data-theme='dark'] input {
+  color-scheme: dark !important;
+}
+
 /* Fix browser autofill glare in Dark Mode */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
@@ -699,11 +706,7 @@ input[type="time"].premium-input {
   color-scheme: var(--native-color-scheme, light);
 }
 
-[data-theme="dark"] input[type="date"].premium-input::-webkit-calendar-picker-indicator,
-[data-theme="dark"] input[type="time"].premium-input::-webkit-calendar-picker-indicator,
-[data-theme="dark"] input[type="datetime-local"].premium-input::-webkit-calendar-picker-indicator {
-  filter: invert(1) hue-rotate(180deg);
-}
+
 
 .premium-input:focus {
   outline: none;

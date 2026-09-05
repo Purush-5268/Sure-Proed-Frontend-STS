@@ -304,8 +304,11 @@ function CohortChat() {
 
   // Scroll to bottom
   const scrollToBottom = useCallback((smooth = false) => {
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto'
+      });
     }
   }, []);
 

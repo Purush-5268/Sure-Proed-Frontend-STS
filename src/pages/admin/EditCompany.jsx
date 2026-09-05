@@ -75,8 +75,8 @@ function EditCompany() {
     setError("");
     setSuccess("");
 
-    if (!form.name.trim() || !form.user) {
-      setError("Please provide a company name and a linked user account.");
+    if (!form.name.trim()) {
+      setError("Please provide a company name.");
       return;
     }
 
@@ -84,7 +84,9 @@ function EditCompany() {
 
     try {
       const formData = new FormData();
-      formData.append("user", form.user);
+      if (form.user) {
+        formData.append("user", form.user);
+      }
       formData.append("name", form.name.trim());
       // For PUT, we append fields. If they are empty, we might need to send empty string or handle null
       formData.append("description", form.description.trim());
@@ -134,15 +136,18 @@ function EditCompany() {
               </div>
 
               <div>
-                <label>Linked User</label>
-                <select name="user" value={form.user} onChange={handleChange} required>
-                  <option value="">Select a user</option>
+                <label>Linked User (Optional)</label>
+                <select name="user" value={form.user} onChange={handleChange}>
+                  <option value="">Select a user (Optional)</option>
                   {users.map((user) => (
                     <option key={user.id} value={user.id}>
                       {user.first_name || user.email} {user.last_name ? `(${user.last_name})` : ""}
                     </option>
                   ))}
                 </select>
+                <small style={{ color: "var(--text-secondary)", marginTop: "4px", display: "block" }}>
+                  Leave this blank if you are only editing the company for the Partners page showcase.
+                </small>
               </div>
 
               <div>

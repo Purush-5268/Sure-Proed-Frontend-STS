@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { studentService } from "../../services/studentService";
 import styles from "./ApplicationStatus.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
+import ApplicationScreeningWidget from "./ApplicationScreeningWidget";
 function ApplicationStatus() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -86,9 +87,7 @@ function ApplicationStatus() {
           </div>
 
         {["EXAM_PENDING", "APPLIED", "OPEN", "DRAFT"].includes(application?.status) && (
-          <Link to="/student/exam-instructions" className={styles.examButton}>
-            Start Screening Exam
-          </Link>
+          <ApplicationScreeningWidget application={application} />
         )}
 
         {["COHORT_ASSIGNED", "ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS", "IN_PROGRESS", "COMPLETED"].includes(application?.status) && (
@@ -97,7 +96,17 @@ function ApplicationStatus() {
           </Link>
         )}
 
-        <Link to="/student/applications" className={styles.button} style={{ marginLeft: "10px", backgroundcolor: "var(--text-muted)" }}>
+        {application?.status === "REJECTED" && (
+          <div style={{ marginTop: "20px", padding: "15px", backgroundColor: "#fef2f2", color: "#991b1b", borderRadius: "8px", border: "1px solid #f87171" }}>
+            <h3 style={{ margin: "0 0 10px 0" }}>Application Unsuccessful</h3>
+            <p style={{ margin: 0 }}>Unfortunately, your application was not successful (e.g., due to not meeting the screening exam criteria). You are free to explore and apply to other open cohorts.</p>
+            <Link to="/student/apply" className={styles.button} style={{ marginTop: "15px", display: "inline-block", backgroundColor: "#991b1b" }}>
+              Explore Other Cohorts
+            </Link>
+          </div>
+        )}
+
+        <Link to="/student/applications" className={styles.button} style={{ marginLeft: "10px", backgroundColor: "var(--text-muted)", marginTop: "20px" }}>
           Back to Dashboard
         </Link>
       </div>

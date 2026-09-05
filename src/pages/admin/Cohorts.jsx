@@ -140,78 +140,90 @@ function Cohorts() {
       ) : cohorts.length === 0 ? (
         <p>No cohorts have been created yet. Create one from the button above.</p>
       ) : (
-        <div className="premium-table-container">
-            <table className="premium-table">
-              <thead>
-                <tr>
-                  <th>Cohort</th>
-                  <th>Status</th>
-                  <th>Course</th>
-                  <th>Students</th>
-                  <th>Applications</th>
-                  <th>Start</th>
-                  <th>End</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <AnimatePresence>
-                  {filteredCohorts.map((cohort) => (
-                    <motion.tr 
-                      key={cohort.id} 
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      style={{ borderBottom: "1px solid #e5e7eb" }}
-                    >
-                      <td style={{ padding: "12px" }}>
-                        <strong>{cohort.name || cohort.code || "N/A"}</strong>
-                      </td>
-                      <td>
-                        <span className="premium-badge" style={{ backgroundColor: "var(--bg-nested)", color: "var(--text-primary)", border: "1px solid var(--border-color)" }}>
-                          {cohort.status || "DRAFT"}
-                        </span>
-                      </td>
-                      <td style={{ padding: "12px", fontWeight: "500", color: "#4338ca" }}>
-                        {cohort.course?.name || getCourseName(cohort.course)}
-                      </td>
-                      <td style={{ padding: "12px" }}>{cohort.students_count || 0}</td>
-                      <td style={{ padding: "12px" }}>{cohort.applications_count || 0}</td>
-                      <td style={{ padding: "12px" }}>{cohort.start_date || "N/A"}</td>
-                      <td style={{ padding: "12px" }}>{cohort.end_date || "N/A"}</td>
-                      <td style={{ padding: "12px" }}>
-                        <div className={styles.actions}>
-                          <Link to={`/admin/cohort-details/${cohort.id}`} className={styles.viewBtn}>View</Link>
-                          <Link to={`/admin/edit-cohort/${cohort.id}`} className={styles.editBtn}>Edit</Link>
-                          
-                          {cohort.status !== "OPEN" && cohort.status !== "ACTIVE" ? (
-                            <div className={styles.statusControls}>
-                              {publishCohortId === cohort.id ? (
-                                <>
-                                  <input 
-                                    type="date" 
-                                    value={publishDate} 
-                                    onChange={(e) => setPublishDate(e.target.value)} 
-                                    className={styles.dateInput}
-                                  />
-                                  <button onClick={() => handlePublish(cohort.id)} className={styles.saveBtn}>Save</button>
-                                  <button onClick={() => setPublishCohortId(null)} className={styles.cancelBtn}>Cancel</button>
-                                </>
-                              ) : (
-                                <button onClick={() => setPublishCohortId(cohort.id)} className={styles.publishBtn}>Publish</button>
-                              )}
-                            </div>
-                          ) : (
-                            <button onClick={() => handleStop(cohort.id)} className={styles.stopBtn}>Stop Applications</button>
-                          )}
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </AnimatePresence>
-              </tbody>
-          </table>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px", marginTop: "20px" }}>
+          <AnimatePresence>
+            {filteredCohorts.map((cohort) => (
+              <motion.div 
+                key={cohort.id} 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                style={{ 
+                  backgroundColor: "var(--bg-surface)", 
+                  border: "1px solid var(--border-color)", 
+                  borderRadius: "12px", 
+                  padding: "20px", 
+                  display: "flex", 
+                  flexDirection: "column", 
+                  gap: "16px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)"
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
+                  <div>
+                    <h3 style={{ margin: "0", fontSize: "16px", color: "var(--text-primary)", fontWeight: "700" }}>
+                      {cohort.name || cohort.code || "N/A"}
+                    </h3>
+                    <span style={{ color: "#4338ca", fontSize: "13px", fontWeight: "600", display: "block", marginTop: "4px" }}>
+                      {cohort.course?.name || getCourseName(cohort.course)}
+                    </span>
+                  </div>
+                  <span className="premium-badge" style={{ backgroundColor: "var(--bg-nested)", color: "var(--text-primary)", border: "1px solid var(--border-color)", fontSize: "11px", fontWeight: "700", padding: "4px 10px", borderRadius: "99px" }}>
+                    {cohort.status || "DRAFT"}
+                  </span>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", fontSize: "13px", color: "var(--text-secondary)" }}>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <strong style={{ color: "var(--text-primary)" }}>Students</strong>
+                    <span>{cohort.students_count || 0} enrolled</span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <strong style={{ color: "var(--text-primary)" }}>Applications</strong>
+                    <span>{cohort.applications_count || 0} received</span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <strong style={{ color: "var(--text-primary)" }}>Start Date</strong>
+                    <span>{cohort.start_date || "N/A"}</span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <strong style={{ color: "var(--text-primary)" }}>End Date</strong>
+                    <span>{cohort.end_date || "N/A"}</span>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: "auto", paddingTop: "16px", borderTop: "1px dashed var(--border-color)" }}>
+                  <div className={styles.actions} style={{ display: "flex", flexWrap: "wrap", gap: "8px", width: "100%" }}>
+                    <Link to={`/admin/cohort-details/${cohort.id}`} className={styles.viewBtn} style={{ flex: 1, textAlign: "center" }}>View</Link>
+                    <Link to={`/admin/edit-cohort/${cohort.id}`} className={styles.editBtn} style={{ flex: 1, textAlign: "center" }}>Edit</Link>
+                    
+                    {cohort.status !== "OPEN" && cohort.status !== "ACTIVE" ? (
+                      <div className={styles.statusControls} style={{ display: "flex", flexWrap: "wrap", gap: "8px", width: "100%" }}>
+                        {publishCohortId === cohort.id ? (
+                          <>
+                            <input 
+                              type="date" 
+                              value={publishDate} 
+                              onChange={(e) => setPublishDate(e.target.value)} 
+                              className={styles.dateInput}
+                              style={{ flex: "1 1 100%" }}
+                            />
+                            <button onClick={() => handlePublish(cohort.id)} className={styles.saveBtn} style={{ flex: 1 }}>Save</button>
+                            <button onClick={() => setPublishCohortId(null)} className={styles.cancelBtn} style={{ flex: 1 }}>Cancel</button>
+                          </>
+                        ) : (
+                          <button onClick={() => setPublishCohortId(cohort.id)} className={styles.publishBtn} style={{ flex: "1 1 100%" }}>Publish</button>
+                        )}
+                      </div>
+                    ) : (
+                      <button onClick={() => handleStop(cohort.id)} className={styles.stopBtn} style={{ flex: "1 1 100%" }}>Stop Applications</button>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       )}
     </div>

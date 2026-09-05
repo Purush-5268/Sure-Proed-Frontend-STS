@@ -402,6 +402,28 @@ export const configureModuleTestProctoring = async (moduleTestId, payload) =>
 export const assignModuleTestProctor = async (moduleTestId, payload) =>
   (await apiClient.post(API_ENDPOINTS.MODULE_TESTS.ASSIGN_PROCTOR(moduleTestId), payload)).data;
 
+/** Admin-only: Start the test so students can begin their attempts. */
+export const adminStartModuleTest = async (moduleTestId) => {
+  try {
+    const response = await apiClient.post(API_ENDPOINTS.MODULE_TESTS.ADMIN_START(moduleTestId));
+    return { success: true, ...response.data };
+  } catch (error) {
+    return {
+      success: false,
+      error: apiError(error, "Failed to start the test."),
+      status: error?.response?.status,
+      code: error?.response?.data?.code,
+    };
+  }
+};
+
+/** Fetch a single ModuleTest detail (used for polling state). */
+export const getModuleTest = async (moduleTestId) =>
+  (await apiClient.get(API_ENDPOINTS.MODULE_TESTS.BY_ID(moduleTestId))).data;
+
+export const updateExam = async (examId, payload) =>
+  (await apiClient.patch(API_ENDPOINTS.EXAMS.BY_ID(examId), payload)).data;
+
 export const examService = {
   fetchAuthoritativeExamContext,
   fetchExamConfig,
@@ -426,6 +448,9 @@ export const examService = {
   getModuleTestProctoringRooms,
   configureModuleTestProctoring,
   assignModuleTestProctor,
+  adminStartModuleTest,
+  getModuleTest,
+  updateExam,
 };
 
 export default examService;

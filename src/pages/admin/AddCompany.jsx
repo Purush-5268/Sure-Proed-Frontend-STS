@@ -57,8 +57,8 @@ function AddCompany() {
     setError("");
     setSuccess("");
 
-    if (!form.name.trim() || !form.user) {
-      setError("Please provide a company name and a linked user account.");
+    if (!form.name.trim()) {
+      setError("Please provide a company name.");
       return;
     }
 
@@ -66,7 +66,9 @@ function AddCompany() {
 
     try {
       const formData = new FormData();
-      formData.append("user", form.user);
+      if (form.user) {
+        formData.append("user", form.user);
+      }
       formData.append("name", form.name.trim());
       if (form.description.trim()) formData.append("description", form.description.trim());
       if (form.website.trim()) formData.append("website", form.website.trim());
@@ -115,16 +117,23 @@ function AddCompany() {
               </div>
 
               <div>
-                <label>Linked User</label>
-                <select name="user" value={form.user} onChange={handleChange} required>
-                  <option value="">Select a user</option>
-                  {users.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.first_name || user.email} {user.last_name ? `(${user.last_name})` : ""}
+              <label>Linked User (Optional)</label>
+              {loadingUsers ? (
+                <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem" }}>Loading available users...</p>
+              ) : (
+                <select name="user" value={form.user} onChange={handleChange}>
+                  <option value="">Select a user (Optional)</option>
+                  {users.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.email} {u.first_name ? `(${u.first_name} ${u.last_name})` : ""}
                     </option>
                   ))}
                 </select>
-              </div>
+              )}
+              <small style={{ color: "var(--text-secondary)", marginTop: "4px", display: "block" }}>
+                Leave this blank if you are only adding the company for the Partners page showcase.
+              </small>
+            </div>
 
               <div>
                 <label>Location</label>

@@ -79,20 +79,6 @@
 //           <div>
 //             <label>Status</label>
 //             <span className="premium-badge premium-badge-active">{cohort.status || "DRAFT"}</span>
-//           </div>
-
-//           <div>
-//             <label>Meeting Link</label>
-//             <p>{cohort.meeting_link || "N/A"}</p>
-//           </div>
-//         </div>
-
-//         <div className={styles.description}>
-//           <label>Code</label>
-//           <p>{cohort.code || "N/A"}</p>
-//         </div>
-
-//         <div className={styles.buttons}>
 //           <Link to={`/admin/edit-cohort/${cohort.id}`}>Edit Cohort</Link>
 //         </div>
 //       </div>
@@ -111,6 +97,7 @@ import { cohortService } from "../../services/cohortService";
 import { cohortChatService } from "../../services/cohortChatService";
 import styles from "./CohortDetails.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
+import CohortScreeningPanel from "./CohortScreeningPanel";
 import { FiMessageCircle, FiEdit2, FiArrowLeft, FiUser, FiCalendar, FiUsers, FiVideo, FiCheckCircle, FiXCircle } from "react-icons/fi";
 
 function CohortDetails() {
@@ -286,7 +273,7 @@ function CohortDetails() {
                 <option value="BATCH_2">Batch 2</option>
               </select>
             </div>
-
+            
             <div className={styles.controlField}>
               <label className={styles.controlLabel}>Stage</label>
               <select
@@ -324,6 +311,9 @@ function CohortDetails() {
           </Link>
         </div>
       </div>
+
+      {/* Cohort Screening Panel */}
+      <CohortScreeningPanel cohortId={id} cohort={cohort} />
 
       {/* Dynamic Timeline */}
       {cohort.start_date && (

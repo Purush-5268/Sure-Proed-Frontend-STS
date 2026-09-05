@@ -126,27 +126,49 @@ function CourseDetails() {
           </>
         )}
 
-        <button 
-          className={styles.applyBtn} 
-          onClick={async () => {
-            if (isApplying || hasApplied) return;
-            setIsApplying(true);
-            setApplyError("");
-            try {
-              await applicationService.createApplication({ course_id: id });
-              setHasApplied(true);
-              navigate("/student/application-success");
-            } catch (err) {
-              setApplyError(err.response?.data?.detail || err.response?.data?.error || err.response?.data?.non_field_errors?.[0] || "Failed to submit application. You may have already applied or the course is unavailable.");
-            } finally {
-              setIsApplying(false);
-            }
-          }}
-          disabled={loading || !course || hasApplied || isApplying}
-          style={hasApplied ? { backgroundColor: 'var(--success-color)', cursor: 'not-allowed', opacity: 1 } : {}}
-        >
-          {isApplying ? "Applying..." : hasApplied ? "✓ Already Applied" : "Apply for this Course"}
-        </button>
+        <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
+          <button 
+            type="button" 
+            onClick={() => navigate(-1)} 
+            style={{ 
+              padding: '16px 24px', 
+              borderRadius: 'var(--radius-md)', 
+              background: 'var(--bg-nested)', 
+              border: '1px solid var(--border-color)', 
+              color: 'var(--text-primary)', 
+              fontWeight: '600', 
+              cursor: 'pointer',
+              flex: '1',
+              transition: 'all 0.2s',
+              boxShadow: 'var(--shadow-sm)'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--text-muted)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; }}
+          >
+            Go Back
+          </button>
+          <button 
+            className={styles.applyBtn} 
+            onClick={async () => {
+              if (isApplying || hasApplied) return;
+              setIsApplying(true);
+              setApplyError("");
+              try {
+                await applicationService.createApplication({ course_id: id });
+                setHasApplied(true);
+                navigate("/student/application-success");
+              } catch (err) {
+                setApplyError(err.response?.data?.detail || err.response?.data?.error || err.response?.data?.non_field_errors?.[0] || "Failed to submit application. You may have already applied or the course is unavailable.");
+              } finally {
+                setIsApplying(false);
+              }
+            }}
+            disabled={loading || !course || hasApplied || isApplying}
+            style={{ flex: '2', ...(hasApplied ? { backgroundColor: 'var(--success-color)', cursor: 'not-allowed', opacity: 1 } : {}) }}
+          >
+            {isApplying ? "Applying..." : hasApplied ? "✓ Already Applied" : "Apply for this Course"}
+          </button>
+        </div>
       </div>
     </div>
   );
