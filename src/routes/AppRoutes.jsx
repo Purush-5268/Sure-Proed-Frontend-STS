@@ -89,6 +89,7 @@ const Resources = lazy(() => import("../pages/student/Resources"));
 
 const Attendance = lazy(() => import("../pages/student/Attendance"));
 const AttendanceHistory = lazy(() => import("../pages/student/AttendanceHistory"));
+const AnnouncementsHistory = lazy(() => import("../pages/student/AnnouncementsHistory"));
 
 const AssignmentList = lazy(() => import("../pages/student/AssignmentList"));
 const AssignmentDetails = lazy(() => import("../pages/student/AssignmentDetails"));
@@ -284,6 +285,7 @@ function AppRoutes() {
               <Route path="attendance" element={<Attendance />} />
               <Route path="attendance-history" element={<AttendanceHistory />} />
               <Route path="permissions" element={<PermissionsStudent />} />
+              <Route path="announcements" element={<AnnouncementsHistory />} />
 
               <Route path="assignments" element={<AssignmentList />} />
               <Route path="assignment-details" element={<AssignmentDetails />} />

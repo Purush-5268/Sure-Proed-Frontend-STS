@@ -93,6 +93,14 @@ function AssignmentFeedback() {
     return <Badge variant="warning">Needs Grading</Badge>;
   };
 
+  const getStudentName = (sub) => {
+    if (sub.student_name) return sub.student_name;
+    if (sub.student?.user?.first_name || sub.student?.user?.last_name) return `${sub.student.user.first_name || ''} ${sub.student.user.last_name || ''}`.trim();
+    if (sub.student?.first_name || sub.student?.last_name) return `${sub.student.first_name || ''} ${sub.student.last_name || ''}`.trim();
+    if (sub.user?.first_name || sub.user?.last_name) return `${sub.user.first_name || ''} ${sub.user.last_name || ''}`.trim();
+    return "Unknown Student";
+  };
+
   if (loading) {
     return (
       <div className={styles.container}>
@@ -125,7 +133,7 @@ function AssignmentFeedback() {
       </div>
 
       <PageHeader 
-        title={`Review: ${assignment.title}`} 
+        title={`Review: ${assignment.title || assignment.assignment_title || 'Assignment'}`} 
         description={`Max Marks: ${assignment.max_marks || 'N/A'} | Passing: ${assignment.pass_percentage || 'N/A'}%`}
       />
 
@@ -151,7 +159,7 @@ function AssignmentFeedback() {
               {submissions.map((sub) => (
                 <tr key={sub.id}>
                   <td style={{ fontWeight: "500", color: "var(--text-primary)" }}>
-                    {sub.student?.user?.first_name} {sub.student?.user?.last_name}
+                    {getStudentName(sub)}
                   </td>
                   <td>{new Date(sub.submitted_at).toLocaleString()} {sub.is_late && <span style={{color: 'var(--error-color)', fontSize: '12px', fontWeight: 'bold'}}>(LATE)</span>}</td>
                   <td>{getStatusBadge(sub)}</td>
@@ -191,7 +199,7 @@ function AssignmentFeedback() {
               <div className={styles.modalBody}>
                 <div style={{ marginBottom: "20px", background: "var(--bg-nested)", padding: "16px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
                   <div style={{ fontWeight: "bold", marginBottom: "8px", color: "var(--text-primary)" }}>
-                    {selectedSubmission.student?.user?.first_name} {selectedSubmission.student?.user?.last_name}
+                    {getStudentName(selectedSubmission)}
                   </div>
                   {selectedSubmission.submission_url && (
                     <a href={selectedSubmission.submission_url} target="_blank" rel="noreferrer" style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--primary-color)", textDecoration: "none", fontWeight: "500" }}>

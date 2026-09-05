@@ -66,43 +66,20 @@ function AddMentor() {
         gender: form.gender || null,
         date_of_birth: form.date_of_birth || null,
         password: form.password,
-        domain: form.domain.trim() || null,
         role: "MENTOR",
         is_active: form.is_active,
+        
+        // Auto-handled by backend mapping to MentorProfile
+        course: form.domain || null,
+        company_name: form.company_name.trim() || null,
+        designation: form.designation.trim() || null,
+        expertise: form.expertise.trim() || null,
+        years_of_experience: form.years_of_experience ? Number(form.years_of_experience) : null,
+        linkedin_url: form.linkedin_url.trim() || null,
+        bio: form.bio.trim() || null,
       };
 
-      const userRes = await apiClient.post(API_ENDPOINTS.USERS.BASE, payload);
-      const newUserId = userRes.data.id || userRes.data.user?.id;
-
-      // 2. Attempt to assign Course (Domain) if selected
-      if (newUserId) {
-        try {
-          const profilePayload = {};
-          if (form.domain) profilePayload.course = form.domain;
-          if (form.company_name.trim()) profilePayload.company_name = form.company_name.trim();
-          if (form.designation.trim()) profilePayload.designation = form.designation.trim();
-          if (form.expertise.trim()) profilePayload.expertise = form.expertise.trim();
-          if (form.years_of_experience.trim()) profilePayload.years_of_experience = form.years_of_experience.trim();
-          if (form.linkedin_url.trim()) profilePayload.linkedin_url = form.linkedin_url.trim();
-          if (form.bio.trim()) profilePayload.bio = form.bio.trim();
-
-          if (Object.keys(profilePayload).length > 0) {
-            // Mentor profiles are auto-created by the backend signal upon user creation.
-            // Fetch the auto-created profile ID using the user_id query parameter.
-            const profileRes = await apiClient.get(API_ENDPOINTS.MENTORS.BASE, { params: { user: newUserId } });
-            const profileData = Array.isArray(profileRes.data?.results) ? profileRes.data.results : (Array.isArray(profileRes.data) ? profileRes.data : []);
-            const profileId = profileData[0]?.id;
-
-            if (profileId) {
-              await apiClient.patch(API_ENDPOINTS.MENTORS.PROFILE_BY_ID(profileId), profilePayload);
-            } else {
-              console.warn("Could not find auto-created Mentor Profile for the new user.");
-            }
-          }
-        } catch (profileErr) {
-          console.warn("Mentor profile update encountered an issue:", profileErr);
-        }
-      }
+      await apiClient.post(API_ENDPOINTS.USERS.BASE, payload);
 
       setSuccess("Mentor account created successfully. Share the email and password with the mentor.");
       setTimeout(() => navigate("/admin/mentors"), 2000);

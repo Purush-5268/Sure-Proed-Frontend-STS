@@ -100,24 +100,36 @@ function ClassSchedule() {
       if (item.end_time) {
         endDateTime = new Date(`${item.class_date}T${item.end_time}`);
       } else {
-        endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
+        endDateTime = new Date(startDateTime.getTime() + 2 * 60 * 60 * 1000); // 2 hours default
       }
+      if (endDateTime < startDateTime) endDateTime = new Date(endDateTime.getTime() + 24 * 60 * 60 * 1000);
+      
+      const itemStatus = (item.class_status || item.status || "").toUpperCase();
+      const isCompleted = itemStatus === "COMPLETED" || itemStatus === "ENDED" || now > endDateTime;
+      const isCancelled = itemStatus === "CANCELLED";
+      
+      if (isCompleted) return { canJoin: false, label: "Completed" };
+      if (isCancelled) return { canJoin: false, label: "Cancelled" };
+      
       const windowOpenTime = new Date(startDateTime.getTime() - 10 * 60 * 1000);
-      const windowCloseTime = new Date(endDateTime.getTime() + 5 * 60 * 1000);
-
-      if (now < windowOpenTime) return { canJoin: false, label: "Locked (Opens 10m prior)" };
       
-      const itemStatus = (item.status || "").toUpperCase();
-      const isCompleted = itemStatus === "COMPLETED" || itemStatus === "ENDED";
-      if (isCompleted) {
-         return { canJoin: false, label: "Completed" };
+      // Join allowed exactly between T-10 and T-0
+      if (now >= windowOpenTime && now <= startDateTime) {
+        return { canJoin: true, label: "Live Now" };
       }
       
-      if (now > windowCloseTime) {
-         return { canJoin: false, label: "Window Closed (Ask Admin)" };
+      // Late Join (Ask Admin) allowed after start time up until it ends
+      if (now > startDateTime && now <= endDateTime) {
+        return { canJoin: false, label: "Ask Admin (Late Join)" };
       }
       
-      return { canJoin: true, label: "Live Now" };
+      if (now < windowOpenTime) {
+        const startsIn = Math.floor((startDateTime - now) / 60000);
+        if (startsIn < 60) return { canJoin: false, label: `Starts in ${startsIn} min` };
+        return { canJoin: false, label: "Upcoming" };
+      }
+      
+      return { canJoin: false, label: "Locked" };
     } catch (e) {
       return { canJoin: false, label: "Error" };
     }

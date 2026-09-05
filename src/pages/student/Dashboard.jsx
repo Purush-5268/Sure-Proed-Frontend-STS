@@ -11,7 +11,7 @@ import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import styles from "./Dashboard.module.css";
-import { FiCheckCircle, FiClock, FiAlertCircle, FiCpu, FiUsers, FiBarChart2, FiUser, FiVideo, FiFileText, FiEdit, FiBookOpen, FiArrowRight, FiLock, FiCalendar, FiAward, FiX } from "react-icons/fi";
+import { FiCheckCircle, FiClock, FiAlertCircle, FiCpu, FiUsers, FiBarChart2, FiUser, FiVideo, FiFileText, FiEdit, FiBookOpen, FiArrowRight, FiLock, FiCalendar, FiAward, FiX, FiBell } from "react-icons/fi";
 import { FaLaptopCode, FaRegCalendarAlt } from "react-icons/fa";
 import FeedbackWidget from "../../components/common/FeedbackWidget";
 import AttendanceWarningPopup from "../../components/attendance/AttendanceWarningPopup";
@@ -50,6 +50,7 @@ function Dashboard() {
   const [isSubmittingAbsence, setIsSubmittingAbsence] = useState(false);
   const [mentorsMap, setMentorsMap] = useState({});
   const [announcements, setAnnouncements] = useState([]);
+  const [isAnnouncementsOpen, setIsAnnouncementsOpen] = useState(false);
   const [calMonth, setCalMonth] = useState(() => { const d = new Date(); return { year: d.getFullYear(), month: d.getMonth() }; });
 
   useEffect(() => {
@@ -582,8 +583,39 @@ function Dashboard() {
               const allVisibleClasses = todayClasses.filter(cls => {
                 const classStart = new Date(`${cls.class_date}T${cls.start_time}`);
                 if (isNaN(classStart)) return false;
-                const hoursSince = (now - classStart) / (1000 * 60 * 60);
-                return hoursSince <= 24;
+                let classEnd = cls.end_time ? new Date(`${cls.class_date}T${cls.end_time}`) : new Date(classStart.getTime() + 2 * 60 * 60 * 1000);
+                if (classEnd < classStart) classEnd = new Date(classEnd.getTime() + 24 * 60 * 60 * 1000);
+                
+                if (now > classEnd) {
+                   const hoursSinceEnd = (now - classEnd) / (1000 * 60 * 60);
+                   if (hoursSinceEnd > 12) return false;
+                }
+                return true;
+              }).sort((a, b) => {
+                const getStatusRank = (cls) => {
+                  const start = new Date(`${cls.class_date}T${cls.start_time}`);
+                  let end = cls.end_time ? new Date(`${cls.class_date}T${cls.end_time}`) : new Date(start.getTime() + 2 * 60 * 60 * 1000);
+                  if (end < start) end = new Date(end.getTime() + 24 * 60 * 60 * 1000);
+                  
+                  const clsStatus = (cls.class_status || cls.status || "").toUpperCase();
+                  if (clsStatus === 'COMPLETED' || clsStatus === 'ENDED') return 2;
+                  if (clsStatus === 'CANCELLED') return 3;
+                  
+                  if (now >= start && now <= end) return 0; // Ongoing
+                  if (now < start) return 1; // Upcoming
+                  return 2; // Past
+                };
+                
+                const rankA = getStatusRank(a);
+                const rankB = getStatusRank(b);
+                
+                if (rankA !== rankB) return rankA - rankB;
+                
+                const startA = new Date(`${a.class_date}T${a.start_time}`);
+                const startB = new Date(`${b.class_date}T${b.start_time}`);
+                
+                if (rankA === 1) return startA - startB; // Upcoming: closest first
+                return startB - startA; // Ongoing or Past: most recent first
               });
               const visibleClasses = allVisibleClasses.slice(0, 3);
 
@@ -597,11 +629,19 @@ function Dashboard() {
                 if (classEnd < classStart) classEnd = new Date(classEnd.getTime() + 24 * 60 * 60 * 1000);
                 
                 const clsStatus = (cls.class_status || cls.status || "").toUpperCase();
-                const isCompleted = clsStatus === 'COMPLETED' || clsStatus === 'ENDED' || now >= classEnd;
+                
+                // Backend strictly dictates completed/cancelled, but we also fallback to time if backend is slow
+                const isCompleted = clsStatus === 'COMPLETED' || clsStatus === 'ENDED' || now > classEnd;
                 const isCancelled = clsStatus === 'CANCELLED';
+                
                 const windowOpenTime = new Date(classStart.getTime() - 10 * 60 * 1000);
-                const classOpen = !isCompleted && !isCancelled && now >= windowOpenTime && now <= classEnd;
-                const isLate = !isCompleted && !isCancelled && now > classEnd;
+                
+                // Join allowed exactly between T-10 and T-0
+                const isJoinWindowOpen = !isCompleted && !isCancelled && now >= windowOpenTime && now <= classStart;
+                
+                // Late Join (Ask Admin) allowed after start time up until it ends
+                const isLate = !isCompleted && !isCancelled && now > classStart && now <= classEnd;
+                
                 const startsIn = Math.floor((classStart - now) / 60000);
 
                 let rightElement;
@@ -609,13 +649,13 @@ function Dashboard() {
                   rightElement = <span className={styles.badgeCompleted}>Completed</span>;
                 } else if (isCancelled) { 
                   rightElement = <span className={styles.badgeCancelled}>Cancelled</span>;
-                } else if (classOpen) { 
+                } else if (isJoinWindowOpen) { 
                   rightElement = <button className={styles.btnJoinClass} onClick={() => handleJoinClass(cls)}>Join Class</button>;
                 } else if (isLate) {
                   rightElement = (
                     <div style={{ textAlign: 'right' }}>
-                      <span className={styles.badgeOngoing}>Ongoing</span>
-                      <button onClick={() => { setLateJoinClassId(cls.id || cls.realId); setShowLateJoinModal(true); }} className={styles.btnAskAdmin}>Ask Admin</button>
+                      <span className={styles.badgeOngoing}>Ongoing (Late)</span>
+                      <button onClick={() => { setLateJoinClassId(cls.id || cls.realId); setShowLateJoinModal(true); }} className={styles.btnAskAdmin} style={{ marginTop: '4px' }}>Ask Admin</button>
                     </div>
                   );
                 } else if (startsIn > 0) {
@@ -647,7 +687,7 @@ function Dashboard() {
                         {rightElement}
                       </div>
                     </div>
-                    {classOpen && (
+                    {(isJoinWindowOpen || isLate) && (
                       <div className={styles.classInstructions}>
                         <h5 style={{ margin: '0 0 8px 0', fontSize: '13px', color: 'var(--text-primary)' }}>📌 Before Joining</h5>
                         <ul style={{ margin: 0, paddingLeft: '16px', color: 'var(--text-secondary)', fontSize: '12px', lineHeight: '1.4' }}>
@@ -676,44 +716,6 @@ function Dashboard() {
         </div>
 
 
-        {/* Col 4: Recent Announcements */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <h3 className={styles.cardTitle}>Recent Announcements</h3>
-            <button className={styles.cardViewAll} onClick={() => navigate('/student/dashboard')}>View All</button>
-          </div>
-          <div className={styles.classesListContainer}>
-            {announcements.length === 0 ? (
-              <>
-                <div className={styles.announcementItem}>
-                  <div className={styles.announcementDot} style={{ background: '#10b981' }}></div>
-                  <div>
-                    <h4 className={styles.announcementText}>New session schedule updated</h4>
-                    <p className={styles.announcementTime}>2 hours ago</p>
-                  </div>
-                </div>
-                <div className={styles.announcementItem}>
-                  <div className={styles.announcementDot} style={{ background: '#f59e0b' }}></div>
-                  <div>
-                    <h4 className={styles.announcementText}>Assignment 3 deadline extended</h4>
-                    <p className={styles.announcementTime}>1 day ago</p>
-                  </div>
-                </div>
-              </>
-            ) : (
-              announcements.map((a, idx) => (
-                <div key={idx} className={styles.announcementItem}>
-                  <div className={styles.announcementDot}></div>
-                  <div>
-                    <h4 className={styles.announcementText}>{a.title || a.message}</h4>
-                    <p className={styles.announcementTime}>{a.created_at ? new Date(a.created_at).toLocaleDateString() : 'Recently'}</p>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-        
       </div>
 
       
@@ -770,22 +772,47 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* SECTION 5: Feedback and Offer Letters */}
-      <div className={styles.quickActions} style={{ marginTop: '24px', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+      {/* SECTION 5: Feedback, Offer Letters, and Announcements */}
+      <div className={styles.quickActions} style={{ marginTop: '24px', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
         {/* Feedback Stats */}
-        <div className={styles.statCard} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <h3>Share Your Experience</h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>Your feedback helps us improve SURE ProEd. Let us know how things are going!</p>
+        <div className={styles.statCard} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <h3>Share Your Experience</h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>Your feedback helps us improve SURE ProEd.</p>
+          </div>
           <FeedbackWidget />
         </div>
 
         {/* Offer Letters Card */}
-        <div className={styles.statCard} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <h3>Offer Letters</h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>View and manage your internship offer letters.</p>
+        <div className={styles.statCard} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <h3>Offer Letters</h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>View and manage your internship offer letters.</p>
+          </div>
           <button onClick={() => navigate('/student/applications')} style={{ width: '100%', padding: '10px 16px', backgroundColor: 'var(--brand-color, #2563eb)', color: 'white', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>
             Go to Applications →
           </button>
+        </div>
+
+        {/* Announcements Card */}
+        <div className={styles.statCard} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+              <h3 style={{ margin: 0 }}>Announcements</h3>
+              {announcements.length > 0 && (
+                <span className={styles.unreadBadge} style={{ position: 'static', marginLeft: 0 }}>{announcements.length}</span>
+              )}
+            </div>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>Stay up to date with the latest platform updates.</p>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => setIsAnnouncementsOpen(true)} style={{ flex: 1, padding: '10px', backgroundColor: 'var(--bg-nested)', color: 'var(--text-primary)', borderRadius: '8px', border: '1px solid var(--border-color)', fontWeight: 'bold', cursor: 'pointer' }}>
+              View Recent
+            </button>
+            <button onClick={() => navigate('/student/announcements')} style={{ flex: 1, padding: '10px', backgroundColor: 'var(--primary-color)', color: '#fff', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>
+              All History →
+            </button>
+          </div>
         </div>
       </div>
 
@@ -938,6 +965,45 @@ function Dashboard() {
         </div>
       )}
 
+      {/* Floating Announcements Panel */}
+      <div className={styles.floatingAnnouncementsWrapper}>
+        <div className={`${styles.announcementPanel} ${isAnnouncementsOpen ? styles.panelOpen : ''}`}>
+          <div className={styles.panelHeader}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ background: 'var(--primary-color)', padding: '6px', borderRadius: '50%', display: 'flex' }}>
+                <FiBell size={16} color="#fff" />
+              </div>
+              <h3 style={{ margin: 0, fontSize: '15px', color: 'var(--text-primary)' }}>Announcements</h3>
+            </div>
+            <button className={styles.panelCloseBtn} onClick={() => setIsAnnouncementsOpen(false)}>
+              <FiX size={18} />
+            </button>
+          </div>
+          <div className={styles.panelBody}>
+            {announcements.length === 0 ? (
+              <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                <div style={{ marginBottom: '12px', opacity: 0.5 }}>
+                  <FiBell size={32} />
+                </div>
+                No new announcements.
+              </div>
+            ) : (
+              announcements.map((a, idx) => (
+                <div key={idx} className={styles.panelItem}>
+                  <div className={styles.panelItemDot}></div>
+                  <div style={{ flex: 1 }}>
+                    <h4 className={styles.panelItemTitle}>{a.title || a.message}</h4>
+                    <p className={styles.panelItemTime}>{a.created_at ? new Date(a.created_at).toLocaleDateString() : 'Recently'}</p>
+                  </div>
+                </div>
+              ))
+            )}
+            <button className={styles.panelViewAllBtn} onClick={() => navigate('/student/announcements')}>
+              View All History &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

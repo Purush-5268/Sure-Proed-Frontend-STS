@@ -1,22 +1,29 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getStudents, removeStudent } from "../../../services/trusteeService";
+import { getStudents, removeStudent, getLowAttendanceAlerts } from "../../../services/trusteeService";
 import { normalizeListResponse } from "../../../services/apiClient";
 import SkeletonLoader from "../../../components/common/SkeletonLoader";
 import styles from "./Users.module.css";
+import { FiAlertTriangle } from "react-icons/fi";
 
 function VolunteerUsers() {
   const navigate = useNavigate();
   const [students, setStudents] = useState([]);
+  const [alerts, setAlerts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const loadStudents = async () => {
+  const loadData = async () => {
     try {
-      const data = await getStudents();
-      setStudents(normalizeListResponse(data));
+      setLoading(true);
+      const [studentsData, alertsData] = await Promise.all([
+        getStudents(),
+        getLowAttendanceAlerts().catch(() => [])
+      ]);
+      setStudents(normalizeListResponse(studentsData));
+      setAlerts(alertsData || []);
     } catch (err) {
-      console.warn("Could not load students:", err);
+      console.warn("Could not load data:", err);
       setStudents([]);
     } finally {
       setLoading(false);
@@ -24,7 +31,7 @@ function VolunteerUsers() {
   };
 
   useEffect(() => {
-    loadStudents();
+    loadData();
   }, []);
 
   const handleRemoveUser = async (id, name) => {
@@ -32,7 +39,7 @@ function VolunteerUsers() {
       try {
         await removeStudent(id);
         alert(`${name} has been removed.`);
-        loadStudents();
+        loadData();
       } catch (err) {
         alert("Failed to remove user: " + (err.response?.data?.detail || err.message));
       }
@@ -92,10 +99,18 @@ function VolunteerUsers() {
                   </td>
                 </tr>
               ) : (
-                filteredStudents.map((s) => (
-                  <tr key={s.id}>
+                filteredStudents.map((s) => {
+                  const sName = s.name || `${s.first_name || ""} ${s.last_name || ""}`;
+                  const hasAlert = alerts.find(a => a.name === sName || a.student_id === s.id || a.user_id === s.user?.id);
+                  return (
+                  <tr key={s.id} style={{ backgroundColor: hasAlert ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
                     <td className={styles.cellName}>
-                      {s.name || `${s.first_name || ""} ${s.last_name || ""}`}
+                      {sName}
+                      {hasAlert && (
+                        <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px', color: '#ef4444', fontSize: '12px', fontWeight: 'bold' }}>
+                          <FiAlertTriangle size={14} /> Low Attendance Alert
+                        </div>
+                      )}
                     </td>
                     <td>
                       <div className={styles.contactInfo}>
@@ -121,7 +136,7 @@ function VolunteerUsers() {
                         onClick={() =>
                           handleRemoveUser(
                             s.id,
-                            s.name || s.first_name || "User"
+                            sName || "User"
                           )
                         }
                       >
@@ -129,7 +144,8 @@ function VolunteerUsers() {
                       </button>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>
