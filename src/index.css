@@ -712,11 +712,7 @@ input[type="time"].premium-input {
   color-scheme: var(--native-color-scheme, light);
 }
 
-[data-theme="dark"] input[type="date"].premium-input::-webkit-calendar-picker-indicator,
-[data-theme="dark"] input[type="time"].premium-input::-webkit-calendar-picker-indicator,
-[data-theme="dark"] input[type="datetime-local"].premium-input::-webkit-calendar-picker-indicator {
-  filter: invert(1) hue-rotate(180deg);
-}
+
 
 .premium-input:focus {
   outline: none;
