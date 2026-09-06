@@ -320,7 +320,7 @@ function ScheduleClass() {
       const finalGroupName = request.groupName ? request.groupName.trim().toUpperCase() : "";
 
       const formattedData = {
-        title: `${request.sessionType} Session - ${finalGroupName || automationInfo?.starting_batch || 'General'}`.toUpperCase(),
+        title: request.title ? request.title : `${request.sessionType} Session - ${finalGroupName || automationInfo?.starting_batch || 'General'}`.toUpperCase(),
         class_date: request.classDate,
         start_time: request.startTime.length === 5 ? request.startTime + ":00" : request.startTime,
         end_time: request.endTime.length === 5 ? request.endTime + ":00" : request.endTime,
@@ -351,8 +351,16 @@ function ScheduleClass() {
 
       setSuccessMessage(`Live class scheduled successfully! Check the active classes below for details.`);
 
-      // 🚨 Fetch fresh data to ensure we have all fields (like class_date, counts) correctly populated
-      await loadActiveClasses();
+      // Optimistically add to state for instant feedback
+      const newClass = res?.data || res;
+      if (newClass && typeof newClass === 'object' && newClass.id) {
+        setActiveAdminClasses(prev => [newClass, ...prev]);
+      }
+
+      // Fetch fresh data in background to ensure relational fields sync correctly
+      setTimeout(() => {
+        loadActiveClasses();
+      }, 1000);
 
       setRequest({
         sessionType: "Domain",
@@ -515,24 +523,26 @@ function ScheduleClass() {
             </div>
           )}
 
-          {request.sessionType === "LST" && (
+          {["LST", "Soft Skills", "Celebration", "Universal"].includes(request.sessionType) && (
             <div className={`premium-section ${styles.animatedField}`}>
               <div className="premium-grid-2">
-                <div>
-                  <label className="premium-label">LST Batch Number *</label>
-                  <select value={request.lstBatchNumber} onChange={(e) => setRequest({ ...request, lstBatchNumber: e.target.value })} required className={`premium-input ${styles.formInput}`}>
-                    <option value="">-- Select Batch --</option>
-                    <option value="BATCH_1">Batch 1</option>
-                    <option value="BATCH_2">Batch 2</option>
-                  </select>
-                </div>
-                <div>
+                {request.sessionType === "LST" && (
+                  <div>
+                    <label className="premium-label">LST Batch Number *</label>
+                    <select value={request.lstBatchNumber} onChange={(e) => setRequest({ ...request, lstBatchNumber: e.target.value })} required className={`premium-input ${styles.formInput}`}>
+                      <option value="">-- Select Batch --</option>
+                      <option value="BATCH_1">Batch 1</option>
+                      <option value="BATCH_2">Batch 2</option>
+                    </select>
+                  </div>
+                )}
+                <div style={{ gridColumn: request.sessionType === "LST" ? 'auto' : '1 / -1' }}>
                   <label className="premium-label">Class / Meet Name *</label>
-                  <input type="text" value={request.title} onChange={(e) => setRequest({ ...request, title: e.target.value })} placeholder="e.g. VLSI LST — Digital Electronics" required className={`premium-input ${styles.formInput}`} />
+                  <input type="text" value={request.title} onChange={(e) => setRequest({ ...request, title: e.target.value })} placeholder={request.sessionType === "LST" ? "e.g. VLSI LST — Digital Electronics" : "Enter session name..."} required className={`premium-input ${styles.formInput}`} />
                 </div>
               </div>
 
-              {automationInfo?.starting_batch && (
+              {request.sessionType === "LST" && automationInfo?.starting_batch && (
                 <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '8px', border: '1px dashed rgba(59, 130, 246, 0.3)' }}>
                   <p style={{ margin: '0 0 0.5rem 0', fontSize: '13px', color: 'var(--text-primary)', fontWeight: 'bold' }}>🤖 Sunday Automation Controls</p>
                   <p style={{ margin: '0 0 1rem 0', fontSize: '12px', color: 'var(--text-secondary)' }}>Automated Google Meets are generated every Sunday by the Celery worker for this batch. You can pause or resume this background process.</p>

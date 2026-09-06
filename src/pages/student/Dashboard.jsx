@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Suspense } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { studentService, checkCurrentEnrollment, resolveStudentEnrollment } from "../../services/studentService";
@@ -304,6 +305,8 @@ function Dashboard() {
             <div className={styles.heroRight}>
               <div style={{ textAlign: 'right' }}>
                  <h3 className={styles.heroValues}>Learn<br/>Build<br/>Grow<br/>Belong</h3>
+                 <div className={styles.shiningLine}></div>
+                 <p className={styles.heroSignature}>SURE ProEd</p>
               </div>
             </div>
           </div>
@@ -405,6 +408,8 @@ function Dashboard() {
           <div className={styles.heroRight}>
             <div style={{ textAlign: 'right' }}>
                <h3 className={styles.heroValues}>Learn<br/>Build<br/>Grow<br/>Belong</h3>
+               <div className={styles.shiningLine}></div>
+               <p className={styles.heroSignature}>SURE ProEd</p>
             </div>
           </div>
         </div>
@@ -896,8 +901,8 @@ function Dashboard() {
       )}
 
       {/* Mentor List Modal */}
-      {showMentorModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowMentorModal(false)}>
+      {showMentorModal && createPortal(
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowMentorModal(false)}>
           <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '400px', boxShadow: '0 24px 48px rgba(0,0,0,0.15)', border: '1px solid var(--border-color)', position: 'relative' }} onClick={e => e.stopPropagation()}>
             <button onClick={() => setShowMentorModal(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}><FiX size={24} /></button>
             <h3 style={{ margin: '0 0 20px 0', fontSize: '20px', color: 'var(--text-primary)' }}>All Assigned Mentors</h3>
@@ -988,7 +993,8 @@ function Dashboard() {
               })()}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Absence Permission Modal */}

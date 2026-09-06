@@ -35,18 +35,18 @@ const RESEND_COOLDOWN_S = 60;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function evaluatePassword(pwd) {
-  const length  = pwd.length >= 8;
-  const upper   = /[A-Z]/.test(pwd);
-  const lower   = /[a-z]/.test(pwd);
-  const number  = /[0-9]/.test(pwd);
+  const length = pwd.length >= 8;
+  const upper = /[A-Z]/.test(pwd);
+  const lower = /[a-z]/.test(pwd);
+  const number = /[0-9]/.test(pwd);
   const special = /[^A-Za-z0-9]/.test(pwd);
-  const score   = [length, upper, lower, number, special].filter(Boolean).length;
-  const label   = score === 5 ? "Very Strong" : score >= 4 ? "Strong" : score === 3 ? "Medium" : "Weak";
+  const score = [length, upper, lower, number, special].filter(Boolean).length;
+  const label = score === 5 ? "Very Strong" : score >= 4 ? "Strong" : score === 3 ? "Medium" : "Weak";
   return { length, upper, lower, number, special, score, label };
 }
 
 function Signup() {
-  const navigate   = useNavigate();
+  const navigate = useNavigate();
   const { updateUser } = useAuth();
 
   // ─── Form data ───────────────────────────────────────
@@ -56,30 +56,30 @@ function Signup() {
     gender: "", dateOfBirth: "",
   });
 
-  const [showPassword, setShowPassword]           = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [passwordStrength, setPasswordStrength]   = useState(evaluatePassword(""));
+  const [passwordStrength, setPasswordStrength] = useState(evaluatePassword(""));
 
   // ─── Email verification state ─────────────────────────
   // emailVerified is only set to true when the backend verifyEmailOTP succeeds
   // and returns JWT tokens.
-  const [emailVerified, setEmailVerified]         = useState(false);
-  const [verifiedEmail, setVerifiedEmail]         = useState(""); // the email that was verified
-  const [showOtpPanel, setShowOtpPanel]           = useState(false);
-  const [otp, setOtp]                             = useState(["", "", "", "", "", ""]);
-  const [deliveryHint, setDeliveryHint]           = useState("");
-  const [sendingOtp, setSendingOtp]               = useState(false);
-  const [verifyingOtp, setVerifyingOtp]           = useState(false);
-  const [otpError, setOtpError]                   = useState("");
-  const [resendTimer, setResendTimer]             = useState(RESEND_COOLDOWN_S);
-  const [canResend, setCanResend]                 = useState(false);
-  const timerRef                                  = useRef(null);
-  const otpRefs                                   = useRef([]);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState(""); // the email that was verified
+  const [showOtpPanel, setShowOtpPanel] = useState(false);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [deliveryHint, setDeliveryHint] = useState("");
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [otpError, setOtpError] = useState("");
+  const [resendTimer, setResendTimer] = useState(RESEND_COOLDOWN_S);
+  const [canResend, setCanResend] = useState(false);
+  const timerRef = useRef(null);
+  const otpRefs = useRef([]);
 
   // ─── Form-level state ─────────────────────────────────
-  const [loading, setLoading]   = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
-  const [success, setSuccess]   = useState(false);
+  const [success, setSuccess] = useState(false);
 
   // ─── Watch email field: reset verification if email changes ──
   useEffect(() => {
@@ -161,18 +161,18 @@ function Signup() {
     setSendingOtp(true);
     try {
       const payload = {
-        first_name:    formData.firstName.trim(),
-        last_name:     formData.lastName.trim(),
+        first_name: formData.firstName.trim(),
+        last_name: formData.lastName.trim(),
         email,
-        phone_number:  formData.phoneNumber.trim() || null,
-        password:      formData.password,
-        role:          "STUDENT",
-        gender:        formData.gender || null,
+        phone_number: formData.phoneNumber.trim() || null,
+        password: formData.password,
+        role: "STUDENT",
+        gender: formData.gender || null,
         date_of_birth: formData.dateOfBirth || null,
       };
       const res = await authService.sendEmailVerificationOTP(payload);
       const detail = res?.detail || "";
-      const match  = detail.match(/dispatched to (.+?)\./i);
+      const match = detail.match(/dispatched to (.+?)\./i);
       setDeliveryHint(match ? match[1] : email);
       setShowOtpPanel(true);
       setOtp(["", "", "", "", "", ""]);
@@ -227,12 +227,12 @@ function Signup() {
     setVerifyingOtp(true);
     try {
       const email = formData.email.trim().toLowerCase();
-      const res   = await authService.verifyEmailOTP(email, otpVal);
+      const res = await authService.verifyEmailOTP(email, otpVal);
       // Backend confirmed email is valid. Store tokens and mark as verified.
       if (res.access) {
         setAccessToken(res.access);
-        if (res.refresh)    setRefreshToken(res.refresh);
-        if (res.user)       { setUserInfo(res.user); updateUser(res.user); }
+        if (res.refresh) setRefreshToken(res.refresh);
+        if (res.user) { setUserInfo(res.user); updateUser(res.user); }
       }
       // Mark email as verified (backend authority confirmed)
       setEmailVerified(true);
@@ -250,7 +250,7 @@ function Signup() {
       }, 1800);
     } catch (err) {
       const data = err?.response?.data;
-      const msg  = data?.detail || data?.otp?.[0] || data?.message ||
+      const msg = data?.detail || data?.otp?.[0] || data?.message ||
         (typeof data === "string" ? data : null) || "Invalid or expired code. Try again.";
       setOtpError(msg);
       setOtp(["", "", "", "", "", ""]);
@@ -462,10 +462,10 @@ function Signup() {
               </div>
               <div className={styles.passwordRules}>
                 {[
-                  [passwordStrength.length,  "Min 8 characters"],
-                  [passwordStrength.upper,   "Uppercase"],
-                  [passwordStrength.lower,   "Lowercase"],
-                  [passwordStrength.number,  "Number"],
+                  [passwordStrength.length, "Min 8 characters"],
+                  [passwordStrength.upper, "Uppercase"],
+                  [passwordStrength.lower, "Lowercase"],
+                  [passwordStrength.number, "Number"],
                   [passwordStrength.special, "Special char"],
                 ].map(([ok, label]) => (
                   <div key={label} className={ok ? styles.ruleValid : styles.ruleInvalid}>

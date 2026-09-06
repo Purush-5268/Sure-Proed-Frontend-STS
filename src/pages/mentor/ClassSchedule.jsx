@@ -144,7 +144,11 @@ function ClassSchedule() {
           session_type: "Domain",
           guest_emails: scheduleForm.guestEmails.join(",")
         };
-        await apiClient.post(API_ENDPOINTS.ATTENDANCE.BASE, payload);
+        const res = await apiClient.post(API_ENDPOINTS.ATTENDANCE.BASE, payload);
+        const newClass = res?.data || res;
+        if (newClass && typeof newClass === 'object' && newClass.id) {
+          setActiveSessions(prev => [newClass, ...prev]);
+        }
         alert("✅ Domain Session Scheduled!");
       } else {
         if (!scheduleForm.trainingId) {
@@ -160,7 +164,11 @@ function ClassSchedule() {
           start_time: start_time,
           end_time: end_time
         };
-        await apiClient.post(API_ENDPOINTS.TRAININGS.SESSIONS, payload);
+        const res = await apiClient.post(API_ENDPOINTS.TRAININGS.SESSIONS, payload);
+        const newClass = res?.data || res;
+        if (newClass && typeof newClass === 'object' && newClass.id) {
+          setActiveSessions(prev => [newClass, ...prev]);
+        }
         alert("✅ Training Session Scheduled!");
       }
 

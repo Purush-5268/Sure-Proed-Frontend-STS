@@ -19,6 +19,7 @@ function Placements() {
   const [submitting, setSubmitting] = useState(false);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [applicationStatus, setApplicationStatus] = useState(null);
   
   const [formData, setFormData] = useState({
     company_name: "",
@@ -32,7 +33,17 @@ function Placements() {
 
   useEffect(() => {
     fetchPlacements();
+    fetchApplicationStatus();
   }, []);
+
+  const fetchApplicationStatus = async () => {
+    try {
+      const res = await apiClient.get(API_ENDPOINTS.STUDENTS.STATISTICS);
+      setApplicationStatus(res.data.application_status);
+    } catch (err) {
+      console.error("Failed to fetch application status", err);
+    }
+  };
 
   const fetchPlacements = async () => {
     try {
@@ -148,9 +159,16 @@ function Placements() {
       case "REJECTED":
         return "Verification Required";
       default:
-        return "Your placement is currently under review.";
+        return null;
     }
   };
+
+  const allowedStatuses = ["COHORT_ASSIGNED", "TRAINING", "INTERNSHIP_ASSIGNED", "COMPLETED", "PLACED", "ALUMNI"];
+  const canReportPlacement = applicationStatus && allowedStatuses.includes(applicationStatus);
+
+  if (loading) {
+    return <div className={styles.container}><SkeletonLoader variant="cards" count={3} /></div>;
+  }
 
   return (
     <div className={styles.container}>
@@ -162,9 +180,9 @@ function Placements() {
       </div>
 
       <div className={styles.grid}>
-        {/* Left Column: Form */}
         <div>
-          {!isFormVisible && placements.length > 0 ? (
+        {canReportPlacement && (
+          !isFormVisible && placements.length > 0 ? (
             <button className={styles.submitBtn} onClick={() => setIsFormVisible(true)}>
               <FaPlus /> Report Another Placement
             </button>
@@ -284,19 +302,27 @@ function Placements() {
                 </div>
               </form>
             </div>
-          )}
+          )
+        )}
         </div>
 
-        {/* Right Column: Submitted Placements */}
         <div>
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>My Placements</h2>
             
-            {loading ? (
-              <SkeletonLoader variant="cards" count={3} />
-            ) : placements.length > 0 ? (
-              <div className={styles.placementList}>
-                {placements.map(placement => (
+            <div className={styles.placementList}>
+              {placements.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <div className={styles.emptyIcon}><FaBriefcase /></div>
+                  <h3>No Placements Reported</h3>
+                  {canReportPlacement ? (
+                    <p>Have you been placed? Use the form to report your placement!</p>
+                  ) : (
+                    <p>You can report your placements here once you are assigned to a cohort.</p>
+                  )}
+                </div>
+              ) : (
+                placements.map(placement => (
                   <div key={placement.id} className={styles.placementItem}>
                     <div className={styles.placementHeader}>
                       <div>
@@ -334,15 +360,9 @@ function Placements() {
                       </button>
                     )}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className={styles.emptyState}>
-                <FaBriefcase className={styles.emptyIcon} />
-                <h3>No placements reported yet</h3>
-                <p>Have you been placed? Use the form to report your placement!</p>
-              </div>
-            )}
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
