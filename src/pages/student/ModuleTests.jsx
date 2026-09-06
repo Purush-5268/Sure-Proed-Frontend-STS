@@ -213,7 +213,8 @@ function ModuleTests() {
               )}
 
               {/* ── State-driven UI ── */}
-              {state === "SUBMITTED" && (
+              <div className={styles.cardFooter}>
+                {state === "SUBMITTED" && (
                 <div className={submission.qualified ? styles.pass : styles.fail}>
                   Submitted · {submission.percentage}% · {submission.qualified ? "Passed" : "Not passed"}
                 </div>
@@ -324,8 +325,9 @@ function ModuleTests() {
                       <><FiPlay /> Start Exam</>
                     )}
                   </button>
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
             </article>
           );
         })}

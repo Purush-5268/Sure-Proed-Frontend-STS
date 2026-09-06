@@ -81,7 +81,7 @@
 
 :global([data-theme="dark"]) .heroBanner {
   background: linear-gradient(90deg, #0a1628 0%, rgba(10, 22, 40, 0.85) 45%, transparent 100%),
-    url('https://images.unsplash.com/photo-1550439062-609e1531270e?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat;
+    url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -914,7 +914,7 @@
 }
 :global([data-theme="dark"]) .heroBanner {
   background: linear-gradient(90deg, rgba(10,22,40, 0.95) 0%, rgba(10,22,40, 0.7) 40%, transparent 100%),
-    url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+    url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat;
 }
 
 .heroValues {

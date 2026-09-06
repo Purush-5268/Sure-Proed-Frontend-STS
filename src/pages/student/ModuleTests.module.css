@@ -215,6 +215,13 @@
 [data-theme="dark"] .badgeInProgress { background: rgba(59, 130, 246, 0.15); color: #93c5fd; }
 [data-theme="dark"] .badgeSubmitted { background: rgba(107, 114, 128, 0.15); color: #9ca3af; }
 
+.cardFooter {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
+}
+
 /* ── Locked banner ── */
 .lockedBanner {
   display: flex;
