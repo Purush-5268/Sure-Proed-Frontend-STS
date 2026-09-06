@@ -79,6 +79,7 @@ function CourseDetails() {
 
             <p className={styles.description}>{course.description || "No description available."}</p>
 
+            <h2 className="sr-only">Course Overview</h2>
             <div className={styles.infoGrid}>
               <div>
                 <h3>Course Code</h3>

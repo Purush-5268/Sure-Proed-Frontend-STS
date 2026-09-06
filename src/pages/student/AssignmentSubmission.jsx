@@ -28,18 +28,20 @@ function AssignmentSubmission() {
         >
 
           <div className={styles.group}>
-            <label>Assignment File</label>
+            <label htmlFor="assignment-file">Assignment File</label>
 
             <input
+              id="assignment-file"
               type="file"
               required
             />
           </div>
 
           <div className={styles.group}>
-            <label>GitHub Repository Link</label>
+            <label htmlFor="repo-url">GitHub Repository Link</label>
 
             <input
+              id="repo-url"
               type="url"
               placeholder="https://github.com/username/project"
               required
@@ -47,9 +49,10 @@ function AssignmentSubmission() {
           </div>
 
           <div className={styles.group}>
-            <label>Comments (Optional)</label>
+            <label htmlFor="submission-comments">Comments (Optional)</label>
 
             <textarea
+              id="submission-comments"
               rows="5"
               placeholder="Write any notes for your mentor..."
             ></textarea>

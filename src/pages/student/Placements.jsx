@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaBriefcase, FaBuilding, FaCalendarAlt, FaEnvelope, FaLink, FaSpinner, FaClock, FaCheckCircle, FaExclamationCircle, FaPlus } from "react-icons/fa";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./Placements.module.css";
 
 const EMPLOYMENT_TYPES = [
@@ -180,8 +181,9 @@ function Placements() {
               <form onSubmit={handleSubmit}>
                 <div className={styles.formGrid}>
                   <div className={styles.formGroup}>
-                    <label className={styles.label}>Company Name *</label>
+                    <label htmlFor="placement_company_name" className={styles.label}>Company Name *</label>
                     <input
+                      id="placement_company_name"
                       type="text"
                       name="company_name"
                       value={formData.company_name}
@@ -192,8 +194,9 @@ function Placements() {
                   </div>
 
                   <div className={styles.formGroup}>
-                    <label className={styles.label}>Designation *</label>
+                    <label htmlFor="placement_designation" className={styles.label}>Designation *</label>
                     <input
+                      id="placement_designation"
                       type="text"
                       name="designation"
                       value={formData.designation}
@@ -204,8 +207,9 @@ function Placements() {
                   </div>
 
                   <div className={styles.formGroup}>
-                    <label className={styles.label}>Employment Type *</label>
+                    <label htmlFor="placement_employment_type" className={styles.label}>Employment Type *</label>
                     <select
+                      id="placement_employment_type"
                       name="employment_type"
                       value={formData.employment_type}
                       onChange={handleInputChange}
@@ -219,8 +223,9 @@ function Placements() {
                   </div>
 
                   <div className={styles.formGroup}>
-                    <label className={styles.label}>Joining Date *</label>
+                    <label htmlFor="placement_joining_date" className={styles.label}>Joining Date *</label>
                     <input
+                      id="placement_joining_date"
                       type="date"
                       name="joining_date"
                       value={formData.joining_date}
@@ -231,8 +236,9 @@ function Placements() {
                   </div>
 
                   <div className={styles.formGroup}>
-                    <label className={styles.label}>Official Company Email (Optional)</label>
+                    <label htmlFor="placement_official_email" className={styles.label}>Official Company Email (Optional)</label>
                     <input
+                      id="placement_official_email"
                       type="email"
                       name="official_email"
                       value={formData.official_email}
@@ -242,8 +248,9 @@ function Placements() {
                   </div>
 
                   <div className={styles.formGroup}>
-                    <label className={styles.label}>LinkedIn URL (Optional)</label>
+                    <label htmlFor="placement_linkedin_url" className={styles.label}>LinkedIn URL (Optional)</label>
                     <input
+                      id="placement_linkedin_url"
                       type="url"
                       name="linkedin_url"
                       value={formData.linkedin_url}
@@ -254,8 +261,9 @@ function Placements() {
                   </div>
 
                   <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                    <label className={styles.label}>Employment Evidence / Offer Letter (Optional)</label>
+                    <label htmlFor="placement_evidence_file" className={styles.label}>Employment Evidence / Offer Letter (Optional)</label>
                     <input
+                      id="placement_evidence_file"
                       type="file"
                       onChange={handleFileChange}
                       className={styles.fileInput}
@@ -285,7 +293,7 @@ function Placements() {
             <h2 className={styles.cardTitle}>My Placements</h2>
             
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '40px' }}><FaSpinner className={styles.spinner} size={24} /></div>
+              <SkeletonLoader variant="cards" count={3} />
             ) : placements.length > 0 ? (
               <div className={styles.placementList}>
                 {placements.map(placement => (

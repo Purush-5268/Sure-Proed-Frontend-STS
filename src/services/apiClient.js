@@ -197,5 +197,35 @@ apiClient.interceptors.response.use(
   }
 );
 
-// Deduplication removed temporarily to fix AbortController conflicts
+// --- Request Deduplication ---
+// Deduplicate identical GET requests that are fired at the exact same time
+// (e.g. from StrictMode double-mounts or multiple components fetching on load)
+const originalGet = apiClient.get;
+const pendingGets = new Map();
+
+apiClient.get = async function (url, config) {
+  // Only deduplicate if it's a simple GET without custom abort signals
+  if (!config?.signal) {
+    // Generate a unique key for the request URL and params
+    const key = `${url}-${JSON.stringify(config?.params || {})}`;
+    
+    // If an identical request is already pending, return its promise
+    if (pendingGets.has(key)) {
+      return pendingGets.get(key);
+    }
+    
+    // Fire the original request and store the promise
+    const promise = originalGet.call(this, url, config).finally(() => {
+      // Keep in cache for a short 100ms window to batch simultaneous component mounts
+      setTimeout(() => pendingGets.delete(key), 100);
+    });
+    
+    pendingGets.set(key, promise);
+    return promise;
+  }
+  
+  // For requests with signals or complex configs, bypass deduplication
+  return originalGet.call(this, url, config);
+};
+
 export default apiClient;

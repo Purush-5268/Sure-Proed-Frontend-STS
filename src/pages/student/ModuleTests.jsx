@@ -24,6 +24,7 @@ const unpack = (response) =>
 const deriveTestState = (test, submission, now) => {
   if (submission?.status === "SUBMITTED") return "SUBMITTED";
   if (submission?.status === "IN_PROGRESS") return "IN_PROGRESS";
+  if (submission?.status === "MISSED") return "MISSED";
 
   const scheduledAt = test.scheduled_at ? new Date(test.scheduled_at) : null;
   const endTime = test.end_time ? new Date(test.end_time) : null;
@@ -161,7 +162,15 @@ function ModuleTests() {
       </header>
       {error && <div className={styles.error}>{error}</div>}
       <div className={styles.grid}>
-        {tests.map((test) => {
+        {[...tests]
+          .sort((a, b) => {
+            // Extract the number from "Module X: Title" to ensure natural numeric sorting
+            const numA = parseInt((a.title || "").match(/\d+/)?.[0] || "0", 10);
+            const numB = parseInt((b.title || "").match(/\d+/)?.[0] || "0", 10);
+            if (numA !== numB) return numA - numB;
+            return (a.title || "").localeCompare(b.title || "");
+          })
+          .map((test) => {
           const submission = submissionFor(test.id);
           const state = deriveTestState(test, submission, now);
           const scheduledAt = test.scheduled_at ? new Date(test.scheduled_at) : null;
@@ -337,6 +346,7 @@ function TestStateBadge({ state }) {
     READY_TO_START: { label: "✅ Ready", className: "badgeReady" },
     IN_PROGRESS: { label: "📝 In Progress", className: "badgeInProgress" },
     SUBMITTED: { label: "✓ Submitted", className: "badgeSubmitted" },
+    MISSED: { label: "❌ Missed Test", className: "badgeMissed" },
   };
   const badge = badges[state];
   if (!badge) return null;

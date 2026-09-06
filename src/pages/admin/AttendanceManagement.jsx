@@ -26,7 +26,16 @@ function AttendanceManagement() {
         let attendanceUrl = API_ENDPOINTS.ATTENDANCE.BASE;
         const params = new URLSearchParams();
         if (selectedCourse) params.append("course", selectedCourse);
-        if (selectedCohort) params.append("cohort", selectedCohort);
+        if (selectedCohort) {
+          params.append("cohort", selectedCohort);
+          
+          // Check if selected cohort is active
+          const activeCohort = cohorts.find(c => String(c.id) === String(selectedCohort));
+          if (activeCohort && activeCohort.status && activeCohort.status !== 'COMPLETED' && activeCohort.status !== 'CANCELLED' && activeCohort.status !== 'DRAFT') {
+            // Apply recent_days if no custom date filter exists (currently no date_from UI, so always apply for active)
+            params.append("recent_days", "21");
+          }
+        }
         
         if (params.toString()) {
           attendanceUrl += `?${params.toString()}`;

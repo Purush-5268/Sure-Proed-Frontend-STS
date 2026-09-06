@@ -45,6 +45,7 @@ function AttendanceHistory() {
           <SkeletonLoader variant="detail" />
         ) : (
           <>
+            <h2 className="sr-only">Attendance Statistics</h2>
             {summary ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
                 <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
@@ -86,10 +87,10 @@ function AttendanceHistory() {
                 <table className="premium-table">
                   <thead>
                     <tr>
-                      <th>Date</th>
-                      <th>Session</th>
-                      <th>Time</th>
-                      <th>Session Status</th>
+                      <th scope="col">Date</th>
+                      <th scope="col">Session</th>
+                      <th scope="col">Time</th>
+                      <th scope="col">Session Status</th>
                     </tr>
                   </thead>
                   <tbody>

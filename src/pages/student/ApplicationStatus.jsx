@@ -35,6 +35,7 @@ function ApplicationStatus() {
           Track the current status of your internship application.
         </p>
 
+        <h2 className="sr-only">Application Details</h2>
         <div className={styles.details}>
           <div className={styles.row}>
             <strong>Application Number</strong>
@@ -54,6 +55,7 @@ function ApplicationStatus() {
           </div>
         </div>
 
+        <h2 className="sr-only">Application Progress Timeline</h2>
           <div className={styles.timeline}>
             <div className={styles.completed}>✓ Application Submitted</div>
             

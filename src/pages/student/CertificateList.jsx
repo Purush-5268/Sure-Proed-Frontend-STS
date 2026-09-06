@@ -60,6 +60,7 @@ function CertificateList() {
           />
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <h2 className="sr-only">Issued Certificates</h2>
             {certificates.map((certificate, idx) => (
               <motion.div 
                 key={certificate.id}
@@ -97,6 +98,7 @@ function CertificateList() {
                     to="/student/certificate-view" 
                     state={{ certificate }} 
                     className="premium-btn premium-btn-primary"
+                    aria-label={`View certificate ${certificate.certificate_type || ''} ${certificate.certificate_number || certificate.id || ''}`.trim()}
                   >
                     View Certificate →
                   </Link>

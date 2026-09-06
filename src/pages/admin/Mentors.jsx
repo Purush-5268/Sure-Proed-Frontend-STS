@@ -323,7 +323,14 @@ function Mentors() {
                                 {`${mentor.first_name || "?"}`.charAt(0).toUpperCase()}
                               </div>
                               <div>
-                                <div style={{ fontWeight: "600", color: "var(--text-primary)" }}>{mentor.full_name}</div>
+                                <div style={{ fontWeight: "600", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "8px" }}>
+                                  {mentor.full_name}
+                                  {selectedCohort?.current_mentor_details?.id === mentor.id && (
+                                    <span style={{ fontSize: "10px", background: "#f59e0b", color: "white", padding: "2px 6px", borderRadius: "12px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px" }}>
+                                      ★ Current Mentor
+                                    </span>
+                                  )}
+                                </div>
                                 <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
                                   {mentor.designation ? `${mentor.designation} | ${mentor.company_name}` : "Professional Details Pending"}
                                 </div>

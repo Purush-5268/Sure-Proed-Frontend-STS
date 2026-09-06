@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
-import { motion } from "framer-motion";
 import PageHeader from "../../components/ui/PageHeader";
 import EmptyState from "../../components/ui/EmptyState";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
@@ -52,6 +51,7 @@ function AssignmentList() {
       />
 
       <div className="premium-card" style={{ maxWidth: '900px', margin: '0 auto', padding: '1.75rem' }}>
+        <h2 className="sr-only">Active Assignments</h2>
         {loading ? (
           <SkeletonLoader variant="table" rows={4} />
         ) : assignments.length === 0 ? (
@@ -63,23 +63,20 @@ function AssignmentList() {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {assignments.map((assignment, idx) => (
-              <motion.div 
+              <div 
                 key={assignment.id} 
                 className={styles.assignmentCard}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                whileHover={{ scale: 1.01 }}
                 style={{ 
                   background: 'var(--bg-nested)', 
                   border: '1px solid var(--border-color)', 
-                  borderRadius: '10px', 
+                  borderRadius: '10px',
                   padding: '1.25rem',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   flexWrap: 'wrap',
-                  gap: '1rem'
+                  gap: '1rem',
+                  transition: 'transform 0.15s ease'
                 }}
               >
                 <div style={{ flex: 1, minWidth: '220px' }}>
@@ -98,21 +95,22 @@ function AssignmentList() {
                 </div>
                 
                 <div>
-                  <Link
+                  <Link 
                     to="/student/assignment-details"
                     state={{ assignment }}
                     className="premium-btn premium-btn-primary"
+                    aria-label={`View details for ${assignment.title}`}
                   >
                     View Details
                   </Link>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         )}
 
         <div className="actions" style={{ display: "flex", gap: "8px", marginTop: "1.5rem" }}>
-          <Link to="/student/certificates" className="premium-btn premium-btn-secondary">
+          <Link to="/student/certificates" className="premium-btn premium-btn-secondary" aria-label="Go to certificates page">
             Continue to Certificates →
           </Link>
         </div>

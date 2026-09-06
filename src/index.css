@@ -83,7 +83,6 @@
 
 [data-theme='dark'] {
   --native-color-scheme: dark;
-  color-scheme: dark !important;
   /* Brand Colors */
   --primary-color: #3b82f6;
   --primary-hover: #60a5fa;
@@ -454,6 +453,19 @@
   box-sizing: border-box;
 }
 
+/* Accessibility Utilities */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 html,
 body,
 #root {
@@ -513,12 +525,6 @@ select {
 input::placeholder,
 textarea::placeholder {
   color: var(--text-muted);
-}
-
-/* Fix Native Input Icons in Dark Mode */
-[data-theme='dark'] select,
-[data-theme='dark'] input {
-  color-scheme: dark !important;
 }
 
 /* Fix browser autofill glare in Dark Mode */
@@ -706,7 +712,11 @@ input[type="time"].premium-input {
   color-scheme: var(--native-color-scheme, light);
 }
 
-
+[data-theme="dark"] input[type="date"].premium-input::-webkit-calendar-picker-indicator,
+[data-theme="dark"] input[type="time"].premium-input::-webkit-calendar-picker-indicator,
+[data-theme="dark"] input[type="datetime-local"].premium-input::-webkit-calendar-picker-indicator {
+  filter: invert(1) hue-rotate(180deg);
+}
 
 .premium-input:focus {
   outline: none;
@@ -784,23 +794,23 @@ input[type="time"].premium-input {
 }
 
 .premium-badge-active {
-  background: var(--status-active-bg);
-  color: var(--status-active-text);
+  background: var(--status-active-bg, rgba(16, 185, 129, 0.12));
+  color: var(--status-active-text, #059669);
 }
 
 .premium-badge-inactive {
-  background: var(--status-inactive-bg);
-  color: var(--status-inactive-text);
+  background: var(--status-inactive-bg, rgba(100, 116, 139, 0.12));
+  color: var(--status-inactive-text, #475569);
 }
 
 .premium-badge-pending {
-  background: var(--status-pending-bg);
-  color: var(--status-pending-text);
+  background: var(--status-pending-bg, rgba(245, 158, 11, 0.12));
+  color: var(--status-pending-text, #b45309);
 }
 
 .premium-badge-info {
-  background: var(--status-info-bg);
-  color: var(--status-info-text);
+  background: var(--status-info-bg, rgba(37, 99, 235, 0.12));
+  color: var(--status-info-text, #1d4ed8);
 }
 
 /* Premium Empty State */

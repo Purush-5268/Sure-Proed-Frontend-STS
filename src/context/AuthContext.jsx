@@ -34,7 +34,18 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      const decoded = parseJwt(token);
+      const decoded = parseJwt(token) || {};
+      
+      // OPTIMISTIC RENDER: Unblock the UI immediately using stored or decoded data
+      if (isMounted && (storedUser || decoded.email)) {
+        setUser(storedUser || {
+          email: decoded.email,
+          role: decoded.role || "STUDENT",
+          id: decoded.user_id || decoded.id
+        });
+        setLoading(false);
+      }
+
       try {
         const res = await apiClient.get(API_ENDPOINTS.USERS.ME);
         if (isMounted && res.data) {
@@ -44,11 +55,8 @@ export function AuthProvider({ children }) {
         }
       } catch (err) {
         // If apiClient fails, the interceptor handles token refresh and clearing storage on 401.
-        // We fallback to stored data ONLY if the token is still present (network error/500).
         if (isMounted) {
-          if (getAccessToken()) {
-            setUser(storedUser || decoded);
-          } else {
+          if (!getAccessToken()) {
             setUser(null);
           }
         }

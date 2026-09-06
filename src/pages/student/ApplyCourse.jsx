@@ -5,10 +5,7 @@
 // import { courseService } from "../../services/courseService";
 // import apiClient from "../../services/apiClient";
 // import { API_ENDPOINTS } from "../../constants/apiEndpoints";
-// import styles from "./ApplyCourse.module.css";
 // import SkeletonLoader from "../../components/common/SkeletonLoader";
-
-// function ApplyCourse() {
 //   const location = useLocation();
 //   const { user } = useAuth();
 //   const [profileCompleted, setProfileCompleted] = useState(Boolean(location.state?.profileCompleted));
@@ -155,6 +152,7 @@ import { studentService } from "../../services/studentService";
 import { courseService } from "../../services/courseService";
 import apiClient from "../../services/apiClient";
 import styles from "./ApplyCourse.module.css";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function ApplyCourse() {
   const location = useLocation();
@@ -264,7 +262,7 @@ function ApplyCourse() {
           <div className="premium-card" style={{ padding: "1.5rem", marginBottom: "2rem", borderLeft: "4px solid var(--primary-color)" }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
               <span style={{ fontSize: '24px' }}>🏆</span>
-              <h3 style={{ margin: 0, color: "var(--primary-color)", fontSize: "18px", fontWeight: "700" }}>Internship Track Secured</h3>
+              <h2 style={{ margin: 0, color: "var(--primary-color)", fontSize: "18px", fontWeight: "700" }}>Internship Track Secured</h2>
             </div>
             <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: "15px", lineHeight: "1.5", paddingLeft: "36px" }}>
               You’re currently enrolled in an internship track. New course applications will become available after you complete your current cohort.
@@ -297,11 +295,11 @@ function ApplyCourse() {
         )}
 
         {loading ? (
-          <p style={{ color: "#64748b" }}>Loading available courses...</p>
+          <SkeletonLoader variant="cards" count={3} />
         ) : courses.length === 0 ? (
           <div style={{ textAlign: "center", padding: "40px", backgroundColor: "var(--bg-nested)", borderRadius: "12px", border: "1px dashed var(--border-color)" }}>
-            <h3 style={{ color: "#475569", marginBottom: "8px" }}>No Courses Available</h3>
-            <p style={{ color: "#64748b" }}>There are currently no published internship courses available for application.</p>
+            <h2 style={{ color: "var(--text-secondary)", marginBottom: "8px", fontSize: "18px" }}>No Courses Available</h2>
+            <p style={{ color: "var(--text-muted)" }}>There are currently no published internship courses available for application.</p>
           </div>
         ) : (
           <div className={styles.courseGrid}>

@@ -153,6 +153,7 @@ function ClassSchedule() {
           />
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            <h2 className="sr-only">Scheduled Sessions</h2>
             {schedule.map((item, idx) => {
               const status = getClassStatus(item);
               const canJoin = status.canJoin;

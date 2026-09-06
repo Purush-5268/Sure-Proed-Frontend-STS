@@ -47,6 +47,7 @@ function Attendance() {
           Track your cohort session attendance and overall percentage.
         </p>
 
+        <h2 className="sr-only">Attendance Statistics</h2>
         {loading ? (
            <SkeletonLoader variant="table" rows={4} />
         ) : (
@@ -66,11 +67,11 @@ function Attendance() {
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', marginBottom: '24px' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-secondary)' }}>
-                    <th style={{ padding: '12px' }}>Date</th>
-                    <th style={{ padding: '12px' }}>Class</th>
-                    <th style={{ padding: '12px' }}>Time</th>
-                    <th style={{ padding: '12px' }}>Mentor</th>
-                    <th style={{ padding: '12px' }}>Status</th>
+                    <th scope="col" style={{ padding: '12px' }}>Date</th>
+                    <th scope="col" style={{ padding: '12px' }}>Class</th>
+                    <th scope="col" style={{ padding: '12px' }}>Time</th>
+                    <th scope="col" style={{ padding: '12px' }}>Mentor</th>
+                    <th scope="col" style={{ padding: '12px' }}>Status</th>
                   </tr>
                 </thead>
                 <tbody>

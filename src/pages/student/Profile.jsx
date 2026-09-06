@@ -23,10 +23,7 @@ function Profile() {
   const [profileStatus, setProfileStatus] = useState("NOT_AVAILABLE");
   const [isExistingStudent, setIsExistingStudent] = useState(false);
   const [serverProfile, setServerProfile] = useState(null);
-  const [courses, setCourses] = useState([]);
-  const [allCohorts, setAllCohorts] = useState([]);
   const [verificationMetadata, setVerificationMetadata] = useState({ reviewRequired: false, automatedResult: "", rejectionReason: "" });
-  const [studentApplications, setStudentApplications] = useState([]);
 
   const [formData, setFormData] = useState({
     firstName: "", lastName: "", email: "", phoneNumber: "",
@@ -41,25 +38,6 @@ function Profile() {
   useEffect(() => {
     let isMounted = true;
     async function loadData() {
-      try {
-        const [courseRes, cohortRes, appRes] = await Promise.all([
-          apiClient.get(API_ENDPOINTS.COURSES?.BASE || "/courses/"),
-          cohortService.getCohorts(),
-          user?.email ? apiClient.get(API_ENDPOINTS.APPLICATIONS?.BASE || "/applications/") : Promise.resolve({ data: [] })
-        ]);
-        const results = courseRes.data?.results || courseRes.data || [];
-        const cohorts = cohortRes?.results || cohortRes || [];
-        const apps = appRes.data?.results || appRes.data || [];
-
-        if (isMounted) {
-          setCourses(results);
-          setAllCohorts(cohorts);
-          setStudentApplications(apps);
-        }
-      } catch (err) {
-        console.warn("Could not fetch domain, cohorts or applications");
-      }
-
       if (!user?.email) return;
       try {
         const profile = await studentService.getProfile(user.email);
@@ -306,7 +284,7 @@ function Profile() {
             {activeTab === "personal" && (
               <motion.div key="personal" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
                 <div className="premium-section">
-                  <h3 style={{ marginBottom: "16px", color: "var(--text-primary)", display: 'flex', alignItems: 'center', gap: '8px' }}><FiUser /> Personal Information</h3>
+                  <h2 style={{ marginBottom: "16px", color: "var(--text-primary)", display: 'flex', alignItems: 'center', gap: '8px' }}><FiUser /> Personal Information</h2>
 
                   {serverProfile?.profile_photo && (
                     <div style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "16px" }}>
@@ -317,14 +295,14 @@ function Profile() {
 
                   <div className="premium-grid-2">
                     <div className="premium-form-group">
-                      <label className="premium-label">Profile Photo (Update)</label>
-                      <input className="premium-input" type="file" name="profile_photo" onChange={handleChange} accept="image/*" />
+                      <label htmlFor="profile_photo" className="premium-label">Profile Photo (Update)</label>
+                      <input id="profile_photo" className="premium-input" type="file" name="profile_photo" onChange={handleChange} accept="image/*" />
                       <small style={{ color: "var(--text-secondary)", fontSize: "12px", marginTop: "4px", display: "block" }}>Max size: 1MB</small>
                     </div>
 
                     <div className="premium-form-group">
-                      <label className="premium-label">Resume (Upload)</label>
-                      <input className="premium-input" type="file" name="resume" onChange={handleChange} accept=".pdf,.doc,.docx" />
+                      <label htmlFor="profile_resume" className="premium-label">Resume (Upload)</label>
+                      <input id="profile_resume" className="premium-input" type="file" name="resume" onChange={handleChange} accept=".pdf,.doc,.docx" />
                       <small style={{ color: "var(--text-secondary)", fontSize: "12px", marginTop: "4px", display: "block" }}>Max size: 1MB</small>
                       {serverProfile?.resume && (
                         <a href={serverProfile.resume} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: 'var(--primary-color)', marginTop: '4px', display: 'inline-block' }}>
@@ -336,24 +314,24 @@ function Profile() {
 
                   <div className="premium-grid-2">
                     <div className="premium-form-group">
-                      <label className="premium-label">First Name *</label>
-                      <input className="premium-input" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                      <label htmlFor="profile_firstName" className="premium-label">First Name *</label>
+                      <input id="profile_firstName" className="premium-input" name="firstName" value={formData.firstName} onChange={handleChange} required />
                     </div>
                     <div className="premium-form-group">
-                      <label className="premium-label">Last Name *</label>
-                      <input className="premium-input" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                      <label htmlFor="profile_lastName" className="premium-label">Last Name *</label>
+                      <input id="profile_lastName" className="premium-input" name="lastName" value={formData.lastName} onChange={handleChange} required />
                     </div>
                     <div className="premium-form-group">
-                      <label className="premium-label">Email *</label>
-                      <input className="premium-input" name="email" value={formData.email} onChange={handleChange} required disabled />
+                      <label htmlFor="profile_email" className="premium-label">Email *</label>
+                      <input id="profile_email" className="premium-input" name="email" value={formData.email} onChange={handleChange} required disabled />
                     </div>
                     <div className="premium-form-group">
-                      <label className="premium-label">Phone *</label>
-                      <input className="premium-input" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
+                      <label htmlFor="profile_phoneNumber" className="premium-label">Phone *</label>
+                      <input id="profile_phoneNumber" className="premium-input" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
                     </div>
                     <div className="premium-form-group">
-                      <label className="premium-label">Gender</label>
-                      <select className="premium-input" name="gender" value={formData.gender} onChange={handleChange}>
+                      <label htmlFor="profile_gender" className="premium-label">Gender</label>
+                      <select id="profile_gender" className="premium-input" name="gender" value={formData.gender} onChange={handleChange}>
                         <option value="">Select Gender</option>
                         <option value="MALE">Male</option>
                         <option value="FEMALE">Female</option>
@@ -361,18 +339,18 @@ function Profile() {
                       </select>
                     </div>
                     <div className="premium-form-group">
-                      <label className="premium-label">Date of Birth</label>
-                      <input className="premium-input" type="date" name="dob" value={formData.dob} onChange={handleChange} />
+                      <label htmlFor="profile_dob" className="premium-label">Date of Birth</label>
+                      <input id="profile_dob" className="premium-input" type="date" name="dob" value={formData.dob} onChange={handleChange} />
                     </div>
                   </div>
 
                   <div className="premium-form-group" style={{ marginTop: "16px" }}>
-                    <label className="premium-label">Tagline / Headline</label>
-                    <input className="premium-input" name="tagline" value={formData.tagline} onChange={handleChange} placeholder="e.g. Aspiring Full-Stack Developer" />
+                    <label htmlFor="profile_tagline" className="premium-label">Tagline / Headline</label>
+                    <input id="profile_tagline" className="premium-input" name="tagline" value={formData.tagline} onChange={handleChange} placeholder="e.g. Aspiring Full-Stack Developer" />
                   </div>
                   <div className="premium-form-group" style={{ marginTop: "16px" }}>
-                    <label className="premium-label">Bio</label>
-                    <textarea className="premium-input" name="bio" value={formData.bio} onChange={handleChange} rows="3" placeholder="Tell us about yourself..." />
+                    <label htmlFor="profile_bio" className="premium-label">Bio</label>
+                    <textarea id="profile_bio" className="premium-input" name="bio" value={formData.bio} onChange={handleChange} rows="3" placeholder="Tell us about yourself..." />
                   </div>
                 </div>
               </motion.div>
@@ -382,15 +360,15 @@ function Profile() {
             {activeTab === "academic" && (
               <motion.div key="academic" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
                 <div className="premium-section">
-                  <h3 style={{ marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px' }}><FiBook /> Education & Location</h3>
+                  <h2 style={{ marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px' }}><FiBook /> Education & Location</h2>
                   <div className="premium-grid-2">
                     <div className="premium-form-group" style={{ gridColumn: 'span 2' }}>
-                      <label className="premium-label">College / University Name *</label>
-                      <input className="premium-input" name="college" value={formData.college} onChange={handleChange} required />
+                      <label htmlFor="profile_college" className="premium-label">College / University Name *</label>
+                      <input id="profile_college" className="premium-input" name="college" value={formData.college} onChange={handleChange} required />
                     </div>
                     <div className="premium-form-group">
-                      <label className="premium-label">Education Level</label>
-                      <select className="premium-input" name="education_level" value={formData.education_level} onChange={handleChange}>
+                      <label htmlFor="profile_education_level" className="premium-label">Education Level</label>
+                      <select id="profile_education_level" className="premium-input" name="education_level" value={formData.education_level} onChange={handleChange}>
                         <option value="">Select Level</option>
                         <option value="Undergraduate">Undergraduate</option>
                         <option value="Postgraduate">Postgraduate</option>
@@ -399,32 +377,32 @@ function Profile() {
                       </select>
                     </div>
                     <div className="premium-form-group">
-                      <label className="premium-label">Degree *</label>
-                      <input className="premium-input" name="degree" value={formData.degree} onChange={handleChange} placeholder="e.g. B.Tech" required />
+                      <label htmlFor="profile_degree" className="premium-label">Degree *</label>
+                      <input id="profile_degree" className="premium-input" name="degree" value={formData.degree} onChange={handleChange} placeholder="e.g. B.Tech" required />
                     </div>
                     <div className="premium-form-group">
-                      <label className="premium-label">Specialization / Branch *</label>
-                      <input className="premium-input" name="specialization" value={formData.specialization} onChange={handleChange} placeholder="e.g. Computer Science" required />
+                      <label htmlFor="profile_specialization" className="premium-label">Specialization / Branch *</label>
+                      <input id="profile_specialization" className="premium-input" name="specialization" value={formData.specialization} onChange={handleChange} placeholder="e.g. Computer Science" required />
                     </div>
                     <div className="premium-form-group">
-                      <label className="premium-label">Graduation Year *</label>
-                      <input className="premium-input" type="number" name="graduation_year" value={formData.graduation_year} onChange={handleChange} required />
+                      <label htmlFor="profile_graduation_year" className="premium-label">Graduation Year *</label>
+                      <input id="profile_graduation_year" className="premium-input" type="number" name="graduation_year" value={formData.graduation_year} onChange={handleChange} required />
                     </div>
                   </div>
 
-                  <h4 style={{ marginTop: "24px", marginBottom: "16px", color: "var(--text-primary)" }}>Location</h4>
+                  <h2 style={{ marginTop: "24px", marginBottom: "16px", color: "var(--text-primary)" }}>Location</h2>
                   <div className="premium-grid-2">
                     <div className="premium-form-group">
-                      <label className="premium-label">City</label>
-                      <input className="premium-input" name="city" value={formData.city} onChange={handleChange} />
+                      <label htmlFor="profile_city" className="premium-label">City</label>
+                      <input id="profile_city" className="premium-input" name="city" value={formData.city} onChange={handleChange} />
                     </div>
                     <div className="premium-form-group">
-                      <label className="premium-label">State</label>
-                      <input className="premium-input" name="state" value={formData.state} onChange={handleChange} />
+                      <label htmlFor="profile_state" className="premium-label">State</label>
+                      <input id="profile_state" className="premium-input" name="state" value={formData.state} onChange={handleChange} />
                     </div>
                     <div className="premium-form-group">
-                      <label className="premium-label">Country</label>
-                      <input className="premium-input" name="country" value={formData.country} onChange={handleChange} />
+                      <label htmlFor="profile_country" className="premium-label">Country</label>
+                      <input id="profile_country" className="premium-input" name="country" value={formData.country} onChange={handleChange} />
                     </div>
                   </div>
                 </div>
@@ -435,23 +413,23 @@ function Profile() {
             {activeTab === "skills" && (
               <motion.div key="skills" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
                 <div className="premium-section">
-                  <h3 style={{ marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px' }}><FiSettings /> Skills & Preferences</h3>
+                  <h2 style={{ marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px' }}><FiSettings /> Skills & Preferences</h2>
                   <div className="premium-form-group">
-                    <label className="premium-label">Technical Skills</label>
-                    <input className="premium-input" name="skills" value={formData.skills} onChange={handleChange} placeholder="e.g. React, Python, Django" />
+                    <label htmlFor="profile_skills" className="premium-label">Technical Skills</label>
+                    <input id="profile_skills" className="premium-input" name="skills" value={formData.skills} onChange={handleChange} placeholder="e.g. React, Python, Django" />
                   </div>
                   <div className="premium-form-group" style={{ marginTop: "16px" }}>
-                    <label className="premium-label">Hobbies</label>
-                    <input className="premium-input" name="hobbies" value={formData.hobbies} onChange={handleChange} placeholder="e.g. Reading, Coding, Travel" />
+                    <label htmlFor="profile_hobbies" className="premium-label">Hobbies</label>
+                    <input id="profile_hobbies" className="premium-input" name="hobbies" value={formData.hobbies} onChange={handleChange} placeholder="e.g. Reading, Coding, Travel" />
                   </div>
                   <div className="premium-form-group" style={{ marginTop: "16px" }}>
-                    <label className="premium-label">Languages</label>
-                    <input className="premium-input" name="languages" value={formData.languages} onChange={handleChange} placeholder="e.g. English, Telugu, Hindi" />
+                    <label htmlFor="profile_languages" className="premium-label">Languages</label>
+                    <input id="profile_languages" className="premium-input" name="languages" value={formData.languages} onChange={handleChange} placeholder="e.g. English, Telugu, Hindi" />
                   </div>
                   <div className="premium-grid" style={{ marginTop: "16px" }}>
                     <div className="premium-form-group">
-                      <label className="premium-label">Portfolio URL</label>
-                      <input className="premium-input" name="portfolio_url" value={formData.portfolio_url || ""} onChange={handleChange} placeholder="https://yourportfolio.com" />
+                      <label htmlFor="profile_portfolio_url" className="premium-label">Portfolio URL</label>
+                      <input id="profile_portfolio_url" className="premium-input" name="portfolio_url" value={formData.portfolio_url || ""} onChange={handleChange} placeholder="https://yourportfolio.com" />
                     </div>
                   </div>
                 </div>
@@ -462,7 +440,7 @@ function Profile() {
             {activeTab === "integrations" && (
               <motion.div key="integrations" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
                 <div className="premium-section">
-                  <h3 style={{ marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px' }}><FiShield /> Integrations & Admin Data</h3>
+                  <h2 style={{ marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px' }}><FiShield /> Integrations & Admin Data</h2>
 
                   <div className="premium-grid-2" style={{ marginBottom: '24px' }}>
                     <div style={{ padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
@@ -494,23 +472,23 @@ function Profile() {
                     </div>
                   </div>
 
-                  <h4 className="premium-h4">Read-Only Admin Information</h4>
+                  <h3 className="premium-h4">Read-Only Admin Information</h3>
                   <div className="premium-grid-2">
                     <div className="premium-form-group">
-                      <label className="premium-label">Student Code</label>
-                      <input className="premium-input" value={serverProfile?.student_code || "Not Generated"} disabled />
+                      <label htmlFor="profile_student_code" className="premium-label">Student Code</label>
+                      <input id="profile_student_code" className="premium-input" value={serverProfile?.student_code || "Not Generated"} disabled />
                     </div>
                     <div className="premium-form-group">
-                      <label className="premium-label">Identity Issued At</label>
-                      <input className="premium-input" value={serverProfile?.student_identity_issued_at ? new Date(serverProfile.student_identity_issued_at).toLocaleString() : "Pending Qualification"} disabled />
+                      <label htmlFor="profile_identity_issued_at" className="premium-label">Identity Issued At</label>
+                      <input id="profile_identity_issued_at" className="premium-input" value={serverProfile?.student_identity_issued_at ? new Date(serverProfile.student_identity_issued_at).toLocaleString() : "Pending Qualification"} disabled />
                     </div>
                     <div className="premium-form-group">
-                      <label className="premium-label">Current Course</label>
-                      <input className="premium-input" value={serverProfile?.current_application?.course?.name || "Not Enrolled"} disabled />
+                      <label htmlFor="profile_current_course" className="premium-label">Current Course</label>
+                      <input id="profile_current_course" className="premium-input" value={serverProfile?.current_application?.course?.name || "Not Enrolled"} disabled />
                     </div>
                     <div className="premium-form-group">
-                      <label className="premium-label">Current Cohort</label>
-                      <input className="premium-input" value={serverProfile?.current_application?.assigned_cohort?.name || "Not Assigned"} disabled />
+                      <label htmlFor="profile_current_cohort" className="premium-label">Current Cohort</label>
+                      <input id="profile_current_cohort" className="premium-input" value={serverProfile?.current_application?.assigned_cohort?.name || "Not Assigned"} disabled />
                     </div>
                   </div>
 

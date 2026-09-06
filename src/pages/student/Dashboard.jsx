@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { studentService, checkCurrentEnrollment, resolveStudentEnrollment } from "../../services/studentService";
@@ -9,14 +9,14 @@ import { examService } from "../../services/examService";
 import { requestService } from "../../services/requestService";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
-import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+const ProgressDonutChart = React.lazy(() => import("./ProgressDonutChart"));
 import styles from "./Dashboard.module.css";
 import { FiCheckCircle, FiClock, FiAlertCircle, FiCpu, FiUsers, FiBarChart2, FiUser, FiVideo, FiFileText, FiEdit, FiBookOpen, FiArrowRight, FiLock, FiCalendar, FiAward, FiX, FiBell } from "react-icons/fi";
 import { FaLaptopCode, FaRegCalendarAlt } from "react-icons/fa";
-import FeedbackWidget from "../../components/common/FeedbackWidget";
-import AttendanceWarningPopup from "../../components/attendance/AttendanceWarningPopup";
+const FeedbackWidget = React.lazy(() => import("../../components/common/FeedbackWidget"));
+const AttendanceWarningPopup = React.lazy(() => import("../../components/attendance/AttendanceWarningPopup"));
 import { pushNotificationService } from "../../services/pushNotificationService";
-import PushNotificationBanner from "../../components/common/PushNotificationBanner";
+const PushNotificationBanner = React.lazy(() => import("../../components/common/PushNotificationBanner"));
 
 function Dashboard() {
   const { user } = useAuth();
@@ -280,17 +280,49 @@ function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className={styles.skeletonContainer}>
-        <div className={`${styles.skeletonBox} ${styles.skeletonHeader}`}></div>
-        <div className={styles.skeletonBox} style={{ height: '240px' }}></div>
-        <div className={styles.skeletonBox}></div>
+      <div className={styles.dashboardContainer}>
+        <Suspense fallback={null}>
+          <PushNotificationBanner />
+        </Suspense>
+        
+        {/* SECTION 1: Top Layer (Hero + Calendar) */}
+        <div className={styles.topSection}>
+          <div className={styles.heroBanner}>
+            <div className={styles.heroLeft}>
+              <p className={styles.heroGreeting}>Welcome back,</p>
+              <h1 className={styles.heroName}>
+                {`${user?.first_name || ''} ${user?.last_name || ''}`.trim() || profile?.first_name || "Student"}!
+              </h1>
+              <p className={styles.heroSubtitle}>Keep learning, keep building. You're one step closer to your goals.</p>
+              
+              <div className={styles.heroQuote}>
+                <p className={styles.heroQuoteText}>"Discipline today builds the career you deserve tomorrow."</p>
+                <p className={styles.heroQuoteAuthor}>— SURE ProEd</p>
+              </div>
+            </div>
+            
+            <div className={styles.heroRight}>
+              <div style={{ textAlign: 'right' }}>
+                 <h3 className={styles.heroValues}>Learn<br/>Build<br/>Grow<br/>Belong</h3>
+              </div>
+            </div>
+          </div>
+  
+          <div className={styles.skeletonBox} style={{ flex: 1, minWidth: '260px' }}></div>
+        </div>
+  
+        <div className={styles.skeletonContainer} style={{ paddingTop: 0 }}>
+          <div className={styles.skeletonBox} style={{ height: '240px' }}></div>
+          <div className={styles.skeletonBox}></div>
+        </div>
       </div>
     );
   }
 
   // 🚨 LOCK SCREEN LOGIC 🚨
+  const isDropped = stats?.application_status === "DROPPED" || activeApp?.status === "DROPPED";
   const hasEnrollment = resolvedEnrollment.isEnrolled;
-  const isLocked = !hasEnrollment || isSuspended;
+  const isLocked = !hasEnrollment || isSuspended || isDropped;
   const isRevoked = profile?.status === "ADMIN_REJECTED";
   const isExisting = resolvedEnrollment.isExistingStudent;
 
@@ -299,10 +331,12 @@ function Dashboard() {
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
         <div style={{ background: 'var(--bg-card)', padding: '40px', borderRadius: '24px', textAlign: 'center', border: '1px solid var(--border-color)', maxWidth: '500px' }}>
           <h2 style={{ color: 'var(--text-primary)', fontSize: '24px', marginBottom: '16px' }}>
-            {isSuspended ? "Cohort Access Suspended" : isRevoked ? "Access Revoked" : (isExisting ? "Account Pending Verification" : "Welcome to SURE ProEd")}
+            {isDropped ? "Access Revoked" : isSuspended ? "Cohort Access Suspended" : isRevoked ? "Access Revoked" : (isExisting ? "Account Pending Verification" : "Welcome to SURE ProEd")}
           </h2>
           <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '24px' }}>
-            {isSuspended
+            {isDropped
+              ? "You have been dropped from this cohort for failing to attend a mandatory Module Test."
+              : isSuspended
               ? "Your access to this cohort is currently suspended. Please contact the administration for assistance."
               : isRevoked
                 ? "Your access has been temporarily revoked by an administrator."
@@ -311,7 +345,7 @@ function Dashboard() {
                   : "Please complete your Profile and click 'Apply Course' to begin your journey.")}
           </p>
           <div style={{ background: 'var(--bg-nested)', padding: '16px', borderRadius: '12px', color: 'var(--primary-color)' }}>
-            <strong>Status:</strong> {isSuspended ? "SUSPENDED" : activeApp?.status ? activeApp.status.replace("_", " ") : (profile?.status ? profile.status.replace("_", " ") : "Action Required")}
+            <strong>Status:</strong> {isDropped ? "DROPPED" : isSuspended ? "SUSPENDED" : activeApp?.status ? activeApp.status.replace("_", " ") : (profile?.status ? profile.status.replace("_", " ") : "Action Required")}
           </div>
         </div>
       </div>
@@ -347,7 +381,9 @@ function Dashboard() {
 
   return (
     <div className={styles.dashboardContainer}>
-      <PushNotificationBanner />
+      <Suspense fallback={null}>
+        <PushNotificationBanner />
+      </Suspense>
 
       
       {/* SECTION 1: Top Layer (Hero + Calendar) */}
@@ -467,41 +503,10 @@ function Dashboard() {
           <div className={styles.cardHeader}>
             <h3 className={styles.cardTitle}>My Learning Progress</h3>
           </div>
-          <div className={styles.progressCenter}>
-            <div className={styles.progressDonut}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={[{ name: 'Progress', value: attendanceStats?.attendance_percentage || 0 }, { name: 'Remaining', value: Math.max(0, 100 - (attendanceStats?.attendance_percentage || 0)) }]} 
-                       innerRadius={45} outerRadius={60} stroke="none" isAnimationActive={false}>
-                    <Cell fill="#10b981" />
-                    <Cell fill="var(--bg-nested)" />
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className={styles.progressDonutLabel}>
-                <div className={styles.progressDonutPct}>{Math.round(attendanceStats?.attendance_percentage || 0)}%</div>
-                <div className={styles.progressDonutSub}>Overall Progress</div>
-              </div>
-            </div>
-            
-            <div className={styles.progressLegend}>
-              <div className={styles.progressLegendItem}>
-                <span><span className={styles.progressLegendDot} style={{background: '#10b981'}}></span> Attended</span>
-                <span className={styles.progressLegendCount}>{attendanceStats?.present_sessions || 0}</span>
-              </div>
-              <div className={styles.progressLegendItem}>
-                <span><span className={styles.progressLegendDot} style={{background: '#ef4444'}}></span> Missed</span>
-                <span className={styles.progressLegendCount}>{attendanceStats?.absent_sessions || 0}</span>
-              </div>
-              <div className={styles.progressLegendItem}>
-                <span><span className={styles.progressLegendDot} style={{background: 'var(--text-muted)'}}></span> Total</span>
-                <span className={styles.progressLegendCount}>{attendanceStats?.total_sessions || 0}</span>
-              </div>
-            </div>
-            
-            <button className={styles.progressViewLink} onClick={() => navigate('/student/attendance')}>
-              View Detailed Progress &rarr;
-            </button>
+          <div className={styles.progressCenter} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+            <Suspense fallback={<div className={styles.progressDonut} />}>
+              <ProgressDonutChart attendanceStats={attendanceStats} stats={stats} />
+            </Suspense>
           </div>
         </div>
 
@@ -512,7 +517,7 @@ function Dashboard() {
             <h3 className={styles.cardTitle}>Current Enrollment</h3>
             <span className={styles.enrollmentBadge}>{resolvedEnrollment?.status ? resolvedEnrollment.status.replace(/_/g, " ") : "ACTIVE"}</span>
           </div>
-          <div className={styles.enrollmentCard}>
+          <div className={styles.enrollmentCard} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
             <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
               <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: 'var(--primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                  {(() => {
@@ -549,22 +554,62 @@ function Dashboard() {
                 <span className={styles.enrollmentMetaValue}>
                   {(() => {
                     const cohortData = stats?.active_cohort || profile?.current_application?.assigned_cohort || {};
-                    const d = resolvedEnrollment?.startDate || cohortData.start_date || cohortData.startDate || profile?.current_application?.applied_at || profile?.current_application?.created_at || profile?.created_at || new Date().toISOString();
+                    const d = stats?.cohort_start_date || resolvedEnrollment?.startDate || cohortData.start_date || cohortData.startDate || profile?.current_application?.applied_at || profile?.current_application?.created_at || profile?.created_at || new Date().toISOString();
                     return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                   })()}
                 </span>
               </div>
             </div>
             
-            <div className={styles.enrollmentProgressContainer}>
-              <div className={styles.enrollmentProgressBarBg}>
-                <div className={styles.enrollmentProgressFill} style={{ width: `${Math.round(attendanceStats?.attendance_percentage || 0)}%` }}></div>
+            <div style={{ marginBottom: '24px', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              
+              {/* Modules Passed Bar */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                  <span style={{ color: 'var(--text-secondary)', fontWeight: '600' }}>Modules Passed</span>
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>{stats?.module_tests_passed || 0} / {stats?.active_cohort?.modules?.length || 0}</span>
+                </div>
+                <div className={styles.enrollmentProgressContainer} style={{ marginBottom: 0 }}>
+                  <div className={styles.enrollmentProgressBarBg}>
+                    <div 
+                      className={styles.enrollmentProgressFill} 
+                      style={{ 
+                        width: `${Math.round(stats?.course_percentage || 0)}%`, 
+                        transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)', 
+                        background: 'linear-gradient(90deg, #3b82f6, #60a5fa)' 
+                      }}
+                    ></div>
+                  </div>
+                  <span className={styles.enrollmentProgressText}>{Math.round(stats?.course_percentage || 0)}%</span>
+                </div>
               </div>
-              <span className={styles.enrollmentProgressText}>{Math.round(attendanceStats?.attendance_percentage || 0)}%</span>
+              
+              {/* Course Progress (Time-based) Bar */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                  <span style={{ color: 'var(--text-secondary)', fontWeight: '600' }}>Course Progress</span>
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>
+                    {Math.round(stats?.time_elapsed_percentage || 0)}%
+                  </span>
+                </div>
+                <div className={styles.enrollmentProgressContainer} style={{ marginBottom: 0 }}>
+                  <div className={styles.enrollmentProgressBarBg}>
+                    <div 
+                      className={styles.enrollmentProgressFill} 
+                      style={{ 
+                        width: `${Math.round(stats?.time_elapsed_percentage || 0)}%`, 
+                        transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)', 
+                        background: 'linear-gradient(90deg, #10b981, #34d399)' 
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+              
             </div>
 
-            <button className={styles.enrollmentViewBtn} onClick={() => navigate('/student/applications')}>
-              View Course Details &rarr;
+            <button className={styles.enrollmentViewBtn} onClick={() => navigate('/student/module-tests')}>
+              View Detailed Progress &rarr;
             </button>
           </div>
         </div>
@@ -620,7 +665,15 @@ function Dashboard() {
               const visibleClasses = allVisibleClasses.slice(0, 3);
 
               if (visibleClasses.length === 0) {
-                return <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>No live classes scheduled currently.</p>;
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', padding: '32px 16px' }}>
+                    <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--bg-nested)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+                      <FiCalendar size={36} color="var(--text-muted)" opacity={0.6} />
+                    </div>
+                    <h4 style={{ margin: '0 0 12px 0', fontSize: '15px', color: 'var(--text-primary)', fontWeight: 'bold' }}>No live classes scheduled currently.</h4>
+                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>You're all caught up! New classes will appear here once they are scheduled.</p>
+                  </div>
+                );
               }
 
               const classesList = visibleClasses.map((cls, idx) => {
@@ -780,7 +833,9 @@ function Dashboard() {
             <h3>Share Your Experience</h3>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>Your feedback helps us improve SURE ProEd.</p>
           </div>
-          <FeedbackWidget />
+          <Suspense fallback={null}>
+            <FeedbackWidget />
+          </Suspense>
         </div>
 
         {/* Offer Letters Card */}
@@ -877,38 +932,54 @@ function Dashboard() {
                 
                 return (
                   <>
-                    {currentMentor && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '12px' }}>
-                         <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#10b981', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', overflow: 'hidden' }}>
-                           {(currentMentor.profile_photo || currentMentor.photo || currentMentor.avatar || currentMentor.profile_picture) ? (
-                             <img src={currentMentor.profile_photo || currentMentor.photo || currentMentor.avatar || currentMentor.profile_picture} alt="Mentor" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                           ) : (
-                             currentMentor.first_name?.[0] || currentMentor.name?.[0] || "M"
-                           )}
-                         </div>
-                         <div style={{ flexGrow: 1 }}>
-                           <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '15px' }}>{currentMentor.first_name || currentMentor.name}</h4>
-                           <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }}></div> CURRENT MENTOR
-                           </span>
-                         </div>
-                      </div>
-                    )}
-                    
+                    {/* Render all mentors uniformly. Highlight the current mentor. */}
                     {activeMentors.map((m, i) => {
-                      if (currentMentor && (m.id === currentMentor.id || m.email === currentMentor.email)) return null;
+                      const isCurrentMentor = currentMentor && (m.id === currentMentor.id || m.email === currentMentor.email);
                       const mName = `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.name || m.username || "Mentor";
                       const mPhoto = m.profile_photo || m.photo || m.avatar || m.profile_picture;
+                      
                       return (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
-                           <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--bg-nested)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', overflow: 'hidden' }}>
-                             {mPhoto ? (
-                               <img src={mPhoto} alt={mName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                             ) : (
-                               mName.charAt(0).toUpperCase()
-                             )}
-                           </div>
-                           <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '15px' }}>{mName}</h4>
+                        <div 
+                          key={i} 
+                          onClick={() => {
+                            if (m.id) {
+                              navigate('/student/mentor-details', { state: { mentorId: m.id } });
+                            }
+                          }}
+                          style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '12px', 
+                            padding: '12px', 
+                            border: isCurrentMentor ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-color)', 
+                            borderRadius: '12px',
+                            background: isCurrentMentor ? 'rgba(16, 185, 129, 0.05)' : 'var(--bg-nested)',
+                            cursor: m.id ? 'pointer' : 'default',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => { if (m.id) e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; }}
+                          onMouseLeave={(e) => { if (m.id) e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                        >
+                          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: isCurrentMentor ? '#10b981' : 'var(--primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', overflow: 'hidden' }}>
+                            {mPhoto ? (
+                              <img src={mPhoto} alt={mName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                              mName[0] || "M"
+                            )}
+                          </div>
+                          <div style={{ flexGrow: 1 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '15px' }}>{mName}</h4>
+                              {isCurrentMentor && (
+                                <span style={{ fontSize: '10px', background: '#f59e0b', color: 'white', padding: '2px 6px', borderRadius: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  ★ Current Mentor
+                                </span>
+                              )}
+                            </div>
+                            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                              {m.designation ? `${m.designation} at ${m.company_name || 'Company'}` : 'Mentor'}
+                            </span>
+                          </div>
                         </div>
                       );
                     })}

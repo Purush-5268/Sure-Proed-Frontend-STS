@@ -329,6 +329,8 @@
 }
 
 .card {
+  display: flex;
+  flex-direction: column;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 16px;
@@ -1059,6 +1061,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
+  margin-top: auto;
 }
 .enrollmentViewBtn:hover {
   background: rgba(16, 185, 129, 0.15);

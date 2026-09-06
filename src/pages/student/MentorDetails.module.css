@@ -3,8 +3,9 @@
 .page {
   width: 100%;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
   padding: 20px;
   animation: studentFadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -36,10 +37,12 @@
   box-shadow: 0 4px 20px var(--student-glow-primary);
 }
 
-.profile h1 {
+.profile h1,
+.profile h2 {
   color: var(--text-primary);
   margin-bottom: 8px;
   font-weight: 800;
+  font-size: 24px;
 }
 
 .profile p {

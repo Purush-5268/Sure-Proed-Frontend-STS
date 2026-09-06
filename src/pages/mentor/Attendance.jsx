@@ -51,9 +51,13 @@ function Attendance() {
     let isMounted = true;
     const fetchSessions = async () => {
       try {
-        const response = await apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { 
-          params: { cohort: selectedCohort, page } 
-        });
+        const activeCohort = cohorts.find(c => String(c.id) === String(selectedCohort));
+        const params = { cohort: selectedCohort, page };
+        if (activeCohort && activeCohort.status && activeCohort.status !== 'COMPLETED' && activeCohort.status !== 'CANCELLED' && activeCohort.status !== 'DRAFT') {
+          params.recent_days = 21;
+        }
+
+        const response = await apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { params });
         const data = response.data;
         if (isMounted) {
           setSessions(Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []));

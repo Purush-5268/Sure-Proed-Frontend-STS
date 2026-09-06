@@ -114,16 +114,16 @@ function Settings() {
 
                     <form onSubmit={handlePasswordChange} className={styles.passwordForm}>
                         <div className={styles.inputGroup}>
-                            <label>Current Password</label>
-                            <input type="password" value={passwordData.current} onChange={(e) => setPasswordData({ ...passwordData, current: e.target.value })} required placeholder="Enter current password" />
+                            <label htmlFor="currentPassword">Current Password</label>
+                            <input id="currentPassword" type="password" value={passwordData.current} onChange={(e) => setPasswordData({ ...passwordData, current: e.target.value })} required placeholder="Enter current password" />
                         </div>
                         <div className={styles.inputGroup}>
-                            <label>New Password</label>
-                            <input type="password" value={passwordData.new} onChange={(e) => setPasswordData({ ...passwordData, new: e.target.value })} required placeholder="Enter new password" />
+                            <label htmlFor="newPassword">New Password</label>
+                            <input id="newPassword" type="password" value={passwordData.new} onChange={(e) => setPasswordData({ ...passwordData, new: e.target.value })} required placeholder="Enter new password" />
                         </div>
                         <div className={styles.inputGroup}>
-                            <label>Confirm New Password</label>
-                            <input type="password" value={passwordData.confirm} onChange={(e) => setPasswordData({ ...passwordData, confirm: e.target.value })} required placeholder="Confirm new password" />
+                            <label htmlFor="confirmPassword">Confirm New Password</label>
+                            <input id="confirmPassword" type="password" value={passwordData.confirm} onChange={(e) => setPasswordData({ ...passwordData, confirm: e.target.value })} required placeholder="Confirm new password" />
                         </div>
                         <button type="submit" disabled={loading} className={styles.saveBtn} style={{ cursor: loading ? "not-allowed" : "pointer" }}>
                             {loading ? "Updating..." : "Update Password"}
@@ -144,7 +144,7 @@ function Settings() {
                             <p>Receive email reminders 10 minutes before a class starts.</p>
                         </div>
                         <div className={styles.toggleWrapper}>
-                            <input type="checkbox" id="classAlerts" defaultChecked className={styles.toggle} />
+                            <input type="checkbox" id="classAlerts" aria-label="Live Class Alerts" defaultChecked className={styles.toggle} />
                             <label htmlFor="classAlerts" className={styles.toggleLabel}></label>
                         </div>
                     </div>
@@ -154,7 +154,7 @@ function Settings() {
                             <p>Get notified when an assignment is due soon.</p>
                         </div>
                         <div className={styles.toggleWrapper}>
-                            <input type="checkbox" id="assignmentAlerts" defaultChecked className={styles.toggle} />
+                            <input type="checkbox" id="assignmentAlerts" aria-label="Assignment Deadlines" defaultChecked className={styles.toggle} />
                             <label htmlFor="assignmentAlerts" className={styles.toggleLabel}></label>
                         </div>
                     </div>

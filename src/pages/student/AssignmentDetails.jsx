@@ -24,7 +24,7 @@ function AssignmentDetails() {
         </p>
 
         <div className={styles.section}>
-          <h3>Assignment Description</h3>
+          <h2>Assignment Description</h2>
           <p>{assignment?.description || "No description available yet."}</p>
         </div>
 

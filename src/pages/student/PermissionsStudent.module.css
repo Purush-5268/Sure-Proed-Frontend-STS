@@ -2,9 +2,8 @@
 
 .container {
   padding: 8px;
-  max-width: 100%;
+  max-width: 1000px;
   margin: 0 auto;
-  animation: studentFadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .header {

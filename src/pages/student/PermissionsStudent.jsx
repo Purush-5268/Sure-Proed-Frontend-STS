@@ -3,6 +3,7 @@ import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./PermissionsStudent.module.css";
 import PermissionChatModal from "../../components/chat/PermissionChatModal";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function PermissionsStudent() {
   const [warnings, setWarnings] = useState([]);
@@ -61,7 +62,7 @@ function PermissionsStudent() {
 
   const isRestricted = (applications || []).some(app => app?.is_restricted);
 
-  if (loading) return <div className={styles.container}>Loading permissions...</div>;
+
 
   return (
     <div className={styles.container}>
@@ -77,8 +78,14 @@ function PermissionsStudent() {
         </div>
       )}
 
+      <h2 style={{ fontSize: "1.25rem", fontWeight: 700, margin: "20px 0 12px 0", color: "var(--text-primary)" }}>
+        Attendance Warnings & Notices
+      </h2>
+
       <div className={styles.permissionsList}>
-        {(warnings || []).length === 0 ? (
+        {loading ? (
+          <SkeletonLoader variant="cards" count={2} />
+        ) : (warnings || []).length === 0 ? (
           <p className={styles.emptyState}>You have no pending warnings.</p>
         ) : (
           (warnings || []).map(w => (
@@ -98,7 +105,11 @@ function PermissionsStudent() {
                   </div>
                 ) : (
                   <div className={styles.apologyForm}>
+                    <label htmlFor={`apology_${w.id}`} style={{ display: "block", marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+                      Explanation / Appeal:
+                    </label>
                     <textarea 
+                      id={`apology_${w.id}`}
                       placeholder="Type your explanation/apology here..."
                       value={apologyInputs[w.id] || ""}
                       onChange={(e) => handleApologyChange(w.id, e.target.value)}
