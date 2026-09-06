@@ -43,6 +43,22 @@ function Navbar() {
 
   const closeMenu = () => setMobileOpen(false);
 
+  const scrollToSection = (e, id) => {
+    if (window.location.pathname === "/") {
+      e.preventDefault();
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      } else {
+        // Retry for lazy loaded components
+        setTimeout(() => {
+          document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+        }, 300);
+      }
+      closeMenu();
+    }
+  };
+
   return (
     <nav className={styles.navbar}>
       <div className={styles.logo}>
@@ -65,8 +81,8 @@ function Navbar() {
       <div className={`${styles.navContent} ${mobileOpen ? styles.mobileOpen : ""}`}>
         <ul className={styles.menu}>
           <li><Link to="/" onClick={closeMenu}>Home</Link></li>
-          <li><a href="/#features" onClick={closeMenu}>Features</a></li>
-          <li><a href="/#statistics" onClick={closeMenu}>Statistics</a></li>
+          <li><a href="/#features" onClick={(e) => scrollToSection(e, "features")}>Features</a></li>
+          <li><a href="/#statistics" onClick={(e) => scrollToSection(e, "statistics")}>Statistics</a></li>
           {isAuthenticated && (
             <li><Link to={getDashboardPath()} onClick={closeMenu}>Dashboard</Link></li>
           )}

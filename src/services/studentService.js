@@ -284,31 +284,37 @@ export const studentService = {
   },
 
   /**
-   * Get a student profile from the authoritative backend.
+   * Get the logged-in student's profile from the authoritative backend.
+   * Uses /api/students/me/ which does get_or_create server-side — reliable and fast.
    */
   async getProfile(email) {
-    if (!email) return null;
-    const cleanEmail = email.trim().toLowerCase();
-
+    // email param kept for backwards compatibility but /me/ is always used
     try {
-      // Explicitly query for the user's email as a safety net against fetching all students
-      const response = await apiClient.get(API_ENDPOINTS.STUDENTS.BASE, {
-        params: { user__email: cleanEmail }
-      });
-
-      const data = response.data;
-      const students = Array.isArray(data) ? data : (data?.results || []);
-
-      const profile = students.find((item) => {
-        const user = item.user || {};
-        return (user.email || "").toLowerCase() === cleanEmail || (item.email || "").toLowerCase() === cleanEmail;
-      }) || students[0];
-
-      if (profile) {
-        return normalizeProfile(profile);
+      const response = await apiClient.get("/api/students/me/");
+      if (response.data) {
+        return normalizeProfile(response.data);
       }
     } catch (err) {
-      console.error("Backend profile fetch failed:", err.message || err);
+      // Fallback: try listing by email if /me/ somehow fails
+      if (email) {
+        const cleanEmail = email.trim().toLowerCase();
+        try {
+          const resp = await apiClient.get(API_ENDPOINTS.STUDENTS.BASE, {
+            params: { user__email: cleanEmail }
+          });
+          const data = resp.data;
+          const students = Array.isArray(data) ? data : (data?.results || []);
+          const profile = students.find((item) => {
+            const user = item.user || {};
+            return (user.email || "").toLowerCase() === cleanEmail;
+          }) || students[0];
+          if (profile) return normalizeProfile(profile);
+        } catch (fallbackErr) {
+          console.error("Backend profile fetch failed:", fallbackErr.message || fallbackErr);
+        }
+      } else {
+        console.error("Backend profile fetch failed:", err.message || err);
+      }
     }
 
     return null;
@@ -316,44 +322,32 @@ export const studentService = {
 
   /**
    * Save/update a student profile authoritatively to backend API.
+   * Always uses PATCH /api/students/me/ — the backend does get_or_create so no POST needed.
    */
   async saveProfile(email, profileData) {
-    if (!email) return null;
-    const cleanEmail = email.trim().toLowerCase();
-
-    const existing = (await this.getProfile(cleanEmail)) || {};
-    const updated = {
-      ...existing,
-      ...profileData,
-      email: cleanEmail,
-      firstName: profileData.firstName || existing.firstName || "",
-      lastName: profileData.lastName || existing.lastName || "",
-      phoneNumber: profileData.phoneNumber || existing.phoneNumber || "",
-      dob: profileData.dob || existing.dob || "",
-      gender: profileData.gender || existing.gender || "",
-    };
+    const updated = { ...profileData };
 
     try {
       const formData = new FormData();
-      
+
       // Fields exactly matching backend (strings)
       const stringFieldsToAppend = [
-        "college", "degree", "specialization", "education_level", 
+        "college", "degree", "specialization", "education_level",
         "city", "state", "country", "bio", "tagline",
         "portfolio_url", "linkedin_url", "github_username",
         "skills", "hobbies", "languages"
       ];
-      
+
       stringFieldsToAppend.forEach(field => {
         if (updated[field] !== undefined) {
           formData.append(field, updated[field] || "");
         }
       });
-      
+
       if (updated.graduation_year) formData.append("graduation_year", Number(updated.graduation_year));
       if (updated.dob) formData.append("date_of_birth", updated.dob);
       if (updated.gender) formData.append("gender", updated.gender);
-      
+
       // Handle file uploads
       if (updated.profile_photo instanceof File) {
         formData.append("profile_photo", updated.profile_photo);
@@ -364,33 +358,37 @@ export const studentService = {
       if (updated.offerLetter instanceof File) {
         formData.append("uploaded_offer_letter", updated.offerLetter);
       }
-      
+
       // Verification Fields
-      formData.append("is_existing_student", updated.isExistingStudent === "yes");
-      if (updated.courseId) formData.append("course_id", updated.courseId);
-      formData.append("course_batch", updated.courseBatch || "");
-
-      const config = {}; // Let Axios automatically set the Content-Type with boundary for FormData
-
-      if (existing.id) {
-        await apiClient.patch(API_ENDPOINTS.STUDENTS.BY_ID(existing.id), formData, config);
-      } else {
-        await apiClient.post(API_ENDPOINTS.STUDENTS.BASE, formData, config);
+      if (updated.isExistingStudent !== undefined) {
+        formData.append("is_existing_student", updated.isExistingStudent === "yes");
       }
+      if (updated.courseId) formData.append("course_id", updated.courseId);
+      if (updated.courseBatch !== undefined) formData.append("course_batch", updated.courseBatch || "");
 
-      // Sync user profile names
-      const meResponse = await apiClient.get(API_ENDPOINTS.USERS.ME);
-      const userId = meResponse?.data?.id;
-      if (userId) {
-        const userUpdatePayload = {
-          first_name: updated.firstName || "",
-          last_name: updated.lastName || "",
-          phone_number: updated.phoneNumber || "",
-        };
-        if (updated.gender) userUpdatePayload.gender = updated.gender;
-        if (updated.dob) userUpdatePayload.date_of_birth = updated.dob;
-        
-        await apiClient.patch(API_ENDPOINTS.USERS.BY_ID(userId), userUpdatePayload);
+      // Always PATCH /me/ — backend does get_or_create, never need POST
+      await apiClient.patch("/api/students/me/", formData);
+
+      // Sync user-level fields (first_name, last_name, phone_number)
+      // /api/users/me/ only supports GET — must PATCH /api/users/{id}/ instead
+      const userUpdatePayload = {};
+      if (updated.firstName !== undefined) userUpdatePayload.first_name = updated.firstName || "";
+      if (updated.lastName !== undefined) userUpdatePayload.last_name = updated.lastName || "";
+      if (updated.phoneNumber !== undefined) userUpdatePayload.phone_number = updated.phoneNumber || "";
+      if (updated.gender) userUpdatePayload.gender = updated.gender;
+      if (updated.dob) userUpdatePayload.date_of_birth = updated.dob;
+
+      if (Object.keys(userUpdatePayload).length > 0) {
+        try {
+          // GET /users/me/ to obtain the user's own ID, then PATCH /users/{id}/
+          const meRes = await apiClient.get(API_ENDPOINTS.USERS.ME);
+          const userId = meRes?.data?.id;
+          if (userId) {
+            await apiClient.patch(API_ENDPOINTS.USERS.BY_ID(userId), userUpdatePayload);
+          }
+        } catch (err) {
+          console.warn("User fields sync failed (non-fatal):", err.message);
+        }
       }
     } catch (err) {
       console.error("Backend profile save failed:", err.message || err);

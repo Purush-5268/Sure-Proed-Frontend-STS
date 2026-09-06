@@ -259,9 +259,9 @@ function Dashboard() {
     setIsSubmittingLateJoin(true);
     try {
       await requestService.createRequest({
-        title: `Late Join Request (Class ID: ${lateJoinClassId})`,
+        subject: `Late Join Request (Class ID: ${lateJoinClassId})`,
         description: lateJoinReason,
-        category: 'PERMISSION'
+        category: 'ATTENDANCE'
       });
       alert("Permission request submitted successfully.");
       setShowLateJoinModal(false);
@@ -648,12 +648,16 @@ function Dashboard() {
                   if (end < start) end = new Date(end.getTime() + 24 * 60 * 60 * 1000);
                   
                   const clsStatus = (cls.class_status || cls.status || "").toUpperCase();
-                  if (clsStatus === 'COMPLETED' || clsStatus === 'ENDED') return 2;
+                  const effectiveStatus = (cls.effective_status || "").toUpperCase();
+                  // Only backend status determines Completed — not time alone
+                  // If class_status is SCHEDULED, admin hasn't ended it — rank as Ongoing
+                  if ((clsStatus === 'COMPLETED' || clsStatus === 'ENDED') ||
+                      (effectiveStatus === 'COMPLETED' && clsStatus !== 'SCHEDULED')) return 2;
                   if (clsStatus === 'CANCELLED') return 3;
-                  
-                  if (now >= start && now <= end) return 0; // Ongoing
+
+                  if (now >= start && now <= end) return 0; // Ongoing (within time window)
                   if (now < start) return 1; // Upcoming
-                  return 2; // Past
+                  return 0; // Past scheduled time but not ended by admin = still ongoing
                 };
                 
                 const rankA = getStatusRank(a);
@@ -687,18 +691,21 @@ function Dashboard() {
                 if (classEnd < classStart) classEnd = new Date(classEnd.getTime() + 24 * 60 * 60 * 1000);
                 
                 const clsStatus = (cls.class_status || cls.status || "").toUpperCase();
-                
-                // Backend strictly dictates completed/cancelled, but we also fallback to time if backend is slow
-                const isCompleted = clsStatus === 'COMPLETED' || clsStatus === 'ENDED' || now > classEnd;
-                const isCancelled = clsStatus === 'CANCELLED';
-                
+                const effectiveStatus = (cls.effective_status || "").toUpperCase();
+
+                // Use effective_status from backend, but NEVER auto-complete based on time:
+                // If the raw class_status is SCHEDULED, admin hasn't ended it — keep it Ongoing
+                const isCompleted = (clsStatus === 'COMPLETED' || clsStatus === 'ENDED') ||
+                                    (effectiveStatus === 'COMPLETED' && clsStatus !== 'SCHEDULED');
+                const isCancelled = clsStatus === 'CANCELLED' || effectiveStatus === 'CANCELLED';
+
                 const windowOpenTime = new Date(classStart.getTime() - 10 * 60 * 1000);
-                
+
                 // Join allowed exactly between T-10 and T-0
                 const isJoinWindowOpen = !isCompleted && !isCancelled && now >= windowOpenTime && now <= classStart;
-                
-                // Late Join (Ask Admin) allowed after start time up until it ends
-                const isLate = !isCompleted && !isCancelled && now > classStart && now <= classEnd;
+
+                // Ongoing/Late: any time after start when admin hasn't ended it
+                const isLate = !isCompleted && !isCancelled && now > classStart;
                 
                 const startsIn = Math.floor((classStart - now) / 60000);
 
@@ -839,7 +846,7 @@ function Dashboard() {
             <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>Your feedback helps us improve SURE ProEd.</p>
           </div>
           <Suspense fallback={null}>
-            <FeedbackWidget />
+            <FeedbackWidget currentMentor={stats?.active_cohort?.current_mentor_details || profile?.current_application?.assigned_cohort?.current_mentor_details} />
           </Suspense>
         </div>
 

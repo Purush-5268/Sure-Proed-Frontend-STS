@@ -27,9 +27,9 @@ function ClassSchedule() {
     setIsSubmittingLateJoin(true);
     try {
       await requestService.createRequest({
-        title: `Late Join Request (Class ID: ${lateJoinClassId})`,
+        subject: `Late Join Request (Class ID: ${lateJoinClassId})`,
         description: lateJoinReason,
-        category: 'PERMISSION'
+        category: 'ATTENDANCE'
       });
       alert("Permission request submitted successfully.");
       setShowLateJoinModal(false);
@@ -103,33 +103,39 @@ function ClassSchedule() {
         endDateTime = new Date(startDateTime.getTime() + 2 * 60 * 60 * 1000); // 2 hours default
       }
       if (endDateTime < startDateTime) endDateTime = new Date(endDateTime.getTime() + 24 * 60 * 60 * 1000);
-      
+
       const itemStatus = (item.class_status || item.status || "").toUpperCase();
-      const isCompleted = itemStatus === "COMPLETED" || itemStatus === "ENDED" || now > endDateTime;
-      const isCancelled = itemStatus === "CANCELLED";
-      
+      const effectiveStatus = (item.effective_status || "").toUpperCase();
+
+      // Only trust backend status for Completed — NOT time alone.
+      // If class_status is still SCHEDULED, admin hasn't ended it — keep it Ongoing.
+      const isCompleted = (itemStatus === "COMPLETED" || itemStatus === "ENDED") ||
+                          (effectiveStatus === "COMPLETED" && itemStatus !== "SCHEDULED");
+      const isCancelled = itemStatus === "CANCELLED" || effectiveStatus === "CANCELLED";
+
       if (isCompleted) return { canJoin: false, label: "Completed" };
       if (isCancelled) return { canJoin: false, label: "Cancelled" };
-      
+
       const windowOpenTime = new Date(startDateTime.getTime() - 10 * 60 * 1000);
-      
+
       // Join allowed exactly between T-10 and T-0
       if (now >= windowOpenTime && now <= startDateTime) {
         return { canJoin: true, label: "Live Now" };
       }
-      
-      // Late Join (Ask Admin) allowed after start time up until it ends
-      if (now > startDateTime && now <= endDateTime) {
+
+      // Ongoing: any time after start — no upper bound until admin ends the class
+      if (now > startDateTime) {
         return { canJoin: false, label: "Ask Admin (Late Join)" };
       }
-      
+
       if (now < windowOpenTime) {
         const startsIn = Math.floor((startDateTime - now) / 60000);
         if (startsIn < 60) return { canJoin: false, label: `Starts in ${startsIn} min` };
         return { canJoin: false, label: "Upcoming" };
       }
-      
-      return { canJoin: false, label: "Locked" };
+
+      // Past the scheduled end time but admin hasn't ended it yet
+      return { canJoin: false, label: "Ongoing" };
     } catch (e) {
       return { canJoin: false, label: "Error" };
     }

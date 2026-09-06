@@ -24,7 +24,20 @@ function CourseDetails() {
       }
 
       try {
-        const courseData = await courseService.getCourseById(id);
+        let courseData = null;
+        try {
+          courseData = await courseService.getCourseById(id);
+        } catch (err) {
+          // 404 can happen when student is enrolled in an active cohort — the course
+          // is excluded from the non-admin queryset. Fall back to the courses list.
+          if (err?.response?.status === 404 || err?.response?.status === 403) {
+            const allCourses = await courseService.getCourses().catch(() => null);
+            const list = Array.isArray(allCourses) ? allCourses : (allCourses?.results || []);
+            courseData = list.find(c => c.id === id) || null;
+          } else {
+            throw err;
+          }
+        }
         if (!isMounted) return;
         setCourse(courseData);
       } catch (err) {

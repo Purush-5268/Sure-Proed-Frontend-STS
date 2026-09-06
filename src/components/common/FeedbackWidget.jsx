@@ -6,7 +6,7 @@ import styles from "./FeedbackWidget.module.css";
 
 const FeedbackWidgetModal = React.lazy(() => import('./FeedbackWidgetModal'));
 
-export default function FeedbackWidget() {
+export default function FeedbackWidget({ currentMentor }) {
   const [isOpen, setIsOpen] = useState(false);
   const [feedbackState, setFeedbackState] = useState("idle"); // 'idle', 'bad_animation', 'form', 'success'
   const [showClose, setShowClose] = useState(true);
@@ -70,6 +70,7 @@ export default function FeedbackWidget() {
             feedbackState={feedbackState} 
             setFeedbackState={setFeedbackState} 
             showClose={showClose} 
+            currentMentor={currentMentor}
           />
         </Suspense>,
         document.body

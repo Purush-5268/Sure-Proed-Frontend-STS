@@ -1,8 +1,18 @@
 import { Link } from "react-router-dom";
 import styles from "./Hero.module.css";
 import heroImage from "../../assets/images/hero.svg";
+import { useAuth } from "../../context/AuthContext";
 
 function Hero() {
+  const { isAuthenticated, user } = useAuth();
+
+  const getDashboardPath = () => {
+    if (user?.role === "ADMIN") return "/admin/dashboard";
+    if (user?.role === "MENTOR") return "/mentor/dashboard";
+    if (user?.role === "TRUSTEE" || user?.role === "VOLUNTEER" || user?.role === "ADVISOR") return "/trustee/dashboard";
+    return "/student/dashboard";
+  };
+
   return (
     <section id="home" className={styles.hero}>
       <div className={styles.container}>
@@ -22,12 +32,20 @@ function Hero() {
           </p>
 
           <div className={styles.actionGroup}>
-            <Link to="/signup" className={styles.primaryBtn}>
-              Get Started Now
-            </Link>
-            <Link to="/login" className={styles.secondaryBtn}>
-              Sign In to Dashboard
-            </Link>
+            {isAuthenticated ? (
+              <Link to={getDashboardPath()} className={styles.primaryBtn}>
+                Go to Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link to="/signup" className={styles.primaryBtn}>
+                  Get Started Now
+                </Link>
+                <Link to="/login" className={styles.secondaryBtn}>
+                  Sign In to Dashboard
+                </Link>
+              </>
+            )}
           </div>
 
           <div className={styles.statsRow}>

@@ -188,26 +188,19 @@ function MyCohort() {
                 <h3>Mentor(s)</h3>
                 <Link to="/student/mentor-details" className="premium-badge premium-badge-active" style={{ textDecoration: 'none', display: 'inline-block' }}>
                   {(() => {
+                    let mentorCount = 0;
                     if (cohort.active_mentors && cohort.active_mentors.length > 0) {
-                      return cohort.active_mentors.map(m => `${m.first_name || ""} ${m.last_name || ""}`.trim() || m.name || m.email || "Mentor").join(", ");
-                    }
-                    if (cohort.mentors && cohort.mentors.length > 0) {
-                      if (typeof cohort.mentors[0] === 'object') {
-                        return cohort.mentors.map(m => `${m.first_name || ""} ${m.last_name || ""}`.trim() || "Mentor").join(", ");
-                      } else {
-                        const names = cohort.mentor_name && cohort.mentor_name !== "Not assigned" 
-                          ? cohort.mentor_name.split(',').map(n => n.trim()) 
-                          : [];
-                        return cohort.mentors.map((id, i) => {
-                          const m = mentorsMap[id];
-                          if (m) return `${m.first_name || ""} ${m.last_name || ""}`.trim() || "Assigned Mentor";
-                          return names[i] || "Assigned Mentor";
-                        }).join(", ");
-                      }
+                      mentorCount = cohort.active_mentors.length;
+                    } else if (cohort.mentors && cohort.mentors.length > 0) {
+                      mentorCount = cohort.mentors.length;
                     } else if (cohort.mentor_name && cohort.mentor_name !== "Not assigned") {
-                      return cohort.mentor_name;
+                      mentorCount = cohort.mentor_name.split(',').length;
+                    } else if (cohort.active_mentor) {
+                      mentorCount = 1;
                     }
-                    return cohort.active_mentor ? `${cohort.active_mentor.first_name || ""} ${cohort.active_mentor.last_name || ""}`.trim() || "Assigned" : "Unassigned";
+                    
+                    if (mentorCount === 0) return "Unassigned";
+                    return `${mentorCount} Mentor${mentorCount > 1 ? 's' : ''}`;
                   })()}
                 </Link>
               </div>

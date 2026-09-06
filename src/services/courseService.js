@@ -22,11 +22,16 @@ export const courseService = {
 
   async getCourseById(id) {
     if (getCourseByIdPromises[id]) return getCourseByIdPromises[id];
-    
+
     getCourseByIdPromises[id] = apiClient.get(API_ENDPOINTS.COURSES.BY_ID(id))
       .then(res => res.data)
+      .catch(err => {
+        // 404 means the course no longer exists — return null gracefully
+        if (err?.response?.status === 404) return null;
+        throw err;
+      })
       .finally(() => { delete getCourseByIdPromises[id]; });
-      
+
     return getCourseByIdPromises[id];
   },
 

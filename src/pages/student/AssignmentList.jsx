@@ -18,7 +18,7 @@ function AssignmentList() {
       try {
         const response = await apiClient.get(API_ENDPOINTS.ASSIGNMENTS.BASE);
         if (isMounted) {
-          setAssignments(Array.isArray(response.data) ? response.data : []);
+          setAssignments(Array.isArray(response.data) ? response.data : (response.data?.results || []));
         }
       } catch (err) {
         console.error("Failed to load assignments:", err);
