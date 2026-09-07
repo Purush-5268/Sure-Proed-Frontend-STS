@@ -29,7 +29,7 @@ export default function ProgressDonutChart({ stats }) {
               stroke="none" 
               isAnimationActive={false}
             >
-              <Cell fill="#10b981" />
+              <Cell fill="var(--primary-color)" />
               <Cell fill="var(--bg-nested)" />
             </Pie>
           </PieChart>
@@ -45,7 +45,7 @@ export default function ProgressDonutChart({ stats }) {
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></span>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary-color)' }}></span>
             <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Attended</span>
           </div>
           <span style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{attendancePresent}</span>

@@ -164,13 +164,13 @@ function Login() {
               <motion.div animate={{ y: [0, -10, 0], x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }} style={{ position: "absolute", top: "5%", left: "-3%", color: "var(--accent-color)", fontSize: "2rem", opacity: 0.6, zIndex: 0 }}>
                 <FaGraduationCap />
               </motion.div>
-              <motion.div animate={{ y: [0, 15, 0], x: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }} style={{ position: "absolute", top: "15%", right: "-3%", color: "#3b82f6", fontSize: "1.8rem", opacity: 0.55, zIndex: 0 }}>
+              <motion.div animate={{ y: [0, 15, 0], x: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }} style={{ position: "absolute", top: "15%", right: "-3%", color: "var(--primary-color)", fontSize: "1.8rem", opacity: 0.55, zIndex: 0 }}>
                 <FaMicrochip />
               </motion.div>
-              <motion.div animate={{ y: [0, -20, 0] }} transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 2 }} style={{ position: "absolute", bottom: "15%", left: "-3%", color: "#10b981", fontSize: "1.8rem", opacity: 0.6, zIndex: 0 }}>
+              <motion.div animate={{ y: [0, -20, 0] }} transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 2 }} style={{ position: "absolute", bottom: "15%", left: "-3%", color: "var(--primary-hover)", fontSize: "1.8rem", opacity: 0.6, zIndex: 0 }}>
                 <FaLaptopCode />
               </motion.div>
-              <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 0.5 }} style={{ position: "absolute", bottom: "20%", right: "-3%", color: "#8b5cf6", fontSize: "2rem", opacity: 0.55, zIndex: 0 }}>
+              <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 0.5 }} style={{ position: "absolute", bottom: "20%", right: "-3%", color: "var(--accent-color)", fontSize: "2rem", opacity: 0.55, zIndex: 0 }}>
                 <FaBrain />
               </motion.div>
               <motion.div

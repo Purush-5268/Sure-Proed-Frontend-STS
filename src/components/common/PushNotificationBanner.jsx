@@ -25,14 +25,14 @@ const PushNotificationBanner = () => {
 
   return (
     <div style={{
-      background: pushStatus === "denied" ? 'var(--status-inactive-text, #ef4444)' : 'var(--student-btn-gradient, var(--primary-color))',
+      background: pushStatus === "denied" ? 'var(--primary-dark)' : 'var(--student-btn-gradient, var(--primary-color))',
       padding: '20px 24px',
       borderRadius: 'var(--radius-lg)',
       marginBottom: '24px',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      boxShadow: pushStatus === "denied" ? '0 8px 20px rgba(239, 68, 68, 0.3)' : '0 8px 20px var(--student-glow-primary, rgba(16, 185, 129, 0.3))',
+      boxShadow: pushStatus === "denied" ? '0 8px 20px var(--student-glow-primary, rgba(147, 51, 234, 0.3))' : '0 8px 20px var(--student-glow-primary, rgba(147, 51, 234, 0.3))',
       border: '1px solid rgba(255, 255, 255, 0.1)'
     }}>
       <div>

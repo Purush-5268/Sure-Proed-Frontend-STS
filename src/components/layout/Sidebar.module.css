@@ -9,10 +9,11 @@
   height: calc(100vh - var(--navbar-height));
   position: sticky;
   top: var(--navbar-height);
-  background: var(--student-glass-bg, var(--bg-surface));
+  background: var(--sidebar-bg, var(--student-glass-bg, var(--bg-surface)));
+  color: var(--sidebar-text, inherit);
   backdrop-filter: blur(var(--student-glass-blur, 16px));
   -webkit-backdrop-filter: blur(var(--student-glass-blur, 16px));
-  border-right: 1px solid var(--student-glass-border, var(--border-color));
+  border-right: 1px solid var(--sidebar-border, var(--student-glass-border, var(--border-color)));
   padding: var(--space-lg) var(--space-md);
   flex-shrink: 0;
   overflow-y: auto;
@@ -22,6 +23,25 @@
   display: flex;
   flex-direction: column;
   z-index: 10;
+}
+
+/* SURE Trust Logo Watermark */
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  transform: translate(-50%, -50%);
+  background-image: url('/sure-logo.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 0;
+  filter: grayscale(100%);
 }
 
 /* Subtle ambient glow line on the right edge */
@@ -66,7 +86,7 @@
 .title {
   font-size: var(--font-lg);
   font-weight: 800;
-  color: var(--text-primary);
+  color: var(--sidebar-text, var(--text-primary));
   margin: 0;
   letter-spacing: -0.02em;
   white-space: nowrap;
@@ -93,7 +113,7 @@
 .desktopCollapseBtn {
   background: none;
   border: none;
-  color: var(--text-muted);
+  color: var(--sidebar-icon, var(--text-muted));
   cursor: pointer;
   padding: 6px;
   display: flex;
@@ -104,8 +124,8 @@
 }
 
 .desktopCollapseBtn:hover {
-  background: var(--bg-nested);
-  color: var(--primary-color);
+  background: var(--sidebar-hover-bg, var(--bg-nested));
+  color: var(--sidebar-link-hover-text, var(--primary-color));
   transform: scale(1.1);
 }
 
@@ -130,7 +150,7 @@
   align-items: center;
   padding: 10px var(--space-md);
   text-decoration: none;
-  color: var(--text-secondary);
+  color: var(--sidebar-link-text, var(--text-secondary));
   border-radius: var(--radius-md);
   font-weight: 500;
   font-size: var(--font-sm);
@@ -139,13 +159,13 @@
 }
 
 .link:hover {
-  background: var(--student-sidebar-active-bg, var(--bg-nested));
-  color: var(--text-primary);
+  background: var(--sidebar-hover-bg, var(--student-sidebar-active-bg, var(--bg-nested)));
+  color: var(--sidebar-link-hover-text, var(--text-primary));
   transform: translateX(2px);
 }
 
 .link:hover .linkIcon {
-  color: var(--primary-color);
+  color: var(--sidebar-active-icon, var(--primary-color));
   transform: scale(1.1);
 }
 
@@ -160,7 +180,7 @@
   height: 32px;
   flex-shrink: 0;
   overflow: hidden;
-  color: var(--text-muted);
+  color: var(--sidebar-icon, var(--text-muted));
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
   border-radius: 8px;
@@ -186,14 +206,14 @@
 
 /* ── Active State ── */
 .active {
-  background: var(--student-sidebar-active-bg, var(--primary-light)) !important;
-  color: var(--primary-color) !important;
+  background: var(--sidebar-active-bg, var(--student-sidebar-active-bg, var(--primary-light))) !important;
+  color: var(--sidebar-active-text, var(--primary-color)) !important;
   font-weight: 600;
 }
 
 .active .linkIcon {
-  color: var(--primary-color);
-  background: var(--student-glow-primary, rgba(13, 148, 136, 0.1));
+  color: var(--sidebar-active-icon, var(--primary-color));
+  background: var(--sidebar-active-bg, var(--student-glow-primary, rgba(13, 148, 136, 0.1)));
 }
 
 [data-theme='dark'] .active {

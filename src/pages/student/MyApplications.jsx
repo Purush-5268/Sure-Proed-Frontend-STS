@@ -239,7 +239,7 @@ function MyApplications() {
               const formattedScoreStr = scoreVal != null ? `${scoreVal}% Marks` : "EVALUATED";
 
               return (
-                <div key={activeApp.id} className={styles.applicationCard} style={{ borderLeft: isQualified ? "4px solid var(--status-active-text, #10b981)" : "4px solid var(--primary-color)" }}>
+                <div key={activeApp.id} className={styles.applicationCard} style={{ borderLeft: isQualified ? "4px solid var(--primary-color)" : "4px solid var(--primary-color)" }}>
                   
                   <div className={styles.infoGrid}>
                     <div className={styles.infoBox}>
@@ -282,7 +282,7 @@ function MyApplications() {
                       <strong style={{ display: "block", marginBottom: "12px", color: "var(--text-primary)" }}>Offer Letter Status</strong>
                       {activeApp.offer_letter_issued && activeApp.offer_letter_file ? (
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span style={{ color: "var(--status-active-text, #10b981)", fontWeight: "bold" }}>✅ Offer Letter Issued</span>
+                          <span style={{ color: "var(--primary-color)", fontWeight: "bold" }}>✅ Offer Letter Issued</span>
                           <button 
                             onClick={() => applicationService.downloadPrivateFile(activeApp.offer_letter_file, `Offer_Letter_${activeApp.application_number || activeApp.id}.pdf`)}
                             className={`${styles.premiumBtn} ${styles.btnPrimary}`}
@@ -296,7 +296,7 @@ function MyApplications() {
                       ) : activeApp.offer_letter_request_status === "IN_PROGRESS" ? (
                         <span style={{ color: "var(--primary-color)", fontWeight: "bold" }}>🔄 Request Being Processed</span>
                       ) : activeApp.offer_letter_request_status === "RESOLVED" ? (
-                        <span style={{ color: "var(--status-active-text, #10b981)", fontWeight: "bold", display: "block" }}>✓ Request Approved<br/><small style={{color: "var(--text-muted)", fontWeight: "normal"}}>Your offer letter is being prepared.</small></span>
+                        <span style={{ color: "var(--primary-color)", fontWeight: "bold", display: "block" }}>✓ Request Approved<br/><small style={{color: "var(--text-muted)", fontWeight: "normal"}}>Your offer letter is being prepared.</small></span>
                       ) : (
                         <div>
                           <p style={{ margin: "0 0 12px 0", fontSize: "13px", color: "var(--text-secondary)" }}>

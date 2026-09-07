@@ -334,13 +334,27 @@ export const studentService = {
       const stringFieldsToAppend = [
         "college", "degree", "specialization", "education_level",
         "city", "state", "country", "bio", "tagline",
-        "portfolio_url", "linkedin_url", "github_username",
-        "skills", "hobbies", "languages"
+        "portfolio_url", "linkedin_url", "github_username"
       ];
 
       stringFieldsToAppend.forEach(field => {
         if (updated[field] !== undefined) {
           formData.append(field, updated[field] || "");
+        }
+      });
+
+      // JSON Fields (must be sent as valid JSON strings in multipart)
+      const jsonFields = ["skills", "hobbies", "languages"];
+      jsonFields.forEach(field => {
+        if (updated[field] !== undefined) {
+          const val = updated[field];
+          if (typeof val === "string") {
+             // Split by comma into array to match Django's default=list
+             const arr = val.split(',').map(s => s.trim()).filter(Boolean);
+             formData.append(field, JSON.stringify(arr));
+          } else {
+             formData.append(field, JSON.stringify(val || []));
+          }
         }
       });
 

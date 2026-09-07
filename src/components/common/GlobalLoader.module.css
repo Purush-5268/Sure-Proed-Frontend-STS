@@ -22,14 +22,14 @@
 .pulseLogo {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, var(--primary-color), #10b981);
+  background: linear-gradient(135deg, #a855f7, #d946ef);
   border-radius: 12px;
   animation: pulse 1.5s infinite ease-in-out alternate;
 }
 
 @keyframes pulse {
-  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
-  100% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
+  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(217, 70, 239, 0.4); }
+  100% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(217, 70, 239, 0); }
 }
 
 .loadingBarWrapper {

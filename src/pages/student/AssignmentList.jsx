@@ -50,7 +50,7 @@ function AssignmentList() {
         description="Complete and submit your internship assignments before the deadline."
       />
 
-      <div className="premium-card" style={{ maxWidth: '900px', margin: '0 auto', padding: '1.75rem' }}>
+      <div className="premium-card" style={{ width: '100%', padding: '1.75rem' }}>
         <h2 className="sr-only">Active Assignments</h2>
         {loading ? (
           <SkeletonLoader variant="table" rows={4} />

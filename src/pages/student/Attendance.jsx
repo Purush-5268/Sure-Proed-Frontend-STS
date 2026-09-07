@@ -11,12 +11,16 @@ function Attendance() {
   const { user } = useAuth();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
     async function loadSessions() {
       try {
-        const res = await apiClient.get(API_ENDPOINTS.ATTENDANCE.SUMMARY);
+        const [res, statsRes] = await Promise.all([
+          apiClient.get(API_ENDPOINTS.ATTENDANCE.SUMMARY),
+          apiClient.get(API_ENDPOINTS.STUDENTS.STATISTICS)
+        ]);
         const data = res?.data?.results || res?.data || [];
         if (data.length > 0) {
           const myAtt = data.find(a => a.student_id === user?.id || a.user?.id === user?.id || a.email === user?.email) || data[0];
@@ -24,6 +28,9 @@ function Attendance() {
           if (isMounted) setSessions(history);
         } else {
           if (isMounted) setSessions([]);
+        }
+        if (isMounted && statsRes?.data) {
+          setStats(statsRes.data);
         }
       } catch (error) {
         console.error("Failed to load attendance sessions", error);
@@ -35,9 +42,9 @@ function Attendance() {
     return () => { isMounted = false; };
   }, []);
 
-  const totalEvaluated = sessions.filter(s => s.student_dashboard_data?.status === 'READY').length;
-  const totalAttended = sessions.filter(s => s.student_dashboard_data?.status === 'READY' && s.student_dashboard_data.attendance_percentage > 0).length;
-  const overallPercentage = totalEvaluated > 0 ? ((totalAttended / totalEvaluated) * 100).toFixed(1) : 0;
+  const totalEvaluated = stats?.attendance_total || 0;
+  const totalAttended = stats?.attendance_present || 0;
+  const overallPercentage = stats?.attendance_percentage || 0;
 
   return (
     <div className={styles.page}>
@@ -81,8 +88,8 @@ function Attendance() {
                     sessions.map((session, idx) => {
                       const data = session.student_dashboard_data || {};
                       const isReady = data.status === 'READY';
-                      const statusColor = data.attendance_status === 'PRESENT' ? '#10b981' : (data.attendance_status === 'ABSENT' ? '#ef4444' : '#f59e0b');
-                      const statusText = data.attendance_status === 'PRESENT' ? '🟢 Present' : (data.attendance_status === 'ABSENT' ? '🔴 Absent' : (isReady ? '🟡 Below Threshold' : '⚪ Pending'));
+                      const statusColor = data.attendance_status === 'PRESENT' ? 'var(--primary-color)' : (data.attendance_status === 'ABSENT' ? '#ef4444' : '#f59e0b');
+                      const statusText = data.attendance_status === 'PRESENT' ? '🟣 Present' : (data.attendance_status === 'ABSENT' ? '🔴 Absent' : (isReady ? '🟡 Below Threshold' : '⚪ Pending'));
 
                       return (
                         <tr key={idx} style={{ borderBottom: '1px solid var(--border-color)' }}>

@@ -18,6 +18,7 @@ const FeedbackWidget = React.lazy(() => import("../../components/common/Feedback
 const AttendanceWarningPopup = React.lazy(() => import("../../components/attendance/AttendanceWarningPopup"));
 import { pushNotificationService } from "../../services/pushNotificationService";
 const PushNotificationBanner = React.lazy(() => import("../../components/common/PushNotificationBanner"));
+import GlobalLoader from "../../components/common/GlobalLoader";
 
 function Dashboard() {
   const { user } = useAuth();
@@ -234,21 +235,39 @@ function Dashboard() {
   }, [user?.email]);
 
   const handleJoinClass = async (cls) => {
+    if (isJoining) return;
+    
+    // 1. Open temporary tab immediately to prevent popup blockers from interfering
+    const meetWindow = window.open('', '_blank');
+    
     setIsJoining(true);
+    const meetingLink = cls.meeting_link?.startsWith('http') ? cls.meeting_link : `https://${cls.meeting_link}`;
+
     try {
-      if (cls.type === "DOMAIN") {
-        await attendanceService.markJoined(cls.realId);
+      // 2. Send portal-join handshake as per architecture requirements
+      try {
+        await apiClient.post(`/attendance/${cls.realId}/portal-join/`);
+      } catch (err) {
+        console.warn('Portal join handshake failed; opening class anyway.', err);
       }
-      // If it's a TRAINING session, there might not be a markJoined API yet, 
-      // or it might use the same. We skip it if not DOMAIN to be safe, 
-      // since attendance is server-side Google Meet.
-    } catch (err) {
-      console.error("Failed to mark joined", err);
-    }
-    setTimeout(() => {
+
+      // Preserve existing legacy markJoined behavior
+      if (cls.type === "DOMAIN") {
+        try {
+          await attendanceService.markJoined(cls.realId);
+        } catch (err) {
+          console.error("Failed to mark joined", err);
+        }
+      }
+    } finally {
+      // 3. Navigate the temporary tab (or fallback to self if popup was blocked)
+      if (meetWindow) {
+        meetWindow.location.href = meetingLink;
+      } else {
+        window.location.href = meetingLink;
+      }
       setIsJoining(false);
-      window.open(cls.meeting_link?.startsWith('http') ? cls.meeting_link : `https://${cls.meeting_link}`, '_blank');
-    }, 1000);
+    }
   };
 
   const handleRequestPermission = async () => {
@@ -280,46 +299,7 @@ function Dashboard() {
   };
 
   if (isLoading) {
-    return (
-      <div className={styles.dashboardContainer}>
-        <Suspense fallback={null}>
-          <PushNotificationBanner />
-        </Suspense>
-        
-        {/* SECTION 1: Top Layer (Hero + Calendar) */}
-        <div className={styles.topSection}>
-          <div className={styles.heroBanner}>
-            <div className={styles.heroLeft}>
-              <p className={styles.heroGreeting}>Welcome back,</p>
-              <h1 className={styles.heroName}>
-                {`${user?.first_name || ''} ${user?.last_name || ''}`.trim() || profile?.first_name || "Student"}!
-              </h1>
-              <p className={styles.heroSubtitle}>Keep learning, keep building. You're one step closer to your goals.</p>
-              
-              <div className={styles.heroQuote}>
-                <p className={styles.heroQuoteText}>"Discipline today builds the career you deserve tomorrow."</p>
-                <p className={styles.heroQuoteAuthor}>— SURE ProEd</p>
-              </div>
-            </div>
-            
-            <div className={styles.heroRight}>
-              <div style={{ textAlign: 'right' }}>
-                 <h3 className={styles.heroValues}>Learn<br/>Build<br/>Grow<br/>Belong</h3>
-                 <div className={styles.shiningLine}></div>
-                 <p className={styles.heroSignature}>SURE ProEd</p>
-              </div>
-            </div>
-          </div>
-  
-          <div className={styles.skeletonBox} style={{ flex: 1, minWidth: '260px' }}></div>
-        </div>
-  
-        <div className={styles.skeletonContainer} style={{ paddingTop: 0 }}>
-          <div className={styles.skeletonBox} style={{ height: '240px' }}></div>
-          <div className={styles.skeletonBox}></div>
-        </div>
-      </div>
-    );
+    return <GlobalLoader message="Loading dashboard..." />;
   }
 
   // 🚨 LOCK SCREEN LOGIC 🚨
@@ -604,7 +584,7 @@ function Dashboard() {
                       style={{ 
                         width: `${Math.round(stats?.time_elapsed_percentage || 0)}%`, 
                         transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)', 
-                        background: 'linear-gradient(90deg, #10b981, #34d399)' 
+                        background: 'var(--student-btn-gradient)' 
                       }}
                     ></div>
                   </div>
@@ -789,7 +769,7 @@ function Dashboard() {
         <h3 className={styles.quickActionsHeading}>Quick Actions</h3>
         <div className={styles.quickActions}>
           <div className={styles.quickAction} onClick={() => navigate('/student/assignments')}>
-            <div className={styles.quickActionIcon} style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}><FiFileText size={24} /></div>
+            <div className={styles.quickActionIcon} style={{ background: 'var(--student-glow-primary)', color: 'var(--primary-color)' }}><FiFileText size={24} /></div>
             <div style={{ flexGrow: 1 }}>
               <h4 className={styles.quickActionTitle}>View Assignments</h4>
               <p className={styles.quickActionDesc}>Check and submit your work</p>
@@ -963,16 +943,16 @@ function Dashboard() {
                             alignItems: 'center', 
                             gap: '12px', 
                             padding: '12px', 
-                            border: isCurrentMentor ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-color)', 
+                            border: isCurrentMentor ? '1px solid var(--accent-color)' : '1px solid var(--border-color)', 
                             borderRadius: '12px',
-                            background: isCurrentMentor ? 'rgba(16, 185, 129, 0.05)' : 'var(--bg-nested)',
+                            background: isCurrentMentor ? 'var(--accent-subtle)' : 'var(--bg-nested)',
                             cursor: m.id ? 'pointer' : 'default',
                             transition: 'all 0.2s ease'
                           }}
                           onMouseEnter={(e) => { if (m.id) e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; }}
                           onMouseLeave={(e) => { if (m.id) e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
                         >
-                          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: isCurrentMentor ? '#10b981' : 'var(--primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', overflow: 'hidden' }}>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: isCurrentMentor ? 'var(--accent-color)' : 'var(--primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', overflow: 'hidden' }}>
                             {mPhoto ? (
                               <img src={mPhoto} alt={mName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             ) : (

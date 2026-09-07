@@ -11,7 +11,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import GlassCard from "../../components/common/GlassCard";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./Profile.module.css";
-import { FiUser, FiBook, FiShield, FiUploadCloud, FiCheckCircle, FiClock, FiAlertCircle, FiSettings, FiGithub, FiLinkedin, FiBriefcase } from "react-icons/fi";
+import { FiUser, FiBook, FiShield, FiUploadCloud, FiCheckCircle, FiClock, FiAlertCircle, FiSettings, FiGithub, FiLinkedin, FiBriefcase, FiExternalLink } from "react-icons/fi";
 
 function Profile() {
   const navigate = useNavigate();
@@ -149,7 +149,8 @@ function Profile() {
 
       alert("Profile updated successfully");
     } catch (err) {
-      alert("Save failed");
+      const msg = err.response?.data ? JSON.stringify(err.response.data) : "Save failed";
+      alert("Save failed: " + msg);
     } finally {
       setSaving(false);
     }
@@ -446,7 +447,14 @@ function Profile() {
                     <div style={{ padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontWeight: 'bold' }}><FiLinkedin color="#0a66c2" size={20} /> LinkedIn Status</div>
                       {serverProfile?.is_linkedin_connected ? (
-                        <div style={{ color: '#059669', fontWeight: 'bold' }}>✅ Connected via Auth</div>
+                        <div style={{ color: '#059669', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          ✅ Connected via Auth
+                          {serverProfile.linkedin_url && (
+                            <a href={serverProfile.linkedin_url} target="_blank" rel="noreferrer" className="premium-btn" style={{ padding: '6px 14px', fontSize: '13px', background: 'var(--student-glow-primary)', color: 'var(--primary-color)', border: '1px solid var(--primary-color)', minHeight: 'auto', gap: '6px', borderRadius: '8px', marginLeft: 'auto' }}>
+                              <FiExternalLink /> View Profile
+                            </a>
+                          )}
+                        </div>
                       ) : (
                         <div>
                           <div style={{ color: '#d97706', fontWeight: 'bold', marginBottom: '12px' }}>⏳ Not Connected via Auth</div>
@@ -460,7 +468,14 @@ function Profile() {
                     <div style={{ padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontWeight: 'bold' }}><FiGithub color="var(--text-primary)" size={20} /> GitHub Status</div>
                       {serverProfile?.is_github_connected ? (
-                        <div style={{ color: '#059669', fontWeight: 'bold' }}>✅ Connected ({serverProfile.github_username})</div>
+                        <div style={{ color: '#059669', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          ✅ Connected ({serverProfile.github_username})
+                          {serverProfile.github_username && (
+                            <a href={`https://github.com/${serverProfile.github_username}`} target="_blank" rel="noreferrer" className="premium-btn" style={{ padding: '6px 14px', fontSize: '13px', background: 'var(--student-glow-primary)', color: 'var(--primary-color)', border: '1px solid var(--primary-color)', minHeight: 'auto', gap: '6px', borderRadius: '8px', marginLeft: 'auto' }}>
+                              <FiExternalLink /> View Profile
+                            </a>
+                          )}
+                        </div>
                       ) : (
                         <div>
                           <div style={{ color: '#d97706', fontWeight: 'bold', marginBottom: '12px' }}>⏳ Not Connected via Auth</div>

@@ -235,7 +235,7 @@ function AppRoutes() {
       <ScrollToTop />
       <ThemeEnforcer />
       <SessionExpiredModal />
-      <Suspense fallback={<GlobalLoader message="Loading module..." />}>
+      <Suspense fallback={<div style={{ height: '100vh', width: '100vw', background: 'var(--bg-main)' }} />}>
         <Routes>
           {/* ================= PUBLIC MODULE ================= */}
           <Route element={<PublicLayout />}>

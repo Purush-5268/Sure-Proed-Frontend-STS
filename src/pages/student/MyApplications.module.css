@@ -114,13 +114,13 @@
 }
 
 .btnSuccess {
-  background: var(--status-active-bg, #059669);
-  color: var(--status-active-text, #fff);
-  border-color: var(--status-active-text, #059669);
+  background: var(--student-btn-gradient, var(--primary-color));
+  color: var(--text-inverse, #fff);
+  border-color: var(--primary-color);
 }
 .btnSuccess:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+  box-shadow: 0 4px 12px var(--student-glow-primary);
 }
 
 .btnWarning {

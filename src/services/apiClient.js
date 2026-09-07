@@ -76,6 +76,12 @@ apiClient.interceptors.request.use(
     if (token && token.includes(".")) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Fix for file uploads: let Axios set the multipart/form-data boundary automatically
+    if (config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
