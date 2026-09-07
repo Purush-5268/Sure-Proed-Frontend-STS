@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiAlertCircle, FiCheckCircle } from "react-icons/fi";
-import apiClient, { normalizeListResponse, fetchAllPages } from "../../services/apiClient";
-import { API_ENDPOINTS } from "../../constants/apiEndpoints";
-import { courseService } from "../../services/courseService";
-import { cohortService } from "../../services/cohortService";
+import apiClient, { normalizeListResponse, fetchAllPages } from "../../../services/apiClient";
+import { API_ENDPOINTS } from "../../../constants/apiEndpoints";
+import { courseService } from "../../../services/courseService";
+import { cohortService } from "../../../services/cohortService";
+import styles from "./Users.module.css";
 
-function AddStudent() {
+function AddUser() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     first_name: "",
@@ -129,7 +130,7 @@ function AddStudent() {
       }
 
       setSuccess("Student created successfully. Ensure you securely share their temporary password.");
-      setTimeout(() => navigate("/admin/students"), 2500);
+      setTimeout(() => navigate("/trustee/volunteer/users"), 2500);
 
     } catch (err) {
       const message = err?.response?.data?.detail || err?.response?.data?.email?.[0] || "Failed to create the student account.";
@@ -146,7 +147,7 @@ function AddStudent() {
           <h1 className="premium-title">Add New Student</h1>
           <p className="premium-subtitle">Create a student account and assign them to a domain and cohort.</p>
         </div>
-        <Link to="/admin/students" className="premium-btn" style={{ background: "var(--bg-nested)", color: "var(--text-secondary)" }}>
+        <Link to="/trustee/volunteer/users" className="premium-btn" style={{ background: "var(--bg-nested)", color: "var(--text-secondary)" }}>
           <FiArrowLeft /> Back to Students
         </Link>
       </div>
@@ -246,7 +247,7 @@ function AddStudent() {
             <button type="submit" disabled={loading} className="premium-btn premium-btn-primary" style={{ cursor: loading ? "not-allowed" : "pointer" }}>
               {loading ? "Creating Student..." : "Create Student"}
             </button>
-            <Link to="/admin/students" className="premium-btn" style={{ background: "var(--bg-nested)", color: "var(--text-secondary)" }}>Cancel</Link>
+            <Link to="/trustee/volunteer/users" className="premium-btn" style={{ background: "var(--bg-nested)", color: "var(--text-secondary)" }}>Cancel</Link>
           </div>
         </form>
       </div>
@@ -254,4 +255,4 @@ function AddStudent() {
   );
 }
 
-export default AddStudent;
+export default AddUser;

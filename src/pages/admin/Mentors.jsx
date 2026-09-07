@@ -187,7 +187,68 @@ function Mentors() {
 
       setAllMentors(normalizeListResponse(mentorsRes.data));
     } catch (err) {
-      alert(err?.response?.data?.error || "Failed to remove mentor.");
+      console.error("Unassign Mentor Error:", err);
+      alert(err?.response?.data?.error || "Failed to unassign mentor.");
+    } finally {
+      setAssigning(null);
+    }
+  };
+
+  const handleSetCurrentMentor = async (mentorId) => {
+    if (!selectedCohort) return;
+    if (!window.confirm("Set this mentor as the Current Mentor for this cohort?")) return;
+    
+    setAssigning(mentorId);
+    try {
+      await apiClient.post(API_ENDPOINTS.COHORTS.SET_CURRENT_MENTOR(selectedCohort.id), {
+        mentor_id: mentorId,
+      });
+      
+      // Refresh cohorts and mentors
+      const [cohortsRes, mentorsRes] = await Promise.all([
+        apiClient.get(API_ENDPOINTS.COHORTS.BASE, { params: { course: selectedCourse.id } }),
+        apiClient.get(API_ENDPOINTS.MENTORS.BASE, { params: { course: selectedCourse.id } })
+      ]);
+      const data = normalizeListResponse(cohortsRes.data);
+      setCohorts(data);
+      
+      const updatedCohort = data.find(c => String(c.id) === String(selectedCohort.id));
+      if (updatedCohort) setSelectedCohort(updatedCohort);
+
+      setAllMentors(normalizeListResponse(mentorsRes.data));
+    } catch (err) {
+      console.error("Set Current Mentor Error:", err);
+      alert(err?.response?.data?.error || "Failed to set current mentor.");
+    } finally {
+      setAssigning(null);
+    }
+  };
+
+  const handleRevokeCurrentMentor = async (mentorId) => {
+    if (!selectedCohort) return;
+    if (!window.confirm("Revoke this mentor's Current Mentor status? (They will remain assigned to the cohort)")) return;
+    
+    setAssigning(mentorId);
+    try {
+      await apiClient.post(API_ENDPOINTS.COHORTS.REVOKE_CURRENT_MENTOR(selectedCohort.id), {
+        mentor_id: mentorId,
+      });
+      
+      // Refresh cohorts and mentors
+      const [cohortsRes, mentorsRes] = await Promise.all([
+        apiClient.get(API_ENDPOINTS.COHORTS.BASE, { params: { course: selectedCourse.id } }),
+        apiClient.get(API_ENDPOINTS.MENTORS.BASE, { params: { course: selectedCourse.id } })
+      ]);
+      const data = normalizeListResponse(cohortsRes.data);
+      setCohorts(data);
+      
+      const updatedCohort = data.find(c => String(c.id) === String(selectedCohort.id));
+      if (updatedCohort) setSelectedCohort(updatedCohort);
+
+      setAllMentors(normalizeListResponse(mentorsRes.data));
+    } catch (err) {
+      console.error("Revoke Current Mentor Error:", err);
+      alert(err?.response?.data?.error || "Failed to revoke current mentor.");
     } finally {
       setAssigning(null);
     }
@@ -232,7 +293,7 @@ function Mentors() {
             className={`premium-btn ${viewMode === "list" ? "premium-btn-primary" : "premium-btn-secondary"}`}
             style={{ height: "40px", display: "flex", alignItems: "center", gap: "8px" }}
           >
-            <FiUsers /> Show Current Mentors
+            <FiUsers /> All Mentors
           </button>
           <Link to="/admin/add-mentor" className="premium-btn premium-btn-primary" style={{ height: "40px", display: "flex", alignItems: "center", gap: "8px" }}>
             <FiUserPlus /> Add Mentor
@@ -303,12 +364,12 @@ function Mentors() {
             <SkeletonLoader width="100%" height="80px" borderRadius="8px" />
           ) : (
             <>
-              {/* CURRENT MENTORS TABLE */}
+              {/* ASSIGNED MENTORS TABLE */}
               <h3 style={{ fontSize: "16px", fontWeight: "600", marginBottom: "16px", color: "var(--text-primary)" }}>
-                CURRENT MENTORS
+                ASSIGNED MENTORS
               </h3>
               {currentMentors.length === 0 ? (
-                <div style={{ padding: "16px", background: "#f9fafb", borderRadius: "8px", border: "1px dashed #d1d5db", marginBottom: "32px", color: "#6b7280", fontSize: "14px" }}>
+                <div style={{ padding: "16px", background: "var(--bg-nested)", borderRadius: "8px", border: "1px dashed var(--border-color)", marginBottom: "32px", color: "var(--text-secondary)", fontSize: "14px" }}>
                   No mentors currently assigned to this cohort.
                 </div>
               ) : (
@@ -325,9 +386,9 @@ function Mentors() {
                               <div>
                                 <div style={{ fontWeight: "600", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "8px" }}>
                                   {mentor.full_name}
-                                  {selectedCohort?.current_mentor_details?.id === mentor.id && (
+                                  {selectedCohort?.current_mentors_details?.some(m => m.id === mentor.user) && (
                                     <span style={{ fontSize: "10px", background: "#f59e0b", color: "white", padding: "2px 6px", borderRadius: "12px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px" }}>
-                                      ★ Current Mentor
+                                      🎓 Current Mentor
                                     </span>
                                   )}
                                 </div>
@@ -345,16 +406,35 @@ function Mentors() {
                           </td>
                           <td style={{ verticalAlign: "middle", textAlign: "right" }}>
                             <div className="premium-flex-row" style={{ gap: "12px", justifyContent: "flex-end" }}>
-                              <span style={{ color: "#059669", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px" }}>
+                              <span style={{ color: "#10b981", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px" }}>
                                 ✓ ASSIGNED
                               </span>
+                              {selectedCohort?.current_mentors_details?.some(m => m.id === mentor.user) ? (
+                                <button
+                                  className="premium-btn premium-btn-secondary"
+                                  style={{ padding: "6px 12px", borderColor: "#f59e0b", color: "#f59e0b" }}
+                                  onClick={() => handleRevokeCurrentMentor(mentor.user)}
+                                  disabled={assigning === mentor.user}
+                                >
+                                  {assigning === mentor.user ? "..." : "Unassign Current"}
+                                </button>
+                              ) : (
+                                <button
+                                  className="premium-btn premium-btn-secondary"
+                                  style={{ padding: "6px 12px", borderColor: "#10b981", color: "#10b981" }}
+                                  onClick={() => handleSetCurrentMentor(mentor.user)}
+                                  disabled={assigning === mentor.user}
+                                >
+                                  {assigning === mentor.user ? "..." : "Make Current"}
+                                </button>
+                              )}
                               <button
-                                className="premium-btn"
-                                style={{ padding: "6px 12px", background: "#fee2e2", color: "#dc2626", border: "none" }}
+                                className="premium-btn premium-btn-danger"
+                                style={{ padding: "6px 12px" }}
                                 onClick={() => handleRemove(mentor.user)}
                                 disabled={assigning === mentor.user}
                               >
-                                {assigning === mentor.user ? "..." : "Remove"}
+                                {assigning === mentor.user ? "..." : "Unassign from Cohort"}
                               </button>
                             </div>
                           </td>
@@ -370,7 +450,7 @@ function Mentors() {
                 RECOMMENDED / AVAILABLE MENTORS
               </h3>
               {availableMentors.length === 0 ? (
-                <div style={{ padding: "16px", background: "#f9fafb", borderRadius: "8px", border: "1px dashed #d1d5db", color: "#6b7280", fontSize: "14px" }}>
+                <div style={{ padding: "16px", background: "var(--bg-nested)", borderRadius: "8px", border: "1px dashed var(--border-color)", color: "var(--text-secondary)", fontSize: "14px" }}>
                   No other mentors available for this course.
                 </div>
               ) : (
@@ -443,7 +523,7 @@ function Mentors() {
         </>
       ) : (
         <div className={styles.stepSection} style={{ marginTop: "20px" }}>
-          <h2 className={styles.stepTitle}>All Current Mentors</h2>
+          <h2 className={styles.stepTitle}>All Mentors</h2>
           {loadingGlobalMentors ? (
             <SkeletonLoader variant="table" rows={6} />
           ) : globalMentors.length === 0 ? (

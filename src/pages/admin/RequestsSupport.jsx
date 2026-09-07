@@ -6,6 +6,7 @@ import { FiRefreshCw, FiInbox, FiAlertCircle, FiCheckCircle, FiXCircle, FiClock,
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import AdminPlacements from "./AdminPlacements";
+import PermissionChatModal from "../../components/chat/PermissionChatModal";
 
 /**
  * Admin Requests & Support page.
@@ -63,19 +64,43 @@ function StatusBadge({ status }) {
   );
 }
 
-function RequestCard({ req, onAction }) {
+function RequestCard({ req, onAction, onOpenChat }) {
   const [expanded, setExpanded] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [internalRemarks, setInternalRemarks] = useState("");
   const allowed = ALLOWED_TRANSITIONS[req.status] || [];
 
   const handleAction = async (newStatus) => {
-    const remarks = newStatus === 'RESOLVED' || newStatus === 'REJECTED' || newStatus === 'CLOSED'
-      ? window.prompt(`Enter remarks for "${newStatus}" (optional):`) ?? ""
-      : "";
+    if (req.isAbsenceWarning) {
+      if (newStatus !== 'RESOLVED' && newStatus !== 'REJECTED') {
+        alert("Attendance queries can only be RESOLVED (Accepted) or REJECTED.");
+        return;
+      }
+      const action = newStatus === 'RESOLVED' ? 'ACCEPT' : 'REJECT';
+      setSubmitting(true);
+      try {
+        if (req.isAbsenceWarning) {
+          // Attendance warnings don't currently support admin_remarks via the endpoint, but we can pass it if supported later.
+          await apiClient.post(API_ENDPOINTS.ATTENDANCE.ADMIN_UPDATE_QUERY, {
+            warning_id: req.id,
+            action: action,
+            admin_remarks: internalRemarks
+          });
+          onAction(req.id, { ...req, status: newStatus, admin_remarks: internalRemarks });
+        }
+      } catch (err) {
+        alert(err.response?.data?.detail || `Failed to update attendance query.`);
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const updated = await requestService.updateRequestStatus(req.id, newStatus, remarks);
+      const updated = await requestService.updateRequestStatus(req.id, newStatus, internalRemarks);
       onAction(req.id, updated);
+      setInternalRemarks(""); // clear on success
     } catch (err) {
       const msg = err.response?.data?.new_status?.[0] || err.response?.data?.error || `Failed to transition to ${newStatus}.`;
       alert(msg);
@@ -111,7 +136,13 @@ function RequestCard({ req, onAction }) {
 
   const senderLabel = req.sender_email || (req.sender?.email) || "Unknown";
   const categoryLabel = CATEGORY_LABELS[req.category] || req.category;
-  const createdDate = req.created_at ? new Date(req.created_at).toLocaleString() : '';
+  
+  const formatDate = (dateStr) => dateStr ? new Date(dateStr).toLocaleString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
+  }) : '';
+
+  const createdDate = formatDate(req.created_at);
+  const apologySubmittedDate = formatDate(req.apology_submitted_at);
 
   return (
     <div style={{
@@ -136,7 +167,15 @@ function RequestCard({ req, onAction }) {
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <span>👤 {senderLabel}</span>
             <span>{categoryLabel}</span>
-            <span><FiClock size={12} style={{ verticalAlign: 'middle' }} /> {createdDate}</span>
+            
+            {req.isAbsenceWarning || req.category === 'ATTENDANCE_WARNING' ? (
+              <>
+                <span style={{ color: 'var(--text-muted)' }}><FiAlertCircle size={12} style={{ verticalAlign: 'middle' }} /> Warning Issued: {createdDate}</span>
+                {apologySubmittedDate && <span><FiClock size={12} style={{ verticalAlign: 'middle' }} /> Apology Submitted: {apologySubmittedDate}</span>}
+              </>
+            ) : (
+              <span><FiClock size={12} style={{ verticalAlign: 'middle' }} /> Submitted: {createdDate}</span>
+            )}
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -173,10 +212,29 @@ function RequestCard({ req, onAction }) {
           )}
 
           {allowed.length > 0 && (
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
-              {allowed.map(newStatus => (
-                <button
-                  key={newStatus}
+            <div style={{ marginTop: '12px' }}>
+              <textarea
+                value={internalRemarks}
+                onChange={(e) => setInternalRemarks(e.target.value)}
+                placeholder="Admin Remarks (Internal/Resolution Notes)..."
+                style={{
+                  width: '100%',
+                  minHeight: '60px',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-nested)',
+                  color: 'var(--text-primary)',
+                  fontSize: '13px',
+                  marginBottom: '10px',
+                  fontFamily: 'inherit',
+                  resize: 'vertical'
+                }}
+              />
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {allowed.map(newStatus => (
+                  <button
+                    key={newStatus}
                   disabled={submitting}
                   onClick={() => handleAction(newStatus)}
                   style={{
@@ -217,6 +275,29 @@ function RequestCard({ req, onAction }) {
                   {submitting ? '...' : '📄 Issue Offer Letter'}
                 </button>
               )}
+
+              {req.isAbsenceWarning && (
+                <button
+                  disabled={submitting}
+                  onClick={() => onOpenChat(req.id)}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--primary-color)',
+                    cursor: submitting ? 'not-allowed' : 'pointer',
+                    fontWeight: '600',
+                    fontSize: '13px',
+                    background: 'transparent',
+                    color: 'var(--primary-color)',
+                    opacity: submitting ? 0.6 : 1,
+                    transition: 'opacity 0.2s',
+                    marginLeft: '8px'
+                  }}
+                >
+                  💬 Message Student
+                </button>
+              )}
+            </div>
             </div>
           )}
           {allowed.length === 0 && (
@@ -234,6 +315,7 @@ function RequestsSupport() {
   const [activeTab, setActiveTab] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [chatModalWarningId, setChatModalWarningId] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -242,10 +324,57 @@ function RequestsSupport() {
     if (activeTab !== 'ALL') params.category = activeTab;
     if (statusFilter) params.status = statusFilter;
 
-    requestService.getRequests(params)
-      .then(data => { if (isMounted) setRequests(data); })
-      .catch(err => console.error("Failed to load requests:", err))
-      .finally(() => { if (isMounted) setLoading(false); });
+    const fetchAll = async () => {
+      try {
+        let finalRequests = [];
+        // Fetch UserRequests
+        if (activeTab !== 'PERMISSION') {
+          try {
+            const urData = await requestService.getRequests(params);
+            finalRequests = [...urData];
+          } catch (err) {
+            console.error("Failed to load UserRequests:", err);
+          }
+        }
+
+        // Fetch Attendance Queries (Permission Apologies)
+        if (activeTab === 'ALL' || activeTab === 'PERMISSION') {
+          try {
+            const queriesRes = await apiClient.get(API_ENDPOINTS.ATTENDANCE.ADMIN_QUERIES);
+            const warnings = queriesRes.data?.results || queriesRes.data || [];
+            const mappedWarnings = warnings.map(w => ({
+              id: w.id,
+              isAbsenceWarning: true,
+              category: 'PERMISSION',
+              subject: `Absence Apology: ${w.session_title || 'Session'}`,
+              description: w.apology_text,
+              sender_email: w.student_name,
+              created_at: w.apology_submitted_at || w.created_at,
+              warning_issued_at: w.created_at,
+              status: w.status === 'APOLOGIZED' ? 'PENDING' : w.status === 'ACCEPTED' ? 'RESOLVED' : w.status,
+            }));
+            
+            if (statusFilter) {
+              finalRequests = [...finalRequests, ...mappedWarnings.filter(w => w.status === statusFilter)];
+            } else {
+              finalRequests = [...finalRequests, ...mappedWarnings];
+            }
+          } catch (err) {
+            console.error("Failed to load admin queries:", err);
+          }
+        }
+
+        if (isMounted) {
+          finalRequests.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+          setRequests(finalRequests);
+        }
+      } catch (err) {
+        console.error("Failed to load requests:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+    fetchAll();
     return () => { isMounted = false; };
   }, [activeTab, statusFilter, refreshKey]);
 
@@ -327,12 +456,24 @@ function RequestsSupport() {
       ) : (
         <div>
           {requests.map(req => (
-            <RequestCard key={req.id} req={req} onAction={handleAction} />
+            <RequestCard 
+              key={req.id} 
+              req={req} 
+              onAction={handleAction} 
+              onOpenChat={setChatModalWarningId} 
+            />
           ))}
           <p style={{ color: 'var(--text-muted)', fontSize: '12px', textAlign: 'center', marginTop: '16px' }}>
             Showing {requests.length} request{requests.length !== 1 ? 's' : ''}
           </p>
         </div>
+      )}
+
+      {chatModalWarningId && (
+        <PermissionChatModal 
+          warningId={chatModalWarningId} 
+          onClose={() => setChatModalWarningId(null)} 
+        />
       )}
     </div>
   );

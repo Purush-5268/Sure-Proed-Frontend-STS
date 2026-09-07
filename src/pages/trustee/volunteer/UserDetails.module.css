@@ -1,0 +1,116 @@
+/* Volunteer UserDetails - Premium Indigo Theme with proper dark mode */
+
+.page {
+  min-height: 100vh;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.card {
+  width: 100%;
+  max-width: 100%;
+  background: var(--bg-surface);
+  padding: 40px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.card h1 {
+  text-align: center;
+  color: var(--primary-color, #4f46e5);
+  margin-bottom: 35px;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+.avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: var(--primary-color, #4f46e5);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.profile h2 {
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.profile p {
+  color: var(--text-secondary);
+}
+
+.info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.info div {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  padding: 18px;
+  border-radius: 10px;
+}
+
+.info strong {
+  color: var(--primary-color, #4f46e5);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.info p {
+  color: var(--text-primary);
+}
+
+.active {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+
+.edit,
+.back {
+  text-decoration: none;
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.edit {
+  background: var(--primary-color, #4f46e5);
+  color: white;
+}
+
+.edit:hover {
+  background: var(--primary-hover, #4338ca);
+}
+
+.back {
+  background: var(--text-secondary);
+  color: white;
+}
+
+.back:hover {
+  opacity: 0.85;
+}

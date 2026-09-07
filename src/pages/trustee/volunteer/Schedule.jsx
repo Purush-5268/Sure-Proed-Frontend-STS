@@ -8,6 +8,7 @@ import { API_ENDPOINTS } from "../../../constants/apiEndpoints";
 import styles from "./Schedule.module.css";
 import SkeletonLoader from "../../../components/common/SkeletonLoader";
 import TimePicker from "../../../components/common/TimePicker";
+import AsyncSelect from "../../../components/common/AsyncSelect";
 
 function ScheduleClass() {
   const [courses, setCourses] = useState([]);
@@ -36,13 +37,22 @@ function ScheduleClass() {
   const [showGuestInput, setShowGuestInput] = useState(false);
   const [newGuestEmail, setNewGuestEmail] = useState("");
 
+  const [priorPermissions, setPriorPermissions] = useState([]);
+  const [showPriorPermissionInput, setShowPriorPermissionInput] = useState(false);
+  const [newPriorPermissionStudent, setNewPriorPermissionStudent] = useState(null);
+  const [newPriorPermissionReason, setNewPriorPermissionReason] = useState("");
+
   const [cohorts, setCohorts] = useState([]);
   const [loadingCohorts, setLoadingCohorts] = useState(false);
 
-  // 🚨 State for Manage Attendees (After Generation)
   const [managingClassId, setManagingClassId] = useState(null);
   const [newWhitelistEmail, setNewWhitelistEmail] = useState("");
   const [isAddingWhitelist, setIsAddingWhitelist] = useState(false);
+
+  const [managingPermissionsClassId, setManagingPermissionsClassId] = useState(null);
+  const [grantPermissionStudent, setGrantPermissionStudent] = useState(null);
+  const [grantPermissionReason, setGrantPermissionReason] = useState("");
+  const [isGrantingPermission, setIsGrantingPermission] = useState(false);
 
   // 🚨 Function to fetch live radar data
   const loadActiveClasses = async () => {
@@ -248,13 +258,15 @@ function ScheduleClass() {
         end_time: request.endTime.length === 5 ? request.endTime + ":00" : request.endTime,
         conducted_by: currentUserId,
         cohort: matchedCohort ? matchedCohort.id : null,
-        attendees: [],
-        notes: request.guestEmails.length > 0 ? `Whitelisted Guests: ${request.guestEmails.join(", ")}` : "",
+        guest_emails: request.guestEmails.join(","),
+        prior_permissions: priorPermissions.map(p => ({
+          student_id: p.student_id,
+          reason: p.reason
+        })),
         session_type: request.sessionType,
         group_name: finalGroupName,
         stream_id: request.streamId,
-        lst_batch: request.lstBatchNumber,
-        guest_emails: request.guestEmails
+        lst_batch: request.lstBatchNumber
       };
 
       let res;
@@ -268,19 +280,15 @@ function ScheduleClass() {
           guest_emails: request.guestEmails
         });
       } else {
-        res = await attendanceService.scheduleSession(formattedData);
+        res = await attendanceService.createAttendanceRecord(formattedData);
       }
 
-      setSuccessMessage(`Live class scheduled successfully! Check the radar below for details.`);
+      setSuccessMessage(`✅ Class scheduled successfully!`);
 
       const newClass = res?.data || res;
       if (newClass && typeof newClass === 'object' && newClass.id) {
         setActiveAdminClasses(prev => [newClass, ...prev]);
       }
-
-      setTimeout(() => {
-        loadActiveClasses();
-      }, 1000);
 
       setRequest({
         sessionType: "Domain",
@@ -293,6 +301,9 @@ function ScheduleClass() {
         guestEmails: [],
         title: "",
       });
+      setPriorPermissions([]);
+
+      loadActiveClasses(); // Refresh Radar
     } catch (err) {
       console.error("SCHEDULING ERROR:", err);
       if (err.customError) {
@@ -307,6 +318,65 @@ function ScheduleClass() {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const addPriorPermission = () => {
+    if (!newPriorPermissionStudent || !newPriorPermissionReason.trim()) {
+      alert("Please select a student and enter a reason.");
+      return;
+    }
+    if (priorPermissions.find(p => p.student_id === newPriorPermissionStudent.id)) {
+      alert("Student already added.");
+      return;
+    }
+    setPriorPermissions([...priorPermissions, {
+      student_id: newPriorPermissionStudent.id,
+      name: `${newPriorPermissionStudent.user?.first_name || newPriorPermissionStudent.first_name} ${newPriorPermissionStudent.user?.last_name || newPriorPermissionStudent.last_name}`.trim(),
+      reason: newPriorPermissionReason.trim()
+    }]);
+    setNewPriorPermissionStudent(null);
+    setNewPriorPermissionReason("");
+  };
+
+  const removePriorPermission = (index) => {
+    setPriorPermissions(priorPermissions.filter((_, i) => i !== index));
+  };
+
+  const loadStudentOptions = async (inputValue) => {
+    if (!inputValue) return [];
+    try {
+      // Use the generic search parameter for students
+      const res = await apiClient.get(`/api/students/?search=${inputValue}&page_size=20`);
+      const data = res.data?.results || res.data || [];
+      return data;
+    } catch (err) {
+      console.error("Failed to fetch students", err);
+      return [];
+    }
+  };
+
+  const handleGrantPriorPermission = async (cls) => {
+    if (!grantPermissionStudent || !grantPermissionReason.trim()) {
+      alert("Please select a student and provide a reason.");
+      return;
+    }
+
+    setIsGrantingPermission(true);
+    try {
+      await apiClient.post(`/api/attendance/${cls.id}/grant-prior-permission/`, {
+        student_id: grantPermissionStudent.id,
+        reason: grantPermissionReason.trim()
+      });
+      alert("✅ Prior permission granted successfully.");
+      setGrantPermissionStudent(null);
+      setGrantPermissionReason("");
+      loadActiveClasses();
+    } catch (err) {
+      console.error(err);
+      alert("❌ Failed to grant prior permission.");
+    } finally {
+      setIsGrantingPermission(false);
     }
   };
 
@@ -422,6 +492,51 @@ function ScheduleClass() {
               )}
             </div>
 
+            <div className="premium-section" style={{ marginTop: "1.5rem" }}>
+              <div className="premium-flex-between" style={{ marginBottom: showPriorPermissionInput ? "1rem" : "0" }}>
+                <div>
+                  <label className="premium-label" style={{ color: "var(--text-primary)", marginBottom: 0 }}>Prior Permissions / Excused Absence</label>
+                  <p style={{ fontSize: "12px", color: "var(--text-primary)", margin: 0 }}>Grant early access and excuse absence for specific students.</p>
+                </div>
+                <button type="button" onClick={() => setShowPriorPermissionInput(!showPriorPermissionInput)} className="premium-btn premium-btn-primary">
+                  {showPriorPermissionInput ? "Hide" : "+ Add Student"}
+                </button>
+              </div>
+
+              {showPriorPermissionInput && (
+                <div className={styles.animatedField}>
+                  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "flex-start" }}>
+                    <div style={{ flex: "2" }}>
+                      <AsyncSelect
+                        value={newPriorPermissionStudent}
+                        onChange={(val) => setNewPriorPermissionStudent(val)}
+                        loadOptions={loadStudentOptions}
+                        getOptionLabel={(s) => `${s.user?.first_name || s.first_name || ""} ${s.user?.last_name || s.last_name || ""} (${s.student_code || s.user?.email || s.email})`}
+                        getOptionValue={(s) => s.id}
+                        placeholder="Search student by name or email..."
+                      />
+                    </div>
+                    <div style={{ flex: "2" }}>
+                      <input type="text" value={newPriorPermissionReason} onChange={(e) => setNewPriorPermissionReason(e.target.value)} placeholder="Reason (e.g. Doctor appointment)" className="premium-input" style={{ width: "100%", height: "42px" }} />
+                    </div>
+                    <button type="button" onClick={addPriorPermission} className="premium-btn premium-btn-secondary" style={{ height: "42px" }}>Add</button>
+                  </div>
+
+                  {priorPermissions.length > 0 && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem", padding: "0.75rem", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "8px" }}>
+                      {priorPermissions.map((p, i) => (
+                        <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px", background: "var(--bg-nested)", padding: "6px 12px", borderRadius: "20px", fontSize: "12px", border: "1px solid var(--border-color)" }}>
+                          <span style={{ fontWeight: "bold", color: "var(--text-primary)" }}>{p.name}</span>
+                          <span style={{ color: "var(--text-secondary)" }}>{p.reason}</span>
+                          <button type="button" onClick={() => removePriorPermission(i)} style={{ color: "#ef4444", border: "none", background: "none", cursor: "pointer", fontSize: "16px", fontWeight: "bold", padding: 0 }}>&times;</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
           <div style={{ marginBottom: "1.5rem" }}>
             <label className="premium-label">Class Date *</label>
             <input type="date" value={request.classDate} onChange={(e) => setRequest({ ...request, classDate: e.target.value })} required className="premium-input" style={{ width: "100%" }} />
@@ -476,8 +591,11 @@ function ScheduleClass() {
                 <div className="premium-flex-row">
                   {editingClassId !== cls.id ? (
                     <>
-                      <button onClick={() => { setManagingClassId(managingClassId === cls.id ? null : cls.id); setNewWhitelistEmail(""); }} className="premium-btn premium-btn-secondary" style={{ backgroundColor: managingClassId === cls.id ? "rgba(255,255,255,0.1)" : "" }}>
+                      <button onClick={() => { setManagingClassId(managingClassId === cls.id ? null : cls.id); setNewWhitelistEmail(""); setManagingPermissionsClassId(null); }} className="premium-btn premium-btn-secondary" style={{ backgroundColor: managingClassId === cls.id ? "rgba(255,255,255,0.1)" : "" }}>
                         👥 Manage Attendees
+                      </button>
+                      <button onClick={() => { setManagingPermissionsClassId(managingPermissionsClassId === cls.id ? null : cls.id); setGrantPermissionStudent(null); setGrantPermissionReason(""); setManagingClassId(null); }} className="premium-btn premium-btn-secondary" style={{ backgroundColor: managingPermissionsClassId === cls.id ? "rgba(255,255,255,0.1)" : "" }}>
+                        🛡️ Prior Permissions
                       </button>
                       <button onClick={() => handleStartEdit(cls)} className="premium-btn premium-btn-secondary">
                         ✏️ Reschedule
@@ -516,7 +634,6 @@ function ScheduleClass() {
                 </div>
               )}
 
-              {/* 🚨 Inline Manage Attendees UI */}
               {managingClassId === cls.id && (
                 <div className={styles.animatedField} style={{ background: 'var(--bg-nested)', padding: '1rem', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '1rem', border: '1px solid var(--border-color)' }}>
                   <div className="premium-flex-between">
@@ -558,6 +675,50 @@ function ScheduleClass() {
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* 🚨 Inline Grant Prior Permission UI */}
+              {managingPermissionsClassId === cls.id && (
+                <div className={styles.animatedField} style={{ background: 'var(--bg-nested)', padding: '1rem', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '1rem', border: '1px solid var(--border-color)' }}>
+                  <div className="premium-flex-between">
+                    <h4 style={{ margin: 0, color: "var(--text-primary)" }}>Grant Prior Permission</h4>
+                    <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                      Excuse absence & grant calendar access
+                    </span>
+                  </div>
+                  
+                  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "flex-start" }}>
+                    <div style={{ flex: "2", minWidth: "200px" }}>
+                      <AsyncSelect
+                        value={grantPermissionStudent}
+                        onChange={(val) => setGrantPermissionStudent(val)}
+                        loadOptions={loadStudentOptions}
+                        getOptionLabel={(s) => `${s.user?.first_name || s.first_name || ""} ${s.user?.last_name || s.last_name || ""} (${s.student_code || s.user?.email || s.email})`}
+                        getOptionValue={(s) => s.id}
+                        placeholder="Search student..."
+                      />
+                    </div>
+                    <div style={{ flex: "2", minWidth: "200px" }}>
+                      <input 
+                        type="text" 
+                        value={grantPermissionReason} 
+                        onChange={(e) => setGrantPermissionReason(e.target.value)} 
+                        placeholder="Reason (e.g. Doctor appointment)" 
+                        className="premium-input" 
+                        style={{ width: "100%", height: "42px" }} 
+                        disabled={isGrantingPermission}
+                      />
+                    </div>
+                    <button 
+                      onClick={() => handleGrantPriorPermission(cls)} 
+                      disabled={isGrantingPermission || !grantPermissionStudent || !grantPermissionReason.trim()} 
+                      className="premium-btn premium-btn-accent"
+                      style={{ height: "42px" }}
+                    >
+                      {isGrantingPermission ? "Granting..." : "Grant"}
+                    </button>
+                  </div>
                 </div>
               )}
 

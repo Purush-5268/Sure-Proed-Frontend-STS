@@ -128,11 +128,28 @@ function MentorDetails() {
   const mentorsList = Array.isArray(mentor) ? mentor : [mentor];
 
   if (selectedMentorId) {
-    const m = mentorsList.find(x => x.id === selectedMentorId || x.user === selectedMentorId) || mentorsList[0];
+    let m;
+    if (selectedMentorId.startsWith("mentor-")) {
+      const idx = parseInt(selectedMentorId.split("-")[1]);
+      m = mentorsList[idx];
+    } else {
+      m = mentorsList.find(x => String(x.id) === String(selectedMentorId) || String(x.user) === String(selectedMentorId));
+    }
+    
+    if (!m) m = mentorsList[0];
     if (!m) return null;
+    
     const fullName = `${m.first_name || ""} ${m.last_name || ""}`.trim() || m.email || m.name || m.username || "Unknown Mentor";
     const avatarUrl = m.profile_picture || m.photo || m.profile_photo || m.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=2563eb&color=fff&size=180`;
-    const isCurrentMentor = cohortInfo?.current_mentor_details && (m.id === cohortInfo.current_mentor_details.id || m.email === cohortInfo.current_mentor_details.email);
+    
+    let currentMentors = Array.isArray(cohortInfo?.current_mentors_details) ? [...cohortInfo.current_mentors_details] : [];
+    if (cohortInfo?.current_mentor_details && !currentMentors.some(cm => cm.id === cohortInfo.current_mentor_details.id)) {
+      currentMentors.push(cohortInfo.current_mentor_details);
+    }
+    if (Array.isArray(cohortInfo?.current_mentors)) {
+      cohortInfo.current_mentors.forEach(id => { if (!currentMentors.some(cm => cm.id === id)) currentMentors.push({ id }); });
+    }
+    const isCurrentMentor = currentMentors.some(cm => cm.id === m.id || cm.id === m.user || cm.email === m.email || (fullName && cm.name && fullName === cm.name));
 
     return (
       <div className={styles.page}>
@@ -150,7 +167,7 @@ function MentorDetails() {
               <h2 style={{ margin: 0 }}>{fullName}</h2>
               {isCurrentMentor && (
                 <span style={{ fontSize: '12px', background: '#f59e0b', color: 'white', padding: '4px 8px', borderRadius: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  ★ Current Mentor
+                  🎓 Current Mentor
                 </span>
               )}
             </div>
@@ -210,12 +227,21 @@ function MentorDetails() {
         {mentorsList.map((m, idx) => {
           const fullName = `${m.first_name || ""} ${m.last_name || ""}`.trim() || m.email || m.name || m.username || "Unknown Mentor";
           const avatarUrl = m.profile_picture || m.photo || m.profile_photo || m.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=2563eb&color=fff&size=180`;
-          const isCurrentMentor = cohortInfo?.current_mentor_details && (m.id === cohortInfo.current_mentor_details.id || m.email === cohortInfo.current_mentor_details.email);
+          
+          let currentMentors = Array.isArray(cohortInfo?.current_mentors_details) ? [...cohortInfo.current_mentors_details] : [];
+          if (cohortInfo?.current_mentor_details && !currentMentors.some(cm => cm.id === cohortInfo.current_mentor_details.id)) {
+            currentMentors.push(cohortInfo.current_mentor_details);
+          }
+          if (Array.isArray(cohortInfo?.current_mentors)) {
+            cohortInfo.current_mentors.forEach(id => { if (!currentMentors.some(cm => cm.id === id)) currentMentors.push({ id }); });
+          }
+          
+          const isCurrentMentor = currentMentors.some(cm => cm.id === m.id || cm.id === m.user || cm.email === m.email || (fullName && cm.name && fullName === cm.name));
 
           return (
             <div 
               key={m.id || idx} 
-              onClick={() => setSelectedMentorId(m.id || m.user)}
+              onClick={() => setSelectedMentorId(m.id || m.user || `mentor-${idx}`)}
               style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -240,7 +266,7 @@ function MentorDetails() {
                   <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>{fullName}</h3>
                   {isCurrentMentor && (
                     <span style={{ fontSize: '11px', background: '#f59e0b', color: 'white', padding: '2px 8px', borderRadius: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      ★ Current Mentor
+                      🎓 Current Mentor
                     </span>
                   )}
                 </div>

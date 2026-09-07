@@ -61,8 +61,16 @@ function TrusteeLayout() {
     return <Navigate to="/trustee/commercial/dashboard" replace />;
   }
 
+  // Inject Volunteer specific theme variables
+  const themeStyles = !isHigherLevel ? {
+    '--primary-color': '#4f46e5',
+    '--primary-hover': '#4338ca',
+    '--primary-light': '#e0e7ff',
+    '--primary-dark': '#3730a3'
+  } : {};
+
   return (
-    <>
+    <div style={themeStyles}>
       <Navbar />
       <div className={styles.layout}>
         <Sidebar title={layoutTitle} links={activeLinks} />
@@ -71,7 +79,7 @@ function TrusteeLayout() {
         </main>
       </div>
       <Footer />
-    </>
+    </div>
   );
 }
 

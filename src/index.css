@@ -83,12 +83,12 @@
 
 [data-theme='dark'] {
   --native-color-scheme: dark;
-  /* Brand Colors (Deep Vibrant Purple) */
-  --primary-color: #a855f7;
-  --primary-hover: #c084fc;
-  --primary-dark: #9333ea;
-  --primary-light: #3b0764;
-  --accent-color: #e879f9;
+  /* Brand Colors (Eye Spark Neon Cyber) */
+  --primary-color: #d946ef;
+  --primary-hover: #e879f9;
+  --primary-dark: #c026d3;
+  --primary-light: #4a044e;
+  --accent-color: #00f3ff;
 
   /* Layered Surfaces (Dark Theme) */
   --bg-main: #0a0a0a;
@@ -132,26 +132,26 @@
    typography, spacing, and surface variables intact.
    ═══════════════════════════════════════════════════════ */
 
-/* Admin: steel-purple / slate-purple — premium command-center feel */
+/* Admin: eye spark neon-cyber — premium command-center feel */
 [data-role="admin"] {
-  --primary-color: #8b5cf6;
-  --primary-hover: #7c3aed;
-  --primary-dark: #6d28d9;
+  --primary-color: #a855f7;
+  --primary-hover: #c084fc;
+  --primary-dark: #9333ea;
   --primary-light: #f5f3ff;
-  --accent-color: #a78bfa;
+  --accent-color: #22d3ee;
   --status-info-bg: #ede9fe;
   --status-info-text: #4c1d95;
 }
 
 [data-role="admin"][data-theme="dark"],
 [data-theme="dark"] [data-role="admin"] {
-  --primary-color: #9b8ec4;
-  --primary-hover: #b3a8d6;
-  --primary-dark: #7c6fb0;
-  --primary-light: #1e1833;
-  --accent-color: #a78bfa;
-  --status-info-bg: rgba(167, 139, 250, 0.15);
-  --status-info-text: #c4b5fd;
+  --primary-color: #d946ef; /* Bright Fuchsia / Neon Pink */
+  --primary-hover: #e879f9; 
+  --primary-dark: #c026d3;
+  --primary-light: #4a044e;
+  --accent-color: #06b6d4; /* Neon Cyan for extreme eye spark contrast */
+  --status-info-bg: rgba(217, 70, 239, 0.15);
+  --status-info-text: #e879f9;
 }
 
 /* Mentor: blue — academic, training, cohort-management */
@@ -744,7 +744,7 @@ input[type="time"].premium-input {
   background: var(--bg-nested);
   color: var(--text-secondary);
   font-weight: 600;
-  padding: var(--space-md) var(--space-lg);
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border-color);
   white-space: nowrap;
   position: sticky;
@@ -754,11 +754,12 @@ input[type="time"].premium-input {
 }
 
 .premium-table td {
-  padding: var(--space-md) var(--space-lg);
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border-color);
   color: var(--text-primary);
   vertical-align: middle;
   transition: background-color var(--transition-fast);
+  white-space: nowrap;
 }
 
 .premium-table tr:last-child td {

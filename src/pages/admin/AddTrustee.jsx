@@ -10,6 +10,7 @@ function AddTrustee() {
     first_name: "",
     last_name: "",
     email: "",
+    mapped_email: "",
     gender: "",
     date_of_birth: "",
     trustee_type: "VOLUNTEER",
@@ -44,9 +45,10 @@ function AddTrustee() {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         email: form.email.trim(),
+        mapped_email: form.mapped_email ? form.mapped_email.trim() : null,
         gender: form.gender || null,
         date_of_birth: form.date_of_birth || null,
-        role: "TRUSTEE",
+        role: form.trustee_type === "VOLUNTEER" ? "VOLUNTEER" : "TRUSTEE",
         is_active: form.is_active,
       };
 
@@ -57,7 +59,7 @@ function AddTrustee() {
       try {
         await apiClient.post(API_ENDPOINTS.TRUSTEE_PROFILES.BASE, {
           user: newUserId,
-          trustee_type: form.trustee_type,
+          category: form.trustee_type,
           organization: form.organization.trim(),
           designation: form.designation.trim(),
           is_active: form.is_active
@@ -117,6 +119,11 @@ function AddTrustee() {
           <div className="premium-form-group">
             <label className="premium-label">Email Address *</label>
             <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="trustee@suretrust.local" className="premium-input" />
+          </div>
+
+          <div className="premium-form-group">
+            <label className="premium-label">Mapped Email (Optional)</label>
+            <input type="email" name="mapped_email" value={form.mapped_email} onChange={handleChange} placeholder="e.g. personal@gmail.com" className="premium-input" />
           </div>
 
           <div className="premium-form-group">

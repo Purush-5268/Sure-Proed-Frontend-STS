@@ -14,8 +14,10 @@ function AttendanceWarningPopup() {
     const fetchWarnings = async () => {
       try {
         const res = await apiClient.get(API_ENDPOINTS.ATTENDANCE.WARNINGS);
-        if (isMounted && res.data?.length > 0) {
-          setWarnings(res.data);
+        const allWarnings = res.data?.results || res.data || [];
+        const pendingWarnings = allWarnings.filter(w => w.status === 'PENDING');
+        if (isMounted) {
+          setWarnings(pendingWarnings);
         }
       } catch (err) {
         // Silently ignore if not found or unauthorized

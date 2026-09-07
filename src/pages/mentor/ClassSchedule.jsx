@@ -201,7 +201,7 @@ function ClassSchedule() {
     if (!window.confirm("Are you sure you want to end this class?")) return;
     try {
       if (type === "DOMAIN") {
-        await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId), { conducted: false });
+        await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId), { conducted: false, class_status: "COMPLETED" });
       } else {
         await apiClient.patch(API_ENDPOINTS.TRAININGS.SESSION_BY_ID(sessionId), { class_status: "COMPLETED" });
       }
@@ -211,6 +211,22 @@ function ClassSchedule() {
       alert("Failed to end class.");
     }
   };
+
+  const handleCancelClass = async (sessionId, type) => {
+    if (!window.confirm("Are you sure you want to cancel this class? This action cannot be undone.")) return;
+    try {
+      if (type === "DOMAIN") {
+        await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId), { class_status: "CANCELLED" });
+      } else {
+        await apiClient.patch(API_ENDPOINTS.TRAININGS.SESSION_BY_ID(sessionId), { class_status: "CANCELLED" });
+      }
+      setActiveSessions(prev => prev.filter(s => s.id !== sessionId));
+      alert("Class cancelled successfully.");
+    } catch (err) {
+      alert("Failed to cancel class.");
+    }
+  };
+
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -420,7 +436,13 @@ function ClassSchedule() {
                       </a>
                     </div>
                   )}
-                  <div style={{ marginTop: '1rem' }}>
+                  <div style={{ marginTop: '1rem', display: 'flex', gap: '8px' }}>
+                    <button 
+                      onClick={() => handleCancelClass(session.id, session.type)}
+                      style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
+                    >
+                      Cancel Class
+                    </button>
                     <button 
                       onClick={() => handleEndClass(session.id, session.type)}
                       style={{ background: session.type === 'TRAINING' ? '#8b5cf6' : '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}

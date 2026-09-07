@@ -20,7 +20,7 @@ function Trustees() {
         const enriched = users.map(u => ({
           ...u,
           profile: {
-            trustee_type: u.trustee_type || null,
+            trustee_type: u.trustee_type || u.category || null,
             organization: u.organization || null,
           }
         }));

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import apiClient from "../../services/apiClient";
-import { API_ENDPOINTS } from "../../constants/apiEndpoints";
-import { studentService } from "../../services/studentService";
-import styles from "./StudentDetails.module.css";
-import SkeletonLoader from "../../components/common/SkeletonLoader";
+import apiClient from "../../../services/apiClient";
+import { API_ENDPOINTS } from "../../../constants/apiEndpoints";
+import { studentService } from "../../../services/studentService";
+import styles from "./UserDetails.module.css";
+import SkeletonLoader from "../../../components/common/SkeletonLoader";
 import { FiArrowLeft, FiMail, FiPhone, FiMapPin, FiBook, FiCalendar, FiGithub, FiLinkedin, FiGlobe, FiCheckCircle, FiXCircle, FiClock, FiShield, FiEdit } from "react-icons/fi";
 
-function StudentDetails() {
+function UserDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [student, setStudent] = useState(null);
@@ -28,7 +28,12 @@ function StudentDetails() {
         ]);
         setStudent(studentRes.data || null);
         const apps = appsRes.data?.results || appsRes.data || [];
-        setApplications(apps.filter(a => a.student === id || a.student?.id === id));
+        setApplications(apps.filter(a => 
+          a.student === id || 
+          a.student?.id === id || 
+          a.student_profile === id || 
+          a.student_profile?.id === id
+        ));
 
         const courseMap = {};
         (coursesRes.data?.results || coursesRes.data || []).forEach(c => courseMap[c.id] = c);
@@ -108,7 +113,7 @@ function StudentDetails() {
       <div className="premium-card" style={{ maxWidth: "900px", margin: "0 auto", padding: "2rem" }}>
         {/* Back Button */}
         <button
-          onClick={() => navigate("/admin/students")}
+          onClick={() => navigate("/trustee/volunteer/users")}
           style={{ background: "transparent", border: "none", display: "inline-flex", alignItems: "center", gap: "8px", color: "var(--text-secondary)", cursor: "pointer", fontSize: "14px", marginBottom: "1.5rem", padding: 0 }}
         >
           <FiArrowLeft /> Back to Students
@@ -131,9 +136,6 @@ function StudentDetails() {
               </span>
             </div>
           </div>
-          <Link to={`/admin/edit-student/${student.id}`} className="premium-btn premium-btn-primary" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "8px 16px", height: "auto" }}>
-            <FiEdit /> Edit
-          </Link>
         </div>
 
         {/* Contact & Location */}
@@ -212,7 +214,7 @@ function StudentDetails() {
                       </div>
                     </div>
                     <div style={{ display: "flex", gap: "8px" }}>
-                      <Link to={`/admin/application-details/${app.id}`} className="premium-btn premium-btn-primary" style={{ padding: "6px 12px", fontSize: "12px" }}>
+                      <Link to={`/trustee/volunteer/application-details/${app.id}`} className="premium-btn premium-btn-primary" style={{ padding: "6px 12px", fontSize: "12px" }}>
                         Manage Offer Letter & Details
                       </Link>
                     </div>
@@ -347,12 +349,24 @@ function StudentDetails() {
         )}
 
         <div className={styles.buttons} style={{ marginTop: "2rem" }}>
-          <Link to={`/admin/edit-student/${student.id}`} className={styles.edit}>Edit Student</Link>
-          <a href="#" onClick={(e) => { e.preventDefault(); navigate(-1); }} className={styles.back}>Back to Students</a>
+          <button 
+            onClick={() => { if(window.confirm("Are you sure you want to suspend this student?")) { /* API Call */ } }}
+            className={`premium-btn ${styles.suspend}`} style={{ flex: 1 }}
+          >
+            Suspend User
+          </button>
+          <button 
+            onClick={() => { if(window.confirm("Are you sure you want to permanently remove this student?")) { /* API Call */ } }}
+            className={`premium-btn ${styles.remove}`} style={{ flex: 1 }}
+          >
+            Remove User
+          </button>
+          <Link to={`/trustee/volunteer/edit-student/${student.id}`} className={`premium-btn ${styles.edit}`}>Edit Student</Link>
+          <a href="#" onClick={(e) => { e.preventDefault(); navigate(-1); }} className={`premium-btn ${styles.back}`}>Back to Students</a>
         </div>
       </div>
     </div>
   );
 }
 
-export default StudentDetails;
+export default UserDetails;

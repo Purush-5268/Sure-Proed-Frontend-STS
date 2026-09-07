@@ -43,7 +43,7 @@ function Dashboard() {
   const [lateJoinReason, setLateJoinReason] = useState("");
   const [lateJoinClassId, setLateJoinClassId] = useState(null);
   const [isSubmittingLateJoin, setIsSubmittingLateJoin] = useState(false);
-  
+
   // UX Consolidation States
   const [showMentorModal, setShowMentorModal] = useState(false);
   const [showAbsenceModal, setShowAbsenceModal] = useState(false);
@@ -138,6 +138,21 @@ function Dashboard() {
           || getStrId(profileObj?.course_batch);
         const courseId = getStrId(enrolled?.course) || getStrId(profileObj?.current_application?.course) || getStrId(profileObj?.course) || getStrId(statsRes?.data?.active_course);
 
+        // Fetch the full cohort details to ensure all mentor arrays (e.g., current_mentors_details) are present
+        if (cohortId && isMounted) {
+          apiClient.get(API_ENDPOINTS.COHORTS.BY_ID(cohortId)).then(cohortRes => {
+            if (isMounted) {
+              setStats(prev => ({
+                ...prev,
+                active_cohort: {
+                  ...(prev?.active_cohort || {}),
+                  ...cohortRes.data
+                }
+              }));
+            }
+          }).catch(e => console.error("Failed to fetch full cohort details", e));
+        }
+
         // Fetch remaining secondary data non-blockingly
         if (enrollmentStatus.isEnrolled && isMounted) {
           apiClient.get(API_ENDPOINTS.ATTENDANCE.SUMMARY).then(attRes => {
@@ -177,11 +192,11 @@ function Dashboard() {
             if (err.response?.status === 403) setIsSuspended(true);
           });
 
-          // Fetch recent announcements/notifications for the dashboard
-          apiClient.get(API_ENDPOINTS.NOTIFICATIONS.BASE, { params: { page_size: 5 } }).then(notifRes => {
+          // Fetch recent announcements for the dashboard
+          apiClient.get(API_ENDPOINTS.ANNOUNCEMENTS?.BASE || '/api/announcements/').then(notifRes => {
             const notifs = notifRes.data?.results || notifRes.data || [];
             if (isMounted) setAnnouncements(Array.isArray(notifs) ? notifs.slice(0, 5) : []);
-          }).catch(() => {});
+          }).catch(() => { });
         }
 
         // Fetch all sessions for this cohort — no status filter so upcoming ones are included
@@ -236,10 +251,10 @@ function Dashboard() {
 
   const handleJoinClass = async (cls) => {
     if (isJoining) return;
-    
+
     // 1. Open temporary tab immediately to prevent popup blockers from interfering
     const meetWindow = window.open('', '_blank');
-    
+
     setIsJoining(true);
     const meetingLink = cls.meeting_link?.startsWith('http') ? cls.meeting_link : `https://${cls.meeting_link}`;
 
@@ -320,12 +335,12 @@ function Dashboard() {
             {isDropped
               ? "You have been dropped from this cohort for failing to attend a mandatory Module Test."
               : isSuspended
-              ? "Your access to this cohort is currently suspended. Please contact the administration for assistance."
-              : isRevoked
-                ? "Your access has been temporarily revoked by an administrator."
-                : (isExisting
-                  ? "Please complete your Offer Letter verification in your Profile to restore your cohort access."
-                  : "Please complete your Profile and click 'Apply Course' to begin your journey.")}
+                ? "Your access to this cohort is currently suspended. Please contact the administration for assistance."
+                : isRevoked
+                  ? "Your access has been temporarily revoked by an administrator."
+                  : (isExisting
+                    ? "Please complete your Offer Letter verification in your Profile to restore your cohort access."
+                    : "Please complete your Profile and click 'Apply Course' to begin your journey.")}
           </p>
           <div style={{ background: 'var(--bg-nested)', padding: '16px', borderRadius: '12px', color: 'var(--primary-color)' }}>
             <strong>Status:</strong> {isDropped ? "DROPPED" : isSuspended ? "SUSPENDED" : activeApp?.status ? activeApp.status.replace("_", " ") : (profile?.status ? profile.status.replace("_", " ") : "Action Required")}
@@ -346,7 +361,7 @@ function Dashboard() {
     const daysInMonth = new Date(calMonth.year, calMonth.month + 1, 0).getDate();
     const firstDay = new Date(calMonth.year, calMonth.month, 1).getDay();
     const today = new Date();
-    
+
     const days = [];
     for (let i = 0; i < firstDay; i++) {
       days.push(<div key={`empty-${i}`} className={styles.calendarDayEmpty}>-</div>);
@@ -368,7 +383,7 @@ function Dashboard() {
         <PushNotificationBanner />
       </Suspense>
 
-      
+
       {/* SECTION 1: Top Layer (Hero + Calendar) */}
       <div className={styles.topSection}>
         <div className={styles.heroBanner}>
@@ -378,18 +393,18 @@ function Dashboard() {
               {`${user?.first_name || ''} ${user?.last_name || ''}`.trim() || profile?.first_name || "Student"}!
             </h1>
             <p className={styles.heroSubtitle}>Keep learning, keep building. You're one step closer to your goals.</p>
-            
+
             <div className={styles.heroQuote}>
               <p className={styles.heroQuoteText}>"Discipline today builds the career you deserve tomorrow."</p>
               <p className={styles.heroQuoteAuthor}>— SURE ProEd</p>
             </div>
           </div>
-          
+
           <div className={styles.heroRight}>
             <div style={{ textAlign: 'right' }}>
-               <h3 className={styles.heroValues}>Learn<br/>Build<br/>Grow<br/>Belong</h3>
-               <div className={styles.shiningLine}></div>
-               <p className={styles.heroSignature}>SURE ProEd</p>
+              <h3 className={styles.heroValues}>Learn<br />Build<br />Grow<br />Belong</h3>
+              <div className={styles.shiningLine}></div>
+              <p className={styles.heroSignature}>SURE ProEd</p>
             </div>
           </div>
         </div>
@@ -422,7 +437,7 @@ function Dashboard() {
         </div>
       )}
 
-      
+
       {/* SECTION 2: Summary Cards */}
       <div className={styles.summaryGrid}>
         <div className={styles.summaryCard}>
@@ -434,7 +449,7 @@ function Dashboard() {
             </h4>
           </div>
         </div>
-        
+
         <div className={styles.summaryCard}>
           <div className={`${styles.summaryIcon} ${styles.summaryIconCohort}`}><FiUsers size={24} /></div>
           <div style={{ flexGrow: 1, minWidth: 0 }}>
@@ -462,15 +477,15 @@ function Dashboard() {
                 let mentorName = null;
                 if (cohortData.active_mentors) {
                   count = cohortData.active_mentors.length;
-                  if(cohortData.current_mentor_details) {
+                  if (cohortData.current_mentor_details) {
                     mentorName = cohortData.current_mentor_details.first_name || cohortData.current_mentor_details.name;
                   }
                 }
                 else if (cohortData.mentors) count = cohortData.mentors.length;
                 else if (cohortData.mentor_name && cohortData.mentor_name !== "Not assigned") count = cohortData.mentor_name.split(',').length;
-                
+
                 if (count > 0) {
-                  return mentorName ? `${count} Assigned · ${mentorName}` : `${count} Assigned`;
+                  return `${count} Assigned`;
                 }
                 return "Pending";
               })()}
@@ -482,7 +497,7 @@ function Dashboard() {
 
       {/* SECTION 3: Main Grid (4 columns) */}
       <div className={styles.mainGrid}>
-        
+
         {/* Col 1: Learning Progress */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
@@ -495,7 +510,7 @@ function Dashboard() {
           </div>
         </div>
 
-        
+
         {/* Col 2: Current Enrollment */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
@@ -505,22 +520,22 @@ function Dashboard() {
           <div className={styles.enrollmentCard} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
             <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
               <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: 'var(--primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                 {(() => {
-                   const cName = (resolvedEnrollment?.courseName || profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "").toLowerCase();
-                   if (cName.includes("vlsi") || cName.includes("silicon") || cName.includes("circuit")) return <FiCpu size={28} />;
-                   if (cName.includes("data") || cName.includes("sql") || cName.includes("analytics")) return <FiBarChart2 size={28} />;
-                   if (cName.includes("web") || cName.includes("stack") || cName.includes("developer") || cName.includes("software")) return <FaLaptopCode size={28} />;
-                   if (cName.includes("security") || cName.includes("cyber") || cName.includes("hack")) return <FiLock size={28} />;
-                   if (cName.includes("ui") || cName.includes("ux") || cName.includes("graphic")) return <FiEdit size={28} />;
-                   if (cName.includes("cloud") || cName.includes("aws")) return <FiCpu size={28} />;
-                   return <FiBookOpen size={28} />;
-                 })()}
+                {(() => {
+                  const cName = (resolvedEnrollment?.courseName || profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "").toLowerCase();
+                  if (cName.includes("vlsi") || cName.includes("silicon") || cName.includes("circuit")) return <FiCpu size={28} />;
+                  if (cName.includes("data") || cName.includes("sql") || cName.includes("analytics")) return <FiBarChart2 size={28} />;
+                  if (cName.includes("web") || cName.includes("stack") || cName.includes("developer") || cName.includes("software")) return <FaLaptopCode size={28} />;
+                  if (cName.includes("security") || cName.includes("cyber") || cName.includes("hack")) return <FiLock size={28} />;
+                  if (cName.includes("ui") || cName.includes("ux") || cName.includes("graphic")) return <FiEdit size={28} />;
+                  if (cName.includes("cloud") || cName.includes("aws")) return <FiCpu size={28} />;
+                  return <FiBookOpen size={28} />;
+                })()}
               </div>
               <h4 className={styles.enrollmentTitle} style={{ margin: 0, fontSize: '15px', fontWeight: 'bold', color: 'var(--text-primary)', lineHeight: 1.4 }}>
-                 {resolvedEnrollment?.courseName || profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "Awaiting Course"}
+                {resolvedEnrollment?.courseName || profile?.current_application?.course?.name || stats?.application_course_title || profile?.course_name || "Awaiting Course"}
               </h4>
             </div>
-            
+
             <div className={styles.enrollmentMetaWrapper}>
               <div className={styles.enrollmentMetaItem}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -545,9 +560,9 @@ function Dashboard() {
                 </span>
               </div>
             </div>
-            
+
             <div style={{ marginBottom: '24px', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              
+
               {/* Modules Passed Bar */}
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
@@ -556,19 +571,19 @@ function Dashboard() {
                 </div>
                 <div className={styles.enrollmentProgressContainer} style={{ marginBottom: 0 }}>
                   <div className={styles.enrollmentProgressBarBg}>
-                    <div 
-                      className={styles.enrollmentProgressFill} 
-                      style={{ 
-                        width: `${Math.round(stats?.course_percentage || 0)}%`, 
-                        transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)', 
-                        background: 'linear-gradient(90deg, #3b82f6, #60a5fa)' 
+                    <div
+                      className={styles.enrollmentProgressFill}
+                      style={{
+                        width: `${Math.round(stats?.course_percentage || 0)}%`,
+                        transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                        background: 'linear-gradient(90deg, #3b82f6, #60a5fa)'
                       }}
                     ></div>
                   </div>
                   <span className={styles.enrollmentProgressText}>{Math.round(stats?.course_percentage || 0)}%</span>
                 </div>
               </div>
-              
+
               {/* Course Progress (Time-based) Bar */}
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
@@ -579,18 +594,18 @@ function Dashboard() {
                 </div>
                 <div className={styles.enrollmentProgressContainer} style={{ marginBottom: 0 }}>
                   <div className={styles.enrollmentProgressBarBg}>
-                    <div 
-                      className={styles.enrollmentProgressFill} 
-                      style={{ 
-                        width: `${Math.round(stats?.time_elapsed_percentage || 0)}%`, 
-                        transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)', 
-                        background: 'var(--student-btn-gradient)' 
+                    <div
+                      className={styles.enrollmentProgressFill}
+                      style={{
+                        width: `${Math.round(stats?.time_elapsed_percentage || 0)}%`,
+                        transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                        background: 'var(--student-btn-gradient)'
                       }}
                     ></div>
                   </div>
                 </div>
               </div>
-              
+
             </div>
 
             <button className={styles.enrollmentViewBtn} onClick={() => navigate('/student/module-tests')}>
@@ -600,7 +615,7 @@ function Dashboard() {
         </div>
 
 
-        
+
         {/* Col 3: Upcoming Live Classes */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
@@ -615,10 +630,10 @@ function Dashboard() {
                 if (isNaN(classStart)) return false;
                 let classEnd = cls.end_time ? new Date(`${cls.class_date}T${cls.end_time}`) : new Date(classStart.getTime() + 2 * 60 * 60 * 1000);
                 if (classEnd < classStart) classEnd = new Date(classEnd.getTime() + 24 * 60 * 60 * 1000);
-                
+
                 if (now > classEnd) {
-                   const hoursSinceEnd = (now - classEnd) / (1000 * 60 * 60);
-                   if (hoursSinceEnd > 12) return false;
+                  const hoursSinceEnd = (now - classEnd) / (1000 * 60 * 60);
+                  if (hoursSinceEnd > 12) return false;
                 }
                 return true;
               }).sort((a, b) => {
@@ -626,28 +641,28 @@ function Dashboard() {
                   const start = new Date(`${cls.class_date}T${cls.start_time}`);
                   let end = cls.end_time ? new Date(`${cls.class_date}T${cls.end_time}`) : new Date(start.getTime() + 2 * 60 * 60 * 1000);
                   if (end < start) end = new Date(end.getTime() + 24 * 60 * 60 * 1000);
-                  
+
                   const clsStatus = (cls.class_status || cls.status || "").toUpperCase();
                   const effectiveStatus = (cls.effective_status || "").toUpperCase();
                   // Only backend status determines Completed — not time alone
                   // If class_status is SCHEDULED, admin hasn't ended it — rank as Ongoing
                   if ((clsStatus === 'COMPLETED' || clsStatus === 'ENDED') ||
-                      (effectiveStatus === 'COMPLETED' && clsStatus !== 'SCHEDULED')) return 2;
+                    (effectiveStatus === 'COMPLETED' && clsStatus !== 'SCHEDULED')) return 2;
                   if (clsStatus === 'CANCELLED') return 3;
 
                   if (now >= start && now <= end) return 0; // Ongoing (within time window)
                   if (now < start) return 1; // Upcoming
                   return 0; // Past scheduled time but not ended by admin = still ongoing
                 };
-                
+
                 const rankA = getStatusRank(a);
                 const rankB = getStatusRank(b);
-                
+
                 if (rankA !== rankB) return rankA - rankB;
-                
+
                 const startA = new Date(`${a.class_date}T${a.start_time}`);
                 const startB = new Date(`${b.class_date}T${b.start_time}`);
-                
+
                 if (rankA === 1) return startA - startB; // Upcoming: closest first
                 return startB - startA; // Ongoing or Past: most recent first
               });
@@ -669,14 +684,14 @@ function Dashboard() {
                 const classStart = new Date(`${cls.class_date}T${cls.start_time}`);
                 let classEnd = cls.end_time ? new Date(`${cls.class_date}T${cls.end_time}`) : new Date(classStart.getTime() + 2 * 60 * 60 * 1000);
                 if (classEnd < classStart) classEnd = new Date(classEnd.getTime() + 24 * 60 * 60 * 1000);
-                
+
                 const clsStatus = (cls.class_status || cls.status || "").toUpperCase();
                 const effectiveStatus = (cls.effective_status || "").toUpperCase();
 
                 // Use effective_status from backend, but NEVER auto-complete based on time:
                 // If the raw class_status is SCHEDULED, admin hasn't ended it — keep it Ongoing
                 const isCompleted = (clsStatus === 'COMPLETED' || clsStatus === 'ENDED') ||
-                                    (effectiveStatus === 'COMPLETED' && clsStatus !== 'SCHEDULED');
+                  (effectiveStatus === 'COMPLETED' && clsStatus !== 'SCHEDULED');
                 const isCancelled = clsStatus === 'CANCELLED' || effectiveStatus === 'CANCELLED';
 
                 const windowOpenTime = new Date(classStart.getTime() - 10 * 60 * 1000);
@@ -686,15 +701,15 @@ function Dashboard() {
 
                 // Ongoing/Late: any time after start when admin hasn't ended it
                 const isLate = !isCompleted && !isCancelled && now > classStart;
-                
+
                 const startsIn = Math.floor((classStart - now) / 60000);
 
                 let rightElement;
-                if (isCompleted) { 
+                if (isCompleted) {
                   rightElement = <span className={styles.badgeCompleted}>Completed</span>;
-                } else if (isCancelled) { 
+                } else if (isCancelled) {
                   rightElement = <span className={styles.badgeCancelled}>Cancelled</span>;
-                } else if (isJoinWindowOpen) { 
+                } else if (isJoinWindowOpen) {
                   rightElement = <button className={styles.btnJoinClass} onClick={() => handleJoinClass(cls)}>Join Class</button>;
                 } else if (isLate) {
                   rightElement = (
@@ -724,7 +739,7 @@ function Dashboard() {
                       <div className={styles.classItemDetails}>
                         <h4 className={styles.classItemName}>{cls.title || cls.class_type || "Live Session"}</h4>
                         <p className={styles.classItemTime}>
-                          <FiClock size={12} style={{marginRight: '4px'}}/>
+                          <FiClock size={12} style={{ marginRight: '4px' }} />
                           {classStart.toLocaleDateString([], { month: 'short', day: 'numeric' })} • {classStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
@@ -745,14 +760,14 @@ function Dashboard() {
                   </div>
                 );
               });
-              
+
               return (
                 <>
                   {classesList}
                   {allVisibleClasses.length > 0 && (
-                     <button className={styles.viewAllClassesBtn} onClick={() => navigate('/student/class-schedule')}>
-                       {allVisibleClasses.length > 3 ? `+ ${allVisibleClasses.length - 3} more classes available. View All Classes →` : "View All Classes →"}
-                     </button>
+                    <button className={styles.viewAllClassesBtn} onClick={() => navigate('/student/class-schedule')}>
+                      {allVisibleClasses.length > 3 ? `+ ${allVisibleClasses.length - 3} more classes available. View All Classes →` : "View All Classes →"}
+                    </button>
                   )}
                 </>
               );
@@ -763,7 +778,7 @@ function Dashboard() {
 
       </div>
 
-      
+
       {/* SECTION 4: Quick Actions Row */}
       <div className={styles.quickActionsWrapper}>
         <h3 className={styles.quickActionsHeading}>Quick Actions</h3>
@@ -846,9 +861,13 @@ function Dashboard() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
               <h3 style={{ margin: 0 }}>Announcements</h3>
-              {announcements.length > 0 && (
-                <span className={styles.unreadBadge} style={{ position: 'static', marginLeft: 0 }}>{announcements.length}</span>
-              )}
+              {(() => {
+                 const readIds = new Set(JSON.parse(localStorage.getItem('sp_announcements_read') || '[]'));
+                 const unreadCount = announcements.filter(a => !readIds.has(a.id)).length;
+                 return unreadCount > 0 ? (
+                   <span className={styles.unreadBadge} style={{ position: 'static', marginLeft: 0 }}>{unreadCount}</span>
+                 ) : null;
+              })()}
             </div>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>Stay up to date with the latest platform updates.</p>
           </div>
@@ -893,12 +912,12 @@ function Dashboard() {
           <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '400px', boxShadow: '0 24px 48px rgba(0,0,0,0.15)', border: '1px solid var(--border-color)', position: 'relative' }} onClick={e => e.stopPropagation()}>
             <button onClick={() => setShowMentorModal(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}><FiX size={24} /></button>
             <h3 style={{ margin: '0 0 20px 0', fontSize: '20px', color: 'var(--text-primary)' }}>All Assigned Mentors</h3>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '400px', overflowY: 'auto' }}>
-                    {(() => {
+              {(() => {
                 const cohortData = stats?.active_cohort || profile?.current_application?.assigned_cohort || {};
                 let activeMentors = cohortData.active_mentors || [];
-                
+
                 if (activeMentors.length === 0) {
                   if (cohortData.mentors && cohortData.mentors.length > 0) {
                     if (typeof cohortData.mentors[0] === 'object') {
@@ -919,31 +938,37 @@ function Dashboard() {
                     activeMentors = cohortData.mentor_name.split(',').map((name, i) => ({ id: `mentor-${i}`, first_name: name.trim() }));
                   }
                 }
-                
-                const currentMentor = cohortData.current_mentor_details;
-                
+
+                let currentMentors = Array.isArray(cohortData.current_mentors_details) ? [...cohortData.current_mentors_details] : [];
+                if (cohortData.current_mentor_details && !currentMentors.some(cm => cm.id === cohortData.current_mentor_details.id)) {
+                  currentMentors.push(cohortData.current_mentor_details);
+                }
+                if (Array.isArray(cohortData.current_mentors)) {
+                  cohortData.current_mentors.forEach(id => { if (!currentMentors.some(cm => cm.id === id)) currentMentors.push({ id }); });
+                }
+
                 return (
                   <>
                     {/* Render all mentors uniformly. Highlight the current mentor. */}
                     {activeMentors.map((m, i) => {
-                      const isCurrentMentor = currentMentor && (m.id === currentMentor.id || m.email === currentMentor.email);
                       const mName = `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.name || m.username || "Mentor";
+                      const isCurrentMentor = currentMentors.some(cm => m.id === cm.id || m.user === cm.id || m.email === cm.email || (mName && cm.name && mName === cm.name) || (cm.id && cm.id === m.id));
                       const mPhoto = m.profile_photo || m.photo || m.avatar || m.profile_picture;
-                      
+
                       return (
-                        <div 
-                          key={i} 
+                        <div
+                          key={i}
                           onClick={() => {
                             if (m.id) {
                               navigate('/student/mentor-details', { state: { mentorId: m.id } });
                             }
                           }}
-                          style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '12px', 
-                            padding: '12px', 
-                            border: isCurrentMentor ? '1px solid var(--accent-color)' : '1px solid var(--border-color)', 
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '12px',
+                            border: isCurrentMentor ? '1px solid var(--accent-color)' : '1px solid var(--border-color)',
                             borderRadius: '12px',
                             background: isCurrentMentor ? 'var(--accent-subtle)' : 'var(--bg-nested)',
                             cursor: m.id ? 'pointer' : 'default',
@@ -963,8 +988,8 @@ function Dashboard() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                               <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '15px' }}>{mName}</h4>
                               {isCurrentMentor && (
-                                <span style={{ fontSize: '10px', background: '#f59e0b', color: 'white', padding: '2px 6px', borderRadius: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                  ★ Current Mentor
+                                <span style={{ fontSize: "10px", background: "#f59e0b", color: "white", padding: "2px 6px", borderRadius: "12px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px" }}>
+                                  🎓 Current Mentor
                                 </span>
                               )}
                             </div>
@@ -990,7 +1015,7 @@ function Dashboard() {
           <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '400px', boxShadow: '0 24px 48px rgba(0,0,0,0.15)', border: '1px solid var(--border-color)', position: 'relative' }} onClick={e => e.stopPropagation()}>
             <button onClick={() => setShowAbsenceModal(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}><FiX size={24} /></button>
             <h3 style={{ margin: '0 0 8px 0', fontSize: '20px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-               <FiAlertCircle color="#f59e0b" /> Seek Permission
+              <FiAlertCircle color="#f59e0b" /> Seek Permission
             </h3>
             <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>You have missed this class or joined too late. Please provide a reason to seek admin permission for attendance.</p>
             <textarea
@@ -1005,19 +1030,20 @@ function Dashboard() {
                 setIsSubmittingAbsence(true);
                 try {
                   // Submit to actual attendance permission endpoint
-                  await apiClient.post(API_ENDPOINTS.ATTENDANCE?.REQUEST_PERMISSION || '/attendance/request-permission/', {
+                  await apiClient.post(API_ENDPOINTS.ATTENDANCE.REQUEST_PERMISSION, {
                     session_id: absenceSessionId,
                     reason: absenceReason
                   });
-                  alert("Permission requested successfully.");
+                  // Silently close modal — no popup
                   setShowAbsenceModal(false);
-                  
-                  // Optimistically update todayClasses
+                  setAbsenceReason("");
+
+                  // Optimistically update todayClasses to show Pending state
                   setTodayClasses(prev => prev.map(cls => cls.id === absenceSessionId ? { ...cls, permission_state: 'PENDING' } : cls));
                 } catch (e) {
-                   alert("Failed to submit permission. " + (e.response?.data?.detail || ""));
+                  alert("Failed to submit permission. " + (e.response?.data?.detail || ""));
                 } finally {
-                   setIsSubmittingAbsence(false);
+                  setIsSubmittingAbsence(false);
                 }
               }}
               disabled={isSubmittingAbsence || !absenceReason.trim()}
@@ -1052,15 +1078,19 @@ function Dashboard() {
                 No new announcements.
               </div>
             ) : (
-              announcements.map((a, idx) => (
-                <div key={idx} className={styles.panelItem}>
-                  <div className={styles.panelItemDot}></div>
-                  <div style={{ flex: 1 }}>
-                    <h4 className={styles.panelItemTitle}>{a.title || a.message}</h4>
-                    <p className={styles.panelItemTime}>{a.created_at ? new Date(a.created_at).toLocaleDateString() : 'Recently'}</p>
+              announcements.map((a, idx) => {
+                const readIds = new Set(JSON.parse(localStorage.getItem('sp_announcements_read') || '[]'));
+                const isRead = readIds.has(a.id);
+                return (
+                  <div key={idx} className={styles.panelItem} style={{ opacity: isRead ? 0.7 : 1 }}>
+                    <div className={styles.panelItemDot} style={{ background: isRead ? 'var(--text-muted)' : 'var(--primary-color)' }}></div>
+                    <div style={{ flex: 1 }}>
+                      <h4 className={styles.panelItemTitle}>{a.title || a.message}</h4>
+                      <p className={styles.panelItemTime}>{a.created_at ? new Date(a.created_at).toLocaleDateString() : 'Recently'}</p>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
             <button className={styles.panelViewAllBtn} onClick={() => navigate('/student/announcements')}>
               View All History &rarr;

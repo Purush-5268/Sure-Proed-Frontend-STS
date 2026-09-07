@@ -48,15 +48,20 @@ function PermissionsStudent() {
     const text = apologyInputs[warningId];
     if (!text?.trim()) return;
 
+    // Optimistically update the UI to avoid lag
+    setWarnings(prev => prev.map(w => w.id === warningId ? { ...w, status: 'APOLOGIZED', apology_text: text } : w));
+    
     try {
       await apiClient.post(API_ENDPOINTS.ATTENDANCE.RESOLVE_WARNING, {
         warning_id: warningId,
         apology_text: text
       });
-      alert("Apology submitted. Awaiting Admin review.");
+      // Silently fetch to ensure consistency, no popup
       fetchData();
     } catch (err) {
-      alert("Failed to submit apology.");
+      console.error("Failed to submit apology", err);
+      // Revert optimistic update on failure
+      fetchData();
     }
   };
 

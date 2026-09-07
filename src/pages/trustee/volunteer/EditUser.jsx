@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import apiClient from "../../services/apiClient";
-import { API_ENDPOINTS } from "../../constants/apiEndpoints";
-import styles from "./EditStudent.module.css";
-import SkeletonLoader from "../../components/common/SkeletonLoader";
+import apiClient from "../../../services/apiClient";
+import { API_ENDPOINTS } from "../../../constants/apiEndpoints";
+import styles from "./EditUser.module.css";
+import SkeletonLoader from "../../../components/common/SkeletonLoader";
 
-function EditStudent() {
+function EditUser() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [form, setForm] = useState({
@@ -82,7 +82,7 @@ function EditStudent() {
           phone_number: form.phone_number.trim() || null,
         });
       }
-      navigate("/admin/students");
+      navigate("/trustee/volunteer/users");
     } catch (err) {
       const message = err?.response?.data?.detail || "Unable to update the student.";
       setError(message);
@@ -118,7 +118,7 @@ function EditStudent() {
 
             <div className={styles.buttons}>
               <button type="submit" disabled={loading}>{loading ? "Updating..." : "Update Student"}</button>
-              <Link to="/admin/students">Cancel</Link>
+              <Link to="/trustee/volunteer/users">Cancel</Link>
             </div>
           </form>
         )}
@@ -127,4 +127,4 @@ function EditStudent() {
   );
 }
 
-export default EditStudent;
+export default EditUser;

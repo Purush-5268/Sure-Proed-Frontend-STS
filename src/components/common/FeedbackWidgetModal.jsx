@@ -91,7 +91,7 @@ export default function FeedbackWidgetModal({ handleClose, feedbackState, setFee
 
   const handleTypeChange = (type) => {
     setFeedbackType(type);
-    
+
     // Default to current mentor if selecting MENTOR category
     if (type === "MENTOR" && currentMentor) {
       setRelatedId(currentMentor.user || currentMentor.id || "");
@@ -196,7 +196,7 @@ export default function FeedbackWidgetModal({ handleClose, feedbackState, setFee
                         const isCurrent = currentMentor && (currentMentor.user === mId || currentMentor.id === mId);
                         return (
                           <option key={m.id} value={mId}>
-                            {m.full_name || m.name || m.first_name || `Mentor ${m.id?.slice(0,6)}`}
+                            {m.full_name || m.name || m.first_name || `Mentor ${m.id?.slice(0, 6)}`}
                             {m.designation ? ` · ${m.designation}` : ""}
                             {isCurrent ? " (Current Mentor)" : ""}
                           </option>

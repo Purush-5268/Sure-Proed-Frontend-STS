@@ -246,9 +246,8 @@ function Dashboard() {
             ) : allCohorts
               .filter(c => c.course === selectedCourse?.id || c.course?.id === selectedCourse?.id)
               .map((cohort, idx) => {
-                // Approximate student count based on loaded student data
-                const studentCount = allStudents.filter(s => s.cohort_code === cohort.code || s.cohort === cohort.id).length;
-                const mentorName = cohort.active_mentor ? `${cohort.active_mentor.first_name || ""} ${cohort.active_mentor.last_name || ""}`.trim() || "Assigned" : "Pending Assignment";
+                // Use exact app count matching the detailed view, or backend count if available
+                const studentCount = cohort.students_count ?? allApps.filter(a => a.assigned_cohort === cohort.id || a.assigned_cohort?.id === cohort.id).length;
 
                 return (
                   <div key={cohort.id || idx} className="premium-card premium-card-hoverable" onClick={() => navigate(`/admin/cohort-details/${cohort.id}`)} style={{ cursor: 'pointer', background: 'linear-gradient(135deg, var(--primary-color), var(--primary-dark))', border: '1px solid var(--border-color)', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -263,7 +262,6 @@ function Dashboard() {
                         👥 {studentCount} Students
                       </div>
                       <div style={{ color: '#cbd5e1', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                        <span>👨‍🏫 Mentor: <strong style={{ color: '#fbbf24' }}>{mentorName}</strong></span>
                         <span>📈 Stage: <strong style={{ color: '#38bdf8' }}>{cohort.status || "DRAFT"}</strong></span>
                       </div>
                     </div>

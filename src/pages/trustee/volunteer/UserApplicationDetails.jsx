@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { FiClock, FiFileText, FiVideo, FiShield, FiUsers, FiAward, FiFile } from "react-icons/fi";
-import apiClient from "../../services/apiClient";
-import { API_ENDPOINTS } from "../../constants/apiEndpoints";
-import { applicationService } from "../../services/applicationService";
-import styles from "./ApplicationDetails.module.css";
-import SkeletonLoader from "../../components/common/SkeletonLoader";
-import AsyncSelect from "../../components/common/AsyncSelect";
+import apiClient from "../../../services/apiClient";
+import { API_ENDPOINTS } from "../../../constants/apiEndpoints";
+import { applicationService } from "../../../services/applicationService";
+import styles from "./UserApplicationDetails.module.css";
+import SkeletonLoader from "../../../components/common/SkeletonLoader";
+import AsyncSelect from "../../../components/common/AsyncSelect";
 
-function ApplicationDetails() {
+function UserApplicationDetails() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [application, setApplication] = useState(null);
@@ -401,17 +401,17 @@ function ApplicationDetails() {
                   </div>
                   <div className={styles.actionRow}>
                     <button type="submit" className="premium-btn premium-btn-primary" disabled={submitting}>Save Screening</button>
-                    <Link to="/admin/exams" className="premium-btn premium-btn-secondary">View Exam Dashboard</Link>
+                    <Link to="/trustee/volunteer/exams" className="premium-btn premium-btn-secondary">View Exam Dashboard</Link>
                   </div>
                 </form>
               ) : (
                 <div style={{ padding: "20px", background: "var(--bg-secondary)", borderRadius: "8px", textAlign: "center" }}>
                   <p style={{ color: "var(--text-secondary)", marginBottom: "16px" }}>No pre-screening exam record exists for this application yet.</p>
                   <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
-                    <Link to={`/admin/add-exam?appId=${application.id}`} state={{ application }} className="premium-btn premium-btn-primary">
+                    <Link to={`/trustee/volunteer/add-exam?appId=${application.id}`} state={{ application }} className="premium-btn premium-btn-primary">
                       Assign Exam Now
                     </Link>
-                    <Link to="/admin/exams" className="premium-btn premium-btn-secondary">
+                    <Link to="/trustee/volunteer/exams" className="premium-btn premium-btn-secondary">
                       Go to Exams Tab
                     </Link>
                   </div>
@@ -676,4 +676,4 @@ function ApplicationDetails() {
   );
 }
 
-export default ApplicationDetails;
+export default UserApplicationDetails;

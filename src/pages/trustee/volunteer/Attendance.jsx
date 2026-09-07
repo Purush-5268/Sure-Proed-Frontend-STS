@@ -74,9 +74,13 @@ function AttendanceManagement() {
       }
     };
 
-    loadData();
+    const delayDebounceFn = setTimeout(() => {
+      loadData();
+    }, 500);
+
     return () => {
       isMounted = false;
+      clearTimeout(delayDebounceFn);
       abortController.abort();
     };
   }, [selectedCourse, selectedCohort]);
@@ -201,6 +205,24 @@ function AttendanceManagement() {
     }
   };
 
+  const handleCancelClass = async (id, title) => {
+    const confirmCancel = window.confirm(`Are you sure you want to cancel the class "${title || 'Untitled'}"?\n\nThis action cannot be undone and will mark the session as cancelled.`);
+    if (!confirmCancel) return;
+    
+    try {
+      await apiClient.patch(`${API_ENDPOINTS.ATTENDANCE.BASE}${id}/`, {
+        class_status: "CANCELLED"
+      });
+      // Update local state
+      setAttendance(prev => prev.map(item => item.id === id ? { ...item, status: "CANCELLED" } : item));
+      alert("Class has been successfully cancelled.");
+    } catch (err) {
+      console.error("Failed to cancel class:", err);
+      const errMsg = err.response?.data?.detail || err.message || "Unknown error";
+      alert(`Failed to cancel class: ${errMsg}`);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -246,7 +268,7 @@ function AttendanceManagement() {
 
         <button
           onClick={() => { setSelectedCourse(""); setSelectedCohort(""); }}
-          className="btn btnSecondary"
+          className="premium-btn premium-btn-secondary"
         >
           Clear Filters
         </button>
@@ -277,8 +299,8 @@ function AttendanceManagement() {
           <div className="premium-empty-state-icon">📅</div>
           <h3>No active classes yet</h3>
           <p>Attendance will appear here when a class is conducted.</p>
-          {(selectedCourse || filterGroup) && (
-            <button onClick={() => { setSelectedCourse(""); setFilterGroup(""); }} className="premium-btn premium-btn-secondary" style={{ marginTop: "1rem" }}>
+          {(selectedCourse || selectedCohort) && (
+            <button onClick={() => { setSelectedCourse(""); setSelectedCohort(""); }} className="premium-btn premium-btn-secondary" style={{ marginTop: "1rem" }}>
               Clear Filters
             </button>
           )}
@@ -331,7 +353,13 @@ function AttendanceManagement() {
                     <td style={{ verticalAlign: "middle" }}>{absentStudents}</td>
 
                     <td className="actions" style={{ verticalAlign: "middle", padding: "8px 16px", whiteSpace: "nowrap", minWidth: "200px" }}>
-                      {item.status === "ATTENDANCE_PENDING" ? (
+                      {item.effective_status === "CANCELLED" || item.class_status === "CANCELLED" || item.status === "CANCELLED" ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span style={{ color: "#dc2626", fontWeight: "bold", fontSize: "12px", border: "1px solid #dc2626", padding: "4px 8px", borderRadius: "4px", backgroundColor: "rgba(220, 38, 38, 0.1)" }}>
+                            Class Cancelled
+                          </span>
+                        </div>
+                      ) : item.status === "ATTENDANCE_PENDING" ? (
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                           <span style={{ color: "#f59e0b", fontWeight: "bold", fontSize: "12px", border: "1px solid #f59e0b", padding: "4px 8px", borderRadius: "4px", backgroundColor: "rgba(245, 158, 11, 0.1)" }}>
                             Generating Meet Link...
@@ -343,8 +371,9 @@ function AttendanceManagement() {
                             Generation Failed
                           </span>
                           <button onClick={() => {/* retry logic here if backend supported */ }} style={{ cursor: "pointer", background: "none", border: "none", color: "#3b82f6", textDecoration: "underline" }}>Retry</button>
+                          <button onClick={() => handleCancelClass(item.id, item.title)} style={{ cursor: "pointer", background: "none", border: "none", color: "#dc2626", textDecoration: "underline", marginLeft: "4px" }}>Cancel</button>
                         </div>
-                      ) : (!item.conducted || item.conducted === 'false' || item.conducted === false) ? (
+                      ) : item.effective_status === "COMPLETED" || item.class_status === "COMPLETED" || item.status === "COMPLETED" ? (
                         <div style={{ display: "flex", alignItems: "stretch", gap: "8px", margin: 0, padding: 0, height: "32px" }}>
                           <button
                             onClick={() => handleDownloadExcel(item.id, item.title, item.class_date)}
@@ -353,7 +382,7 @@ function AttendanceManagement() {
                               color: "white",
                               border: "none",
                               padding: "0 14px",
-                              height: "100%", /* 🚨 Fills the flex container */
+                              height: "100%",
                               borderRadius: "6px",
                               cursor: "pointer",
                               fontWeight: "bold",
@@ -377,7 +406,7 @@ function AttendanceManagement() {
                               background: "var(--primary-color)",
                               color: "white",
                               padding: "0 16px",
-                              height: "100%", /* 🚨 Fills the flex container */
+                              height: "100%",
                               borderRadius: "6px",
                               textDecoration: "none",
                               fontWeight: "bold",
@@ -394,21 +423,77 @@ function AttendanceManagement() {
                           </Link>
                         </div>
                       ) : (
-                        <span
-                          style={{
-                            display: "inline-block",
-                            background: "var(--bg-nested)",
-                            color: "var(--text-muted)",
-                            border: "1px solid var(--border-color)",
-                            padding: "6px 12px",
-                            borderRadius: "6px",
-                            fontSize: "12px",
-                            fontWeight: "bold",
-                            whiteSpace: "nowrap"
-                          }}
-                        >
-                          ⏳ Ongoing...
-                        </span>
+                        <div style={{ display: "flex", alignItems: "stretch", gap: "8px", margin: 0, padding: 0, height: "32px" }}>
+                          <button
+                            onClick={() => handleCancelClass(item.id, item.title)}
+                            style={{
+                              background: "rgba(239, 68, 68, 0.1)",
+                              color: "#ef4444",
+                              border: "1px solid rgba(239, 68, 68, 0.3)",
+                              padding: "0 10px",
+                              height: "100%",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              fontWeight: "bold",
+                              fontSize: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              boxSizing: "border-box",
+                              transition: "all 0.2s ease",
+                              whiteSpace: "nowrap",
+                              margin: 0
+                            }}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => handleDownloadExcel(item.id, item.title, item.class_date)}
+                            style={{
+                              background: "#10b981",
+                              color: "white",
+                              border: "none",
+                              padding: "0 14px",
+                              height: "100%",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              fontWeight: "bold",
+                              fontSize: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              boxSizing: "border-box",
+                              transition: "all 0.2s ease",
+                              whiteSpace: "nowrap",
+                              margin: 0
+                            }}
+                          >
+                            ⬇️ Excel
+                          </button>
+
+                          <Link
+                            to="/trustee/volunteer/attendance-details"
+                            state={{ sessionId: item.id, sessionTitle: item.title, sessionDate: item.class_date }}
+                            style={{
+                              background: "var(--primary-color)",
+                              color: "white",
+                              padding: "0 16px",
+                              height: "100%",
+                              borderRadius: "6px",
+                              textDecoration: "none",
+                              fontWeight: "bold",
+                              fontSize: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              boxSizing: "border-box",
+                              whiteSpace: "nowrap",
+                              margin: 0
+                            }}
+                          >
+                            View Details
+                          </Link>
+                        </div>
                       )}
                     </td>
                   </tr>

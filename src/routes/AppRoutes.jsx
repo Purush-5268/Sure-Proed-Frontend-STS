@@ -51,7 +51,7 @@ function ThemeEnforcer() {
     const handleChange = () => {
       if (theme === 'system') applyTheme();
     };
-    
+
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [location.pathname, theme]);
@@ -65,6 +65,10 @@ const VolunteerAlerts = lazy(() => import("../pages/trustee/volunteer/Alerts"));
 const VolunteerSchedule = lazy(() => import("../pages/trustee/volunteer/Schedule"));
 const VolunteerAttendance = lazy(() => import("../pages/trustee/volunteer/Attendance"));
 const VolunteerUsers = lazy(() => import("../pages/trustee/volunteer/Users"));
+const VolunteerAddUser = lazy(() => import("../pages/trustee/volunteer/AddUser"));
+const VolunteerUserDetails = lazy(() => import("../pages/trustee/volunteer/UserDetails"));
+const VolunteerEditUser = lazy(() => import("../pages/trustee/volunteer/EditUser"));
+const VolunteerUserApplicationDetails = lazy(() => import("../pages/trustee/volunteer/UserApplicationDetails"));
 
 /* Commercial Trustee */
 const CommercialDashboard = lazy(() => import("../pages/trustee/commercial/Dashboard"));
@@ -257,7 +261,7 @@ function AppRoutes() {
           <Route element={<ProtectedRoute allowedRoles={["STUDENT"]} redirectTo="/login" />}>
             <Route path="/student/exam" element={<Exam />} />
             <Route path="/student/exam-result" element={<ExamResult />} />
-            
+
             <Route path="/student" element={<StudentLayout />}>
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<StudentDashboard />} />
@@ -275,7 +279,7 @@ function AppRoutes() {
               <Route path="cohort" element={<MyCohort />} />
               <Route path="cohorts" element={<MyCohort />} />
               <Route path="module-tests" element={<ModuleTests />} />
-              
+
               <Route path="exam-instructions" element={<ExamInstructions />} />
               <Route path="class-schedule" element={<ClassSchedule />} />
               <Route path="mentor-details" element={<MentorDetails />} />
@@ -291,7 +295,7 @@ function AppRoutes() {
               <Route path="assignment-details" element={<AssignmentDetails />} />
               <Route path="assignment-submission" element={<AssignmentSubmission />} />
               <Route path="assignment-feedback" element={<AssignmentFeedback />} />
-              
+
               <Route path="placements" element={<Placements />} />
 
               <Route path="certificates" element={<CertificateList />} />
@@ -460,7 +464,10 @@ function AppRoutes() {
               <Route path="volunteer/attendance-details" element={<AttendanceDetails />} />
               <Route path="volunteer/update-attendance" element={<UpdateAttendance />} />
               <Route path="volunteer/users" element={<VolunteerUsers />} />
-
+              <Route path="volunteer/add-student" element={<VolunteerAddUser />} />
+              <Route path="volunteer/student-details/:id" element={<VolunteerUserDetails />} />
+              <Route path="volunteer/edit-student/:id" element={<VolunteerEditUser />} />
+              <Route path="volunteer/application-details/:id" element={<VolunteerUserApplicationDetails />} />
               {/* Commercial Trustee */}
               <Route path="commercial/dashboard" element={<CommercialDashboard />} />
               <Route path="commercial/announcements" element={<Announcements />} />

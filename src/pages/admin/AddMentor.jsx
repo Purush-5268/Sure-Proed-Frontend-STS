@@ -9,8 +9,8 @@ function AddMentor() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     first_name: "",
-    last_name: "",
     email: "",
+    mapped_email: "",
     phone_number: "",
     gender: "",
     date_of_birth: "",
@@ -62,6 +62,7 @@ function AddMentor() {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         email: form.email.trim(),
+        mapped_email: form.mapped_email ? form.mapped_email.trim() : null,
         phone_number: form.phone_number.trim() || null,
         gender: form.gender || null,
         date_of_birth: form.date_of_birth || null,
@@ -120,6 +121,11 @@ function AddMentor() {
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Email Address *</label>
             <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="mentor@example.com" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Mapped Email (Optional)</label>
+            <input type="email" name="mapped_email" value={form.mapped_email} onChange={handleChange} placeholder="e.g. personal@gmail.com" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }} />
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>

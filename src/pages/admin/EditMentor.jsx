@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
@@ -12,6 +12,7 @@ function EditMentor() {
     first_name: "",
     last_name: "",
     email: "",
+    mapped_email: "",
     phone_number: "",
     is_active: true,
   });
@@ -28,6 +29,7 @@ function EditMentor() {
           first_name: mentor.first_name || "",
           last_name: mentor.last_name || "",
           email: mentor.email || "",
+          mapped_email: mentor.mapped_email || "",
           phone_number: mentor.phone_number || "",
           is_active: mentor.is_active !== false,
         });
@@ -59,6 +61,7 @@ function EditMentor() {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         email: form.email.trim(),
+        mapped_email: form.mapped_email ? form.mapped_email.trim() : null,
         phone_number: form.phone_number.trim() || null,
         is_active: form.is_active,
       };
@@ -98,6 +101,11 @@ function EditMentor() {
             <div className={styles.group}>
               <label>Email</label>
               <input type="email" name="email" value={form.email} onChange={handleChange} />
+            </div>
+
+            <div className={styles.group}>
+              <label>Mapped Email (Optional)</label>
+              <input type="email" name="mapped_email" value={form.mapped_email} onChange={handleChange} />
             </div>
 
             <div className={styles.group}>

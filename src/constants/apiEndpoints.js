@@ -113,6 +113,8 @@ export const API_ENDPOINTS = {
     REQUEST_ASSIGNMENT: "/api/cohorts/request-assignment/",
     ASSIGN_MENTOR: (id) => `/api/cohorts/${id}/assign_mentor/`,
     REVOKE_MENTOR: (id) => `/api/cohorts/${id}/revoke_mentor/`,
+    SET_CURRENT_MENTOR: (id) => `/api/cohorts/${id}/set-current-mentor/`,
+    REVOKE_CURRENT_MENTOR: (id) => `/api/cohorts/${id}/revoke-current-mentor/`,
     SCHEDULE_SCREENING: (id) => `/api/cohorts/${id}/schedule-screening/`,
     // Chat endpoints
     CHAT_MESSAGES: (id) => `/api/cohorts/${id}/chat/messages/`,
@@ -193,6 +195,8 @@ export const API_ENDPOINTS = {
     DOWNLOAD_EXCEL: (id) => `/api/attendance/${id}/official-attendance/download/`,
     ADD_ATTENDEES: (id) => `/api/attendance/${id}/add-attendees/`,
     WARNINGS: "/api/attendance/warnings/",
+    REQUEST_PERMISSION: "/api/attendance/request-permission/",
+    WARNING_MESSAGES: "/api/attendance/warning_messages/",
     RESOLVE_WARNING: "/api/attendance/resolve_warning/",
     ADMIN_QUERIES: "/api/attendance/admin_queries/",
     ADMIN_UPDATE_QUERY: "/api/attendance/admin_update_query/",
