@@ -27,7 +27,7 @@ function PermissionChatModal({ warningId, onClose }) {
     const apiBase = import.meta.env.VITE_API_URL || "";
     let wsProtocol = "ws";
     let wsHost = apiBase;
-    
+
     if (apiBase.startsWith("https://")) {
       wsProtocol = "wss";
       wsHost = apiBase.replace("https://", "");
@@ -38,9 +38,9 @@ function PermissionChatModal({ warningId, onClose }) {
       wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
       wsHost = window.location.host;
     }
-    
+
     const wsUrl = `${wsProtocol}://${wsHost}/ws/chat/${warningId}/`;
-    
+
     wsRef.current = new WebSocket(wsUrl, ["Bearer", token]);
 
     wsRef.current.onopen = () => {
@@ -75,11 +75,11 @@ function PermissionChatModal({ warningId, onClose }) {
 
   const sendMessage = () => {
     if (!inputValue.trim() || !wsRef.current) return;
-    
+
     wsRef.current.send(JSON.stringify({
       message: inputValue
     }));
-    
+
     setInputValue("");
   };
 
@@ -94,7 +94,7 @@ function PermissionChatModal({ warningId, onClose }) {
           <h2>Permission Chat</h2>
           <button className={styles.closeBtn} onClick={onClose}>&times;</button>
         </div>
-        
+
         <div className={styles.chatArea}>
           {messages.length === 0 ? (
             <p className={styles.emptyMsg}>No messages yet.</p>
@@ -115,9 +115,9 @@ function PermissionChatModal({ warningId, onClose }) {
           )}
           <div ref={messagesEndRef} />
         </div>
-        
+
         <div className={styles.inputArea}>
-          <input 
+          <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}

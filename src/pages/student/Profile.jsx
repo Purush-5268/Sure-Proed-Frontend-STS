@@ -19,6 +19,7 @@ function Profile() {
   const [activeTab, setActiveTab] = useState("personal");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [skillInput, setSkillInput] = useState("");
 
   const [profileStatus, setProfileStatus] = useState("NOT_AVAILABLE");
   const [isExistingStudent, setIsExistingStudent] = useState(false);
@@ -52,7 +53,7 @@ function Profile() {
             lastName: profile?.lastName || user?.last_name || "",
             email: profile?.email || user?.email || "",
             phoneNumber: profile?.phoneNumber || user?.phone_number || "",
-            gender: profile?.gender || user?.gender || "",
+            gender: (profile?.gender || user?.gender || "").toUpperCase(),
             dob: profile?.dob || user?.date_of_birth || "",
 
             college: profile?.college || "",
@@ -175,6 +176,30 @@ function Profile() {
       }
     } catch (err) {
       alert("Could not initiate GitHub connection");
+    }
+  };
+
+  const handleAddSkill = () => {
+    if (skillInput.trim()) {
+      const currentSkills = formData.skills ? formData.skills.split(",").map(s => s.trim()).filter(Boolean) : [];
+      if (!currentSkills.includes(skillInput.trim())) {
+        const newSkills = [...currentSkills, skillInput.trim()];
+        setFormData(prev => ({ ...prev, skills: newSkills.join(", ") }));
+      }
+      setSkillInput("");
+    }
+  };
+
+  const handleRemoveSkill = (skillToRemove) => {
+    const currentSkills = formData.skills ? formData.skills.split(",").map(s => s.trim()).filter(Boolean) : [];
+    const newSkills = currentSkills.filter(s => s !== skillToRemove);
+    setFormData(prev => ({ ...prev, skills: newSkills.join(", ") }));
+  };
+
+  const handleSkillKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddSkill();
     }
   };
 
@@ -416,8 +441,49 @@ function Profile() {
                 <div className="premium-section">
                   <h2 style={{ marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px' }}><FiSettings /> Skills & Preferences</h2>
                   <div className="premium-form-group">
-                    <label htmlFor="profile_skills" className="premium-label">Technical Skills</label>
-                    <input id="profile_skills" className="premium-input" name="skills" value={formData.skills} onChange={handleChange} placeholder="e.g. React, Python, Django" />
+                    <label className="premium-label">Technical Skills</label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                      {(formData.skills ? formData.skills.split(",").map(s => s.trim()).filter(Boolean) : []).map((skill, index) => (
+                        <div key={index} style={{
+                          display: 'flex', alignItems: 'center', gap: '6px',
+                          background: 'var(--primary-color)', color: 'white',
+                          padding: '6px 12px', borderRadius: '16px', fontSize: '13px', fontWeight: '500'
+                        }}>
+                          {skill}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSkill(skill)}
+                            style={{
+                              background: 'transparent', border: 'none', color: 'white',
+                              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              padding: '0', margin: '0'
+                            }}
+                            title="Remove Skill"
+                          >
+                            &times;
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <input
+                        id="profile_skill_input"
+                        className="premium-input"
+                        value={skillInput}
+                        onChange={(e) => setSkillInput(e.target.value)}
+                        onKeyDown={handleSkillKeyDown}
+                        placeholder="e.g. React, Python, Django (Press Enter to add)"
+                        style={{ flex: 1 }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddSkill}
+                        className="premium-btn premium-btn-primary"
+                        style={{ padding: '0 16px', minHeight: 'auto' }}
+                      >
+                        Add Skill
+                      </button>
+                    </div>
                   </div>
                   <div className="premium-form-group" style={{ marginTop: "16px" }}>
                     <label htmlFor="profile_hobbies" className="premium-label">Hobbies</label>

@@ -9,6 +9,7 @@ import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./ScheduleClass.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import TimePicker from "../../components/common/TimePicker";
+import AsyncSelect from "../../components/common/AsyncSelect";
 
 function ScheduleClass() {
   const { user } = useAuth();
@@ -45,6 +46,11 @@ function ScheduleClass() {
 
   const [showGuestInput, setShowGuestInput] = useState(false);
   const [newGuestEmail, setNewGuestEmail] = useState("");
+
+  const [priorPermissions, setPriorPermissions] = useState([]);
+  const [showPriorPermissionInput, setShowPriorPermissionInput] = useState(false);
+  const [newPriorPermissionStudent, setNewPriorPermissionStudent] = useState(null);
+  const [newPriorPermissionReason, setNewPriorPermissionReason] = useState("");
 
   const [cohorts, setCohorts] = useState([]);
   const [loadingCohorts, setLoadingCohorts] = useState(false);
@@ -178,6 +184,54 @@ function ScheduleClass() {
       ...prev,
       guestEmails: prev.guestEmails.filter((_, i) => i !== index),
     }));
+  };
+
+  const addPriorPermission = () => {
+    if (!newPriorPermissionStudent || !newPriorPermissionReason.trim()) {
+      alert("Please select a student and enter a reason.");
+      return;
+    }
+    if (priorPermissions.find(p => p.student_id === newPriorPermissionStudent.id)) {
+      alert("Student already added.");
+      return;
+    }
+    setPriorPermissions([...priorPermissions, {
+      student_id: newPriorPermissionStudent.id,
+      name: `${newPriorPermissionStudent.user?.first_name || newPriorPermissionStudent.first_name} ${newPriorPermissionStudent.user?.last_name || newPriorPermissionStudent.last_name}`.trim(),
+      reason: newPriorPermissionReason.trim()
+    }]);
+    setNewPriorPermissionStudent(null);
+    setNewPriorPermissionReason("");
+  };
+
+  const removePriorPermission = (index) => {
+    setPriorPermissions(priorPermissions.filter((_, i) => i !== index));
+  };
+
+  const loadStudentOptions = async (inputValue, scopeParams = {}) => {
+    if (!inputValue) return [];
+    try {
+      let url = `/api/students/?search=${inputValue}&page_size=20`;
+      
+      const { sessionType, cohortId, lstBatch } = scopeParams;
+      
+      if (sessionType === "Domain" && cohortId) {
+        url += `&cohort=${cohortId}`;
+      } else if (sessionType === "Domain" && !cohortId) {
+        return []; // Do not fetch all students if cohort is not selected
+      } else if (sessionType === "LST" && lstBatch) {
+        url += `&lst_batch=${lstBatch}`;
+      } else if (sessionType === "Soft Skills") {
+        url += `&status=SOFT_SKILLS`;
+      }
+      
+      const res = await apiClient.get(url);
+      const data = res.data?.results || res.data || [];
+      return data;
+    } catch (err) {
+      console.error("Failed to fetch students", err);
+      return [];
+    }
   };
 
   // 🚨 New States for Inline Rescheduling
@@ -328,6 +382,10 @@ function ScheduleClass() {
         cohort: matchedCohort ? matchedCohort.id : null,
         attendees: [],
         notes: request.guestEmails.length > 0 ? `Whitelisted Guests: ${request.guestEmails.join(", ")}` : "",
+        prior_permissions: priorPermissions.map(p => ({
+          student_id: p.student_id,
+          reason: p.reason
+        })),
         session_type: request.sessionType,
         group_name: finalGroupName,
         stream_id: request.streamId,
@@ -533,6 +591,7 @@ function ScheduleClass() {
                       <option value="">-- Select Batch --</option>
                       <option value="BATCH_1">Batch 1</option>
                       <option value="BATCH_2">Batch 2</option>
+                      <option value="COMBINED">Batch 1 + Batch 2 (Combined)</option>
                     </select>
                   </div>
                 )}
@@ -580,6 +639,51 @@ function ScheduleClass() {
                           {email}
                           <button type="button" onClick={() => removeGuestEmail(i)} style={{ color: "#ef4444", border: "none", background: "none", cursor: "pointer", fontSize: "16px", fontWeight: "bold", padding: 0 }}>&times;</button>
                         </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="premium-section" style={{ marginTop: "1.5rem" }}>
+              <div className="premium-flex-between" style={{ marginBottom: showPriorPermissionInput ? "1rem" : "0" }}>
+                <div>
+                  <label className="premium-label" style={{ color: "var(--text-primary)", marginBottom: 0 }}>Prior Permissions / Excused Absence</label>
+                  <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "4px 0 0 0" }}>Exempts this student from attendance disciplinary action. Actual attendance is still calculated. This is NOT a whitelist.</p>
+                </div>
+                <button type="button" onClick={() => setShowPriorPermissionInput(!showPriorPermissionInput)} className="premium-btn premium-btn-secondary" style={{ padding: "0 12px", height: "32px", fontSize: "var(--font-xs)" }}>
+                  {showPriorPermissionInput ? "Hide" : "+ Grant Permission"}
+                </button>
+              </div>
+
+              {showPriorPermissionInput && (
+                <div className={styles.animatedField}>
+                  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "flex-start" }}>
+                    <div style={{ flex: "2", minWidth: "200px" }}>
+                      <AsyncSelect
+                        value={newPriorPermissionStudent}
+                        onChange={(val) => setNewPriorPermissionStudent(val)}
+                        loadOptions={(val) => loadStudentOptions(val, { sessionType: request.sessionType, cohortId: request.cohortId, lstBatch: request.lstBatchNumber })}
+                        getOptionLabel={(s) => `${s.user?.first_name || s.first_name || ""} ${s.user?.last_name || s.last_name || ""} (${s.user?.email || s.email || ""} - ${s.student_code || ""})`}
+                        getOptionValue={(s) => s.id}
+                        placeholder="Search student by name or email..."
+                      />
+                    </div>
+                    <div style={{ flex: "2" }}>
+                      <input type="text" value={newPriorPermissionReason} onChange={(e) => setNewPriorPermissionReason(e.target.value)} placeholder="Reason (e.g. Doctor appointment)" className="premium-input" style={{ width: "100%", height: "42px" }} />
+                    </div>
+                    <button type="button" onClick={addPriorPermission} className="premium-btn premium-btn-secondary" style={{ height: "42px" }}>Add</button>
+                  </div>
+
+                  {priorPermissions.length > 0 && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem", padding: "0.75rem", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "8px" }}>
+                      {priorPermissions.map((p, i) => (
+                        <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px", background: "var(--bg-nested)", padding: "6px 12px", borderRadius: "20px", fontSize: "12px", border: "1px solid var(--border-color)" }}>
+                          <span style={{ fontWeight: "bold", color: "var(--text-primary)" }}>{p.name}</span>
+                          <span style={{ color: "var(--text-secondary)" }}>{p.reason}</span>
+                          <button type="button" onClick={() => removePriorPermission(i)} style={{ color: "#ef4444", border: "none", background: "none", cursor: "pointer", fontSize: "16px", fontWeight: "bold", padding: 0 }}>&times;</button>
+                        </div>
                       ))}
                     </div>
                   )}

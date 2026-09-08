@@ -6,7 +6,6 @@ import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 
 function AttendanceWarningPopup() {
   const [warnings, setWarnings] = useState([]);
-  const [isVisible, setIsVisible] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,6 +17,9 @@ function AttendanceWarningPopup() {
         const pendingWarnings = allWarnings.filter(w => w.status === 'PENDING');
         if (isMounted) {
           setWarnings(pendingWarnings);
+          if (pendingWarnings.length > 0 && window.location.pathname !== "/student/permissions") {
+            navigate("/student/permissions");
+          }
         }
       } catch (err) {
         // Silently ignore if not found or unauthorized
@@ -25,9 +27,9 @@ function AttendanceWarningPopup() {
     };
     fetchWarnings();
     return () => { isMounted = false; };
-  }, []);
+  }, [navigate]);
 
-  if (!isVisible || warnings.length === 0) return null;
+  if (warnings.length === 0) return null;
 
   return (
     <div style={{
@@ -51,13 +53,6 @@ function AttendanceWarningPopup() {
         <h3 style={{ margin: 0, fontSize: "16px", display: "flex", alignItems: "center", gap: "8px", color: "var(--color-danger, #ef4444)" }}>
           <FiAlertTriangle /> Attendance Warning
         </h3>
-        <button 
-          onClick={() => setIsVisible(false)}
-          style={{ background: "transparent", border: "none", color: "var(--text-secondary)", cursor: "pointer", opacity: 0.8, padding: "4px", display: "flex", alignItems: "center" }}
-          aria-label="Close warning"
-        >
-          <FiX size={18} />
-        </button>
       </div>
 
       <p style={{ margin: 0, fontSize: "14px", lineHeight: "1.5", color: "var(--text-primary)" }}>
@@ -65,19 +60,20 @@ function AttendanceWarningPopup() {
         Your attendance has dropped below the 40% threshold.
       </p>
 
-      <button 
-        onClick={() => {
-          setIsVisible(false);
-          navigate("/student/permissions");
-        }}
-        style={{
-          background: "var(--color-danger, #ef4444)", color: "white", border: "none", cursor: "pointer",
-          padding: "10px", borderRadius: "8px", textAlign: "center", fontWeight: "600",
-          fontSize: "14px", marginTop: "4px", transition: "opacity 0.2s", display: "block"
-        }}
-      >
-        Review & Seek Permission
-      </button>
+      {window.location.pathname !== "/student/permissions" && (
+        <button 
+          onClick={() => {
+            navigate("/student/permissions");
+          }}
+          style={{
+            background: "var(--color-danger, #ef4444)", color: "white", border: "none", cursor: "pointer",
+            padding: "10px", borderRadius: "8px", textAlign: "center", fontWeight: "600",
+            fontSize: "14px", marginTop: "4px", transition: "opacity 0.2s", display: "block"
+          }}
+        >
+          Review & Seek Permission
+        </button>
+      )}
     </div>
   );
 }

@@ -38,7 +38,7 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  opacity: 0.04;
+  opacity: var(--watermark-opacity, 0.1); /* Increased visibility for light mode */
   pointer-events: none;
   z-index: 0;
   filter: grayscale(100%);

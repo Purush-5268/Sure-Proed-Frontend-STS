@@ -85,6 +85,7 @@ export const API_ENDPOINTS = {
     BY_ID: (id) => `/api/requests/${id}/`,
     UPDATE_STATUS: (id) => `/api/requests/${id}/update-status/`,
     PENDING_COUNT: "/api/requests/pending-count/",
+    MESSAGE: (id) => `/api/requests/${id}/message/`,
   },
 
   // Pre-Screening
@@ -201,6 +202,7 @@ export const API_ENDPOINTS = {
     ADMIN_QUERIES: "/api/attendance/admin_queries/",
     ADMIN_UPDATE_QUERY: "/api/attendance/admin_update_query/",
     CHAT_HISTORY: "/api/attendance/chat_history/",
+    MESSAGE: (id) => `/api/warnings/${id}/message/`,
   },
 
   // Certificates

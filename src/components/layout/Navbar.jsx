@@ -43,21 +43,7 @@ function Navbar() {
 
   const closeMenu = () => setMobileOpen(false);
 
-  const scrollToSection = (e, id) => {
-    if (window.location.pathname === "/") {
-      e.preventDefault();
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      } else {
-        // Retry for lazy loaded components
-        setTimeout(() => {
-          document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-        }, 300);
-      }
-      closeMenu();
-    }
-  };
+
 
   return (
     <nav className={styles.navbar}>
@@ -80,9 +66,44 @@ function Navbar() {
 
       <div className={`${styles.navContent} ${mobileOpen ? styles.mobileOpen : ""}`}>
         <ul className={styles.menu}>
-          <li><Link to="/" onClick={closeMenu}>Home</Link></li>
-          <li><a href="/#features" onClick={(e) => scrollToSection(e, "features")}>Features</a></li>
-          <li><a href="/#statistics" onClick={(e) => scrollToSection(e, "statistics")}>Statistics</a></li>
+          <li>
+            <Link to="/" onClick={(e) => {
+              if (window.location.pathname === "/") {
+                e.preventDefault();
+                window.history.pushState(null, "", "/");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+              closeMenu();
+            }}>Home</Link>
+          </li>
+          <li>
+            <Link to="/#features" onClick={(e) => {
+              if (window.location.pathname === "/") {
+                e.preventDefault();
+                window.history.pushState(null, "", "/#features");
+                const element = document.getElementById("features");
+                if (element) element.scrollIntoView({ behavior: "smooth" });
+              }
+              closeMenu();
+            }}>Features</Link>
+          </li>
+          <li>
+            <Link to="/#statistics" onClick={(e) => {
+              if (window.location.pathname === "/") {
+                e.preventDefault();
+                window.history.pushState(null, "", "/#statistics");
+                const element = document.getElementById("statistics");
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth" });
+                } else {
+                  setTimeout(() => {
+                    document.getElementById("statistics")?.scrollIntoView({ behavior: "smooth" });
+                  }, 300);
+                }
+              }
+              closeMenu();
+            }}>Statistics</Link>
+          </li>
           {isAuthenticated && (
             <li><Link to={getDashboardPath()} onClick={closeMenu}>Dashboard</Link></li>
           )}

@@ -153,12 +153,36 @@
   font-family: inherit;
   font-size: 14px;
   transition: all 0.2s ease;
+  width: 100%;
 }
 
 .inputGroup input:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px var(--student-glow-primary);
+}
+
+.passwordInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordToggleBtn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.passwordToggleBtn:hover {
+  color: var(--text-primary);
 }
 
 .saveBtn {

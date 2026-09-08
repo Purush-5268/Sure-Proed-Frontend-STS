@@ -69,6 +69,8 @@ const VolunteerAddUser = lazy(() => import("../pages/trustee/volunteer/AddUser")
 const VolunteerUserDetails = lazy(() => import("../pages/trustee/volunteer/UserDetails"));
 const VolunteerEditUser = lazy(() => import("../pages/trustee/volunteer/EditUser"));
 const VolunteerUserApplicationDetails = lazy(() => import("../pages/trustee/volunteer/UserApplicationDetails"));
+const VolunteerCohorts = lazy(() => import("../pages/trustee/volunteer/Cohorts"));
+const VolunteerCohortDetails = lazy(() => import("../pages/trustee/volunteer/CohortDetails"));
 
 /* Commercial Trustee */
 const CommercialDashboard = lazy(() => import("../pages/trustee/commercial/Dashboard"));
@@ -468,6 +470,10 @@ function AppRoutes() {
               <Route path="volunteer/student-details/:id" element={<VolunteerUserDetails />} />
               <Route path="volunteer/edit-student/:id" element={<VolunteerEditUser />} />
               <Route path="volunteer/application-details/:id" element={<VolunteerUserApplicationDetails />} />
+              <Route path="volunteer/requests-support" element={<RequestsSupport />} />
+              <Route path="volunteer/cohorts" element={<VolunteerCohorts />} />
+              <Route path="volunteer/cohort-details/:id" element={<VolunteerCohortDetails />} />
+              <Route path="volunteer/cohort-chat/:cohortId" element={<CohortChat />} />
               {/* Commercial Trustee */}
               <Route path="commercial/dashboard" element={<CommercialDashboard />} />
               <Route path="commercial/announcements" element={<Announcements />} />

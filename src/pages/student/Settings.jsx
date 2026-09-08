@@ -4,11 +4,12 @@ import ThemeToggle from '../../components/common/ThemeToggle';
 import { useAuth } from '../../context/AuthContext';
 import apiClient from '../../services/apiClient';
 import { API_ENDPOINTS } from '../../constants/apiEndpoints';
-import { FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
+import { FiAlertCircle, FiCheckCircle, FiEye, FiEyeOff } from 'react-icons/fi';
 
 function Settings() {
     const { user } = useAuth();
     const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
@@ -38,7 +39,21 @@ function Settings() {
             setPasswordData({ current: '', new: '', confirm: '' });
             setTimeout(() => setSuccess(""), 3000);
         } catch (err) {
-            setError(err?.response?.data?.detail || "Failed to update password. Please check your current password.");
+            let errorMsg = "Failed to update password. Please check your current password.";
+            if (err?.response?.data) {
+                if (err.response.data.detail) {
+                    errorMsg = err.response.data.detail;
+                } else if (err.response.data.non_field_errors) {
+                    errorMsg = err.response.data.non_field_errors[0];
+                } else if (typeof err.response.data === 'object') {
+                    // Get the first error message from Djoser's object response (e.g. current_password or new_password)
+                    const firstKey = Object.keys(err.response.data)[0];
+                    if (firstKey && Array.isArray(err.response.data[firstKey])) {
+                        errorMsg = err.response.data[firstKey][0];
+                    }
+                }
+            }
+            setError(errorMsg);
         } finally {
             setLoading(false);
         }
@@ -115,15 +130,24 @@ function Settings() {
                     <form onSubmit={handlePasswordChange} className={styles.passwordForm}>
                         <div className={styles.inputGroup}>
                             <label htmlFor="currentPassword">Current Password</label>
-                            <input id="currentPassword" type="password" value={passwordData.current} onChange={(e) => setPasswordData({ ...passwordData, current: e.target.value })} required placeholder="Enter current password" />
+                            <div className={styles.passwordInputWrapper}>
+                                <input id="currentPassword" type={showPassword ? "text" : "password"} value={passwordData.current} onChange={(e) => setPasswordData({ ...passwordData, current: e.target.value })} required placeholder="Enter current password" />
+                                <button type="button" className={styles.passwordToggleBtn} onClick={() => setShowPassword(!showPassword)} aria-label="Toggle password visibility">
+                                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                                </button>
+                            </div>
                         </div>
                         <div className={styles.inputGroup}>
                             <label htmlFor="newPassword">New Password</label>
-                            <input id="newPassword" type="password" value={passwordData.new} onChange={(e) => setPasswordData({ ...passwordData, new: e.target.value })} required placeholder="Enter new password" />
+                            <div className={styles.passwordInputWrapper}>
+                                <input id="newPassword" type={showPassword ? "text" : "password"} value={passwordData.new} onChange={(e) => setPasswordData({ ...passwordData, new: e.target.value })} required placeholder="Enter new password" />
+                            </div>
                         </div>
                         <div className={styles.inputGroup}>
                             <label htmlFor="confirmPassword">Confirm New Password</label>
-                            <input id="confirmPassword" type="password" value={passwordData.confirm} onChange={(e) => setPasswordData({ ...passwordData, confirm: e.target.value })} required placeholder="Confirm new password" />
+                            <div className={styles.passwordInputWrapper}>
+                                <input id="confirmPassword" type={showPassword ? "text" : "password"} value={passwordData.confirm} onChange={(e) => setPasswordData({ ...passwordData, confirm: e.target.value })} required placeholder="Confirm new password" />
+                            </div>
                         </div>
                         <button type="submit" disabled={loading} className={styles.saveBtn} style={{ cursor: loading ? "not-allowed" : "pointer" }}>
                             {loading ? "Updating..." : "Update Password"}

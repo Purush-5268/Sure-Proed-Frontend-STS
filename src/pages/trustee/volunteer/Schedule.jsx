@@ -21,6 +21,9 @@ function ScheduleClass() {
 
   // 🚨 State for the Live Radar
   const [activeAdminClasses, setActiveAdminClasses] = useState([]);
+  
+  // 🚨 State for LST Automation Admin Banner
+  const [lstAutomationConfig, setLstAutomationConfig] = useState(null);
 
   const [request, setRequest] = useState({
     sessionType: "Domain",
@@ -83,7 +86,19 @@ function ScheduleClass() {
         console.error("Failed to load courses:", err);
       }
     }
-    Promise.all([loadCourses(), loadActiveClasses()]);
+    
+    async function loadLstConfig() {
+      try {
+        const res = await apiClient.get('/api/attendance/get-lst-automation/');
+        if (res.data?.configured) {
+          setLstAutomationConfig(res.data);
+        }
+      } catch (err) {
+        // Not admin or no config
+      }
+    }
+    
+    Promise.all([loadCourses(), loadActiveClasses(), loadLstConfig()]);
   }, []);
 
   useEffect(() => {
@@ -343,11 +358,24 @@ function ScheduleClass() {
     setPriorPermissions(priorPermissions.filter((_, i) => i !== index));
   };
 
-  const loadStudentOptions = async (inputValue) => {
+  const loadStudentOptions = async (inputValue, scopeParams = {}) => {
     if (!inputValue) return [];
     try {
-      // Use the generic search parameter for students
-      const res = await apiClient.get(`/api/students/?search=${inputValue}&page_size=20`);
+      // Use the generic search parameter for students, but append scope parameters to avoid fetching entire global population
+      let url = `/api/students/?search=${inputValue}&page_size=20`;
+      
+      const { sessionType, cohortId, lstBatch } = scopeParams;
+      
+      if (sessionType === "Domain" && cohortId) {
+        url += `&cohort=${cohortId}`;
+      } else if (sessionType === "LST" && lstBatch) {
+        // If COMBINED, we might just search broadly or backend supports lst_batch=COMBINED
+        url += `&lst_batch=${lstBatch}`;
+      } else if (sessionType === "Soft Skills") {
+        url += `&status=SOFT_SKILLS`;
+      }
+      
+      const res = await apiClient.get(url);
       const data = res.data?.results || res.data || [];
       return data;
     } catch (err) {
@@ -388,6 +416,12 @@ function ScheduleClass() {
           <p className="premium-subtitle">Configure automated Google Meets for Domains, LST, or Celebrations.</p>
         </div>
       </div>
+
+      {lstAutomationConfig && new Date().getDay() === 0 && new Date().getHours() === 11 && (
+        <div className="premium-alert-warning" style={{ marginBottom: "1.5rem" }}>
+          ⚠️ <strong>LST Automation Reminder:</strong> Today's automated LST ({lstAutomationConfig.starting_batch}) will generate at 12:00 PM. Verify prior permissions or explicitly select COMBINED if clubbing is required.
+        </div>
+      )}
 
       <div className="premium-glass-card premium-card-large">
         {successMessage && <div className="premium-alert-success">✅ {successMessage}</div>}
@@ -447,6 +481,7 @@ function ScheduleClass() {
                       <option value="">-- Select Batch --</option>
                       <option value="BATCH_1">Batch 1</option>
                       <option value="BATCH_2">Batch 2</option>
+                      <option value="COMBINED">Batch 1 + Batch 2 (Combined)</option>
                     </select>
                   </div>
                 )}
@@ -496,21 +531,21 @@ function ScheduleClass() {
               <div className="premium-flex-between" style={{ marginBottom: showPriorPermissionInput ? "1rem" : "0" }}>
                 <div>
                   <label className="premium-label" style={{ color: "var(--text-primary)", marginBottom: 0 }}>Prior Permissions / Excused Absence</label>
-                  <p style={{ fontSize: "12px", color: "var(--text-primary)", margin: 0 }}>Grant early access and excuse absence for specific students.</p>
+                  <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "4px 0 0 0" }}>Exempts this student from attendance disciplinary action. Actual attendance is still calculated. This is NOT a whitelist.</p>
                 </div>
-                <button type="button" onClick={() => setShowPriorPermissionInput(!showPriorPermissionInput)} className="premium-btn premium-btn-primary">
-                  {showPriorPermissionInput ? "Hide" : "+ Add Student"}
+                <button type="button" onClick={() => setShowPriorPermissionInput(!showPriorPermissionInput)} className="premium-btn premium-btn-secondary" style={{ padding: "0 12px", height: "32px", fontSize: "var(--font-xs)" }}>
+                  {showPriorPermissionInput ? "Hide" : "+ Grant Permission"}
                 </button>
               </div>
 
               {showPriorPermissionInput && (
                 <div className={styles.animatedField}>
                   <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "flex-start" }}>
-                    <div style={{ flex: "2" }}>
+                    <div style={{ flex: "2", minWidth: "200px" }}>
                       <AsyncSelect
                         value={newPriorPermissionStudent}
                         onChange={(val) => setNewPriorPermissionStudent(val)}
-                        loadOptions={loadStudentOptions}
+                        loadOptions={(val) => loadStudentOptions(val, { sessionType: request.sessionType, cohortId: request.cohortId, lstBatch: request.lstBatchNumber })}
                         getOptionLabel={(s) => `${s.user?.first_name || s.first_name || ""} ${s.user?.last_name || s.last_name || ""} (${s.student_code || s.user?.email || s.email})`}
                         getOptionValue={(s) => s.id}
                         placeholder="Search student by name or email..."
@@ -693,7 +728,7 @@ function ScheduleClass() {
                       <AsyncSelect
                         value={grantPermissionStudent}
                         onChange={(val) => setGrantPermissionStudent(val)}
-                        loadOptions={loadStudentOptions}
+                        loadOptions={(val) => loadStudentOptions(val, { sessionType: cls.session_type, cohortId: cls.cohort, lstBatch: cls.lst_batch })}
                         getOptionLabel={(s) => `${s.user?.first_name || s.first_name || ""} ${s.user?.last_name || s.last_name || ""} (${s.student_code || s.user?.email || s.email})`}
                         getOptionValue={(s) => s.id}
                         placeholder="Search student..."
