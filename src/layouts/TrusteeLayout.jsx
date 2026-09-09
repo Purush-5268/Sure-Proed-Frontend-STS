@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { 
   FaTachometerAlt, FaExclamationTriangle, FaCalendarAlt, 
   FaUserClock, FaUserShield, FaBullhorn, 
-  FaTrophy, FaBriefcase 
+  FaTrophy, FaBriefcase, FaUser 
 } from "react-icons/fa";
 
 import Navbar from "../components/layout/Navbar";
@@ -22,6 +22,7 @@ function TrusteeLayout() {
     { label: "Schedule Classes", path: "/trustee/volunteer/schedule", icon: <FaCalendarAlt /> },
     { label: "Attendance & CSV", path: "/trustee/volunteer/attendance", icon: <FaUserClock /> },
     { label: "User Moderation", path: "/trustee/volunteer/users", icon: <FaUserShield /> },
+    { label: "My Profile", path: "/trustee/volunteer/profile", icon: <FaUser /> },
   ];
 
   const higherLevelTrusteeLinks = [
@@ -29,6 +30,7 @@ function TrusteeLayout() {
     { label: "Announcements", path: "/trustee/commercial/announcements", icon: <FaBullhorn /> },
     { label: "Achievements", path: "/trustee/commercial/achievements", icon: <FaTrophy /> },
     { label: "Updates", path: "/trustee/commercial/updates", icon: <FaBriefcase /> },
+    { label: "My Profile", path: "/trustee/commercial/profile", icon: <FaUser /> },
   ];
 
   const isHigherLevel = user?.role === "TRUSTEE";

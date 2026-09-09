@@ -82,6 +82,12 @@ export const authService = {
     return response.data;
   },
 
+  // Google OAuth Connect URL
+  async getGoogleConnectUrl() {
+    const response = await apiClient.get(API_ENDPOINTS.AUTH.GOOGLE_CONNECT);
+    return response.data;
+  },
+
   // Logout
   logout() {
     clearAuthStorage();

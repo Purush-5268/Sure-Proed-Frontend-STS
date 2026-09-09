@@ -126,7 +126,7 @@ function VolunteerDashboard() {
             <span className={styles.radarPing}></span>
             <span className={styles.radarDot}></span>
           </span>
-          Live Spectator Radar
+          Live Classes
         </h2>
 
         <div className={styles.radarCard}>

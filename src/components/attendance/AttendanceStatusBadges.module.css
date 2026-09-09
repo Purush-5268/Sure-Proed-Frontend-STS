@@ -1,0 +1,98 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.text {
+  display: inline;
+}
+
+/* Success (Green) */
+.badge-success {
+  background-color: var(--status-active-bg, rgba(16, 185, 129, 0.1));
+  color: var(--status-success, #10b981);
+  border: 1px solid var(--status-success, #10b981);
+}
+
+.badge-success:hover {
+  background-color: var(--status-active-bg, rgba(16, 185, 129, 0.2));
+}
+
+/* Warning (Amber) */
+.badge-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: var(--status-warning, #f59e0b);
+  border: 1px solid var(--status-warning, #f59e0b);
+}
+
+.badge-warning:hover {
+  background-color: rgba(245, 158, 11, 0.2);
+}
+
+/* Error (Red) */
+.badge-error {
+  background-color: var(--status-inactive-bg, rgba(239, 68, 68, 0.1));
+  color: var(--status-error, #ef4444);
+  border: 1px solid var(--status-error, #ef4444);
+}
+
+.badge-error:hover {
+  background-color: var(--status-inactive-bg, rgba(239, 68, 68, 0.2));
+}
+
+/* Default (Gray) */
+.badge-default {
+  background-color: var(--bg-secondary, rgba(107, 114, 128, 0.1));
+  color: var(--text-secondary, #6b7280);
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.badge-default:hover {
+  background-color: var(--bg-secondary, rgba(107, 114, 128, 0.2));
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .badge {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .icon {
+    font-size: 12px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .badge-success {
+    background-color: rgba(16, 185, 129, 0.15);
+  }
+
+  .badge-warning {
+    background-color: rgba(245, 158, 11, 0.15);
+  }
+
+  .badge-error {
+    background-color: rgba(239, 68, 68, 0.15);
+  }
+
+  .badge-default {
+    background-color: rgba(107, 114, 128, 0.15);
+  }
+}

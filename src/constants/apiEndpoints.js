@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
     GITHUB_CONNECT: "/api/auth/github/connect/",
     GITHUB_CALLBACK: "/api/auth/github/callback/",
     GITHUB_DISCONNECT: "/api/auth/github/disconnect/",
+    GOOGLE_CONNECT: "/api/auth/google/connect/",
     // OTP-gated email verification registration flow
     SEND_VERIFICATION_OTP: "/api/auth/send-verification-otp/",
     VERIFY_EMAIL_OTP: "/api/auth/verify-email-otp/",
