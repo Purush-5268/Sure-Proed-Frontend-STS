@@ -22,6 +22,7 @@ function AddCertificate() {
   const [form, setForm] = useState({
     certificate_number: initialCodes.certificate_number,
     verification_code: initialCodes.verification_code,
+    cohort: "",
     student: "",
     application: "",
     certificate_type: "COURSE",
@@ -30,6 +31,7 @@ function AddCertificate() {
     status: "ACTIVE",
   });
 
+  const [cohorts, setCohorts] = useState([]);
   const [students, setStudents] = useState([]);
   const [applications, setApplications] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
@@ -37,24 +39,29 @@ function AddCertificate() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // Filter toggle: completed only (both cohort and students)
+  const [onlyCompleted, setOnlyCompleted] = useState(true);
+
   useEffect(() => {
     let isMounted = true;
     const loadData = async () => {
       setDataLoading(true);
       try {
-        const [studentsData, applicationsData] = await Promise.all([
+        const [cohortsData, studentsData, applicationsData] = await Promise.all([
+          fetchAllPages(API_ENDPOINTS.COHORTS.BASE).catch(() => []),
           fetchAllPages(API_ENDPOINTS.STUDENTS.BASE).catch(() => []),
           fetchAllPages(API_ENDPOINTS.APPLICATIONS.BASE).catch(() => []),
         ]);
 
         if (isMounted) {
+          setCohorts(Array.isArray(cohortsData) ? cohortsData : []);
           setStudents(Array.isArray(studentsData) ? studentsData : []);
           setApplications(Array.isArray(applicationsData) ? applicationsData : []);
         }
       } catch (err) {
         console.error("Failed to load certificate form data:", err);
         if (isMounted) {
-          setError("Failed to load students and applications. Please check your backend connection.");
+          setError("Failed to load cohorts, students, and applications. Please check your backend connection.");
         }
       } finally {
         if (isMounted) setDataLoading(false);
@@ -67,28 +74,129 @@ function AddCertificate() {
     };
   }, []);
 
-  // Filter applications belonging to the selected student
+  // Helper to test if an application is completed
+  const isAppCompleted = (app) => {
+    return (
+      app.status?.toUpperCase() === "COMPLETED" ||
+      app.completed_course === true
+    );
+  };
+
+  // Helper to test if a cohort is completed or has completed applications
+  const isCohortCompleted = (cohort) => {
+    if (cohort.status?.toUpperCase() === "COMPLETED") return true;
+    return applications.some((app) => {
+      const appCohortId = app.assigned_cohort?.id || app.assigned_cohort || app.cohort?.id || app.cohort;
+      return String(appCohortId) === String(cohort.id) && isAppCompleted(app);
+    });
+  };
+
+  // Filtered cohorts for the dropdown
+  const displayCohorts = useMemo(() => {
+    if (!onlyCompleted) return cohorts;
+    const completed = cohorts.filter(isCohortCompleted);
+    // If no cohorts in the database have COMPLETED status yet, fall back to all cohorts so the admin is never blocked
+    return completed.length > 0 ? completed : cohorts;
+  }, [cohorts, onlyCompleted, applications]);
+
+  // Filtered students based on selected cohort and completion filter
+  const availableStudents = useMemo(() => {
+    if (!form.cohort) {
+      if (onlyCompleted) {
+        const completedStudentIds = new Set(
+          applications
+            .filter(isAppCompleted)
+            .map((app) => String(app.student?.id || app.student || app.student_details?.id))
+        );
+        const filtered = students.filter((s) => completedStudentIds.has(String(s.id)));
+        return filtered.length > 0 ? filtered : students;
+      }
+      return students;
+    }
+
+    // Cohort is selected: find all applications belonging to this cohort
+    const cohortApps = applications.filter((app) => {
+      const appCohortId = app.assigned_cohort?.id || app.assigned_cohort || app.cohort?.id || app.cohort;
+      const matchesCohort = String(appCohortId) === String(form.cohort);
+      if (!matchesCohort) return false;
+      if (onlyCompleted) {
+        return isAppCompleted(app);
+      }
+      return true;
+    });
+
+    const validStudentIds = new Set(
+      cohortApps.map((app) => String(app.student?.id || app.student || app.student_details?.id))
+    );
+
+    return students.filter((s) => validStudentIds.has(String(s.id)));
+  }, [students, applications, form.cohort, onlyCompleted]);
+
+  // Filtered applications belonging to selected student and cohort
   const availableApplications = useMemo(() => {
-    if (!form.student) return applications;
     return applications.filter((app) => {
       const appStudentId = app.student?.id || app.student || app.student_details?.id;
-      return String(appStudentId) === String(form.student);
+      if (form.student && String(appStudentId) !== String(form.student)) {
+        return false;
+      }
+
+      const appCohortId = app.assigned_cohort?.id || app.assigned_cohort || app.cohort?.id || app.cohort;
+      if (form.cohort && String(appCohortId) !== String(form.cohort)) {
+        return false;
+      }
+
+      if (onlyCompleted) {
+        return isAppCompleted(app);
+      }
+
+      return true;
     });
-  }, [applications, form.student]);
+  }, [applications, form.student, form.cohort, onlyCompleted]);
+
+  const handleCohortChange = (event) => {
+    const cohortId = event.target.value;
+    const selectedCohort = cohorts.find((c) => String(c.id) === String(cohortId));
+
+    setForm((prev) => {
+      return {
+        ...prev,
+        cohort: cohortId,
+        student: "",
+        application: "",
+        title: selectedCohort
+          ? selectedCohort.name || selectedCohort.course?.name || prev.title
+          : prev.title,
+      };
+    });
+  };
 
   const handleStudentChange = (event) => {
     const studentId = event.target.value;
+
+    // Find applications for this student in this cohort
+    const matchingApps = applications.filter((app) => {
+      const appStudentId = app.student?.id || app.student || app.student_details?.id;
+      if (String(appStudentId) !== String(studentId)) return false;
+      if (form.cohort) {
+        const appCohortId = app.assigned_cohort?.id || app.assigned_cohort || app.cohort?.id || app.cohort;
+        if (String(appCohortId) !== String(form.cohort)) return false;
+      }
+      if (onlyCompleted) {
+        return isAppCompleted(app);
+      }
+      return true;
+    });
+
+    const singleApp = matchingApps.length === 1 ? matchingApps[0] : null;
+
     setForm((prev) => {
-      // Check if current application still belongs to this newly selected student
-      const appMatches = applications.find(
-        (app) =>
-          String(app.id) === String(prev.application) &&
-          String(app.student?.id || app.student || app.student_details?.id) === String(studentId)
-      );
       return {
         ...prev,
         student: studentId,
-        application: appMatches ? prev.application : "",
+        application: singleApp ? singleApp.id : "",
+        title: singleApp
+          ? singleApp.course_title || singleApp.course_name || singleApp.course?.name || prev.title
+          : prev.title,
       };
     });
   };
@@ -97,11 +205,17 @@ function AddCertificate() {
     const appId = event.target.value;
     const selectedApp = applications.find((app) => String(app.id) === String(appId));
     setForm((prev) => {
-      const nextStudent = selectedApp ? (selectedApp.student?.id || selectedApp.student || selectedApp.student_details?.id || prev.student) : prev.student;
+      const nextStudent = selectedApp
+        ? selectedApp.student?.id || selectedApp.student || selectedApp.student_details?.id || prev.student
+        : prev.student;
+      const nextCohort = selectedApp
+        ? selectedApp.assigned_cohort?.id || selectedApp.assigned_cohort || selectedApp.cohort?.id || selectedApp.cohort || prev.cohort
+        : prev.cohort;
       return {
         ...prev,
         application: appId,
         student: nextStudent || prev.student,
+        cohort: nextCohort || prev.cohort,
         title: prev.title || selectedApp?.course_title || selectedApp?.course_name || selectedApp?.course?.name || "",
       };
     });
@@ -203,11 +317,62 @@ function AddCertificate() {
           <SkeletonLoader variant="table" rows={4} />
         ) : (
           <form className={styles.form} onSubmit={handleSubmit}>
+            {/* Filter Toggle Banner */}
+            <div className={styles.filterRow}>
+              <label style={{ display: "inline-flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "14px", fontWeight: 600, color: "var(--text-primary)" }}>
+                <input
+                  type="checkbox"
+                  checked={onlyCompleted}
+                  onChange={(e) => setOnlyCompleted(e.target.checked)}
+                  style={{ width: "16px", height: "16px", accentColor: "#2563eb", cursor: "pointer" }}
+                />
+                <span>Filter by Completed Status Only (Cohorts & Students)</span>
+              </label>
+
+              {onlyCompleted ? (
+                <span style={{ fontSize: "12px", background: "rgba(34, 197, 94, 0.15)", color: "#16a34a", padding: "4px 10px", borderRadius: "12px", fontWeight: 600 }}>
+                  ✓ Showing only completed cohorts & students
+                </span>
+              ) : (
+                <span style={{ fontSize: "12px", background: "rgba(100, 116, 139, 0.15)", color: "var(--text-secondary)", padding: "4px 10px", borderRadius: "12px", fontWeight: 500 }}>
+                  Showing all cohorts & students
+                </span>
+              )}
+            </div>
+
+            {/* Select Cohort */}
             <div className={styles.group}>
-              <label>Student *</label>
+              <label>Select Cohort *</label>
+              <select name="cohort" value={form.cohort} onChange={handleCohortChange}>
+                <option value="">
+                  {displayCohorts.length > 0 ? `Select a cohort (${displayCohorts.length} available)` : "No cohorts available"}
+                </option>
+                {displayCohorts.map((cohort) => {
+                  const isComp = cohort.status?.toUpperCase() === "COMPLETED";
+                  const label = `${cohort.name || cohort.code} (${cohort.status || "ACTIVE"})${isComp ? " - Completed" : ""}`;
+                  return (
+                    <option key={cohort.id} value={cohort.id}>
+                      {label}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+
+            {/* Select Student */}
+            <div className={styles.group}>
+              <label>
+                Student * {form.cohort ? `(${availableStudents.length} in cohort)` : `(${availableStudents.length} available)`}
+              </label>
               <select name="student" value={form.student} onChange={handleStudentChange} required>
-                <option value="">Select a student ({students.length} available)</option>
-                {students.map((student) => {
+                <option value="">
+                  {availableStudents.length > 0
+                    ? `Select a student (${availableStudents.length} ${onlyCompleted ? "completed" : "available"})`
+                    : form.cohort
+                    ? "No completed students in selected cohort"
+                    : "Select a student"}
+                </option>
+                {availableStudents.map((student) => {
                   const studentName = `${student.user?.first_name || ""} ${student.user?.last_name || ""}`.trim() || student.user?.email || student.student_code;
                   return (
                     <option key={student.id} value={student.id}>
@@ -216,8 +381,14 @@ function AddCertificate() {
                   );
                 })}
               </select>
+              {form.cohort && availableStudents.length === 0 && (
+                <span style={{ fontSize: "12px", color: "#eab308", marginTop: "4px" }}>
+                  ⚠️ No completed students in this cohort. Uncheck "Filter by Completed Status" above to view all enrolled students.
+                </span>
+              )}
             </div>
 
+            {/* Course Application */}
             <div className={styles.group}>
               <label>Course Application *</label>
               <select name="application" value={form.application} onChange={handleApplicationChange} required>
@@ -236,13 +407,27 @@ function AddCertificate() {
               </select>
             </div>
 
+            {/* Certificate Type */}
+            <div className={styles.group}>
+              <label>Certificate Type *</label>
+              <select name="certificate_type" value={form.certificate_type} onChange={handleChange}>
+                <option value="COURSE">Course Completion</option>
+                <option value="INTERNSHIP">Internship Completion</option>
+                <option value="MERIT">Certificate of Merit</option>
+                <option value="PARTICIPATION">Participation</option>
+                <option value="VOLUNTEER">Volunteer Appreciation</option>
+                <option value="MENTOR">Mentor Appreciation</option>
+              </select>
+            </div>
+
+            {/* Certificate Number */}
             <div className={styles.group}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                 <label style={{ margin: 0 }}>Certificate Number *</label>
                 <button
                   type="button"
                   onClick={handleRegenerateCodes}
-                  style={{ background: "none", border: "none", color: "#2563eb", cursor: "pointer", fontSize: "12px", padding: 0, fontWeight: 600 }}
+                  style={{ background: "none", border: "none", color: "#2563eb", cursor: "pointer", fontSize: "12px", padding: 0, fontWeight: 600, gridColumn: "auto" }}
                 >
                   ⚡ Regenerate IDs
                 </button>
@@ -257,6 +442,7 @@ function AddCertificate() {
               />
             </div>
 
+            {/* Verification Code */}
             <div className={styles.group}>
               <label>Verification Code *</label>
               <input
@@ -269,29 +455,7 @@ function AddCertificate() {
               />
             </div>
 
-            <div className={styles.group}>
-              <label>Certificate Type *</label>
-              <select name="certificate_type" value={form.certificate_type} onChange={handleChange}>
-                <option value="COURSE">Course Completion</option>
-                <option value="INTERNSHIP">Internship Completion</option>
-                <option value="MERIT">Certificate of Merit</option>
-                <option value="PARTICIPATION">Participation</option>
-                <option value="VOLUNTEER">Volunteer Appreciation</option>
-                <option value="MENTOR">Mentor Appreciation</option>
-              </select>
-            </div>
-
-            <div className={styles.group}>
-              <label>Certificate Title (Optional)</label>
-              <input
-                type="text"
-                name="title"
-                value={form.title}
-                onChange={handleChange}
-                placeholder="e.g. VLSI Design & Verification"
-              />
-            </div>
-
+            {/* Issued At */}
             <div className={styles.group}>
               <label>Issued At *</label>
               <input
@@ -303,12 +467,25 @@ function AddCertificate() {
               />
             </div>
 
+            {/* Status */}
             <div className={styles.group}>
               <label>Status *</label>
               <select name="status" value={form.status} onChange={handleChange}>
                 <option value="ACTIVE">Active</option>
                 <option value="REVOKED">Revoked</option>
               </select>
+            </div>
+
+            {/* Certificate Title */}
+            <div className={styles.full}>
+              <label>Certificate Title (Optional)</label>
+              <input
+                type="text"
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                placeholder="e.g. VLSI Design & Verification"
+              />
             </div>
 
             <button type="submit" disabled={submitting || dataLoading}>
