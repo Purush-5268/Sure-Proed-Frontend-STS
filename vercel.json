@@ -1,16 +1,45 @@
 {
-    "rewrites": [
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
         {
-            "source": "/api/:path*",
-            "destination": "https://sureproed.com/api/:path*"
-        },
-        {
-            "source": "/media/:path*",
-            "destination": "https://sureproed.com/media/:path*"
-        },
-        {
-            "source": "/(.*)",
-            "destination": "/index.html"
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
         }
-    ]
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://sureproed.com/api/:path*"
+    },
+    {
+      "source": "/media/:path*",
+      "destination": "https://sureproed.com/media/:path*"
+    },
+    {
+      "source": "/((?!assets/).*)",
+      "destination": "/index.html"
+    }
+  ]
 }

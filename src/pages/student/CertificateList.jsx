@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import apiClient from "../../services/apiClient";
+import apiClient, { normalizeListResponse } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { motion } from "framer-motion";
 import PageHeader from "../../components/ui/PageHeader";
@@ -18,7 +18,7 @@ function CertificateList() {
     const loadCertificates = async () => {
       try {
         const response = await apiClient.get(API_ENDPOINTS.CERTIFICATES.BASE);
-        if (isMounted) setCertificates(Array.isArray(response.data) ? response.data : []);
+        if (isMounted) setCertificates(normalizeListResponse(response.data));
       } catch (err) {
         console.error("Failed to load certificates:", err);
         if (isMounted) setCertificates([]);
@@ -46,7 +46,7 @@ function CertificateList() {
     <div className="premium-page-container">
       <PageHeader 
         title="My Certificates" 
-        description="View and download your internship certificates."
+        description="View and download your official course and internship completion certificates."
       />
 
       <div className="premium-card" style={{ maxWidth: '900px', margin: '0 auto', padding: '1.75rem' }}>
@@ -56,7 +56,7 @@ function CertificateList() {
           <EmptyState 
             icon={<span style={{ fontSize: '2rem' }}>🎓</span>}
             title="No Certificates Found" 
-            description="You don't have any certificates issued yet."
+            description="You don't have any certificates issued yet. Certificates will appear here once issued by the administration."
           />
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -85,22 +85,39 @@ function CertificateList() {
                     <span className="premium-badge premium-badge-active">
                       {certificate.status || "ACTIVE"}
                     </span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                      {certificate.certificate_type_display || certificate.certificate_type || "Course"}
+                    </span>
                   </div>
-                  <h3 style={{ fontSize: '1.1rem', margin: '0 0 4px 0', color: 'var(--text-primary)' }}>{certificate.certificate_type || "Certificate"}</h3>
+                  <h3 style={{ fontSize: '1.1rem', margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
+                    {certificate.subject_display || certificate.title || certificate.certificate_type_display || "Certificate"}
+                  </h3>
                   <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                     <strong>ID:</strong> {certificate.certificate_number || certificate.id} &nbsp;|&nbsp; 
-                    <strong> Issued:</strong> {formatDate(certificate.issued_at)}
+                    <strong>Code:</strong> <code>{certificate.verification_code}</code> &nbsp;|&nbsp;
+                    <strong>Issued:</strong> {formatDate(certificate.issued_at)}
                   </p>
                 </div>
                 
-                <div>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                  {certificate.download_url && (
+                    <a
+                      href={certificate.download_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="premium-btn premium-btn-secondary"
+                      style={{ padding: "8px 14px", textDecoration: "none", fontSize: "14px" }}
+                    >
+                      📥 PDF
+                    </a>
+                  )}
                   <Link 
                     to="/student/certificate-view" 
                     state={{ certificate }} 
                     className="premium-btn premium-btn-primary"
-                    aria-label={`View certificate ${certificate.certificate_type || ''} ${certificate.certificate_number || certificate.id || ''}`.trim()}
+                    aria-label={`View certificate ${certificate.certificate_number || certificate.id || ''}`.trim()}
                   >
-                    View Certificate →
+                    View Details →
                   </Link>
                 </div>
               </motion.div>

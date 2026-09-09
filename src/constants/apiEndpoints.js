@@ -230,6 +230,12 @@ export const API_ENDPOINTS = {
   },
   
   // Volunteer operations
+  VOLUNTEER_PROFILES: {
+    BASE: "/api/volunteers/profiles/",
+    BY_ID: (id) => `/api/volunteers/profiles/${id}/`,
+    PROFILE_BY_USER: (userId) => `/api/volunteers/profiles/?user=${userId}`,
+    STATS: (id) => `/api/volunteers/profiles/${id}/stats/`,
+  },
   VOLUNTEER_TASKS: {
     BASE: "/api/volunteers/tasks/",
     BY_ID: (id) => `/api/volunteers/tasks/${id}/`,

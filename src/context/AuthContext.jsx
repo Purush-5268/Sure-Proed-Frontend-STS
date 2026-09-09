@@ -12,7 +12,8 @@ import {
   setRefreshToken,
   clearAuthStorage,
   parseJwt,
-  setRememberMe
+  setRememberMe,
+  isTokenExpired,
 } from "../utils/tokenStorage";
 
 const AuthContext = createContext(null);
@@ -25,19 +26,40 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let isMounted = true;
 
+    const handleSessionExpired = () => {
+      clearAuthStorage();
+      if (isMounted) {
+        setUser(null);
+        setLoading(false);
+      }
+    };
+
+    window.addEventListener("sure_session_expired", handleSessionExpired);
+
     const initAuth = async () => {
       const token = getAccessToken();
+      const refreshToken = getRefreshToken();
       const storedUser = getUserInfo();
 
-      if (!token) {
+      if (!token && !refreshToken) {
         if (isMounted) setLoading(false);
         return;
       }
 
-      const decoded = parseJwt(token) || {};
+      // If both access token and refresh token are expired or missing, clean up dead credentials
+      if (isTokenExpired(token) && (!refreshToken || isTokenExpired(refreshToken))) {
+        clearAuthStorage();
+        if (isMounted) {
+          setUser(null);
+          setLoading(false);
+        }
+        return;
+      }
+
+      const decoded = (token && !isTokenExpired(token)) ? parseJwt(token) : (refreshToken ? parseJwt(refreshToken) : {});
       
-      // OPTIMISTIC RENDER: Unblock the UI immediately using stored or decoded data
-      if (isMounted && (storedUser || decoded.email)) {
+      // OPTIMISTIC RENDER: Unblock UI immediately only if access token is still active
+      if (isMounted && token && !isTokenExpired(token) && (storedUser || decoded?.email)) {
         setUser(storedUser || {
           email: decoded.email,
           role: decoded.role || "STUDENT",
@@ -66,7 +88,10 @@ export function AuthProvider({ children }) {
     };
 
     initAuth();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+      window.removeEventListener("sure_session_expired", handleSessionExpired);
+    };
   }, []);
 
   const updateUser = (updatedFields) => {
@@ -192,7 +217,7 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     role: user?.role || "STUDENT",
-    isAuthenticated: !!user || !!getAccessToken(),
+    isAuthenticated: !!user && (!isTokenExpired(getAccessToken()) || !isTokenExpired(getRefreshToken())),
     loading,
     login,
     logout,

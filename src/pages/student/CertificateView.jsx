@@ -1,6 +1,5 @@
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import styles from "./CertificateVerify.module.css";
-import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function CertificateView() {
   const location = useLocation();
@@ -10,7 +9,7 @@ function CertificateView() {
     if (!value) return "N/A";
     return new Date(value).toLocaleDateString("en-IN", {
       year: "numeric",
-      month: "short",
+      month: "long",
       day: "numeric",
     });
   };
@@ -18,27 +17,52 @@ function CertificateView() {
   return (
     <div className={styles.page}>
       <div className="premium-card">
-        <h1>Certificate Details</h1>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+          <h1 style={{ margin: 0 }}>Certificate Details</h1>
+          <Link to="/student/certificates" className="premium-btn premium-btn-secondary" style={{ textDecoration: "none", fontSize: "14px" }}>
+            ← Back to List
+          </Link>
+        </div>
 
         <p className={styles.subtitle}>
-          This certificate is authentic and securely loaded.
+          This certificate is officially issued, authentic, and securely stored in the SureTrust platform.
         </p>
 
         {!certificate ? (
-          <p>No certificate details were provided.</p>
+          <div style={{ textAlign: "center", padding: "30px 0" }}>
+            <p>No certificate was selected.</p>
+            <Link to="/student/certificates" className="premium-btn premium-btn-primary">
+              Go to My Certificates
+            </Link>
+          </div>
         ) : (
           <div className={styles.result}>
-            <h2 className={styles.verified}>✅ Certificate Available</h2>
+            <h2 className={styles.verified}>✅ Certificate Verified & Active</h2>
 
             <div className={styles.details}>
               <div className={styles.row}>
-                <strong>Certificate ID</strong>
-                <span>{certificate.certificate_number || certificate.id}</span>
+                <strong>Recipient Name</strong>
+                <span style={{ fontWeight: 600 }}>{certificate.recipient_display || certificate.recipient_name || "Valued Student"}</span>
               </div>
 
               <div className={styles.row}>
-                <strong>Type</strong>
-                <span>{certificate.certificate_type || "Certificate"}</span>
+                <strong>Course / Subject</strong>
+                <span style={{ fontWeight: 600 }}>{certificate.subject_display || certificate.title || "Course"}</span>
+              </div>
+
+              <div className={styles.row}>
+                <strong>Certificate Number</strong>
+                <span><code>{certificate.certificate_number || certificate.id}</code></span>
+              </div>
+
+              <div className={styles.row}>
+                <strong>Verification Code</strong>
+                <span><code>{certificate.verification_code}</code></span>
+              </div>
+
+              <div className={styles.row}>
+                <strong>Certificate Type</strong>
+                <span>{certificate.certificate_type_display || certificate.certificate_type || "Course Completion"}</span>
               </div>
 
               <div className={styles.row}>
@@ -50,6 +74,30 @@ function CertificateView() {
                 <strong>Status</strong>
                 <span className="premium-badge premium-badge-active">{certificate.status || "ACTIVE"}</span>
               </div>
+            </div>
+
+            <div style={{ display: "flex", gap: "12px", marginTop: "24px", flexWrap: "wrap", justifyContent: "center" }}>
+              {certificate.download_url && (
+                <a
+                  href={certificate.download_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="premium-btn premium-btn-primary"
+                  style={{ textDecoration: "none", padding: "10px 20px" }}
+                >
+                  📥 Download Official PDF
+                </a>
+              )}
+
+              {certificate.verification_code && (
+                <Link
+                  to={`/certificate/verify/${certificate.verification_code}`}
+                  className="premium-btn premium-btn-secondary"
+                  style={{ textDecoration: "none", padding: "10px 20px" }}
+                >
+                  🔍 Public Verification Page
+                </Link>
+              )}
             </div>
           </div>
         )}

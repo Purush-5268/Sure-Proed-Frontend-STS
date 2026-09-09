@@ -14,15 +14,35 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    // You can also log the error to an error reporting service
     console.error("ErrorBoundary caught an error", error, errorInfo);
-    this.setState({ error, errorInfo });
+
+    const errorMessage = (error?.message || '') + ' ' + (error?.stack || '');
+    const isChunkLoadFailed =
+      error?.name === 'ChunkLoadError' ||
+      /Failed to fetch dynamically imported module/i.test(errorMessage) ||
+      /Importing a module script failed/i.test(errorMessage) ||
+      /Expected a JavaScript-or-Wasm module script/i.test(errorMessage);
+
+    if (isChunkLoadFailed) {
+      const reloadKey = 'eb_chunk_reload_time';
+      const lastReload = parseInt(sessionStorage.getItem(reloadKey) || '0', 10);
+      const now = Date.now();
+      // Auto-reload once if not reloaded within the last 15 seconds
+      if (now - lastReload > 15000) {
+        sessionStorage.setItem(reloadKey, String(now));
+        window.location.reload();
+        return;
+      }
+    }
+
+    this.setState({ error, errorInfo, isChunkError: isChunkLoadFailed });
   }
 
   render() {
     if (this.state.hasError) {
       const user = getUserInfo();
       const isAdmin = user && (user.role === 'ADMIN' || user.is_superuser);
+      const isChunk = this.state.isChunkError;
       
       // You can render any custom fallback UI
       return (
@@ -37,14 +57,21 @@ class ErrorBoundary extends React.Component {
           background: 'var(--bg-main)',
           color: 'var(--text-primary)'
         }}>
-          <FaExclamationTriangle style={{ fontSize: '48px', color: '#ef4444', marginBottom: '16px' }} />
-          <h1 style={{ marginBottom: '16px' }}>Something went wrong.</h1>
+          <FaExclamationTriangle style={{ fontSize: '48px', color: isChunk ? '#2563eb' : '#ef4444', marginBottom: '16px' }} />
+          <h1 style={{ marginBottom: '16px' }}>
+            {isChunk ? "Application Update Available" : "Something went wrong."}
+          </h1>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', maxWidth: '500px' }}>
-            We're sorry, but an unexpected error occurred while loading this page. 
-            Please try refreshing or navigating back.
+            {isChunk
+              ? "A new version of the platform has just been deployed. Please reload the page to get the latest updates."
+              : "We're sorry, but an unexpected error occurred while loading this page. Please try refreshing or navigating back."}
           </p>
           <button 
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              sessionStorage.removeItem('eb_chunk_reload_time');
+              sessionStorage.removeItem('vite_preload_reload_time');
+              window.location.reload();
+            }}
             style={{
               padding: '10px 24px',
               background: 'var(--primary-color)',
@@ -55,9 +82,8 @@ class ErrorBoundary extends React.Component {
               cursor: 'pointer'
             }}
           >
-            Refresh Page
+            {isChunk ? "Update & Reload" : "Refresh Page"}
           </button>
-          
           {this.state.error && isAdmin && (
             <div style={{ marginTop: '32px', textAlign: 'left', background: 'var(--bg-nested)', padding: '16px', borderRadius: '8px', width: '100%', maxWidth: '800px', overflowX: 'auto' }}>
               <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#ef4444' }}>Error Details (Admin Only)</div>

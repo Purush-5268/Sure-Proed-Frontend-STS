@@ -5,6 +5,7 @@ import {
   setAccessToken,
   setRefreshToken,
   clearAuthStorage,
+  isTokenExpired,
 } from "../utils/tokenStorage";
 import { API_ENDPOINTS } from "../constants/apiEndpoints";
 
@@ -67,28 +68,7 @@ export const fetchAllPages = async (url, config = {}) => {
   return allResults;
 };
 
-// Request Interceptor: Attach JWT Bearer Token
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = getAccessToken();
-    // Only attach the token if it looks like a real JWT (contains dots)
-    // Skip demo/session tokens that are just plain strings
-    if (token && token.includes(".")) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    // Fix for file uploads: let Axios set the multipart/form-data boundary automatically
-    if (config.data instanceof FormData) {
-      delete config.headers["Content-Type"];
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-
-// Response Interceptor: Handle Token Refresh on 401
+// Response Interceptor: Handle Token Refresh queue
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -103,6 +83,64 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
+// Request Interceptor: Proactively refresh token if expired, attach only valid Bearer tokens
+apiClient.interceptors.request.use(
+  async (config) => {
+    let token = getAccessToken();
+    const refreshToken = getRefreshToken();
+
+    // 1. Proactive Refresh: If access token is expired, refresh it before firing the request
+    if (token && isTokenExpired(token) && refreshToken && !isTokenExpired(refreshToken)) {
+      try {
+        if (!isRefreshing) {
+          isRefreshing = true;
+          const { data } = await axios.post(
+            `${BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
+            { refresh: refreshToken }
+          );
+          token = data.access;
+          setAccessToken(data.access);
+          if (data.refresh) setRefreshToken(data.refresh);
+          processQueue(null, data.access);
+        } else {
+          token = await new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          });
+        }
+      } catch (err) {
+        processQueue(err, null);
+        clearAuthStorage();
+        token = null;
+        window.dispatchEvent(new CustomEvent("sure_session_expired"));
+      } finally {
+        isRefreshing = false;
+      }
+    } else if (token && isTokenExpired(token) && (!refreshToken || isTokenExpired(refreshToken))) {
+      // Both tokens are dead: clear stale storage so we never send invalid credentials to APIs
+      clearAuthStorage();
+      token = null;
+      window.dispatchEvent(new CustomEvent("sure_session_expired"));
+    }
+
+    // 2. Only attach valid JWT tokens (skip expired or non-JWT strings)
+    if (token && token.includes(".") && !isTokenExpired(token)) {
+      config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      delete config.headers?.Authorization;
+    }
+
+    // Fix for file uploads: let Axios set the multipart/form-data boundary automatically
+    if (config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+
+// Response Interceptor: Handle Token Refresh on 401
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {

@@ -80,3 +80,15 @@ export const parseJwt = (token) => {
     return null;
   }
 };
+
+export const isTokenExpired = (token) => {
+  if (!token || typeof token !== "string" || !token.includes(".")) return true;
+  try {
+    const decoded = parseJwt(token);
+    if (!decoded || !decoded.exp) return false;
+    // Buffer of 10 seconds to avoid edge-of-expiry race conditions
+    return Date.now() >= (decoded.exp * 1000 - 10000);
+  } catch (e) {
+    return true;
+  }
+};
