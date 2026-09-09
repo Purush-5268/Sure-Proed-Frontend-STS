@@ -561,7 +561,7 @@ function ExamInstructions() {
           {/* Institutional Masthead Header */}
           <div className={styles.headerWrap}>
             <div className={styles.brandLogo}>
-              <SureProEdLogo size={52} showText={true} />
+              <SureProEdLogo size={58} showText={true} />
             </div>
             <div className={styles.portalBadge}>
               <FiShield className={styles.portalBadgeIcon} />
