@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { certificateService } from "../../services/certificateService";
 import styles from "./CertificateAdminDetails.module.css";
 
 function CertificateAdminDetails() {
@@ -91,17 +92,14 @@ function CertificateAdminDetails() {
         </div>
 
         <div className={styles.buttons} style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
-          {cert.download_url && (
-            <a
-              href={cert.download_url}
-              target="_blank"
-              rel="noreferrer"
-              className="premium-btn premium-btn-primary"
-              style={{ textDecoration: "none", padding: "10px 20px", display: "inline-flex", alignItems: "center", gap: "6px" }}
-            >
-              📥 Download Certificate PDF
-            </a>
-          )}
+          <button
+            type="button"
+            onClick={() => certificateService.downloadCertificate(cert)}
+            className="premium-btn premium-btn-primary"
+            style={{ padding: "10px 20px", display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer", border: "none" }}
+          >
+            📥 Download Certificate PDF
+          </button>
 
           <Link
             to="/admin/edit-certificate"

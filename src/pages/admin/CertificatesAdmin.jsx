@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import apiClient, { fetchAllPages } from "../../services/apiClient";
+import { certificateService } from "../../services/certificateService";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./CertificatesAdmin.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
@@ -167,16 +168,14 @@ function CertificatesAdmin() {
                       View
                     </Link>
 
-                    {certificate.download_url && (
-                      <a
-                        href={certificate.download_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{ fontSize: "13px", color: "#16a34a", textDecoration: "none", fontWeight: 600 }}
-                      >
-                        PDF 📥
-                      </a>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => certificateService.downloadCertificate(certificate)}
+                      style={{ background: "none", border: "none", padding: 0, fontSize: "13px", color: "#16a34a", cursor: "pointer", fontWeight: 600 }}
+                      title="Download Certificate PDF"
+                    >
+                      PDF 📥
+                    </button>
 
                     <Link
                       to="/admin/edit-certificate"

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import apiClient, { normalizeListResponse } from "../../services/apiClient";
+import { certificateService } from "../../services/certificateService";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { motion } from "framer-motion";
 import PageHeader from "../../components/ui/PageHeader";
@@ -100,17 +101,15 @@ function CertificateList() {
                 </div>
                 
                 <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                  {certificate.download_url && (
-                    <a
-                      href={certificate.download_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="premium-btn premium-btn-secondary"
-                      style={{ padding: "8px 14px", textDecoration: "none", fontSize: "14px" }}
-                    >
-                      📥 PDF
-                    </a>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => certificateService.downloadCertificate(certificate)}
+                    className="premium-btn premium-btn-secondary"
+                    style={{ padding: "8px 14px", fontSize: "14px", cursor: "pointer", border: "none" }}
+                    title="Download Certificate PDF"
+                  >
+                    📥 PDF
+                  </button>
                   <Link 
                     to="/student/certificate-view" 
                     state={{ certificate }} 

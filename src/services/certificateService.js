@@ -38,4 +38,32 @@ export const certificateService = {
     });
     return response.data;
   },
+
+  async downloadCertificate(certificate) {
+    const certId = typeof certificate === "object" ? certificate.id : certificate;
+    const certNumber = typeof certificate === "object" ? (certificate.certificate_number || certId) : certId;
+    const filename = `Certificate_${certNumber}.pdf`;
+
+    const downloadUrl = (typeof certificate === "object" && certificate.download_url)
+      ? certificate.download_url
+      : `/api/certificates/${certId}/download/`;
+
+    try {
+      const response = await apiClient.get(downloadUrl, {
+        responseType: "blob",
+      });
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
+    } catch (err) {
+      console.warn("Authenticated blob download failed, opening direct URL:", err);
+      window.open(downloadUrl, "_blank");
+    }
+  },
 };

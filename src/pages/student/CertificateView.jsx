@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { certificateService } from "../../services/certificateService";
 import styles from "./CertificateVerify.module.css";
 
 function CertificateView() {
@@ -77,17 +78,14 @@ function CertificateView() {
             </div>
 
             <div style={{ display: "flex", gap: "12px", marginTop: "24px", flexWrap: "wrap", justifyContent: "center" }}>
-              {certificate.download_url && (
-                <a
-                  href={certificate.download_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="premium-btn premium-btn-primary"
-                  style={{ textDecoration: "none", padding: "10px 20px" }}
-                >
-                  📥 Download Official PDF
-                </a>
-              )}
+              <button
+                type="button"
+                onClick={() => certificateService.downloadCertificate(certificate)}
+                className="premium-btn premium-btn-primary"
+                style={{ padding: "10px 20px", cursor: "pointer", border: "none" }}
+              >
+                📥 Download Official PDF
+              </button>
 
               {certificate.verification_code && (
                 <Link
