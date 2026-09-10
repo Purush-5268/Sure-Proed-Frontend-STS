@@ -53,11 +53,11 @@ export default function AnnouncementsHistory() {
   };
 
   const handleMarkAllRead = () => {
-    markAllIdsRead(announcements.map(a => a.id));
+    markAllIdsRead(announcements.map(a => a.id || a.uuid || a.title));
     setReadIds(new Set(getReadIds()));
   };
 
-  const unreadCount = announcements.filter(a => !readIds.has(a.id)).length;
+  const unreadCount = announcements.filter(a => !readIds.has(a.id || a.uuid || a.title)).length;
 
   return (
     <div style={{ padding: '32px 40px', maxWidth: '1000px', margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>

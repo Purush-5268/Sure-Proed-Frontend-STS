@@ -863,7 +863,7 @@ function Dashboard() {
               <h3 style={{ margin: 0 }}>Announcements</h3>
               {(() => {
                  const readIds = new Set(JSON.parse(localStorage.getItem('sp_announcements_read') || '[]'));
-                 const unreadCount = announcements.filter(a => !readIds.has(a.id)).length;
+                 const unreadCount = announcements.filter(a => !readIds.has(a.id || a.uuid || a.title)).length;
                  return unreadCount > 0 ? (
                    <span className={styles.unreadBadge} style={{ position: 'static', marginLeft: 0 }}>{unreadCount}</span>
                  ) : null;
@@ -1080,7 +1080,7 @@ function Dashboard() {
             ) : (
               announcements.map((a, idx) => {
                 const readIds = new Set(JSON.parse(localStorage.getItem('sp_announcements_read') || '[]'));
-                const isRead = readIds.has(a.id);
+                const isRead = readIds.has(a.id || a.uuid || a.title);
                 return (
                   <div key={idx} className={styles.panelItem} style={{ opacity: isRead ? 0.7 : 1 }}>
                     <div className={styles.panelItemDot} style={{ background: isRead ? 'var(--text-muted)' : 'var(--primary-color)' }}></div>

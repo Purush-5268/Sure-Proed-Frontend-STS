@@ -1,16 +1,18 @@
 /* ═══ Settings — Premium Visual System ═══ */
 
 .settingsPage {
-  padding: 24px 32px;
+  padding: 32px 5%;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
   animation: studentFadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: calc(100vh - var(--navbar-height));
+  background-color: var(--bg-surface);
 }
 
 .header {
-  margin-bottom: 40px;
+  margin-bottom: 32px;
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 24px;
 }
@@ -29,56 +31,100 @@
   font-size: 15px;
 }
 
-.settingsGrid {
+.layout {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
+}
+
+@media (min-width: 768px) {
+  .layout {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+.sidebar {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    position: sticky;
+    top: calc(var(--navbar-height) + 32px);
+  }
+}
+
+.navMenu {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  gap: 8px;
+  padding-bottom: 8px;
+}
+
+@media (min-width: 768px) {
+  .navMenu {
+    flex-direction: column;
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.navItem:hover {
+  background: var(--bg-nested);
+  color: var(--text-primary);
+}
+
+.navItem.active {
+  background: var(--primary-light);
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.content {
+  flex-grow: 1;
+  min-width: 0;
 }
 
 .settingsCard {
-  background: var(--student-glass-bg, var(--bg-surface));
-  backdrop-filter: blur(var(--student-glass-blur, 12px));
-  -webkit-backdrop-filter: blur(var(--student-glass-blur, 12px));
-  border: 1px solid var(--student-glass-border, var(--border-color));
+  background: var(--bg-nested);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 28px 32px;
-  box-shadow: var(--student-card-shadow);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.settingsCard:hover {
-  box-shadow: var(--student-card-hover-shadow);
-  border-color: var(--primary-color);
-}
-
-.cardHeader {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-
-.icon {
-  font-size: 20px;
-  background: var(--student-surface-2, var(--bg-nested));
-  padding: 10px;
-  border-radius: var(--radius-md);
-  display: flex;
-  color: var(--primary-color);
+  padding: 32px;
 }
 
 .cardHeader h2 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0;
+  margin: 0 0 8px 0;
 }
 
 .description {
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 15px;
   margin: 0 0 24px 0;
-  padding-bottom: 20px;
+  padding-bottom: 24px;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -86,7 +132,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0;
+  padding: 20px 0;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -104,15 +150,15 @@
 
 .settingInfo p {
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 14px;
   margin: 0;
   max-width: 600px;
 }
 
 .badge {
-  background: var(--status-active-bg);
-  color: var(--status-active-text);
-  padding: 5px 12px;
+  background: var(--primary-light);
+  color: var(--primary-color);
+  padding: 6px 12px;
   border-radius: var(--radius-sm);
   font-size: 12px;
   font-weight: 700;
@@ -120,22 +166,40 @@
   letter-spacing: 0.5px;
 }
 
+.alertBanner {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #b45309;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  margin-bottom: 24px;
+}
+
+:global([data-theme='dark']) .alertBanner {
+  color: #fcd34d;
+}
+
+.alertBanner p {
+  margin: 4px 0 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 /* Password Form */
 .passwordForm {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 20px;
-  max-width: 100%;
+  max-width: 480px;
 }
 
 .inputGroup {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.inputGroup:last-of-type {
-  grid-column: 1 / -1;
+  gap: 8px;
 }
 
 .inputGroup label {
@@ -148,113 +212,28 @@
   padding: 12px 16px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
-  background: var(--student-surface-2, var(--bg-main));
+  background: var(--bg-surface);
   color: var(--text-primary);
   font-family: inherit;
   font-size: 14px;
-  transition: all 0.2s ease;
   width: 100%;
 }
 
-.inputGroup input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px var(--student-glow-primary);
-}
-
-.passwordInputWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.passwordToggleBtn {
-  position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.passwordToggleBtn:hover {
-  color: var(--text-primary);
+.inputGroup input:disabled {
+  background: var(--bg-nested);
+  color: var(--text-muted);
+  cursor: not-allowed;
 }
 
 .saveBtn {
-  grid-column: 1 / -1;
-  background: var(--student-btn-gradient, var(--primary-color));
+  background: var(--primary-color);
   color: #fff;
   padding: 12px 24px;
   border-radius: var(--radius-md);
   border: none;
-  font-weight: 700;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 15px;
   cursor: pointer;
   margin-top: 8px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   width: max-content;
-}
-
-.saveBtn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--student-glow-primary);
-}
-
-.saveBtn:active {
-  transform: translateY(0) scale(0.98);
-}
-
-/* CSS Toggle Switches */
-.toggleWrapper {
-  position: relative;
-}
-
-.toggle {
-  display: none;
-}
-
-.toggleLabel {
-  display: block;
-  width: 48px;
-  height: 26px;
-  background: var(--student-surface-3, var(--bg-main));
-  border: 1px solid var(--border-color);
-  border-radius: 100px;
-  cursor: pointer;
-  position: relative;
-  transition: 0.3s;
-}
-
-.toggleLabel::after {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 18px;
-  height: 18px;
-  background: var(--text-muted);
-  border-radius: 50%;
-  transition: 0.3s;
-}
-
-.toggle:checked + .toggleLabel {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
-}
-
-.toggle:checked + .toggleLabel::after {
-  transform: translateX(22px);
-  background: #fff;
-}
-
-@media (max-width: 768px) {
-  .settingsPage { padding: 16px; }
-  .settingsCard { padding: 20px; }
-  .passwordForm { grid-template-columns: 1fr; }
-  .settingRow { flex-direction: column; align-items: flex-start; gap: 12px; }
 }

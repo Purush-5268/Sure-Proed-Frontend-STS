@@ -1,22 +1,37 @@
+self.addEventListener("install", function (event) {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", function (event) {
+  event.waitUntil(self.clients.claim());
+});
+
 self.addEventListener("push", function (event) {
   if (!event.data) return;
   
+  let data = {};
   try {
-    const data = event.data.json();
-    const title = data.title || "SURE ProEd Notification";
-    const options = {
-      body: data.message || "You have a new notification.",
-      icon: "/Sure-icon.png",
-      badge: "/Sure-icon.png",
-      data: {
-        url: new URL(`/?notification_action=${data.action_url || "/"}`, self.location.origin).href,
-      },
-    };
-
-    event.waitUntil(self.registration.showNotification(title, options));
+    data = event.data.json();
   } catch (err) {
-    console.error("Error processing push event:", err);
+    // If payload is not valid JSON, treat it as a raw string message
+    data = { message: event.data.text() };
   }
+
+  const title = data.title || data.notification_title || "SURE ProEd Notification";
+  const body = data.message || data.notification_message || data.body || "You have a new notification.";
+  const icon = data.icon || "/sure-logo.jpg";
+  const url = data.action_url || data.url || "/";
+
+  const options = {
+    body: body,
+    icon: icon,
+    badge: icon,
+    data: {
+      url: new URL(`/?notification_action=${url}`, self.location.origin).href,
+    },
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
 self.addEventListener("notificationclick", function (event) {

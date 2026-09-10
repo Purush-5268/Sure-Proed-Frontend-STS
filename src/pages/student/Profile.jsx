@@ -660,79 +660,93 @@ function Profile() {
                           </div>
                         </div>
 
-                        {/* Meet Identity & Identity Match */}
-                        {serverProfile?.current_application?.required_meet_display_name && (
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                            <div style={{ padding: '14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                              <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Meet Identity</div>
-                              <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>{serverProfile.current_application.required_meet_display_name}</div>
-                            </div>
-                            <div style={{ padding: '14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                              <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Identity Match</div>
-                              {serverProfile.google_identity.naming_compliant?.is_compliant === true || serverProfile.google_identity.naming_compliant === true ? (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                  <FiCheckCircle size={16} color="#059669" />
-                                  <span style={{ fontSize: '14px', fontWeight: 600, color: '#059669' }}>Matching Successful</span>
+                        {/* Compute Identity Match and Meet Identity from both old and new backend keys */}
+                        {(() => {
+                          const matchObj = serverProfile.google_identity.identity_match || serverProfile.google_identity.naming_compliant;
+                          const isMatched = matchObj?.is_matched ?? matchObj?.is_compliant ?? matchObj;
+                          const matchMsg = matchObj?.message;
+                          const meetIdentity = serverProfile.current_application?.meet_identity || serverProfile.current_application?.required_meet_display_name;
+
+                          return (
+                            <>
+                              {/* Meet Identity & Identity Match */}
+                              {meetIdentity && (
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                                  <div style={{ padding: '14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                                    <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Meet Identity</div>
+                                    <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>{meetIdentity}</div>
+                                  </div>
+                                  <div style={{ padding: '14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                                    <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Identity Match</div>
+                                    {isMatched === true ? (
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <FiCheckCircle size={16} color="#059669" />
+                                        <span style={{ fontSize: '14px', fontWeight: 600, color: '#059669' }}>Matching Successful</span>
+                                      </div>
+                                    ) : isMatched === false ? (
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <FiAlertCircle size={16} color="#d97706" />
+                                        <span style={{ fontSize: '14px', fontWeight: 600, color: '#d97706' }}>Name Change Required</span>
+                                      </div>
+                                    ) : (
+                                      <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-secondary)' }}>—</div>
+                                    )}
+                                  </div>
                                 </div>
-                              ) : serverProfile.google_identity.naming_compliant?.is_compliant === false || serverProfile.google_identity.naming_compliant === false ? (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                  <FiAlertCircle size={16} color="#d97706" />
-                                  <span style={{ fontSize: '14px', fontWeight: 600, color: '#d97706' }}>Name Change Required</span>
-                                </div>
-                              ) : (
-                                <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-secondary)' }}>—</div>
                               )}
-                            </div>
-                          </div>
-                        )}
 
-                        {/* Compliant advisory */}
-                        {(serverProfile.google_identity.naming_compliant?.is_compliant === true || serverProfile.google_identity.naming_compliant === true) && (
-                          <div style={{
-                            padding: '12px 16px',
-                            borderRadius: '10px',
-                            marginBottom: '16px',
-                            background: 'rgba(16, 185, 129, 0.05)',
-                            border: '1px solid rgba(16, 185, 129, 0.2)',
-                            display: 'flex',
-                            alignItems: 'flex-start',
-                            gap: '10px',
-                          }}>
-                            <FiCheckCircle size={16} color="#059669" style={{ marginTop: '2px', flexShrink: 0 }} />
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                              <strong style={{ color: '#059669', fontSize: '13px', marginBottom: '4px' }}>Attendance Tracking Active</strong>
-                              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
-                                {serverProfile.google_identity.naming_compliant?.message || "Your Google identity matches your SURE ProEd attendance identity. Attendance tracking is active."}
-                              </p>
-                            </div>
-                          </div>
-                        )}
+                              {/* Compliant advisory */}
+                              {isMatched === true && (
+                                <div style={{
+                                  padding: '12px 16px',
+                                  borderRadius: '10px',
+                                  marginBottom: '16px',
+                                  background: 'rgba(16, 185, 129, 0.05)',
+                                  border: '1px solid rgba(16, 185, 129, 0.2)',
+                                  display: 'flex',
+                                  alignItems: 'flex-start',
+                                  gap: '10px',
+                                }}>
+                                  <FiCheckCircle size={16} color="#059669" style={{ marginTop: '2px', flexShrink: 0 }} />
+                                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <strong style={{ color: '#059669', fontSize: '13px', marginBottom: '4px' }}>Attendance Tracking Active</strong>
+                                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                                      {matchMsg || "Your Google identity matches your SURE ProEd attendance identity. Attendance tracking is active."}
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
 
-                        {/* Non-compliant advisory */}
-                        {(serverProfile.google_identity.naming_compliant?.is_compliant === false || serverProfile.google_identity.naming_compliant === false) && (
-                          <div style={{
-                            padding: '12px 16px',
-                            borderRadius: '10px',
-                            marginBottom: '16px',
-                            background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.08), rgba(245, 158, 11, 0.05))',
-                            border: '1px solid rgba(217, 119, 6, 0.2)',
-                            display: 'flex',
-                            alignItems: 'flex-start',
-                            gap: '10px',
-                          }}>
-                            <FiAlertCircle size={16} color="#d97706" style={{ marginTop: '2px', flexShrink: 0 }} />
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                              <strong style={{ color: 'var(--text-primary)', fontSize: '13px', marginBottom: '4px' }}>Name Change Required</strong>
-                              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
-                                {serverProfile.google_identity.naming_compliant?.message ? (
-                                  serverProfile.google_identity.naming_compliant.message
-                                ) : (
-                                  <>Your Google Account name does not follow the recommended SURE ProEd naming format (<strong style={{ color: 'var(--text-primary)' }}>{serverProfile.current_application?.required_meet_display_name}</strong>). This is for identification consistency only and does not affect your attendance.</>
-                                )}
-                              </p>
-                            </div>
-                          </div>
-                        )}
+                              {/* Non-compliant advisory */}
+                              {isMatched === false && (
+                                <div style={{
+                                  padding: '12px 16px',
+                                  borderRadius: '10px',
+                                  marginBottom: '16px',
+                                  background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.08), rgba(245, 158, 11, 0.05))',
+                                  border: '1px solid rgba(217, 119, 6, 0.2)',
+                                  display: 'flex',
+                                  alignItems: 'flex-start',
+                                  gap: '10px',
+                                }}>
+                                  <FiAlertCircle size={16} color="#d97706" style={{ marginTop: '2px', flexShrink: 0 }} />
+                                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <strong style={{ color: 'var(--text-primary)', fontSize: '13px', marginBottom: '4px' }}>Name Change Required</strong>
+                                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                                      {matchMsg ? (
+                                        matchMsg
+                                      ) : (
+                                        <>Your Google Account name does not follow the recommended SURE ProEd naming format (<strong style={{ color: 'var(--text-primary)' }}>{meetIdentity}</strong>). This is for identification consistency only and does not affect your attendance.</>
+                                      )}
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
+
+
 
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                           Connected on {new Date(serverProfile.google_identity.connected_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
