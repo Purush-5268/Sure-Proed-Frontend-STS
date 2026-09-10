@@ -505,7 +505,7 @@ function Dashboard() {
           </div>
           <div className={styles.progressCenter} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
             <Suspense fallback={<div className={styles.progressDonut} />}>
-              <ProgressDonutChart attendanceStats={attendanceStats} stats={stats} />
+              <ProgressDonutChart attendanceStats={attendanceStats} stats={stats} profile={profile} />
             </Suspense>
           </div>
         </div>

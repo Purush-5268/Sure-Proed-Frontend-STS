@@ -277,6 +277,8 @@ function AttendanceDetails() {
                   <th>Student</th>
                   <th>Attendance</th>
                   <th>Identity</th>
+                  <th>Class Status</th>
+                  <th>Account Status</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -285,15 +287,18 @@ function AttendanceDetails() {
                   Object.values(officialData.expected_students).map((student, idx) => {
                     const attPercentage = student.attendance_percentage || 0;
                     const hasPriorPermission = student.prior_permission?.has_permission === true;
-                    const isSuspended = student.status === "BELOW_THRESHOLD";
-                    const isWarning = student.status === "PRESENT" && attPercentage < 95;
                     const isAbsent = student.status === "ABSENT";
+                    const isPriorPerm = student.status === "PRIOR_PERMISSION";
                     const isReviewReq = student.status === "IDENTITY_REVIEW_REQUIRED";
 
-                    // Determine visual state based on permission
-                    const rowBg = hasPriorPermission ? "rgba(59, 130, 246, 0.05)" : (isAbsent ? "rgba(239, 68, 68, 0.15)" : (isSuspended ? "rgba(239, 68, 68, 0.05)" : isReviewReq ? "rgba(245, 158, 11, 0.1)" : "transparent"));
+                    // Row background: blue tint for exempt, red tint for absent, transparent otherwise
+                    const rowBg = hasPriorPermission || isPriorPerm
+                      ? "rgba(59, 130, 246, 0.06)"
+                      : isAbsent
+                        ? "rgba(239, 68, 68, 0.06)"
+                        : "transparent";
                     
-                    // Map identity badge names
+                    // Map identity match method to readable label
                     let identityLabel = "—";
                     if (student.match_method) {
                       switch (student.match_method) {
@@ -301,9 +306,35 @@ function AttendanceDetails() {
                         case "EMAIL": identityLabel = "Email"; break;
                         case "DIRECTORY": identityLabel = "Directory"; break;
                         case "NAME": identityLabel = "Name"; break;
-                        default: identityLabel = student.match_method;
+                        case "GOOGLE_IDENTITY": identityLabel = "Google OAuth"; break;
+                        default: identityLabel = student.match_method.replace(/_/g, " ");
                       }
                     }
+
+                    // Map backend Application status to user-friendly account status label
+                    const accountStatus = student.account_status || "";
+                    let accountLabel, accountColor;
+                    const ACTIVE_STATUSES = ["COHORT_ASSIGNED", "IN_PROGRESS", "TRAINING", "INTERNSHIP_ASSIGNED", "SOFT_SKILLS", "PRE_TRAINING", "TRANSFER_COHORT"];
+                    if (accountStatus === "SUSPENDED" || accountStatus === "DROPPED") {
+                      accountLabel = accountStatus;
+                      accountColor = "#ef4444";
+                    } else if (ACTIVE_STATUSES.includes(accountStatus)) {
+                      accountLabel = "ACTIVE";
+                      accountColor = "#10b981";
+                    } else if (accountStatus === "COMPLETED") {
+                      accountLabel = "COMPLETED";
+                      accountColor = "#3b82f6";
+                    } else if (accountStatus) {
+                      accountLabel = accountStatus.replace(/_/g, " ");
+                      accountColor = "var(--text-secondary)";
+                    } else {
+                      accountLabel = "—";
+                      accountColor = "var(--text-secondary)";
+                    }
+
+                    // Determine if action buttons should be shown:
+                    // Only show Warning/Permission for absent, below-threshold, or review-required students
+                    const needsAction = isAbsent || isReviewReq || attPercentage < 96;
 
                     return (
                       <tr key={student.student_id || idx} style={{ background: rowBg }}>
@@ -318,61 +349,57 @@ function AttendanceDetails() {
                           </div>
                           <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{student.email || "Email Hidden"}</div>
                         </td>
-                        <td style={{ verticalAlign: "middle", color: (!hasPriorPermission && (isSuspended || isAbsent)) ? "#ef4444" : "inherit", fontWeight: (!hasPriorPermission && (isSuspended || isAbsent)) ? "bold" : "normal" }}>
+                        <td style={{ verticalAlign: "middle", color: isAbsent ? "#ef4444" : "inherit", fontWeight: isAbsent ? "bold" : "normal" }}>
                           {attPercentage}%
                         </td>
                         <td style={{ verticalAlign: "middle" }}>
-                          {isAbsent ? (
+                          {isAbsent && !student.match_method ? (
                             "—"
                           ) : isReviewReq ? (
                             <span style={{ color: "#d97706", fontSize: "12px", fontWeight: "bold" }}>⚠ Review Required</span>
-                          ) : (
+                          ) : student.match_method ? (
                             <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "bold", background: "rgba(16, 185, 129, 0.1)", padding: "2px 6px", borderRadius: "4px" }}>
                               ✓ {identityLabel}
                             </span>
+                          ) : (
+                            "—"
                           )}
+                        </td>
+                        <td style={{ verticalAlign: "middle" }}>
+                          {isAbsent ? (
+                            <span style={{ color: "#ef4444", fontSize: "12px", fontWeight: "bold" }}>Absent</span>
+                          ) : isPriorPerm ? (
+                            <span style={{ color: "#2563eb", fontSize: "12px", fontWeight: "bold" }}>Prior Permission</span>
+                          ) : isReviewReq ? (
+                            <span style={{ color: "#d97706", fontSize: "12px", fontWeight: "bold" }}>Review Req</span>
+                          ) : (
+                            <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "bold" }}>Present</span>
+                          )}
+                        </td>
+                        <td style={{ verticalAlign: "middle" }}>
+                          <span style={{ color: accountColor, fontSize: "12px", fontWeight: "bold" }}>{accountLabel}</span>
                         </td>
                         <td style={{ verticalAlign: "middle" }}>
                           {hasPriorPermission ? (
                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                               <span style={{ color: "#2563eb", fontSize: "12px", fontWeight: "bold" }}>Prior Permission</span>
-                               <button onClick={() => handleRevokePermission(student.student_id, student.name)} style={{ background: "transparent", color: "#ef4444", border: "1px solid #fca5a5", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer" }}>Revoke</button>
+                              <span style={{ color: "#2563eb", fontSize: "12px", fontWeight: "bold" }}>✓ Exempt</span>
+                              <button onClick={() => handleRevokePermission(student.student_id, student.name)} style={{ background: "transparent", color: "#ef4444", border: "1px solid #fca5a5", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer" }}>Revoke</button>
                             </div>
-                          ) : isReviewReq ? (
-                            <span style={{ color: "#d97706", fontSize: "12px", fontWeight: "bold" }}>Requires Admin Review</span>
-                          ) : isSuspended || isAbsent || isWarning ? (
-                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                              <span style={{ color: isWarning ? "#f59e0b" : "#ef4444", fontSize: "12px", fontWeight: "bold" }}>
-                                {isAbsent ? "⚠️ Absent" : isSuspended ? "⚠️ Below Threshold" : "⚠️ Warning"}
-                              </span>
+                          ) : needsAction ? (
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                               <button
                                 onClick={() => handleSendWarning(student.student_id, student.name)}
                                 style={{
-                                  background: "#ef4444", color: "white", border: "none",
-                                  padding: "6px 12px", borderRadius: "6px", fontSize: "11px",
-                                  fontWeight: "bold", cursor: "pointer", transition: "all 0.2s ease"
-                                }}
-                                onMouseOver={(e) => e.target.style.background = "#dc2626"}
-                                onMouseOut={(e) => e.target.style.background = "#ef4444"}
-                              >
-                                Send Warning
-                              </button>
-                              <button
-                                onClick={() => handleOpenPermissionModal(student.student_id, student.name)}
-                                style={{
-                                  background: "#3b82f6", color: "white", border: "none",
-                                  padding: "6px 12px", borderRadius: "6px", fontSize: "11px",
-                                  fontWeight: "bold", cursor: "pointer", transition: "all 0.2s ease"
+                                  background: "transparent", color: "#ef4444", border: "1px solid #fca5a5",
+                                  padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer"
                                 }}
                               >
-                                + Prior Permission
+                                Warning
                               </button>
+                              <button onClick={() => handleOpenPermissionModal(student.student_id, student.name)} style={{ background: "transparent", color: "#3b82f6", border: "1px solid #bfdbfe", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer" }}>+ Permission</button>
                             </div>
                           ) : (
-                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                              <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "bold" }}>✅ Good</span>
-                              <button onClick={() => handleOpenPermissionModal(student.student_id, student.name)} style={{ background: "transparent", color: "#3b82f6", border: "1px solid #bfdbfe", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer" }}>Grant Exemption</button>
-                            </div>
+                            <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "bold" }}>✅ Good</span>
                           )}
                         </td>
                       </tr>
@@ -388,33 +415,29 @@ function AttendanceDetails() {
 
                     const isJoined = Array.isArray(sessionData.joined_students) && sessionData.joined_students.some(js => js === studentId || (typeof js === 'object' && js.id === studentId));
                     const attPercentage = isObject && student.attendance_percentage !== undefined ? student.attendance_percentage : (isJoined ? 100 : 0);
-                    const isLowAttendance = attPercentage > 0 && attPercentage < 40;
-                    const isAbsent = attPercentage === 0 || (student.status && student.status.toUpperCase() === 'ABSENT');
+                    const isAbsent = student.status && student.status.toUpperCase() === 'ABSENT';
 
                     return (
-                      <tr key={studentId || idx} style={{ background: isAbsent ? "rgba(239, 68, 68, 0.15)" : isLowAttendance ? "rgba(239, 68, 68, 0.05)" : "transparent" }}>
+                      <tr key={studentId || idx} style={{ background: "transparent" }}>
                         <td style={{ verticalAlign: "middle" }}>
                           <div style={{ fontWeight: "500" }}>{studentName}</div>
                           <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{studentEmail}</div>
                         </td>
-                        <td style={{ verticalAlign: "middle", color: isLowAttendance || isAbsent ? "#ef4444" : "inherit", fontWeight: isLowAttendance || isAbsent ? "bold" : "normal" }}>
+                        <td style={{ verticalAlign: "middle" }}>
                           {attPercentage}%
                         </td>
                         <td style={{ verticalAlign: "middle" }}>—</td>
                         <td style={{ verticalAlign: "middle" }}>
-                          {isLowAttendance ? (
-                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                              <span style={{ color: "#ef4444", fontSize: "12px", fontWeight: "bold" }}>⚠️ Below Threshold</span>
-                              <button onClick={() => handleSendWarning(studentId, studentName)} style={{ background: "#ef4444", color: "white", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}>Send Warning</button>
-                            </div>
-                          ) : isAbsent ? (
-                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                              <span style={{ color: "#ef4444", fontSize: "12px", fontWeight: "bold" }}>⚠️ Absent</span>
-                              <button onClick={() => handleSendWarning(studentId, studentName)} style={{ background: "#ef4444", color: "white", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}>Send Warning</button>
-                            </div>
-                          ) : (
-                            <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "bold" }}>✅ Good</span>
-                          )}
+                          <span style={{ color: "var(--text-secondary)", fontSize: "12px", fontWeight: "bold" }}>{student.status || "UNKNOWN"}</span>
+                        </td>
+                        <td style={{ verticalAlign: "middle" }}>
+                           <span style={{ color: "var(--text-secondary)", fontSize: "12px", fontWeight: "bold" }}>—</span>
+                        </td>
+                        <td style={{ verticalAlign: "middle" }}>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <button onClick={() => handleSendWarning(studentId, studentName)} style={{ background: "transparent", color: "#ef4444", border: "1px solid #fca5a5", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer" }}>Warning</button>
+                            <button onClick={() => handleOpenPermissionModal(studentId, studentName)} style={{ background: "transparent", color: "#3b82f6", border: "1px solid #bfdbfe", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer" }}>+ Permission</button>
+                          </div>
                         </td>
                       </tr>
                     );

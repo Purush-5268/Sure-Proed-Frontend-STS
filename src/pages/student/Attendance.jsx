@@ -4,6 +4,7 @@ import { attendanceService } from "../../services/attendanceService";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { useAuth } from "../../context/AuthContext";
+import { studentService } from "../../services/studentService";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./Attendance.module.css";
 
@@ -12,14 +13,16 @@ function Attendance() {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
+  const [profile, setProfile] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
     async function loadSessions() {
       try {
-        const [res, statsRes] = await Promise.all([
+        const [res, statsRes, profileRes] = await Promise.all([
           apiClient.get(API_ENDPOINTS.ATTENDANCE.SUMMARY),
-          apiClient.get(API_ENDPOINTS.STUDENTS.STATISTICS)
+          apiClient.get(API_ENDPOINTS.STUDENTS.STATISTICS),
+          studentService.getProfile(user?.email).catch(() => null)
         ]);
         const data = res?.data?.results || res?.data || [];
         if (data.length > 0) {
@@ -31,6 +34,9 @@ function Attendance() {
         }
         if (isMounted && statsRes?.data) {
           setStats(statsRes.data);
+        }
+        if (isMounted && profileRes) {
+          setProfile(profileRes);
         }
       } catch (error) {
         console.error("Failed to load attendance sessions", error);
@@ -45,6 +51,9 @@ function Attendance() {
   const totalEvaluated = stats?.attendance_total || 0;
   const totalAttended = stats?.attendance_present || 0;
   const overallPercentage = stats?.attendance_percentage || 0;
+  
+  const cumulativePct = profile?.current_application?.cumulative_attendance_percentage;
+  const showCumulative = cumulativePct !== undefined && cumulativePct !== null;
 
   return (
     <div className={styles.page}>
@@ -64,6 +73,12 @@ function Attendance() {
                 <h3 style={{ margin: '0 0 8px 0', color: 'var(--text-secondary)' }}>Overall Attendance</h3>
                 <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--primary-color)' }}>{overallPercentage}%</div>
               </div>
+              {showCumulative && (
+                <div style={{ background: 'var(--bg-nested)', padding: '16px', borderRadius: '8px', flex: 1 }}>
+                  <h3 style={{ margin: '0 0 8px 0', color: 'var(--text-secondary)' }}>Cumulative Avg (All Classes)</h3>
+                  <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#10b981' }}>{Number(cumulativePct).toFixed(1)}%</div>
+                </div>
+              )}
               <div style={{ background: 'var(--bg-nested)', padding: '16px', borderRadius: '8px', flex: 1 }}>
                 <h3 style={{ margin: '0 0 8px 0', color: 'var(--text-secondary)' }}>Sessions Attended</h3>
                 <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{totalAttended} / {totalEvaluated}</div>

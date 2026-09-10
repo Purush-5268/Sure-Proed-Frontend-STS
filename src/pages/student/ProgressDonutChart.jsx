@@ -3,11 +3,16 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import styles from "./Dashboard.module.css";
 import { useNavigate } from 'react-router-dom';
 
-export default function ProgressDonutChart({ stats }) {
+export default function ProgressDonutChart({ stats, profile }) {
   const navigate = useNavigate();
 
   // Use the backend-provided authoritative values from the statistics endpoint.
-  const attendancePct = stats?.attendance_percentage || 0;
+  const cumulativePct = profile?.current_application?.cumulative_attendance_percentage;
+  
+  const attendancePct = cumulativePct !== undefined && cumulativePct !== null 
+    ? Number(cumulativePct) 
+    : (stats?.attendance_percentage || 0);
+
   const attendancePresent = stats?.attendance_present || 0;
   const attendanceTotal = stats?.attendance_total || 0;
   const attendanceMissed = Math.max(0, attendanceTotal - attendancePresent);
@@ -35,8 +40,8 @@ export default function ProgressDonutChart({ stats }) {
           </PieChart>
         </ResponsiveContainer>
         <div className={styles.progressDonutLabel}>
-          <div className={styles.progressDonutPct} style={{ fontSize: '28px' }}>{Math.round(attendancePct)}%</div>
-          <div className={styles.progressDonutSub} style={{ fontSize: '12px' }}>Attendance</div>
+          <div className={styles.progressDonutPct} style={{ fontSize: '28px' }}>{Number(attendancePct).toFixed(1)}%</div>
+          <div className={styles.progressDonutSub} style={{ fontSize: '12px' }}>{cumulativePct != null ? "Cumul. Avg" : "Attendance"}</div>
         </div>
       </div>
       

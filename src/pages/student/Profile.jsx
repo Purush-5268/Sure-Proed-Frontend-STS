@@ -660,6 +660,51 @@ function Profile() {
                           </div>
                         </div>
 
+                        {/* Required Meet Name & Naming Compliance */}
+                        {serverProfile?.current_application?.required_meet_display_name && (
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                            <div style={{ padding: '14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                              <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Required Meet Name</div>
+                              <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>{serverProfile.current_application.required_meet_display_name}</div>
+                            </div>
+                            <div style={{ padding: '14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                              <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Naming Compliance</div>
+                              {serverProfile.google_identity.naming_compliant === true ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <FiCheckCircle size={16} color="#059669" />
+                                  <span style={{ fontSize: '14px', fontWeight: 600, color: '#059669' }}>Compliant</span>
+                                </div>
+                              ) : serverProfile.google_identity.naming_compliant === false ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <FiAlertCircle size={16} color="#d97706" />
+                                  <span style={{ fontSize: '14px', fontWeight: 600, color: '#d97706' }}>Name Change Required</span>
+                                </div>
+                              ) : (
+                                <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-secondary)' }}>—</div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Non-compliant advisory */}
+                        {serverProfile.google_identity.naming_compliant === false && serverProfile?.current_application?.required_meet_display_name && (
+                          <div style={{
+                            padding: '12px 16px',
+                            borderRadius: '10px',
+                            marginBottom: '16px',
+                            background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.08), rgba(245, 158, 11, 0.05))',
+                            border: '1px solid rgba(217, 119, 6, 0.2)',
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '10px',
+                          }}>
+                            <FiAlertCircle size={16} color="#d97706" style={{ marginTop: '2px', flexShrink: 0 }} />
+                            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                              Update your Google Account display name to <strong style={{ color: 'var(--text-primary)' }}>{serverProfile.current_application.required_meet_display_name}</strong> for correct attendance matching. Attendance will still work after Google sync.
+                            </p>
+                          </div>
+                        )}
+
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                           Connected on {new Date(serverProfile.google_identity.connected_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
                         </div>
