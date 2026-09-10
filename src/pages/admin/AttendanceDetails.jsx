@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
@@ -522,13 +523,13 @@ function AttendanceDetails() {
           </Link>
         </div>
 
-        {showPermissionModal && (
+        {showPermissionModal && createPortal(
           <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999,
+            backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 999999,
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
-            <div className="premium-card" style={{ width: '400px', maxWidth: '90%', padding: '24px' }}>
+            <div className="premium-card" style={{ width: '400px', maxWidth: '90%', padding: '24px', backgroundColor: 'var(--bg-main)' }}>
               <h3 style={{ marginTop: 0, color: 'var(--text-primary)', marginBottom: '16px' }}>Grant Prior Permission</h3>
               <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
                 This excuses the student from disciplinary action for this specific class. Their attendance percentage will not be changed.
@@ -566,7 +567,8 @@ function AttendanceDetails() {
                 </div>
               </form>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
       </div>

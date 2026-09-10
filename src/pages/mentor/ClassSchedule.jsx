@@ -46,7 +46,7 @@ function ClassSchedule() {
         let unifiedSessions = [];
 
         if (domainRes.status === "fulfilled") {
-          const domainActive = domainRes.value.filter(s => s.conducted !== false);
+          const domainActive = domainRes.value.filter(s => s.class_status !== 'COMPLETED' && s.class_status !== 'CANCELLED' && s.conducted !== true);
           domainActive.forEach(s => {
             unifiedSessions.push({
               id: s.id,
@@ -201,7 +201,7 @@ function ClassSchedule() {
     if (!window.confirm("Are you sure you want to end this class?")) return;
     try {
       if (type === "DOMAIN") {
-        await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId), { conducted: false, class_status: "COMPLETED" });
+        await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId), { conducted: true, class_status: "COMPLETED" });
       } else {
         await apiClient.patch(API_ENDPOINTS.TRAININGS.SESSION_BY_ID(sessionId), { class_status: "COMPLETED" });
       }

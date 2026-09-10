@@ -47,7 +47,8 @@ function Navbar() {
   }, [isAuthenticated, user?.email, user?.role]);
 
   const getProfileName = () => {
-    return user?.name || user?.first_name || profile?.user?.first_name || profile?.user?.name || "Student";
+    const fallback = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase() : "User";
+    return user?.name || user?.first_name || profile?.user?.first_name || profile?.user?.name || fallback;
   };
 
   const getRoleDisplay = () => {
@@ -76,6 +77,21 @@ function Navbar() {
     if (user?.role === "MENTOR") return "/mentor/dashboard";
     if (user?.role === "TRUSTEE" || user?.role === "VOLUNTEER" || user?.role === "ADVISOR") return "/trustee/dashboard";
     return "/student/dashboard";
+  };
+
+  const getProfilePath = () => {
+    if (user?.role === "ADMIN") return "/admin/profile-settings";
+    if (user?.role === "MENTOR") return "/mentor/profile";
+    if (user?.role === "TRUSTEE" || user?.role === "VOLUNTEER" || user?.role === "ADVISOR") {
+      return `/trustee/${user?.trustee_type?.toLowerCase() || 'volunteer'}/profile`;
+    }
+    return "/student/profile";
+  };
+
+  const getSettingsPath = () => {
+    if (user?.role === "ADMIN") return "/admin/settings";
+    if (user?.role === "MENTOR") return "/mentor/settings";
+    return "/student/settings";
   };
 
   const closeMenu = () => setMobileOpen(false);
@@ -173,19 +189,21 @@ function Navbar() {
                 {profileDropdownOpen && (
                   <div className={styles.profileDropdownMenu}>
                     <div className={styles.dropdownHeader}>
-                      <span className={styles.dropdownName}>{user?.name || "Student"}</span>
+                      <span className={styles.dropdownName}>{getProfileName()}</span>
                       <span className={styles.dropdownEmail}>{user?.email}</span>
                     </div>
                     <div className={styles.dropdownDivider}></div>
                     <Link to={getDashboardPath()} onClick={() => { closeMenu(); setProfileDropdownOpen(false); }} className={styles.dropdownItem}>
                       Dashboard
                     </Link>
-                    <Link to="/student/profile" onClick={() => { closeMenu(); setProfileDropdownOpen(false); }} className={styles.dropdownItem}>
+                    <Link to={getProfilePath()} onClick={() => { closeMenu(); setProfileDropdownOpen(false); }} className={styles.dropdownItem}>
                       Profile
                     </Link>
-                    <Link to="/student/settings" onClick={() => { closeMenu(); setProfileDropdownOpen(false); }} className={styles.dropdownItem}>
-                      Settings
-                    </Link>
+                    {user?.role !== "TRUSTEE" && user?.role !== "VOLUNTEER" && user?.role !== "ADVISOR" && (
+                      <Link to={getSettingsPath()} onClick={() => { closeMenu(); setProfileDropdownOpen(false); }} className={styles.dropdownItem}>
+                        Settings
+                      </Link>
+                    )}
                     <div className={styles.dropdownDivider}></div>
                     <button onClick={handleLogout} className={styles.dropdownItem} style={{ color: "var(--danger-color)", width: "100%", textAlign: "left" }}>
                       Sign Out

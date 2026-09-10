@@ -30,6 +30,12 @@ function UserApplicationDetails() {
         const coursesRes = await apiClient.get(`${API_ENDPOINTS.COURSES.BASE}?limit=1000`).catch(() => ({ data: [] }));
         setCourses(coursesRes.data?.results || coursesRes.data || []);
       }
+      if (response.data?.assigned_cohort && typeof response.data.assigned_cohort === "string") {
+        const cohortRes = await apiClient.get(API_ENDPOINTS.COHORTS.BY_ID(response.data.assigned_cohort)).catch(() => ({ data: null }));
+        if (cohortRes.data) {
+          response.data.assigned_cohort = cohortRes.data;
+        }
+      }
     } catch (err) {
       console.error("Failed to load application details:", err);
       setError("Unable to load application details.");
@@ -585,17 +591,9 @@ function UserApplicationDetails() {
                 </p>
                 <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                   {application.status === "SUSPENDED" ? (
-                    <>
-                      <button onClick={() => handleReactivateApplication("TRAINING")} className="premium-btn premium-btn-primary" disabled={submitting}>
-                        Reactivate (Training)
-                      </button>
-                      <button onClick={() => handleReactivateApplication("IN_PROGRESS")} className="premium-btn premium-btn-secondary" disabled={submitting}>
-                        Reactivate (In Progress)
-                      </button>
-                      <button onClick={() => handleReactivateApplication("COHORT_ASSIGNED")} className="premium-btn premium-btn-secondary" disabled={submitting}>
-                        Reactivate (Cohort Assigned)
-                      </button>
-                    </>
+                    <button onClick={() => handleReactivateApplication("COHORT_ASSIGNED")} className="premium-btn premium-btn-primary" disabled={submitting}>
+                      Revoke Suspension
+                    </button>
                   ) : (
                     <button onClick={handleSuspendApplication} className="premium-btn premium-btn-danger" disabled={submitting || application.status === "DROPPED" || application.status === "CANCELLED" || application.status === "REJECTED"}>
                       Suspend Application
