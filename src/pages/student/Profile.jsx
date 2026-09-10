@@ -669,12 +669,12 @@ function Profile() {
                             </div>
                             <div style={{ padding: '14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
                               <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Naming Compliance</div>
-                              {serverProfile.google_identity.naming_compliant === true ? (
+                              {serverProfile.google_identity.naming_compliant?.is_compliant === true || serverProfile.google_identity.naming_compliant === true ? (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                   <FiCheckCircle size={16} color="#059669" />
                                   <span style={{ fontSize: '14px', fontWeight: 600, color: '#059669' }}>Compliant</span>
                                 </div>
-                              ) : serverProfile.google_identity.naming_compliant === false ? (
+                              ) : serverProfile.google_identity.naming_compliant?.is_compliant === false || serverProfile.google_identity.naming_compliant === false ? (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                   <FiAlertCircle size={16} color="#d97706" />
                                   <span style={{ fontSize: '14px', fontWeight: 600, color: '#d97706' }}>Name Change Required</span>
@@ -687,7 +687,7 @@ function Profile() {
                         )}
 
                         {/* Non-compliant advisory */}
-                        {serverProfile.google_identity.naming_compliant === false && serverProfile?.current_application?.required_meet_display_name && (
+                        {(serverProfile.google_identity.naming_compliant?.is_compliant === false || serverProfile.google_identity.naming_compliant === false) && (
                           <div style={{
                             padding: '12px 16px',
                             borderRadius: '10px',
@@ -699,9 +699,16 @@ function Profile() {
                             gap: '10px',
                           }}>
                             <FiAlertCircle size={16} color="#d97706" style={{ marginTop: '2px', flexShrink: 0 }} />
-                            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
-                              Update your Google Account display name to <strong style={{ color: 'var(--text-primary)' }}>{serverProfile.current_application.required_meet_display_name}</strong> for correct attendance matching. Attendance will still work after Google sync.
-                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                              <strong style={{ color: 'var(--text-primary)', fontSize: '13px', marginBottom: '4px' }}>Name Change Required</strong>
+                              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                                {serverProfile.google_identity.naming_compliant?.message ? (
+                                  serverProfile.google_identity.naming_compliant.message
+                                ) : (
+                                  <>Your Google Account name does not follow the recommended SURE ProEd naming format (<strong style={{ color: 'var(--text-primary)' }}>{serverProfile.current_application?.required_meet_display_name}</strong>). This is for identification consistency only and does not affect your attendance.</>
+                                )}
+                              </p>
+                            </div>
                           </div>
                         )}
 
