@@ -139,8 +139,8 @@ function ScheduleClass() {
     try {
        const res = await apiClient.post('/api/attendance/setup-lst-automation/', {
           first_sunday: automationForm.firstSunday,
-          start_time: automationForm.startTime + ":00",
-          end_time: automationForm.endTime + ":00",
+          start_time: automationForm.startTime.length === 5 ? automationForm.startTime + ":00" : automationForm.startTime,
+          end_time: automationForm.endTime.length === 5 ? automationForm.endTime + ":00" : automationForm.endTime,
           starting_batch: automationForm.startingBatch,
           is_paused: false
        });
@@ -264,8 +264,8 @@ function ScheduleClass() {
     try {
       const updatedData = {
         class_date: editDate,
-        start_time: editStartTime + ":00",
-        end_time: editEndTime.split("T")[1] + ":00"
+        start_time: editStartTime.length === 5 ? editStartTime + ":00" : editStartTime,
+        end_time: editEndTime.length === 5 ? editEndTime + ":00" : editEndTime
       };
 
       await attendanceService.patchAttendanceRecord(classId, updatedData);
@@ -417,16 +417,9 @@ function ScheduleClass() {
 
       setSuccessMessage(`Live class scheduled successfully! Check the active classes below for details.`);
 
-      // Optimistically add to state for instant feedback
-      const newClass = res?.data || res;
-      if (newClass && typeof newClass === 'object' && newClass.id) {
-        setActiveAdminClasses(prev => [newClass, ...prev]);
-      }
-
-      // Fetch fresh data in background to ensure relational fields sync correctly
-      setTimeout(() => {
-        loadActiveClasses();
-      }, 1000);
+      // We rely on loadActiveClasses to fetch the freshly created session(s)
+      // because LST sessions might return different ID keys or multiple records
+      await loadActiveClasses();
 
       setRequest({
         sessionType: "Domain",

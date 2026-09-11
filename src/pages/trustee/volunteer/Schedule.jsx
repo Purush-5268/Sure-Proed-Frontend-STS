@@ -163,8 +163,8 @@ function ScheduleClass() {
     try {
       const updatedData = {
         class_date: editDate,
-        start_time: editStartTime + ":00",
-        end_time: editEndTime.split("T")[1] + ":00"
+        start_time: editStartTime.length === 5 ? editStartTime + ":00" : editStartTime,
+        end_time: editEndTime.length === 5 ? editEndTime + ":00" : editEndTime
       };
 
       await attendanceService.patchAttendanceRecord(classId, updatedData);
@@ -300,10 +300,8 @@ function ScheduleClass() {
 
       setSuccessMessage(`✅ Class scheduled successfully!`);
 
-      const newClass = res?.data || res;
-      if (newClass && typeof newClass === 'object' && newClass.id) {
-        setActiveAdminClasses(prev => [newClass, ...prev]);
-      }
+      // We rely on loadActiveClasses to fetch the freshly created session(s)
+      await loadActiveClasses();
 
       setRequest({
         sessionType: "Domain",
@@ -317,8 +315,6 @@ function ScheduleClass() {
         title: "",
       });
       setPriorPermissions([]);
-
-      loadActiveClasses(); // Refresh Radar
     } catch (err) {
       console.error("SCHEDULING ERROR:", err);
       if (err.customError) {

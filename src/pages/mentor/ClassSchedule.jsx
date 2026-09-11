@@ -112,6 +112,12 @@ function ClassSchedule() {
   const [isScheduling, setIsScheduling] = useState(false);
   const [showScheduleForm, setShowScheduleForm] = useState(false);
 
+  // Edit states for Reschedule
+  const [editingClassId, setEditingClassId] = useState(null);
+  const [editDate, setEditDate] = useState("");
+  const [editStartTime, setEditStartTime] = useState("");
+  const [editEndTime, setEditEndTime] = useState("");
+
   const handleScheduleSubmit = async (e) => {
     e.preventDefault();
     setIsScheduling(true);
@@ -227,6 +233,42 @@ function ClassSchedule() {
     }
   };
 
+  const handleStartEdit = (cls) => {
+    setEditingClassId(cls.id);
+    const datePart = cls.session_date || cls.class_date || new Date().toISOString().split('T')[0];
+    const startPart = cls.start_time ? cls.start_time.substring(0, 5) : "00:00";
+    const endPart = cls.end_time ? cls.end_time.substring(0, 5) : "23:59";
+
+    setEditDate(datePart);
+    setEditStartTime(startPart);
+    setEditEndTime(endPart);
+  };
+
+  const handleSaveReschedule = async (cls) => {
+    try {
+      const updatedData = {
+        class_date: editDate,
+        session_date: editDate,
+        start_time: editStartTime.length === 5 ? editStartTime + ":00" : editStartTime,
+        end_time: editEndTime.length === 5 ? editEndTime + ":00" : editEndTime
+      };
+
+      if (cls.type === "DOMAIN") {
+        await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(cls.id), updatedData);
+      } else {
+        await apiClient.patch(API_ENDPOINTS.TRAININGS.SESSION_BY_ID(cls.id), updatedData);
+      }
+
+      setActiveSessions(prev => prev.map(c =>
+        c.id === cls.id ? { ...c, session_date: editDate, start_time: updatedData.start_time, end_time: updatedData.end_time } : c
+      ));
+
+      setEditingClassId(null);
+      alert("✅ Class rescheduled successfully!");
+    } catch (error) {
+      alert("❌ Failed to reschedule. Please check the backend connection.");
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -436,19 +478,62 @@ function ClassSchedule() {
                       </a>
                     </div>
                   )}
-                  <div style={{ marginTop: '1rem', display: 'flex', gap: '8px' }}>
-                    <button 
-                      onClick={() => handleCancelClass(session.id, session.type)}
-                      style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
-                    >
-                      Cancel Class
-                    </button>
-                    <button 
-                      onClick={() => handleEndClass(session.id, session.type)}
-                      style={{ background: session.type === 'TRAINING' ? '#8b5cf6' : '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
-                    >
-                      End Class
-                    </button>
+                  {editingClassId === session.id && (
+                    <div style={{ marginTop: '1rem', background: 'rgba(0,0,0,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                        <div style={{ flex: 1, minWidth: '150px' }}>
+                          <label style={{ fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '0.25rem' }}>New Start Time</label>
+                          <div style={{ display: "flex", gap: "5px" }}>
+                            <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} className={styles.input} style={{ flex: 1, minWidth: 0, padding: '0.25rem 0.5rem' }} />
+                            <div style={{ flex: 1, minWidth: 0 }}><TimePicker value={editStartTime} onChange={e => setEditStartTime(e.target.value)} className={styles.input} /></div>
+                          </div>
+                        </div>
+                        <div style={{ flex: 1, minWidth: '150px' }}>
+                          <label style={{ fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '0.25rem' }}>New End Time</label>
+                          <div style={{ flex: 1 }}><TimePicker value={editEndTime} onChange={e => setEditEndTime(e.target.value)} className={styles.input} /></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ marginTop: '1rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {editingClassId !== session.id ? (
+                      <>
+                        <button 
+                          onClick={() => handleStartEdit(session)}
+                          style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
+                        >
+                          Reschedule
+                        </button>
+                        <button 
+                          onClick={() => handleCancelClass(session.id, session.type)}
+                          style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
+                        >
+                          Cancel Class
+                        </button>
+                        <button 
+                          onClick={() => handleEndClass(session.id, session.type)}
+                          style={{ background: session.type === 'TRAINING' ? '#8b5cf6' : '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
+                        >
+                          End Class
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button 
+                          onClick={() => setEditingClassId(null)}
+                          style={{ background: 'rgba(107, 114, 128, 0.1)', color: '#6b7280', border: '1px solid rgba(107, 114, 128, 0.3)', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
+                        >
+                          Cancel
+                        </button>
+                        <button 
+                          onClick={() => handleSaveReschedule(session)}
+                          style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
+                        >
+                          Save Changes
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </Card>
