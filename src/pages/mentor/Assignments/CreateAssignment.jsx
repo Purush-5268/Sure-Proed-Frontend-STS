@@ -14,14 +14,15 @@ const CreateAssignment = () => {
     cohort: "",
     dueDate: "",
     points: 100,
+    allow_late_submissions: false,
   });
   const [content, setContent] = useState("");
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleSaveDraft = () => {
@@ -169,6 +170,30 @@ const CreateAssignment = () => {
                 min="0"
                 max="1000"
               />
+            </div>
+          </Card>
+
+          <Card className={styles.card} style={{ marginTop: '24px' }}>
+            <h3 className={styles.sideTitle}>Submission Policy</h3>
+            
+            <div style={{ padding: '16px', background: 'var(--bg-nested)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', fontWeight: 600 }}>
+                  <span>⏰</span> Late Submissions
+                </div>
+                <label className="premium-toggle">
+                  <input 
+                    type="checkbox" 
+                    name="allow_late_submissions"
+                    checked={formData.allow_late_submissions}
+                    onChange={handleChange}
+                  />
+                  <span className="slider round"></span>
+                </label>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                Allow students to submit after the deadline.
+              </p>
             </div>
           </Card>
         </div>

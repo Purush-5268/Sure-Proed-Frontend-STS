@@ -142,7 +142,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: left 0.4s ease;
 }
 
@@ -160,9 +160,17 @@
 }
 
 @media (max-width: 768px) {
-  .profileCard { padding: 20px; }
-  .row { grid-template-columns: 1fr; }
-  .saveButton { width: 100%; }
+  .profileCard {
+    padding: 20px;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .saveButton {
+    width: 100%;
+  }
 }
 
 /* --- Profile Completion & Lock UI --- */
@@ -223,8 +231,13 @@
   box-shadow: var(--student-card-shadow);
 }
 
-.lockedIcon { font-size: 20px; }
-.lockedTitle { font-size: 16px; }
+.lockedIcon {
+  font-size: 20px;
+}
+
+.lockedTitle {
+  font-size: 16px;
+}
 
 .lockedSub {
   font-size: 13px;
@@ -257,7 +270,11 @@
   accent-color: var(--primary-color);
 }
 
-.fieldset { border: none; padding: 0; margin: 0; }
+.fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
 
 /* Tabs */
 .tabContainer {
@@ -273,7 +290,11 @@
   padding: 4px;
 }
 
-.tabList::-webkit-scrollbar { height: 0px; } /* Hide scrollbar for clean look */
+.tabList::-webkit-scrollbar {
+  height: 0px;
+}
+
+/* Hide scrollbar for clean look */
 
 .tabBtn {
   background: transparent;
@@ -342,7 +363,271 @@
 }
 
 @media (max-width: 768px) {
-  .profileHeader { flex-direction: column; align-items: center; text-align: center; }
-  .profileHeaderLeft { flex-direction: column; text-align: center; gap: 16px; }
-  .profileHeaderRight { align-items: center; width: 100%; }
+  .profileHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profileHeaderLeft {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .profileHeaderRight {
+    align-items: center;
+    width: 100%;
+  }
 }
+
+/* ═══════════════════════════════════════════════════════
+   PREMIUM REDESIGN ADDITIONS
+   ═══════════════════════════════════════════════════════ */
+
+.heroContainer {
+  position: relative;
+  width: calc(100% + 56px);
+  margin-left: -28px;
+  margin-right: -28px;
+  margin-top: -28px;
+  overflow: hidden;
+  margin-bottom: 60px;
+  background: var(--bg-card);
+}
+
+@media (max-width: 768px) {
+  .heroContainer {
+    width: calc(100% + 32px);
+    margin-left: -16px;
+    margin-right: -16px;
+    margin-top: -16px;
+  }
+}
+
+.heroBanner {
+  width: 100%;
+  height: 220px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--primary-color);
+  background-image: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+  position: relative;
+}
+
+.heroBanner::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.75) 100%);
+  pointer-events: none;
+}
+
+.identitySection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 24px;
+  padding: 0 32px 24px;
+  position: relative;
+  z-index: 2;
+  margin-top: -65px;
+}
+
+.avatarWrapper {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 4px solid var(--bg-card);
+  background: var(--bg-surface);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatarFallback {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--primary-color);
+}
+
+.cameraBtn {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg-card);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: all 0.2s;
+}
+.cameraBtn:hover {
+  transform: scale(1.1);
+  background: var(--accent-color);
+}
+
+.userInfo {
+  flex: 1 1 250px;
+  min-width: 0;
+  padding-bottom: 8px;
+}
+.userName {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  margin: 0 0 8px 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.userRole {
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+.userMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  align-items: flex-start;
+}
+.userMeta span {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  word-break: break-word;
+}
+
+.completionCard {
+  background: var(--student-surface-2, var(--bg-surface));
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  width: 260px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+  margin-left: auto;
+}
+.completionHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+.progressBarBg {
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progressBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  border-radius: 4px;
+  transition: width 0.5s ease-out;
+}
+
+/* Resume Card */
+.resumeCard {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  background: var(--student-surface-2, var(--bg-surface));
+  border: 1px dashed var(--primary-color);
+  gap: 16px;
+  align-items: center;
+  text-align: center;
+}
+.resumeCardActive {
+  border-style: solid;
+  border-color: var(--primary-color);
+  background: rgba(139, 92, 246, 0.05); /* subtle active background */
+}
+.resumeIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.resumeInfo h4 {
+  margin: 0 0 4px 0;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+.resumeInfo p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+.resumeActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+@media (max-width: 1024px) {
+  .identitySection { flex-direction: column; align-items: center; text-align: center; margin-top: -65px; }
+  .userInfo { margin-left: 0; margin-top: 16px; }
+  .userMeta { justify-content: center; }
+  .completionCard { margin-top: 20px; width: 100%; }
+}
+
+
+.hiddenInput {
+  display: none !important;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--student-glass-bg, #ffffff);
+  backdrop-filter: blur(12px);
+  padding: 16px 24px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  border-left: 4px solid var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 1000;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+

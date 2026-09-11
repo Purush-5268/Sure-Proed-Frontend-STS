@@ -22,6 +22,15 @@ function Profile() {
   const [saving, setSaving] = useState(false);
   const [skillInput, setSkillInput] = useState("");
   const [googleOAuthToast, setGoogleOAuthToast] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [resumeFileName, setResumeFileName] = useState(null);
+  const [successToast, setSuccessToast] = useState(null);
+
+  useEffect(() => {
+    return () => {
+      if (photoPreview) URL.revokeObjectURL(photoPreview);
+    };
+  }, [photoPreview]);
 
   const [profileStatus, setProfileStatus] = useState("NOT_AVAILABLE");
   const [isExistingStudent, setIsExistingStudent] = useState(false);
@@ -123,19 +132,21 @@ function Profile() {
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === 'profile_photo') {
-      if (files[0] && files[0].size > 1024 * 1024) {
-        alert("Caution: Profile photo must be less than 1MB.");
+      if (files[0] && files[0].size > 5 * 1024 * 1024) {
+        alert("Caution: Profile photo must be less than 5MB.");
         e.target.value = "";
         return;
       }
       setFormData(prev => ({ ...prev, profile_photo: files[0] }));
+      setPhotoPreview(URL.createObjectURL(files[0]));
     } else if (name === 'resume') {
-      if (files[0] && files[0].size > 1024 * 1024) {
-        alert("Caution: Resume must be less than 1MB.");
+      if (files[0] && files[0].size > 5 * 1024 * 1024) {
+        alert("Caution: Resume must be less than 5MB.");
         e.target.value = "";
         return;
       }
       setFormData(prev => ({ ...prev, resume: files[0] }));
+      setResumeFileName(files[0].name);
     } else if (name === 'courseBatch') {
       setFormData(prev => ({ ...prev, [name]: value.toUpperCase() }));
     } else {
@@ -171,8 +182,13 @@ function Profile() {
         });
       }
 
-      alert("Profile updated successfully");
+      setSuccessToast("Profile updated successfully");
+      setTimeout(() => setSuccessToast(null), 5000);
+      setPhotoPreview(null);
+      setResumeFileName(null);
+      console.log("Profile successfully saved. Latest profile:", latestProfile);
     } catch (err) {
+      console.error("Profile Save Error:", err);
       const msg = err.response?.data ? JSON.stringify(err.response.data) : "Save failed";
       alert("Save failed: " + msg);
     } finally {
@@ -254,73 +270,98 @@ function Profile() {
     { id: "integrations", label: "Integrations", icon: <FiShield /> },
   ];
 
-  const requiredFields = ["firstName", "lastName", "email", "phoneNumber", "college", "degree", "specialization", "graduation_year"];
+  const requiredFields = ["firstName", "lastName", "email", "phoneNumber", "college", "degree", "specialization", "graduation_year", "linkedin_url", "github_username"];
   const completedFields = requiredFields.filter(field => Boolean(formData[field]));
   const completionPercentage = Math.round((completedFields.length / requiredFields.length) * 100);
 
-  return (
-    <div className="premium-page-container">
-      <div className={styles.profileHeader}>
-        <div className={styles.profileHeaderLeft}>
-          <div style={{ position: 'relative' }}>
-            {serverProfile?.profile_photo ? (
-              <img
-                src={serverProfile.profile_photo}
-                alt="Profile"
-                style={{ width: "120px", height: "120px", borderRadius: "50%", objectFit: "cover", border: "4px solid var(--bg-nested)", boxShadow: "0 8px 16px rgba(0,0,0,0.1)" }}
-              />
-            ) : (
-              <div style={{ width: "120px", height: "120px", borderRadius: "50%", background: "var(--primary-color)", color: "var(--text-inverse)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "48px", fontWeight: "bold", boxShadow: "0 8px 16px rgba(0,0,0,0.1)" }}>
-                {user?.first_name?.charAt(0) || <FiUser />}
-              </div>
-            )}
-            {profileStatus === 'ADMIN_APPROVED' && (
-              <div style={{ position: 'absolute', bottom: '0', right: '0', background: '#059669', color: 'var(--text-inverse)', borderRadius: '50%', padding: '6px', border: '3px solid var(--bg-default)' }}>
-                <FiCheckCircle size={18} />
-              </div>
-            )}
-          </div>
-          <div>
-            <h1 style={{ margin: "0 0 8px 0", fontSize: "28px", color: "var(--text-primary)" }}>
-              {formData.firstName || user?.first_name} {formData.lastName || user?.last_name}
-            </h1>
-            <p style={{ margin: "0 0 12px 0", fontSize: "16px", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "8px" }}>
-              <FiBriefcase /> {formData.tagline || formData.degree || "Sure Trust Student"}
-            </p>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <span style={{ fontSize: '13px', background: 'var(--bg-nested)', padding: '4px 12px', borderRadius: '12px', color: 'var(--text-secondary)' }}>
-                {user?.email}
-              </span>
-              <span style={{ fontSize: '13px', background: 'var(--bg-nested)', padding: '4px 12px', borderRadius: '12px', color: 'var(--text-secondary)' }}>
-                {formData.phoneNumber || user?.phone_number || "No Phone"}
-              </span>
-            </div>
-          </div>
-        </div>
+  const getInitials = () => {
+    if (formData.firstName && formData.lastName) return `${formData.firstName[0]}${formData.lastName[0]}`;
+    if (user?.first_name && user?.last_name) return `${user.first_name[0]}${user.last_name[0]}`;
+    return "P";
+  };
 
-        <div className={styles.profileHeaderRight}>
-          {profileStatus === 'ADMIN_APPROVED' ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#059669', background: '#ecfdf5', padding: '8px 16px', borderRadius: '20px', fontWeight: 'bold' }}>
-              <FiCheckCircle size={20} />
-              <span>Verified Student</span>
+  const displayPhoto = photoPreview || serverProfile?.profile_photo;
+  const bannerUrl = serverProfile?.linkedin_banner || serverProfile?.banner_image;
+
+  const handleDownloadResume = async (e) => {
+    e.preventDefault();
+    if (!serverProfile?.resume) return;
+    
+    try {
+      const response = await apiClient.get(serverProfile.resume, { responseType: 'blob' });
+      
+      // Determine the content type from the response to display properly in the new tab
+      const contentType = response.headers['content-type'] || 'application/pdf';
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: contentType }));
+      
+      // Open the Blob URL in a new tab instead of forcing a download
+      window.open(url, '_blank');
+      
+      // We can't immediately revoke the URL because the new tab needs time to load it
+      setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+    } catch (error) {
+      console.error("Download Error (Backend rejected the token or file not found):", error?.response || error);
+    }
+  };
+
+  return (
+    <>
+      {/* 1. HERO BANNER & IDENTITY OVERLAP (Edge to Edge) */}
+      <div className={styles.heroContainer}>
+        <div 
+          className={styles.heroBanner} 
+          style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : {}}
+        />
+        
+        <div style={{ padding: "0 24px" }}>
+          <div className={styles.identitySection}>
+            <div className={styles.avatarWrapper}>
+              {displayPhoto ? (
+                <img src={displayPhoto} alt="Profile" className={styles.avatarImage} />
+              ) : (
+                <span className={styles.avatarFallback}>{getInitials()}</span>
+              )}
             </div>
-          ) : (
-            completionPercentage < 100 && (
-              <div style={{ width: '250px', background: 'var(--bg-nested)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
+            
+            <div className={styles.userInfo}>
+              <h1 className={styles.userName}>
+                {formData.firstName || user?.first_name} {formData.lastName || user?.last_name}
+                {profileStatus === 'ADMIN_APPROVED' && (
+                  <FiCheckCircle size={22} color="#059669" title="Verified Student" style={{ flexShrink: 0 }} />
+                )}
+              </h1>
+              <div className={styles.userRole}>
+                {formData.tagline || formData.degree || "SURE Trust Student"}
+              </div>
+              <div className={styles.userMeta}>
+                <span>
+                  <FiBook style={{ marginTop: '2px', flexShrink: 0 }} /> 
+                  <span style={{ wordBreak: 'break-word' }}>{formData.college || "No College Added"}</span>
+                </span>
+                <span style={{ whiteSpace: 'nowrap' }}>
+                  <FiUser style={{ marginTop: '2px', flexShrink: 0 }} /> {user?.email}
+                </span>
+              </div>
+            </div>
+
+            {completionPercentage < 100 && (
+              <div className={styles.completionCard}>
+                <div className={styles.completionHeader}>
                   <span>Profile Completion</span>
-                  <span>{completionPercentage}%</span>
+                  <span style={{ color: "var(--primary-color)" }}>{completionPercentage}%</span>
                 </div>
-                <div style={{ width: '100%', height: '8px', background: 'var(--bg-default)', borderRadius: '4px', overflow: 'hidden' }}>
-                  <motion.div initial={{ width: 0 }} animate={{ width: `${completionPercentage}%` }} transition={{ duration: 0.5 }} style={{ height: '100%', background: 'var(--primary-color)', borderRadius: '4px' }} />
+                <div className={styles.progressBarBg}>
+                  <div className={styles.progressBarFill} style={{ width: `${completionPercentage}%` }} />
                 </div>
               </div>
-            )
-          )}
+            )}
+          </div>
         </div>
       </div>
 
-      <div className={styles.tabContainer}>
+      <div style={{ padding: "0 24px" }}>
+        {/* TABS */}
+        <div className={styles.tabContainer} style={{ marginBottom: '24px' }}>
         <div className={styles.tabList}>
           {tabs.map(tab => (
             <button
@@ -329,93 +370,112 @@ function Profile() {
               className={`${styles.tabBtn} ${activeTab === tab.id ? styles.activeTab : ""}`}
             >
               {tab.icon} {tab.label}
-              {activeTab === tab.id && (
-                <motion.div layoutId="activeTabIndicator" className={styles.tabIndicator} />
-              )}
+              {activeTab === tab.id && <motion.div layoutId="activeTabIndicator" className={styles.tabIndicator} />}
             </button>
           ))}
         </div>
       </div>
 
-      <GlassCard>
-        <form onSubmit={handleSubmit} className="premium-form">
-          <AnimatePresence mode="wait">
+      {/* MAIN CONTENT GRID */}
+      <div className={styles.mainGrid}>
+        <div className={styles.leftColumn}>
+          <GlassCard>
+            <form onSubmit={handleSubmit} className="premium-form">
+              <AnimatePresence mode="wait">
 
-            {/* PERSONAL TAB */}
-            {activeTab === "personal" && (
-              <motion.div key="personal" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
-                <div className="premium-section">
-                  <h2 style={{ marginBottom: "16px", color: "var(--text-primary)", display: 'flex', alignItems: 'center', gap: '8px' }}><FiUser /> Personal Information</h2>
+                {/* PERSONAL TAB */}
+                {activeTab === "personal" && (
+                  <motion.div key="personal" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                    <div className="premium-section">
+                      <h2 style={{ marginBottom: "6px", display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FiUser /> Personal Information
+                      </h2>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '24px' }}>
+                        Keep your profile updated to help mentors and the team know you better.
+                      </p>
 
-                  {serverProfile?.profile_photo && (
-                    <div style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "16px" }}>
-                      <img src={serverProfile.profile_photo} alt="Profile" style={{ width: "80px", height: "80px", borderRadius: "50%", objectFit: "cover", border: "2px solid var(--primary-color)" }} />
-                      <div style={{ fontSize: "14px", color: "var(--text-secondary)" }}>Current Profile Photo</div>
-                    </div>
-                  )}
+                      {/* File Uploads Grid */}
+                      <div className="premium-grid-2" style={{ marginBottom: "24px" }}>
+                        <div className="premium-form-group">
+                          <label htmlFor="profile_photo" className="premium-label">Profile Photo (Update)</label>
+                          <input 
+                            type="file" 
+                            id="profile_photo" 
+                            name="profile_photo" 
+                            onChange={handleChange} 
+                            accept="image/jpeg,image/png" 
+                            className="premium-input" 
+                            style={{ padding: '8px' }} 
+                          />
+                          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Max size: 1MB</p>
+                        </div>
+                        <div className="premium-form-group">
+                          <label htmlFor="resume" className="premium-label">Resume (Upload)</label>
+                          <input 
+                            type="file" 
+                            id="resume" 
+                            name="resume" 
+                            onChange={handleChange} 
+                            accept=".pdf,.doc,.docx" 
+                            className="premium-input" 
+                            style={{ padding: '8px' }} 
+                          />
+                          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Max size: 1MB</p>
+                          {serverProfile?.resume && (
+                            <a 
+                              href="#" 
+                              onClick={handleDownloadResume} 
+                              style={{ color: '#d946ef', fontSize: '13px', display: 'inline-block', marginTop: '4px', textDecoration: 'none', cursor: 'pointer' }}
+                            >
+                              View Current Resume
+                            </a>
+                          )}
+                        </div>
+                      </div>
 
-                  <div className="premium-grid-2">
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_photo" className="premium-label">Profile Photo (Update)</label>
-                      <input id="profile_photo" className="premium-input" type="file" name="profile_photo" onChange={handleChange} accept="image/*" />
-                      <small style={{ color: "var(--text-secondary)", fontSize: "12px", marginTop: "4px", display: "block" }}>Max size: 1MB</small>
-                    </div>
+                      <div className="premium-grid-2">
+                        <div className="premium-form-group">
+                          <label htmlFor="profile_firstName" className="premium-label">First Name *</label>
+                          <input id="profile_firstName" className="premium-input" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                        </div>
+                        <div className="premium-form-group">
+                          <label htmlFor="profile_lastName" className="premium-label">Last Name *</label>
+                          <input id="profile_lastName" className="premium-input" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                        </div>
+                        <div className="premium-form-group">
+                          <label htmlFor="profile_email" className="premium-label">Email *</label>
+                          <input id="profile_email" className="premium-input" name="email" value={formData.email} onChange={handleChange} required disabled />
+                        </div>
+                        <div className="premium-form-group">
+                          <label htmlFor="profile_phoneNumber" className="premium-label">Phone *</label>
+                          <input id="profile_phoneNumber" className="premium-input" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
+                        </div>
+                        <div className="premium-form-group">
+                          <label htmlFor="profile_gender" className="premium-label">Gender</label>
+                          <select id="profile_gender" className="premium-input" name="gender" value={formData.gender} onChange={handleChange}>
+                            <option value="">Select Gender</option>
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                            <option value="OTHER">Other</option>
+                          </select>
+                        </div>
+                        <div className="premium-form-group">
+                          <label htmlFor="profile_dob" className="premium-label">Date of Birth</label>
+                          <input id="profile_dob" className="premium-input" type="date" name="dob" value={formData.dob} onChange={handleChange} />
+                        </div>
+                      </div>
 
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_resume" className="premium-label">Resume (Upload)</label>
-                      <input id="profile_resume" className="premium-input" type="file" name="resume" onChange={handleChange} accept=".pdf,.doc,.docx" />
-                      <small style={{ color: "var(--text-secondary)", fontSize: "12px", marginTop: "4px", display: "block" }}>Max size: 1MB</small>
-                      {serverProfile?.resume && (
-                        <a href={serverProfile.resume} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: 'var(--primary-color)', marginTop: '4px', display: 'inline-block' }}>
-                          View Current Resume
-                        </a>
-                      )}
+                      <div className="premium-form-group" style={{ marginTop: "24px" }}>
+                        <label htmlFor="profile_tagline" className="premium-label">Tagline / Headline</label>
+                        <input id="profile_tagline" className="premium-input" name="tagline" value={formData.tagline} onChange={handleChange} placeholder="e.g. Aspiring Full-Stack Developer" />
+                      </div>
+                      <div className="premium-form-group" style={{ marginTop: "16px" }}>
+                        <label htmlFor="profile_bio" className="premium-label">About You</label>
+                        <textarea id="profile_bio" className="premium-input" name="bio" value={formData.bio} onChange={handleChange} rows="4" placeholder="Tell us about yourself..." />
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="premium-grid-2">
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_firstName" className="premium-label">First Name *</label>
-                      <input id="profile_firstName" className="premium-input" name="firstName" value={formData.firstName} onChange={handleChange} required />
-                    </div>
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_lastName" className="premium-label">Last Name *</label>
-                      <input id="profile_lastName" className="premium-input" name="lastName" value={formData.lastName} onChange={handleChange} required />
-                    </div>
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_email" className="premium-label">Email *</label>
-                      <input id="profile_email" className="premium-input" name="email" value={formData.email} onChange={handleChange} required disabled />
-                    </div>
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_phoneNumber" className="premium-label">Phone *</label>
-                      <input id="profile_phoneNumber" className="premium-input" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
-                    </div>
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_gender" className="premium-label">Gender</label>
-                      <select id="profile_gender" className="premium-input" name="gender" value={formData.gender} onChange={handleChange}>
-                        <option value="">Select Gender</option>
-                        <option value="MALE">Male</option>
-                        <option value="FEMALE">Female</option>
-                        <option value="OTHER">Other</option>
-                      </select>
-                    </div>
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_dob" className="premium-label">Date of Birth</label>
-                      <input id="profile_dob" className="premium-input" type="date" name="dob" value={formData.dob} onChange={handleChange} />
-                    </div>
-                  </div>
-
-                  <div className="premium-form-group" style={{ marginTop: "16px" }}>
-                    <label htmlFor="profile_tagline" className="premium-label">Tagline / Headline</label>
-                    <input id="profile_tagline" className="premium-input" name="tagline" value={formData.tagline} onChange={handleChange} placeholder="e.g. Aspiring Full-Stack Developer" />
-                  </div>
-                  <div className="premium-form-group" style={{ marginTop: "16px" }}>
-                    <label htmlFor="profile_bio" className="premium-label">Bio</label>
-                    <textarea id="profile_bio" className="premium-input" name="bio" value={formData.bio} onChange={handleChange} rows="3" placeholder="Tell us about yourself..." />
-                  </div>
-                </div>
-              </motion.div>
-            )}
+                  </motion.div>
+                )}
 
             {/* ACADEMIC TAB */}
             {activeTab === "academic" && (
@@ -818,7 +878,7 @@ function Profile() {
               <motion.div key="integrations" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
                 <div className="premium-section">
                   <h2 style={{ marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}><FiShield /> Professional Integrations</h2>
-                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px' }}>Optional links to your professional profiles.</p>
+                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px' }}>Mandatory links to your professional profiles.</p>
 
                   <div className="premium-grid-2" style={{ marginBottom: '24px' }}>
                     <div style={{ padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
@@ -877,7 +937,25 @@ function Profile() {
           </div>
         </form>
       </GlassCard>
-    </div>
+      </div>
+      </div>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {successToast && (
+          <motion.div 
+            className={styles.toast}
+            initial={{ opacity: 0, y: 50 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: 50 }}
+          >
+            <FiCheckCircle size={20} color="var(--primary-color)" />
+            {successToast}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      </div>
+    </>
   );
 }
 

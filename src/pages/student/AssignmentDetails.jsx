@@ -5,6 +5,9 @@ function AssignmentDetails() {
   const location = useLocation();
   const assignment = location.state?.assignment;
 
+  const isPastDeadline = assignment?.deadline ? new Date() > new Date(assignment.deadline) : false;
+  const allowLate = assignment?.allow_late_submissions;
+
   const formatDate = (value) => {
     if (!value) return "N/A";
     return new Date(value).toLocaleDateString("en-IN", {
@@ -32,6 +35,16 @@ function AssignmentDetails() {
           <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             📅 Due: {formatDate(assignment?.deadline)}
           </span>
+          {isPastDeadline && !allowLate && (
+            <span className="premium-badge" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>
+              🔒 Closed
+            </span>
+          )}
+          {isPastDeadline && allowLate && (
+            <span className="premium-badge" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#d97706' }}>
+              ⏰ Late Allowed
+            </span>
+          )}
         </div>
 
         <div className={styles.content}>
@@ -41,17 +54,37 @@ function AssignmentDetails() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
+        <div style={{ display: 'flex', gap: '12px', marginTop: '32px', flexWrap: 'wrap', alignItems: 'center' }}>
           <Link to="/student/assignments" className={styles.backBtn}>
             ← Back to List
           </Link>
-          <Link 
-            to="/student/assignment-submission" 
-            state={{ assignment }} 
-            className={styles.submitBtn}
-          >
-            Submit Assignment →
-          </Link>
+
+          {assignment?.status === 'SUBMITTED' ? (
+             <div style={{ padding: '10px 16px', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', borderRadius: 'var(--radius-md)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>✓</span> Already Submitted
+            </div>
+          ) : isPastDeadline && !allowLate ? (
+            <div style={{ padding: '10px 16px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: 'var(--radius-md)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>🔒</span> Submissions Closed
+            </div>
+          ) : isPastDeadline && allowLate ? (
+            <Link 
+              to="/student/assignment-submission" 
+              state={{ assignment }} 
+              className={styles.submitBtn}
+              style={{ background: '#f59e0b', color: '#fff', borderColor: '#d97706' }}
+            >
+              Submit Late Assignment →
+            </Link>
+          ) : (
+            <Link 
+              to="/student/assignment-submission" 
+              state={{ assignment }} 
+              className={styles.submitBtn}
+            >
+              Submit Assignment →
+            </Link>
+          )}
         </div>
       </div>
     </div>
