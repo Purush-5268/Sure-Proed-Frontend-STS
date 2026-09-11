@@ -11,7 +11,7 @@ import Footer from "../components/layout/Footer";
 import Sidebar from "../components/layout/Sidebar";
 import apiClient from "../services/apiClient";
 import { API_ENDPOINTS } from "../constants/apiEndpoints";
-
+import { usePushNotifications } from "../services/usePushNotifications";
 import styles from "./MentorLayout.module.css";
 
 const mentorLinks = [
@@ -30,6 +30,7 @@ const mentorLinks = [
 ];
 
 function MentorLayout() {
+  usePushNotifications();
   const [cohorts, setCohorts] = useState([]);
   const [selectedGlobalCohort, setSelectedGlobalCohort] = useState("");
 

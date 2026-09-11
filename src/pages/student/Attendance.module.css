@@ -81,7 +81,8 @@
   padding: 16px 24px 16px 42px;
   border-radius: 16px;
   position: relative;
-  min-width: 340px;
+  min-width: 0;
+  width: 100%;
   max-width: 400px;
   min-height: 80px;
   display: flex;
@@ -839,6 +840,19 @@
 }
 
 @media (max-width: 640px) {
+  .calendarGrid {
+    gap: 4px;
+  }
+  .calendarCell {
+    padding: 4px;
+    min-height: 60px;
+  }
+  .calendarEmptyCell {
+    min-height: 60px;
+  }
+  .dayNumber {
+    font-size: 12px;
+  }
   .policyContent {
     padding-right: 0;
   }

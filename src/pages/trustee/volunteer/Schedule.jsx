@@ -273,7 +273,7 @@ function ScheduleClass() {
         end_time: request.endTime.length === 5 ? request.endTime + ":00" : request.endTime,
         conducted_by: currentUserId,
         cohort: matchedCohort ? matchedCohort.id : null,
-        guest_emails: request.guestEmails.join(","),
+        guest_emails: request.guestEmails,
         prior_permissions: priorPermissions.map(p => ({
           student_id: p.student_id,
           reason: p.reason
@@ -347,7 +347,15 @@ function ScheduleClass() {
     }
     setPriorPermissions([...priorPermissions, {
       student_id: newPriorPermissionStudent.id,
-      name: `${newPriorPermissionStudent.user?.first_name || newPriorPermissionStudent.first_name} ${newPriorPermissionStudent.user?.last_name || newPriorPermissionStudent.last_name}`.trim(),
+      name: (
+        newPriorPermissionStudent.name || 
+        newPriorPermissionStudent.user?.name || 
+        `${newPriorPermissionStudent.user?.first_name || newPriorPermissionStudent.first_name || ""} ${newPriorPermissionStudent.user?.last_name || newPriorPermissionStudent.last_name || ""}`.trim() || 
+        newPriorPermissionStudent.student_code || 
+        newPriorPermissionStudent.user?.email || 
+        newPriorPermissionStudent.email || 
+        "Unknown Student"
+      ),
       reason: newPriorPermissionReason.trim()
     }]);
     setNewPriorPermissionStudent(null);
@@ -543,8 +551,8 @@ function ScheduleClass() {
                   <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "flex-start" }}>
                     <div style={{ flex: "2", minWidth: "200px" }}>
                       <AsyncSelect
-                        value={newPriorPermissionStudent}
-                        onChange={(val) => setNewPriorPermissionStudent(val)}
+                        value={newPriorPermissionStudent ? newPriorPermissionStudent.id : ""}
+                        onChange={(e, opt) => setNewPriorPermissionStudent(opt || null)}
                         loadOptions={(val) => loadStudentOptions(val, { sessionType: request.sessionType, cohortId: request.cohortId, lstBatch: request.lstBatchNumber })}
                         getOptionLabel={(s) => `${s.user?.first_name || s.first_name || ""} ${s.user?.last_name || s.last_name || ""} (${s.student_code || s.user?.email || s.email})`}
                         getOptionValue={(s) => s.id}

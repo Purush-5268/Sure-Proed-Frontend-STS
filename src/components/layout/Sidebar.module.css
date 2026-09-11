@@ -71,8 +71,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-xl);
-  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -141,14 +141,14 @@
 .nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0px;
 }
 
 .link {
   position: relative;
   display: flex;
   align-items: center;
-  padding: 10px var(--space-md);
+  padding: 8px var(--space-md);
   text-decoration: none;
   color: var(--sidebar-link-text, var(--text-secondary));
   border-radius: var(--radius-md);
@@ -171,13 +171,13 @@
 
 /* ── Icon ── */
 .linkIcon {
-  font-size: 17px;
-  margin-right: var(--space-md);
+  font-size: 16px;
+  margin-right: var(--space-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
   overflow: hidden;
   color: var(--sidebar-icon, var(--text-muted));

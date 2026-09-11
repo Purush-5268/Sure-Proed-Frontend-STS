@@ -734,6 +734,7 @@ input[type="time"].premium-input {
 
 .premium-table {
   width: 100%;
+  min-width: 600px;
   border-collapse: separate;
   border-spacing: 0;
   text-align: left;

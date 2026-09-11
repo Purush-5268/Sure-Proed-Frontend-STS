@@ -6,12 +6,13 @@ const PROFILE_STORAGE_KEY_PREFIX = "sure_student_profile_";
 const normalizeProfile = (profile = {}) => {
   const user = profile.user || {};
   
-  // Fix mixed-content issues by stripping absolute HTTP backend origins for media URLs
+  // Preserve absolute HTTP backend origins for media URLs to avoid 404s via Vite proxy
   let photoUrl = profile.profile_photo || "";
-  if (photoUrl && photoUrl.startsWith("http")) {
-    try {
-      photoUrl = new URL(photoUrl).pathname; // Extract only the /media/... part
-    } catch (e) {}
+  let resumeUrl = profile.resume || "";
+  if (typeof window !== "undefined" && window.location.protocol === "https:") {
+    // Only force https if the frontend itself is hosted on https (to avoid mixed content)
+    if (photoUrl && photoUrl.startsWith("http:")) photoUrl = photoUrl.replace("http:", "https:");
+    if (resumeUrl && resumeUrl.startsWith("http:")) resumeUrl = resumeUrl.replace("http:", "https:");
   }
 
   return {
@@ -42,7 +43,7 @@ const normalizeProfile = (profile = {}) => {
     hobbies: Array.isArray(profile.hobbies) ? profile.hobbies.join(", ") : (profile.hobbies || ""),
     languages: Array.isArray(profile.languages) ? profile.languages.join(", ") : (profile.languages || ""),
     portfolio_url: profile.portfolio_url || "",
-    resume: profile.resume || "",
+    resume: resumeUrl,
 
     // Integrations
     linkedin_url: profile.linkedin_url || "",

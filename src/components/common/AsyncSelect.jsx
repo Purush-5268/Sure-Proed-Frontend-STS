@@ -101,7 +101,7 @@ const AsyncSelect = ({
     setSelectedOption(option);
     setInputValue(getOptionLabel(option));
     setIsOpen(false);
-    onChange({ target: { name, value: getOptionValue(option) } });
+    onChange({ target: { name, value: getOptionValue(option) } }, option);
   };
 
   const handleClear = (e) => {
@@ -109,7 +109,7 @@ const AsyncSelect = ({
     setSelectedOption(null);
     setInputValue("");
     setOptions([]);
-    onChange({ target: { name, value: "" } });
+    onChange({ target: { name, value: "" } }, null);
   };
 
   return (

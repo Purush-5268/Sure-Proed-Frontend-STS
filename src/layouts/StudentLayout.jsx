@@ -3,14 +3,14 @@ import { useEffect } from "react";
 import {
   FaChartLine, FaUserAlt, FaBookOpen, FaFileSignature,
   FaClipboardCheck, FaUsers, FaCalendarCheck,
-  FaTasks, FaAward, FaCog, FaBriefcase // 🚨 Added FaBriefcase
+  FaTasks, FaAward, FaCog, FaBriefcase, FaQuestionCircle
 } from "react-icons/fa";
 
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import Sidebar from "../components/layout/Sidebar";
 
-
+import { usePushNotifications } from "../services/usePushNotifications";
 import styles from "./StudentLayout.module.css";
 
 const studentLinks = [
@@ -26,9 +26,12 @@ const studentLinks = [
   { label: "Placements", path: "/student/placements", icon: <FaBriefcase /> },
   { label: "Certificates", path: "/student/certificates", icon: <FaAward /> },
   { label: "Settings", path: "/student/settings", icon: <FaCog /> },
+  { label: "Help & Support", path: "/student/support", icon: <FaQuestionCircle /> },
 ];
 
 function StudentLayout() {
+  usePushNotifications();
+
   useEffect(() => {
     document.body.setAttribute("data-role", "student");
     return () => document.body.removeAttribute("data-role");

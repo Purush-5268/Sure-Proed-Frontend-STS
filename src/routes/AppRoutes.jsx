@@ -88,6 +88,7 @@ const ApplicationSuccess = lazy(() => import("../pages/student/ApplicationSucces
 const MyApplications = lazy(() => import("../pages/student/MyApplications"));
 const ApplicationStatus = lazy(() => import("../pages/student/ApplicationStatus"));
 const StudentSettings = lazy(() => import("../pages/student/Settings"));
+const StudentSupport = lazy(() => import("../pages/student/Support"));
 
 const MyCohort = lazy(() => import("../pages/student/MyCohort"));
 const ClassSchedule = lazy(() => import("../pages/student/ClassSchedule"));
@@ -306,6 +307,7 @@ function AppRoutes() {
               <Route path="certificate-verify" element={<CertificateVerify />} />
               {/* 🚨 FIX: Placed directly in the student block WITHOUT nesting /student inside /student */}
               <Route path="settings" element={<StudentSettings />} />
+              <Route path="support" element={<StudentSupport />} />
               <Route path="cohort-chat/:cohortId" element={<CohortChat />} />
             </Route>
           </Route>

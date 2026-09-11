@@ -1,0 +1,68 @@
+.mainTabs {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.mainTab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--bg-nested);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 15px;
+}
+
+.mainTab:hover {
+  background: var(--bg-default);
+  color: var(--text-primary);
+}
+
+.activeMainTab {
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+}
+
+.activeMainTab:hover {
+  background: var(--primary-color);
+  color: var(--text-inverse);
+}
+
+.subTabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 8px;
+}
+
+.subTab {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.subTab:hover {
+  background: var(--bg-nested);
+  color: var(--text-primary);
+}
+
+.activeSubTab {
+  background: var(--bg-nested);
+  color: var(--primary-color);
+  font-weight: 700;
+}

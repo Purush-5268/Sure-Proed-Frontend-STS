@@ -142,7 +142,7 @@ function ClassSchedule() {
           start_time,
           end_time,
           session_type: "Domain",
-          guest_emails: scheduleForm.guestEmails.join(",")
+          guest_emails: scheduleForm.guestEmails
         };
         const res = await apiClient.post(API_ENDPOINTS.ATTENDANCE.BASE, payload);
         const newClass = res?.data || res;

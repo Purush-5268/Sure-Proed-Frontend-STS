@@ -197,7 +197,15 @@ function ScheduleClass() {
     }
     setPriorPermissions([...priorPermissions, {
       student_id: newPriorPermissionStudent.id,
-      name: `${newPriorPermissionStudent.user?.first_name || newPriorPermissionStudent.first_name} ${newPriorPermissionStudent.user?.last_name || newPriorPermissionStudent.last_name}`.trim(),
+      name: (
+        newPriorPermissionStudent.name || 
+        newPriorPermissionStudent.user?.name || 
+        `${newPriorPermissionStudent.user?.first_name || newPriorPermissionStudent.first_name || ""} ${newPriorPermissionStudent.user?.last_name || newPriorPermissionStudent.last_name || ""}`.trim() || 
+        newPriorPermissionStudent.student_code || 
+        newPriorPermissionStudent.user?.email || 
+        newPriorPermissionStudent.email || 
+        "Unknown Student"
+      ),
       reason: newPriorPermissionReason.trim()
     }]);
     setNewPriorPermissionStudent(null);
@@ -662,8 +670,8 @@ function ScheduleClass() {
                   <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "flex-start" }}>
                     <div style={{ flex: "2", minWidth: "200px" }}>
                       <AsyncSelect
-                        value={newPriorPermissionStudent}
-                        onChange={(val) => setNewPriorPermissionStudent(val)}
+                        value={newPriorPermissionStudent ? newPriorPermissionStudent.id : ""}
+                        onChange={(e, opt) => setNewPriorPermissionStudent(opt || null)}
                         loadOptions={(val) => loadStudentOptions(val, { sessionType: request.sessionType, cohortId: request.cohortId, lstBatch: request.lstBatchNumber })}
                         getOptionLabel={(s) => `${s.user?.first_name || s.first_name || ""} ${s.user?.last_name || s.last_name || ""} (${s.user?.email || s.email || ""} - ${s.student_code || ""})`}
                         getOptionValue={(s) => s.id}

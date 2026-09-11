@@ -109,11 +109,6 @@ function AssignmentList() {
           </div>
         )}
 
-        <div className="actions" style={{ display: "flex", gap: "8px", marginTop: "1.5rem" }}>
-          <Link to="/student/certificates" className="premium-btn premium-btn-secondary" aria-label="Go to certificates page">
-            Continue to Certificates →
-          </Link>
-        </div>
       </div>
     </div>
   );

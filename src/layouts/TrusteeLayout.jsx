@@ -9,11 +9,12 @@ import {
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import Sidebar from "../components/layout/Sidebar";
-
+import { usePushNotifications } from "../services/usePushNotifications";
 import styles from "./TrusteeLayout.module.css";
 
 function TrusteeLayout() {
   const { user } = useAuth();
+  usePushNotifications();
   
 
   const volunteerLinks = [

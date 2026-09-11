@@ -14,8 +14,11 @@
 
 .modalContent {
   background: var(--bg-surface);
-  width: 500px;
-  height: 600px;
+  width: 100%;
+  max-width: 500px;
+  height: 90vh;
+  max-height: 600px;
+  margin: 16px;
   border-radius: 12px;
   display: flex;
   flex-direction: column;

@@ -244,7 +244,7 @@
    ══════════════════════════════════════ */
 .infoStrip {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
   gap: 16px;
   padding: 20px 40px;
   background: var(--bg-surface);
@@ -670,7 +670,7 @@
    ══════════════════════════════════════ */
 .quickActions {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: 20px;
   padding: 0 40px 24px 40px;
 }
@@ -1004,7 +1004,7 @@
 
 .summaryGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: 20px;
   padding: 0 40px 24px 40px;
 }
