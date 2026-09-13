@@ -1,0 +1,22 @@
+[Unit]
+Description=SURE ProEd frontend and legacy API compatibility proxy
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=dev1
+WorkingDirectory=/home/dev1/Student-Tracking-Application-Frontend
+ExecStartPre=/usr/sbin/nginx -t -c /home/dev1/Student-Tracking-Application-Frontend/nginx.frontend.conf -p /home/dev1/Student-Tracking-Application-Frontend/
+ExecStart=/usr/sbin/nginx -c /home/dev1/Student-Tracking-Application-Frontend/nginx.frontend.conf -p /home/dev1/Student-Tracking-Application-Frontend/ -g "daemon off;"
+Restart=always
+RestartSec=3
+KillSignal=SIGQUIT
+TimeoutStopSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target
