@@ -17,7 +17,7 @@ const FEEDBACK_CATEGORIES = [
   { label: "Other", value: "OTHER", hasRelated: false },
 ];
 
-export default function FeedbackWidgetModal({ handleClose, feedbackState, setFeedbackState, showClose, currentMentor }) {
+export default function FeedbackWidgetModal({ handleClose, feedbackState, setFeedbackState, showClose, currentMentor, inline = false }) {
   const [feedbackType, setFeedbackType] = useState("SYSTEM");
   const [relatedId, setRelatedId] = useState("");
   const [rating, setRating] = useState(5);
@@ -102,24 +102,15 @@ export default function FeedbackWidgetModal({ handleClose, feedbackState, setFee
 
   const currentCat = FEEDBACK_CATEGORIES.find(c => c.value === feedbackType);
 
-  return (
-    <div className={styles.overlay} onClick={() => handleClose(false)}>
-      <motion.div
-        className={styles.modal}
-        initial={{ opacity: 0, scale: 0.8, y: 50 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.8, y: 50 }}
-        transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        style={{ padding: '24px', width: '100%', maxWidth: '450px', maxHeight: '90vh', overflowY: 'auto', background: 'var(--bg-card)', borderRadius: '24px', position: 'relative', border: '1px solid var(--border-color)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {showClose && (
-          <button className={styles.closeBtn} onClick={() => handleClose(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '20px' }}>
-            <FaTimes />
-          </button>
-        )}
+  const innerContent = (
+    <>
+      {showClose && !inline && (
+        <button className={styles.closeBtn} onClick={() => handleClose(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '20px' }}>
+          <FaTimes />
+        </button>
+      )}
 
-        <div className={styles.content} style={{ textAlign: 'center' }}>
+      <div className={styles.content} style={{ textAlign: 'center' }}>
           {feedbackState === "idle" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <h3 style={{ color: 'var(--text-primary)', margin: '0 0 12px 0', fontSize: '24px' }}>Enjoying Sure ProEd?</h3>
@@ -259,6 +250,29 @@ export default function FeedbackWidgetModal({ handleClose, feedbackState, setFee
             </motion.div>
           )}
         </div>
+    </>
+  );
+
+  if (inline) {
+    return (
+      <div style={{ width: '100%', maxWidth: '450px', margin: '0 auto', background: 'transparent', position: 'relative' }}>
+        {innerContent}
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.overlay} onClick={() => handleClose(false)}>
+      <motion.div
+        className={styles.modal}
+        initial={{ opacity: 0, scale: 0.8, y: 50 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.8, y: 50 }}
+        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+        style={{ padding: '24px', width: '100%', maxWidth: '450px', maxHeight: '90vh', overflowY: 'auto', background: 'var(--bg-card)', borderRadius: '24px', position: 'relative', border: '1px solid var(--border-color)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {innerContent}
       </motion.div>
     </div>
   );

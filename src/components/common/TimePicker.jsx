@@ -3,9 +3,19 @@ import React, { useState, useEffect } from 'react';
 const TimePicker = ({ value, onChange, required, className }) => {
   // Parse incoming HH:MM 24-hour string to 12-hour components
   const parseTime = (timeStr) => {
-    if (!timeStr) return { hh: '12', mm: '00', period: 'AM' };
-    const [h, m] = timeStr.split(':').map(Number);
-    if (isNaN(h) || isNaN(m)) return { hh: '12', mm: '00', period: 'AM' };
+    let h, m;
+    if (!timeStr) {
+      const now = new Date();
+      h = now.getHours();
+      m = now.getMinutes();
+    } else {
+      [h, m] = timeStr.split(':').map(Number);
+      if (isNaN(h) || isNaN(m)) {
+        const now = new Date();
+        h = now.getHours();
+        m = now.getMinutes();
+      }
+    }
     
     const period = h >= 12 ? 'PM' : 'AM';
     let hh = h % 12;

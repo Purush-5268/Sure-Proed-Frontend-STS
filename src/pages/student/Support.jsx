@@ -4,8 +4,11 @@ import { useAuth } from "../../context/AuthContext";
 import PageHeader from "../../components/ui/PageHeader";
 import GlassCard from "../../components/common/GlassCard";
 import { supportService } from "../../services/supportService";
+import { studentService } from "../../services/studentService";
 import { FiMessageSquare, FiHelpCircle, FiSend, FiClock, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
-import styles from "./Support.module.css"; // We will create this
+import styles from "./Support.module.css";
+import MentorFeedbackForm from "./MentorFeedbackForm";
+import FeedbackWidgetModal from "../../components/common/FeedbackWidgetModal";
 
 const REQUEST_CATEGORIES = [
   { value: "OFFER_LETTER", label: "Offer Letter Request" },
@@ -34,13 +37,29 @@ function Support() {
   const [fetchingRequests, setFetchingRequests] = useState(false);
 
   const [requestData, setRequestData] = useState({ category: "TECHNICAL_ISSUE", subject: "", description: "" });
-  const [feedbackData, setFeedbackData] = useState({ rating: 5, comments: "" });
+  
+  // Profile state for Mentor Feedback
+  const [profile, setProfile] = useState(null);
+  const [inlineFeedbackState, setInlineFeedbackState] = useState("idle");
 
   useEffect(() => {
     if (activeTab === "request" && requestSubTab === "my_requests") {
       fetchMyRequests();
     }
   }, [activeTab, requestSubTab]);
+
+  useEffect(() => {
+    // Fetch profile to get modules and mentors
+    if (user?.email) {
+      studentService.getStudentProfiles({ user__email: user.email })
+        .then(res => {
+          const profileData = res?.data || res;
+          const profileObj = Array.isArray(profileData?.results) ? profileData.results[0] : (Array.isArray(profileData) ? profileData[0] : profileData);
+          setProfile(profileObj);
+        })
+        .catch(err => console.error("Failed to load profile for feedback", err));
+    }
+  }, [user]);
 
   const fetchMyRequests = async () => {
     setFetchingRequests(true);
@@ -69,23 +88,7 @@ function Support() {
     }
   };
 
-  const handleFeedbackSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await supportService.submitFeedback({
-        feedback_type: feedbackSubTab,
-        rating: feedbackData.rating,
-        comments: feedbackData.comments
-      });
-      alert("Feedback submitted successfully. Thank you!");
-      setFeedbackData({ rating: 5, comments: "" });
-    } catch (err) {
-      alert("Failed to submit feedback.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Feedback submission is now handled individually by the respective components
 
   return (
     <div className="premium-page-container">
@@ -205,40 +208,49 @@ function Support() {
 
           {activeTab === "feedback" && (
             <motion.div key="feedback" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-              <div className={styles.subTabs}>
-                <button className={`${styles.subTab} ${feedbackSubTab === 'COURSE' ? styles.activeSubTab : ''}`} onClick={() => setFeedbackSubTab('COURSE')}>Classes & Tutor Review</button>
-                <button className={`${styles.subTab} ${feedbackSubTab === 'SYSTEM' ? styles.activeSubTab : ''}`} onClick={() => setFeedbackSubTab('SYSTEM')}>General & App Support</button>
+              
+              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <h2 style={{ color: 'var(--text-primary)', fontSize: '20px', marginBottom: '8px' }}>Share your experience</h2>
+                <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Your feedback helps us improve your learning experience.</p>
               </div>
 
-              <form onSubmit={handleFeedbackSubmit} className="premium-form" style={{ marginTop: "20px" }}>
-                <div className="premium-form-group">
-                  <label className="premium-label">Overall Rating</label>
-                  <div style={{ display: "flex", gap: "16px" }}>
-                    {[1, 2, 3, 4, 5].map(num => (
-                      <label key={num} style={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}>
-                        <input type="radio" name="rating" value={num} checked={feedbackData.rating === num} onChange={() => setFeedbackData({...feedbackData, rating: num})} />
-                        {num} {num === 1 ? "Poor" : num === 5 ? "Excellent" : ""}
-                      </label>
-                    ))}
-                  </div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
+                <div style={{ display: 'flex', background: 'var(--bg-nested)', padding: '6px', borderRadius: '12px', gap: '8px' }}>
+                  <button 
+                    onClick={() => setFeedbackSubTab('COURSE')}
+                    style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: feedbackSubTab === 'COURSE' ? 'var(--primary-color)' : 'transparent', color: feedbackSubTab === 'COURSE' ? '#fff' : 'var(--text-secondary)', fontWeight: 'bold', cursor: 'pointer', transition: '0.2s' }}
+                  >
+                    🎓 Class & Tutor Review
+                  </button>
+                  <button 
+                    onClick={() => setFeedbackSubTab('SYSTEM')}
+                    style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: feedbackSubTab === 'SYSTEM' ? 'var(--primary-color)' : 'transparent', color: feedbackSubTab === 'SYSTEM' ? '#fff' : 'var(--text-secondary)', fontWeight: 'bold', cursor: 'pointer', transition: '0.2s' }}
+                  >
+                    💬 App & Support
+                  </button>
                 </div>
+              </div>
 
-                <div className="premium-form-group">
-                  <label className="premium-label">{feedbackSubTab === 'COURSE' ? 'What did you like about the classes and tutor?' : 'What do you like about the platform?'}</label>
-                  <textarea 
-                    className="premium-input" 
-                    rows="4" 
-                    placeholder="Share your positive thoughts..."
-                    value={feedbackData.comments}
-                    onChange={e => setFeedbackData({...feedbackData, comments: e.target.value})}
-                    required
-                  ></textarea>
-                </div>
-
-                <button type="submit" className="premium-btn premium-btn-primary" disabled={loading} style={{ marginTop: "16px" }}>
-                  {loading ? "Submitting..." : <><FiSend /> Submit Anonymous Feedback</>}
-                </button>
-              </form>
+              <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                <AnimatePresence mode="wait">
+                  {feedbackSubTab === "COURSE" && (
+                    <motion.div key="COURSE" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}>
+                      <MentorFeedbackForm profile={profile} />
+                    </motion.div>
+                  )}
+                  {feedbackSubTab === "SYSTEM" && (
+                    <motion.div key="SYSTEM" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                      <FeedbackWidgetModal 
+                        inline={true}
+                        feedbackState={inlineFeedbackState}
+                        setFeedbackState={setInlineFeedbackState}
+                        showClose={true}
+                        handleClose={() => setInlineFeedbackState("idle")}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
