@@ -3,7 +3,7 @@ import { API_ENDPOINTS } from "../constants/apiEndpoints";
 
 function urlBase64ToUint8Array(base64String) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/\-/g, "+").replace(/_/g, "/");
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
 
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
@@ -14,6 +14,45 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
+function extractVapidPublicKey(payload) {
+  return payload?.public_key || payload?.vapid_public_key || payload?.key || "";
+}
+
+async function fetchVapidPublicKey() {
+  const endpoint = API_ENDPOINTS.NOTIFICATIONS.PUSH_PUBLIC_KEY;
+  let primaryError = null;
+
+  try {
+    const { data } = await apiClient.get(endpoint, {
+      params: { _ts: Date.now() },
+      headers: { "Cache-Control": "no-cache" },
+    });
+    const key = extractVapidPublicKey(data);
+    if (key) return key;
+  } catch (error) {
+    primaryError = error;
+  }
+
+  // A stale frontend deployment can accidentally resolve the API path against
+  // the SPA origin and receive index.html. Retry once against the configured API
+  // origin without using browser or intermediary caches.
+  const apiOrigin = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+  if (apiOrigin) {
+    const response = await fetch(`${apiOrigin}${endpoint}?_ts=${Date.now()}`, {
+      cache: "no-store",
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    });
+    if (response.ok) {
+      const key = extractVapidPublicKey(await response.json());
+      if (key) return key;
+    }
+  }
+
+  if (primaryError) throw primaryError;
+  throw new Error("Backend did not provide a VAPID public key.");
+}
+
 export const pushNotificationService = {
   isSupported() {
     return "serviceWorker" in navigator && "PushManager" in window;
@@ -22,7 +61,9 @@ export const pushNotificationService = {
   async registerServiceWorker() {
     if (!this.isSupported()) return null;
     try {
-      const registration = await navigator.serviceWorker.register("/service-worker.js");
+      const registration = await navigator.serviceWorker.register("/service-worker.js?v=20260913-vapid-media", {
+        updateViaCache: "none",
+      });
       return registration;
     } catch (error) {
       console.error("Service Worker registration failed:", error);
@@ -35,12 +76,7 @@ export const pushNotificationService = {
 
     try {
       // 1. Get the VAPID public key from the backend
-      const { data } = await apiClient.get(API_ENDPOINTS.NOTIFICATIONS.PUSH_PUBLIC_KEY);
-      const vapidPublicKey = data.public_key;
-      
-      if (!vapidPublicKey) {
-        throw new Error("Backend did not provide a VAPID public key.");
-      }
+      const vapidPublicKey = await fetchVapidPublicKey();
 
       const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
 

@@ -1,13 +1,22 @@
 import apiClient from "./apiClient";
 import { API_ENDPOINTS } from "../constants/apiEndpoints";
 
-const PROFILE_STORAGE_KEY_PREFIX = "sure_student_profile_";
+const resolveBackendMediaUrl = (value) => {
+  if (!value || typeof value !== "string" || !value.startsWith("/media/")) {
+    return value || "";
+  }
+  const apiOrigin = (import.meta.env.VITE_API_URL || "")
+    .replace(/\/api\/?$/, "")
+    .replace(/\/$/, "");
+  return apiOrigin ? `${apiOrigin}${value}` : value;
+};
 
 const normalizeProfile = (profile = {}) => {
   const user = profile.user || {};
   
   // Preserve absolute HTTP backend origins for media URLs to avoid 404s via Vite proxy
-  let photoUrl = profile.profile_photo || "";
+  let photoUrl = resolveBackendMediaUrl(profile.profile_photo || "");
+  let bannerUrl = resolveBackendMediaUrl(profile.banner_image || "");
   let resumeUrl = profile.resume || "";
   if (typeof window !== "undefined" && window.location.protocol === "https:") {
     // Only force https if the frontend itself is hosted on https (to avoid mixed content)
@@ -18,6 +27,7 @@ const normalizeProfile = (profile = {}) => {
   return {
     ...profile,
     profile_photo: photoUrl,
+    banner_image: bannerUrl,
     id: profile.id || null,
     firstName: profile.first_name || profile.firstName || user.first_name || user.firstName || "",
     lastName: profile.last_name || profile.lastName || user.last_name || user.lastName || "",
