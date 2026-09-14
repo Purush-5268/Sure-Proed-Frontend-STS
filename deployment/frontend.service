@@ -1,5 +1,5 @@
 [Unit]
-Description=SURE ProEd frontend and legacy API compatibility proxy
+Description=SURE ProEd frontend
 After=network-online.target
 Wants=network-online.target
 
