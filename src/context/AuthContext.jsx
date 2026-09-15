@@ -14,6 +14,10 @@ import {
   parseJwt,
   setRememberMe,
   isTokenExpired,
+  extendSession,
+  getSessionExpiresAt,
+  isSessionExpired,
+  SESSION_WARNING_BEFORE_MS,
 } from "../utils/tokenStorage";
 
 const AuthContext = createContext(null);
@@ -91,6 +95,99 @@ export function AuthProvider({ children }) {
     return () => {
       isMounted = false;
       window.removeEventListener("sure_session_expired", handleSessionExpired);
+    };
+  }, []);
+
+  // Enforce a real browser-session boundary even while the refresh token is valid.
+  // Activity is intentionally limited to user input; background polling must not keep
+  // an abandoned dashboard signed in forever.
+  useEffect(() => {
+    let warningTimer;
+    let expiryTimer;
+    let lastActivityWrite = 0;
+
+    const clearTimers = () => {
+      window.clearTimeout(warningTimer);
+      window.clearTimeout(expiryTimer);
+    };
+
+    const expireSession = () => {
+      clearTimers();
+      clearAuthStorage();
+      setUser(null);
+      setLoading(false);
+      window.dispatchEvent(new CustomEvent("sure_session_expired"));
+    };
+
+    const scheduleSessionTimers = () => {
+      clearTimers();
+      if (!getAccessToken() && !getRefreshToken()) return;
+
+      const expiresAt = getSessionExpiresAt() || extendSession();
+      const remainingMs = expiresAt - Date.now();
+      if (remainingMs <= 0) {
+        expireSession();
+        return;
+      }
+
+      const warningDelay = remainingMs - SESSION_WARNING_BEFORE_MS;
+      if (warningDelay <= 0) {
+        window.dispatchEvent(
+          new CustomEvent("sure_session_expiring", {
+            detail: { remainingMs },
+          })
+        );
+      } else {
+        warningTimer = window.setTimeout(() => {
+          window.dispatchEvent(
+            new CustomEvent("sure_session_expiring", {
+              detail: { remainingMs: SESSION_WARNING_BEFORE_MS },
+            })
+          );
+        }, warningDelay);
+      }
+
+      expiryTimer = window.setTimeout(expireSession, remainingMs);
+    };
+
+    const recordActivity = () => {
+      if (!getAccessToken() && !getRefreshToken()) return;
+      const now = Date.now();
+      if (now - lastActivityWrite < 30_000) return;
+      lastActivityWrite = now;
+      extendSession();
+      scheduleSessionTimers();
+      window.dispatchEvent(new CustomEvent("sure_session_extended"));
+    };
+
+    const handleStorage = (event) => {
+      if (event.key === "sure_session_expires_at") {
+        if (event.newValue) {
+          scheduleSessionTimers();
+          window.dispatchEvent(new CustomEvent("sure_session_extended"));
+        } else {
+          expireSession();
+        }
+      }
+    };
+
+    const handleSessionStarted = () => scheduleSessionTimers();
+
+    const activityEvents = ["pointerdown", "keydown", "touchstart", "wheel"];
+    activityEvents.forEach((eventName) =>
+      window.addEventListener(eventName, recordActivity, { passive: true })
+    );
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("sure_session_started", handleSessionStarted);
+    scheduleSessionTimers();
+
+    return () => {
+      clearTimers();
+      activityEvents.forEach((eventName) =>
+        window.removeEventListener(eventName, recordActivity)
+      );
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("sure_session_started", handleSessionStarted);
     };
   }, []);
 
@@ -182,6 +279,8 @@ export function AuthProvider({ children }) {
       setUserInfo(userObj);
       setAccessToken(data.access);
       setRefreshToken(data.refresh);
+      extendSession();
+      window.dispatchEvent(new CustomEvent("sure_session_started"));
       setLoading(false);
       
       // Subscribe to web push notifications right after successful login
@@ -217,7 +316,10 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     role: user?.role || "STUDENT",
-    isAuthenticated: !!user && (!isTokenExpired(getAccessToken()) || !isTokenExpired(getRefreshToken())),
+    isAuthenticated:
+      !!user &&
+      !isSessionExpired() &&
+      (!isTokenExpired(getAccessToken()) || !isTokenExpired(getRefreshToken())),
     loading,
     login,
     logout,

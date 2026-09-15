@@ -2,6 +2,23 @@ const ACCESS_TOKEN_KEY = "sure_access_token";
 const REFRESH_TOKEN_KEY = "sure_refresh_token";
 const USER_INFO_KEY = "sure_user_info";
 const REMEMBER_ME_KEY = "sure_remember_me";
+const SESSION_EXPIRES_AT_KEY = "sure_session_expires_at";
+
+const configuredIdleMinutes = Number(
+  import.meta.env?.VITE_SESSION_IDLE_TIMEOUT_MINUTES
+);
+const configuredWarningMinutes = Number(
+  import.meta.env?.VITE_SESSION_WARNING_MINUTES
+);
+
+export const SESSION_IDLE_TIMEOUT_MS =
+  (Number.isFinite(configuredIdleMinutes) && configuredIdleMinutes > 0
+    ? configuredIdleMinutes
+    : 60) * 60 * 1000;
+export const SESSION_WARNING_BEFORE_MS =
+  (Number.isFinite(configuredWarningMinutes) && configuredWarningMinutes > 0
+    ? configuredWarningMinutes
+    : 5) * 60 * 1000;
 
 // Determine storage based on user's choice
 const getStorage = () => {
@@ -25,7 +42,25 @@ export const setRememberMe = (value) => {
 };
 
 export const getAccessToken = () => getStorage().getItem(ACCESS_TOKEN_KEY);
-export const setAccessToken = (token) => getStorage().setItem(ACCESS_TOKEN_KEY, token);
+export const setAccessToken = (token) => {
+  getStorage().setItem(ACCESS_TOKEN_KEY, token);
+  if (!token) return;
+
+  try {
+    if (!localStorage.getItem(SESSION_EXPIRES_AT_KEY)) {
+      localStorage.setItem(
+        SESSION_EXPIRES_AT_KEY,
+        String(Date.now() + SESSION_IDLE_TIMEOUT_MS)
+      );
+    }
+  } catch {
+    // Browser privacy settings may block storage; token validation still applies.
+  }
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("sure_session_started"));
+  }
+};
 export const removeAccessToken = () => {
   try {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
@@ -46,7 +81,7 @@ export const getUserInfo = () => {
   const data = getStorage().getItem(USER_INFO_KEY);
   try {
     return data ? JSON.parse(data) : null;
-  } catch (e) {
+  } catch {
     return null;
   }
 };
@@ -56,13 +91,53 @@ export const removeUserInfo = () => {
   try {
     localStorage.removeItem(USER_INFO_KEY);
     sessionStorage.removeItem(USER_INFO_KEY);
-  } catch (e) {}
+  } catch {
+    // Browser privacy settings may block storage.
+  }
+};
+
+export const getSessionExpiresAt = () => {
+  try {
+    const value = Number(localStorage.getItem(SESSION_EXPIRES_AT_KEY));
+    return Number.isFinite(value) && value > 0 ? value : null;
+  } catch {
+    return null;
+  }
+};
+
+export const extendSession = () => {
+  const expiresAt = Date.now() + SESSION_IDLE_TIMEOUT_MS;
+  try {
+    localStorage.setItem(SESSION_EXPIRES_AT_KEY, String(expiresAt));
+  } catch {
+    // Browser privacy settings may block storage.
+  }
+  return expiresAt;
+};
+
+export const clearSessionExpiry = () => {
+  try {
+    localStorage.removeItem(SESSION_EXPIRES_AT_KEY);
+  } catch {
+    // Browser privacy settings may block storage.
+  }
+};
+
+export const getSessionRemainingMs = () => {
+  const expiresAt = getSessionExpiresAt();
+  return expiresAt ? Math.max(0, expiresAt - Date.now()) : 0;
+};
+
+export const isSessionExpired = () => {
+  const expiresAt = getSessionExpiresAt();
+  return Boolean(expiresAt && Date.now() >= expiresAt);
 };
 
 export const clearAuthStorage = () => {
   removeAccessToken();
   removeRefreshToken();
   removeUserInfo();
+  clearSessionExpiry();
 };
 
 export const parseJwt = (token) => {
