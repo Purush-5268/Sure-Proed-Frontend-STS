@@ -74,10 +74,10 @@ const VolunteerCohortDetails = lazy(() => import("../pages/trustee/volunteer/Coh
 const TrusteeProfile = lazy(() => import("../pages/trustee/Profile"));
 
 /* Commercial Trustee */
-const CommercialDashboard = lazy(() => import("../pages/trustee/commercial/Dashboard"));
-const Announcements = lazy(() => import("../pages/trustee/commercial/Announcements"));
-const Achievements = lazy(() => import("../pages/trustee/commercial/Achievements"));
-const Updates = lazy(() => import("../pages/trustee/commercial/Updates"));
+const MainDashboard = lazy(() => import("../pages/trustee/main/Dashboard"));
+const Announcements = lazy(() => import("../pages/trustee/main/Announcements"));
+const Achievements = lazy(() => import("../pages/trustee/main/Achievements"));
+const Updates = lazy(() => import("../pages/trustee/main/Updates"));
 
 /* Student */
 const StudentDashboard = lazy(() => import("../pages/student/Dashboard"));
@@ -478,12 +478,14 @@ function AppRoutes() {
               <Route path="volunteer/cohort-details/:id" element={<VolunteerCohortDetails />} />
               <Route path="volunteer/cohort-chat/:cohortId" element={<CohortChat />} />
               <Route path="volunteer/profile" element={<TrusteeProfile />} />
+              <Route path="volunteer/exam-proctoring" element={<ProctorDashboard />} />
+              <Route path="volunteer/assessments" element={<MentorAssessments />} />
               {/* Commercial Trustee */}
-              <Route path="commercial/dashboard" element={<CommercialDashboard />} />
-              <Route path="commercial/announcements" element={<Announcements />} />
-              <Route path="commercial/achievements" element={<Achievements />} />
-              <Route path="commercial/updates" element={<Updates />} />
-              <Route path="commercial/profile" element={<TrusteeProfile />} />
+              <Route path="main/dashboard" element={<MainDashboard />} />
+              <Route path="main/announcements" element={<Announcements />} />
+              <Route path="main/achievements" element={<Achievements />} />
+              <Route path="main/updates" element={<Updates />} />
+              <Route path="main/profile" element={<TrusteeProfile />} />
             </Route>
           </Route>
 

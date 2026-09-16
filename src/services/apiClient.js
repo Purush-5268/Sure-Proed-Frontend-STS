@@ -13,7 +13,7 @@ const BASE_URL = import.meta.env.VITE_API_URL || "";
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
-  timeout: 15000, // 15-second timeout to prevent infinite hanging
+  timeout: 60000, // 60-second timeout for long operations like scheduling large classes
   headers: {
     "Content-Type": "application/json",
   },

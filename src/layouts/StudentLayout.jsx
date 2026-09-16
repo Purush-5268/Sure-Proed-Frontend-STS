@@ -23,10 +23,10 @@ const studentLinks = [
   { label: "Attendance", path: "/student/attendance", icon: <FaCalendarCheck /> },
   { label: "Permissions", path: "/student/permissions", icon: <FaCalendarCheck /> },
   { label: "Assignments", path: "/student/assignments", icon: <FaTasks /> },
-  { label: "Placements", path: "/student/placements", icon: <FaBriefcase /> },
   { label: "Certificates", path: "/student/certificates", icon: <FaAward /> },
-  { label: "Settings", path: "/student/settings", icon: <FaCog /> },
+  { label: "Placements", path: "/student/placements", icon: <FaBriefcase /> },
   { label: "Help & Support", path: "/student/support", icon: <FaQuestionCircle /> },
+  { label: "Settings", path: "/student/settings", icon: <FaCog /> },
 ];
 
 function StudentLayout() {

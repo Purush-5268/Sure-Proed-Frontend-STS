@@ -9,13 +9,17 @@ import {
 } from "../utils/tokenStorage";
 
 export const authService = {
-  // Login with email/username and password
-  async login(identifier, password) {
-    const response = await apiClient.post(API_ENDPOINTS.AUTH.TOKEN, {
+  // Login with email/username, password, and optional role
+  async login(identifier, password, role = null) {
+    const payload = {
       email: identifier,
       username: identifier,
       password,
-    });
+    };
+    if (role) {
+      payload.role = role;
+    }
+    const response = await apiClient.post(API_ENDPOINTS.AUTH.TOKEN, payload);
     const { access, refresh } = response.data;
     setAccessToken(access);
     setRefreshToken(refresh);
@@ -35,6 +39,21 @@ export const authService = {
       refresh,
     });
     setAccessToken(response.data.access);
+    return response.data;
+  },
+
+  // Switch account for dual roles
+  async switchAccount() {
+    const response = await apiClient.post(API_ENDPOINTS.AUTH.SWITCH_ACCOUNT);
+    const { access, refresh } = response.data;
+    setAccessToken(access);
+    setRefreshToken(refresh);
+
+    // Decode token payload for basic info
+    const decoded = parseJwt(access);
+    if (decoded) {
+      setUserInfo(decoded);
+    }
     return response.data;
   },
 

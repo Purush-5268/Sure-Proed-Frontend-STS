@@ -4,7 +4,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { getAnnouncements, getUpdates } from "../../../services/trusteeService";
 import styles from "./Dashboard.module.css";
 
-function CommercialDashboard() {
+function MainDashboard() {
   const { user } = useAuth();
   const roleName = user?.admin_category === "ADVISORY" ? "Advisor" : "Trustee";
   const userName = user?.firstName || user?.first_name || roleName;
@@ -55,7 +55,7 @@ function CommercialDashboard() {
       </div>
 
       <div className={styles.grid}>
-        <Link to="/trustee/commercial/announcements" className="premium-card">
+        <Link to="/trustee/main/announcements" className="premium-card">
           <div className={styles.cardIconWrapper} style={{ background: '#fef3c7', color: '#d97706' }}>
             <span className={styles.cardIcon}>📢</span>
           </div>
@@ -63,7 +63,7 @@ function CommercialDashboard() {
           <p>Broadcast high-priority messages to all stakeholders and users across the platform.</p>
         </Link>
 
-        <Link to="/trustee/commercial/achievements" className="premium-card">
+        <Link to="/trustee/main/achievements" className="premium-card">
           <div className={styles.cardIconWrapper} style={{ background: '#dcfce7', color: '#15803d' }}>
             <span className={styles.cardIcon}>🏆</span>
           </div>
@@ -71,7 +71,7 @@ function CommercialDashboard() {
           <p>Highlight organizational milestones, awards, and major success stories.</p>
         </Link>
 
-        <Link to="/trustee/commercial/updates" className="premium-card">
+        <Link to="/trustee/main/updates" className="premium-card">
           <div className={styles.cardIconWrapper} style={{ background: '#e0e7ff', color: '#4338ca' }}>
             <span className={styles.cardIcon}>📰</span>
           </div>
@@ -83,4 +83,4 @@ function CommercialDashboard() {
   );
 }
 
-export default CommercialDashboard;
+export default MainDashboard;

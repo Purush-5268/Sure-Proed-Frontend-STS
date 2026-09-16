@@ -42,7 +42,10 @@ function Profile() {
   useEffect(() => {
     let isMounted = true;
     async function fetchProfile() {
-      if (!user?.id) return;
+      if (!user?.id) {
+        if (isMounted) setLoading(false);
+        return;
+      }
       try {
         const res = await apiClient.get(API_ENDPOINTS.VOLUNTEER_PROFILES.PROFILE_BY_USER(user.id));
         if (isMounted && res.data && res.data.results && res.data.results.length > 0) {
@@ -57,7 +60,7 @@ function Profile() {
             mappedEmail: user.mapped_email || "",
             gender: user.gender || "",
             dob: profile.date_of_birth || user.date_of_birth || "",
-            trusteeType: user.role === "TRUSTEE" ? (user.admin_category || "Commercial") : "Volunteer",
+            trusteeType: user.role === "TRUSTEE" ? (user.admin_category || "Trustee") : "Volunteer",
             organization: profile.organization_name || "",
             designation: profile.occupation || "",
             bio: profile.bio || "",
@@ -248,7 +251,7 @@ function Profile() {
                     </div>
                   </div>
 
-                  <h2 style={{ marginTop: "24px", marginBottom: "16px", color: "var(--text-primary)" }}>Account Data (Read-Only)</h2>
+                  <h2 style={{ marginTop: "24px", marginBottom: "16px", color: "var(--text-primary)" }}>Account Details</h2>
                   <div className="premium-grid-2">
                     <div className="premium-form-group">
                       <label className="premium-label"><FiMail style={{marginRight: 6}}/> Email Address</label>
@@ -308,6 +311,11 @@ function Profile() {
               {statsLoading ? (
                 <div style={{ padding: "40px" }}><SkeletonLoader variant="table" rows={6} /></div>
               ) : statsData ? (
+                statsData.classes_generated === 0 ? (
+                  <div style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary)" }}>
+                    No contributions yet
+                  </div>
+                ) : (
                 <div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px", marginBottom: "24px" }}>
                     <div style={{ background: "var(--bg-nested)", padding: "20px", borderRadius: "12px", border: "1px solid var(--border-color)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
@@ -404,6 +412,11 @@ function Profile() {
                       </tbody>
                     </table>
                   </div>
+                </div>
+                )
+              ) : !profileId ? (
+                <div style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary)" }}>
+                  No contributions yet
                 </div>
               ) : (
                 <div style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary)" }}>

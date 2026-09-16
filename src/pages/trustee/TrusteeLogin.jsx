@@ -22,7 +22,7 @@ function TrusteeLogin() {
       const userRole = res?.user?.role;
 
       if (userRole === "TRUSTEE") {
-        navigate("/trustee/commercial/dashboard");
+        navigate("/trustee/main/dashboard");
       } else if (userRole === "VOLUNTEER") {
         navigate("/trustee/volunteer/dashboard");
       } else {

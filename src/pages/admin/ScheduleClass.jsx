@@ -268,16 +268,13 @@ function ScheduleClass() {
         end_time: editEndTime.length === 5 ? editEndTime + ":00" : editEndTime
       };
 
+      setEditingClassId(null); // Optimistically close the UI so the user doesn't click twice!
       await attendanceService.patchAttendanceRecord(classId, updatedData);
-
-      // Update local state to reflect changes instantly
-      setActiveAdminClasses(prev => prev.map(c =>
-        c.id === classId ? { ...c, class_date: updatedData.class_date, start_time: updatedData.start_time, end_time: updatedData.end_time } : c
-      ));
-
-      setEditingClassId(null);
+      
+      await loadActiveClasses();
+      setTimeout(() => alert("✅ Class rescheduled successfully!"), 10);
     } catch (error) {
-      alert("❌ Failed to reschedule. Please check the backend connection.");
+      setTimeout(() => alert("❌ Failed to reschedule. Please check the backend connection."), 10);
     }
   };
 
@@ -331,11 +328,11 @@ function ScheduleClass() {
       // 🚨 FIX: MUST send conducted: false so Django triggers the aggregate_completed_session logic!
       await attendanceService.patchAttendanceRecord(classId, { status: "COMPLETED", conducted: false });
 
-      alert("✅ Class ended successfully. Attendance calculated.");
+      setTimeout(() => alert("✅ Class ended successfully. Attendance calculated."), 10);
     } catch (err) {
       console.error("Failed to end class:", err);
       loadActiveClasses(); // Revert if failed
-      alert("❌ Failed to end class. Check backend endpoints.");
+      setTimeout(() => alert("❌ Failed to end class. Check backend endpoints."), 10);
     }
   };
 

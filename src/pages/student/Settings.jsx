@@ -3,12 +3,16 @@ import React, { useState, useEffect } from 'react';
 import styles from './Settings.module.css';
 import ThemeToggle from '../../components/common/ThemeToggle';
 import { useAuth } from '../../context/AuthContext';
-import { FiUser, FiLock, FiMonitor, FiCheckCircle } from 'react-icons/fi';
+import { FiUser, FiLock, FiMonitor, FiCheckCircle, FiAlertOctagon } from 'react-icons/fi';
 import { authService } from '../../services/authService';
+import apiClient from '../../services/apiClient';
+import DropOutModal from './DropOutModal';
 
 function Settings() {
     const { user } = useAuth();
     const [activeSection, setActiveSection] = useState('account');
+    const [profile, setProfile] = useState(null);
+    const [isDropOutModalOpen, setIsDropOutModalOpen] = useState(false);
     
     // Security Section State
     const [pwdStep, setPwdStep] = useState(1);
@@ -30,6 +34,18 @@ function Settings() {
         }
         return () => clearTimeout(timer);
     }, [cooldown]);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const response = await apiClient.get('/api/students/profile/');
+                setProfile(response.data);
+            } catch (err) {
+                console.error("Failed to load profile", err);
+            }
+        };
+        fetchProfile();
+    }, []);
 
     const maskEmail = (email) => {
         if (!email) return '';
@@ -255,6 +271,35 @@ function Settings() {
                         </div>
                     </div>
                 );
+            case 'danger':
+                return (
+                    <div className={styles.settingsCard}>
+                        <div className={styles.cardHeader}>
+                            <h2 style={{ color: '#ef4444' }}>Danger Zone</h2>
+                        </div>
+                        <p className={styles.description}>Irreversible actions for your account and enrollment.</p>
+                        
+                        <div className={styles.settingRow} style={{ border: '1px solid rgba(239, 68, 68, 0.2)', background: 'rgba(239, 68, 68, 0.02)', borderRadius: '12px', padding: '20px' }}>
+                            <div className={styles.settingInfo}>
+                                <h3 style={{ color: '#ef4444' }}>Drop Out of Course</h3>
+                                <p>Permanently withdraw from your currently active course and cohort.</p>
+                                {(!profile?.current_application) && (
+                                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '8px' }}>You do not have an active application to drop out from.</p>
+                                )}
+                            </div>
+                            <div className={styles.settingAction}>
+                                <button 
+                                    className="premium-btn" 
+                                    style={{ background: '#ef4444', color: '#fff', border: 'none' }}
+                                    onClick={() => setIsDropOutModalOpen(true)}
+                                    disabled={!profile?.current_application}
+                                >
+                                    Drop Out
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
             default:
                 return null;
         }
@@ -288,12 +333,30 @@ function Settings() {
                         >
                             <FiMonitor /> Appearance
                         </button>
+                        <button 
+                            className={`${styles.navItem} ${activeSection === 'danger' ? styles.active : ''}`}
+                            onClick={() => setActiveSection('danger')}
+                            style={{ color: '#ef4444' }}
+                        >
+                            <FiAlertOctagon /> Danger Zone
+                        </button>
                     </nav>
                 </aside>
                 <main className={styles.content}>
                     {renderContent()}
                 </main>
             </div>
+            
+            {isDropOutModalOpen && profile?.current_application?.id && (
+                <DropOutModal 
+                    applicationId={profile.current_application.id}
+                    onClose={() => setIsDropOutModalOpen(false)}
+                    onSuccess={() => {
+                        setIsDropOutModalOpen(false);
+                        window.location.reload();
+                    }}
+                />
+            )}
         </div>
     );
 }

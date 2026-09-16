@@ -111,7 +111,7 @@ function Announcements() {
           <p>Manage organization-wide announcements.</p>
         </div>
         <div className={styles.headerActions}>
-          <Link to="/trustee/commercial/dashboard" className="btn btnSecondary">
+          <Link to="/trustee/main/dashboard" className="btn btnSecondary">
             ← Dashboard
           </Link>
           <button className="btn btnPrimary" onClick={() => openModal()}>

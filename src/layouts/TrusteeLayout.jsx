@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { 
   FaTachometerAlt, FaExclamationTriangle, FaCalendarAlt, 
   FaUserClock, FaUserShield, FaBullhorn, 
-  FaTrophy, FaBriefcase, FaUser 
+  FaTrophy, FaBriefcase, FaUser, FaClipboardList, FaDesktop
 } from "react-icons/fa";
 
 import Navbar from "../components/layout/Navbar";
@@ -23,15 +23,17 @@ function TrusteeLayout() {
     { label: "Schedule Classes", path: "/trustee/volunteer/schedule", icon: <FaCalendarAlt /> },
     { label: "Attendance & CSV", path: "/trustee/volunteer/attendance", icon: <FaUserClock /> },
     { label: "User Moderation", path: "/trustee/volunteer/users", icon: <FaUserShield /> },
+    { label: "Assessments", path: "/trustee/volunteer/assessments", icon: <FaClipboardList /> },
+    { label: "Proctor Dashboard", path: "/trustee/volunteer/exam-proctoring", icon: <FaDesktop /> },
     { label: "My Profile", path: "/trustee/volunteer/profile", icon: <FaUser /> },
   ];
 
   const higherLevelTrusteeLinks = [
-    { label: "Dashboard Overview", path: "/trustee/commercial/dashboard", icon: <FaTachometerAlt /> },
-    { label: "Announcements", path: "/trustee/commercial/announcements", icon: <FaBullhorn /> },
-    { label: "Achievements", path: "/trustee/commercial/achievements", icon: <FaTrophy /> },
-    { label: "Updates", path: "/trustee/commercial/updates", icon: <FaBriefcase /> },
-    { label: "My Profile", path: "/trustee/commercial/profile", icon: <FaUser /> },
+    { label: "Dashboard Overview", path: "/trustee/main/dashboard", icon: <FaTachometerAlt /> },
+    { label: "Announcements", path: "/trustee/main/announcements", icon: <FaBullhorn /> },
+    { label: "Achievements", path: "/trustee/main/achievements", icon: <FaTrophy /> },
+    { label: "Updates", path: "/trustee/main/updates", icon: <FaBriefcase /> },
+    { label: "My Profile", path: "/trustee/main/profile", icon: <FaUser /> },
   ];
 
   const isHigherLevel = user?.role === "TRUSTEE";
@@ -52,16 +54,16 @@ function TrusteeLayout() {
 
   // Handle generic /trustee or /trustee/dashboard entry points
   if (currentPath === "/trustee" || currentPath === "/trustee/" || currentPath === "/trustee/dashboard" || currentPath === "/trustee/dashboard/") {
-    return <Navigate to={isHigherLevel ? "/trustee/commercial/dashboard" : "/trustee/volunteer/dashboard"} replace />;
+    return <Navigate to={isHigherLevel ? "/trustee/main/dashboard" : "/trustee/volunteer/dashboard"} replace />;
   }
 
   // Route Protection: Prevent cross-trustee manual URL navigation
-  if (user?.role === "VOLUNTEER" && currentPath.includes("/commercial/")) {
+  if (user?.role === "VOLUNTEER" && currentPath.includes("/main/")) {
     return <Navigate to="/trustee/volunteer/dashboard" replace />;
   }
   
   if (isHigherLevel && currentPath.includes("/volunteer/")) {
-    return <Navigate to="/trustee/commercial/dashboard" replace />;
+    return <Navigate to="/trustee/main/dashboard" replace />;
   }
 
   // Inject Volunteer specific theme variables

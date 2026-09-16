@@ -415,6 +415,33 @@ function Exams() {
     }
   };
 
+  const handleDeleteScheduled = async (item) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete the scheduled assessment "${item.title}"?`
+      )
+    ) {
+      return;
+    }
+    setActionInProgress(item.id);
+    try {
+      if (item.type === "SCREENING") {
+        await apiClient.delete(`/api/pre-screenings/${item.id}/`);
+      } else {
+        await apiClient.delete(`/api/module-tests/${item.id}/`);
+      }
+      alert("✅ Scheduled assessment deleted successfully!");
+      loadScheduledData();
+    } catch (err) {
+      console.error("Failed to delete scheduled assessment:", err);
+      alert(
+        err.response?.data?.error || err.response?.data?.detail || "Failed to delete scheduled assessment."
+      );
+    } finally {
+      setActionInProgress(null);
+    }
+  };
+
   const handleAdminStart = async (item) => {
     if (
       !window.confirm(
@@ -1199,6 +1226,25 @@ function Exams() {
                               }}
                             >
                               {item.is_released ? "🔒 Lock" : "🔓 Release"}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteScheduled(item)}
+                              disabled={actionInProgress === item.id}
+                              style={{
+                                padding: "5px 10px",
+                                backgroundColor: "rgba(220, 38, 38, 0.1)",
+                                color: "var(--danger-color)",
+                                border: "1px solid rgba(220, 38, 38, 0.2)",
+                                borderRadius: "6px",
+                                fontSize: "12px",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                              }}
+                              title="Delete this scheduled assessment"
+                            >
+                              🗑️ Delete
                             </button>
                           </div>
                         </td>

@@ -141,7 +141,7 @@ function AttendanceManagement() {
       // Check if status is 202 or 425 (Report Pending / Too Early)
       if (response.status === 202 || response.status === 425) {
         let detailMessage = response.data?.detail || response.data?.message || "Attendance data is pending. Please wait for Google to finalize the conference log.";
-        alert(`⏳ ${detailMessage}`);
+        setTimeout(() => alert(`⏳ ${detailMessage}`), 10);
         return;
       }
 
@@ -152,7 +152,7 @@ function AttendanceManagement() {
           const text = await responseData.text();
           try {
             const json = JSON.parse(text);
-            alert(`⚠️ ${json.detail || json.message || "Report is not ready yet."}`);
+            setTimeout(() => alert(`⚠️ ${json.detail || json.message || "Report is not ready yet."}`), 10);
             return;
           } catch (e) {
             // Not JSON, proceed as file
@@ -201,7 +201,7 @@ function AttendanceManagement() {
         // Fallback to default error message if blob parsing fails
       }
 
-      alert(`Attendance download failed: ${errorMsg}`);
+      setTimeout(() => alert(`Attendance download failed: ${errorMsg}`), 10);
     }
   };
 
@@ -215,11 +215,11 @@ function AttendanceManagement() {
       });
       // Update local state
       setAttendance(prev => prev.map(item => item.id === id ? { ...item, status: "CANCELLED" } : item));
-      alert("Class has been successfully cancelled.");
+      setTimeout(() => alert("Class has been successfully cancelled."), 10);
     } catch (err) {
       console.error("Failed to cancel class:", err);
       const errMsg = err.response?.data?.detail || err.message || "Unknown error";
-      alert(`Failed to cancel class: ${errMsg}`);
+      setTimeout(() => alert(`Failed to cancel class: ${errMsg}`), 10);
     }
   };
 

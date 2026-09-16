@@ -90,7 +90,7 @@ const getNotificationRoute = (notification, userRole) => {
   if (title.includes("announcement")) {
     if (role === "student") return `/student/dashboard`;
     if (role === "admin") return `/admin/dashboard`;
-    if (role === "trustee") return `/trustee/commercial/announcements`;
+    if (role === "trustee") return `/trustee/main/announcements`;
   }
 
   // Application status changes (approved, rejected, cohort assigned, qualified, etc.)

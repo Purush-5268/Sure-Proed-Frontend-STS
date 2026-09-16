@@ -204,6 +204,28 @@ function Navbar() {
                         Settings
                       </Link>
                     )}
+                    {user?.has_dual_access && (
+                      <button 
+                        onClick={async () => {
+                          try {
+                            const { authService } = await import("../../services/authService");
+                            const res = await authService.switchAccount();
+                            closeMenu(); 
+                            setProfileDropdownOpen(false);
+                            // Hard redirect to the target dashboard for a clean state rebuild
+                            window.location.href = res.user.role === 'VOLUNTEER' 
+                               ? '/trustee/volunteer/dashboard' 
+                               : '/student/dashboard';
+                          } catch (err) {
+                            console.error("Failed to switch dashboard", err);
+                          }
+                        }} 
+                        className={styles.dropdownItem} 
+                        style={{ color: "var(--primary-color)", width: "100%", textAlign: "left", fontWeight: "600" }}
+                      >
+                        Switch to {user.linked_account_role === 'STUDENT' ? 'Student' : 'Volunteer'} Dashboard
+                      </button>
+                    )}
                     <div className={styles.dropdownDivider}></div>
                     <button onClick={handleLogout} className={styles.dropdownItem} style={{ color: "var(--danger-color)", width: "100%", textAlign: "left" }}>
                       Sign Out

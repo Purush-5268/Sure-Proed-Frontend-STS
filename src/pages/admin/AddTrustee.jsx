@@ -40,7 +40,6 @@ function AddTrustee() {
 
     setLoading(true);
     try {
-      // 1. Create the User (Omit password so backend sends setup email automatically)
       const userPayload = {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
@@ -49,31 +48,20 @@ function AddTrustee() {
         gender: form.gender || null,
         date_of_birth: form.date_of_birth || null,
         role: form.trustee_type === "VOLUNTEER" ? "VOLUNTEER" : "TRUSTEE",
+        type: form.trustee_type,
+        organization: form.organization.trim(),
+        designation: form.designation.trim(),
         is_active: form.is_active,
       };
 
-      const userRes = await apiClient.post(API_ENDPOINTS.USERS.BASE, userPayload);
-      const newUserId = userRes.data.id || userRes.data.user?.id;
+      await apiClient.post(API_ENDPOINTS.USERS.BASE, userPayload);
 
-      // 2. Try to create the TrusteeProfile (Backend might ignore user_id due to strict serializer, but we follow the standard flow)
-      try {
-        await apiClient.post(API_ENDPOINTS.TRUSTEE_PROFILES.BASE, {
-          user: newUserId,
-          category: form.trustee_type,
-          organization: form.organization.trim(),
-          designation: form.designation.trim(),
-          is_active: form.is_active
-        });
-      } catch (profileErr) {
-        console.warn("Trustee profile creation skipped or failed (backend API constraint):", profileErr);
-        // We do not fail the whole process if profile fails, user was created and email sent.
-      }
-
-      setSuccess(`Trustee created successfully. An email has been sent to ${form.email} to set up their password.`);
+      const emailUsedForNotification = form.mapped_email ? form.mapped_email.trim() : form.email.trim();
+      setSuccess(`${form.trustee_type} account created successfully. An email has been sent to ${emailUsedForNotification} to set up their password.`);
       setTimeout(() => navigate("/admin/trustees"), 2500);
 
     } catch (err) {
-      const message = err?.response?.data?.detail || err?.response?.data?.email?.[0] || "Failed to create the trustee account.";
+      const message = err?.response?.data?.detail || err?.response?.data?.email?.[0] || "Failed to create the account.";
       setError(message);
     } finally {
       setLoading(false);
@@ -84,8 +72,8 @@ function AddTrustee() {
     <div className="premium-page-container">
       <div className="premium-page-header">
         <div>
-          <h1 className="premium-title">Add New Trustee</h1>
-          <p className="premium-subtitle">Register a Volunteer, Advisor, or Board Trustee. They will receive a password setup email.</p>
+          <h1 className="premium-title">Add New Trustee / Volunteer / Advisor</h1>
+          <p className="premium-subtitle">Register a new Admin account. They will receive a password setup email.</p>
         </div>
         <Link to="/admin/trustees" className="premium-btn" style={{ background: "var(--bg-nested)", color: "var(--text-secondary)" }}>
           <FiArrowLeft /> Back to Trustees
@@ -118,16 +106,17 @@ function AddTrustee() {
 
           <div className="premium-form-group">
             <label className="premium-label">Email Address *</label>
-            <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="trustee@suretrust.local" className="premium-input" />
+            <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="e.g. volunteer@sureproed.org" className="premium-input" />
           </div>
 
           <div className="premium-form-group">
-            <label className="premium-label">Mapped Email (Optional)</label>
-            <input type="email" name="mapped_email" value={form.mapped_email} onChange={handleChange} placeholder="e.g. personal@gmail.com" className="premium-input" />
+            <label className="premium-label">Mapped Email</label>
+            <input type="email" name="mapped_email" value={form.mapped_email} onChange={handleChange} placeholder="e.g. personal.google@gmail.com" className="premium-input" />
           </div>
 
           <div className="premium-form-group">
             <label className="premium-label">Gender</label>
+
             <select className="premium-input" name="gender" value={form.gender} onChange={handleChange}>
               <option value="">Select Gender</option>
               <option value="MALE">Male</option>
@@ -144,7 +133,7 @@ function AddTrustee() {
           <div className="premium-form-group">
             <label className="premium-label">Trustee Type *</label>
             <select name="trustee_type" value={form.trustee_type} onChange={handleChange} className="premium-input">
-              <option value="COMMERCIAL">Trustee</option>
+              <option value="TRUSTEE">Trustee</option>
               <option value="VOLUNTEER">Volunteer</option>
               <option value="ADVISOR">Advisor</option>
             </select>

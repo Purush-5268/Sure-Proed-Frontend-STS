@@ -16,10 +16,7 @@
   
   padding: 32px 5%;
   min-height: calc(100vh - var(--navbar-height));
-  background: radial-gradient(circle at 10% 20%, rgba(216, 180, 254, 0.3) 0%, transparent 40%),
-              radial-gradient(circle at 90% 10%, rgba(191, 219, 254, 0.4) 0%, transparent 40%),
-              radial-gradient(circle at 50% 80%, rgba(24, 188, 254, 0.1) 0%, transparent 50%),
-              var(--bg-main);
+  background: var(--bg-main);
   background-attachment: fixed;
   font-family: 'Inter', -apple-system, sans-serif;
   color: var(--text-main);
@@ -35,10 +32,7 @@
   --text-sub: #94a3b8;
   --bg-main: #0f172a;
   
-  background: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
-              radial-gradient(circle at 90% 10%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
-              radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
-              var(--bg-main);
+  background: var(--bg-main);
 }
 
 /* Header */
@@ -690,12 +684,15 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 4px;
+  gap: 12px;
 }
 
 .metaMain {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1;
+  min-width: 0;
 }
 
 .metaItem {
@@ -704,10 +701,14 @@
   gap: 8px;
   font-size: 13px;
   color: var(--text-sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .metaIcon {
   color: var(--text-sub);
   font-size: 14px;
+  flex-shrink: 0;
 }
 
 .metaProgress {
@@ -715,12 +716,15 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
+  min-width: 60px;
 }
 .progressLabel {
   font-size: 10px;
   color: var(--text-sub);
   font-weight: 600;
   text-transform: uppercase;
+  text-align: center;
 }
 
 .cardFooterSuccess {

@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './Statistics.module.css';
 
 const CompanyShowcase = ({ companies }) => {
-  if (!companies || companies.length === 0) {
+  if (!companies || !Array.isArray(companies) || companies.length === 0) {
     return (
       <div className={styles.emptyCompanies}>
         <p style={{ color: 'var(--text-secondary, #6b7280)', fontStyle: 'italic', margin: 0, padding: '40px 0', textAlign: 'center' }}>

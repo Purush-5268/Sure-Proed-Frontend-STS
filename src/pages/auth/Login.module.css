@@ -441,3 +441,69 @@
     background: var(--bg-surface);
   }
 }
+
+.roleSelectorOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.roleSelectorModal {
+  background: var(--bg-surface);
+  padding: 32px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+}
+
+.roleSelectorModal h3 {
+  font-size: 24px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.roleSelectorModal p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.roleOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.roleBtn {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid var(--primary-color);
+  background: transparent;
+  color: var(--primary-color);
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.roleBtn:hover:not(:disabled) {
+  background: var(--primary-color);
+  color: white;
+}
+
+.roleBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

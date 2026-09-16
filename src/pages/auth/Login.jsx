@@ -20,6 +20,9 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [rememberMe, setRememberMeState] = useState(true);
+  const [showRoleSelector, setShowRoleSelector] = useState(false);
+  const [pendingRoles, setPendingRoles] = useState([]);
+  const [switchLoading, setSwitchLoading] = useState(false);
 
   // Check for LinkedIn OAuth redirect tokens in URL query params
   useEffect(() => {
@@ -61,7 +64,7 @@ function Login() {
         } else if (role === "ADMIN") navigate("/admin/dashboard", { replace: true });
         else if (role === "MENTOR") navigate("/mentor/dashboard", { replace: true });
         else if (role === "VOLUNTEER") navigate("/trustee/volunteer/dashboard", { replace: true });
-        else if (role === "TRUSTEE") navigate("/trustee/commercial/dashboard", { replace: true });
+        else if (role === "TRUSTEE") navigate("/trustee/main/dashboard", { replace: true });
         else navigate("/student/profile", { replace: true });
       }, 500);
     };
@@ -71,6 +74,64 @@ function Login() {
     }
   }, [navigate, updateUser]);
 
+  const routeUser = (role) => {
+    const params = new URLSearchParams(window.location.search);
+    const returnUrl = params.get("returnUrl");
+    
+    if (returnUrl && returnUrl.startsWith("/student/") && role === "STUDENT") {
+      navigate(returnUrl);
+      return;
+    }
+
+    if (role === "ADMIN") {
+      navigate("/admin/dashboard");
+    } else if (role === "MENTOR") {
+      navigate("/mentor/dashboard");
+    } else if (role === "VOLUNTEER") {
+      navigate("/trustee/volunteer/dashboard");
+    } else if (role === "TRUSTEE") {
+      navigate("/trustee/main/dashboard");
+    } else {
+      navigate("/student/profile");
+    }
+  };
+
+  const handleRoleSelect = async (selectedRole) => {
+    setSwitchLoading(true);
+    try {
+        // First try logging directly into the selected role
+        const res = await login(username, password, rememberMe, selectedRole);
+        const userRole = res?.user?.role;
+        setSuccess(true);
+        setTimeout(() => routeUser(userRole), 800);
+    } catch (err) {
+        // If they provided the password for their OTHER linked account, the direct login will fail with 401.
+        // We can try to authenticate with their other role to get a valid JWT, then securely switch accounts!
+        if (err.response?.status === 401 && pendingRoles.length === 2) {
+            const otherRole = pendingRoles.find(r => r !== selectedRole);
+            try {
+                // Get the initial JWT using the other role
+                await login(username, password, rememberMe, otherRole);
+                
+                // Now securely exchange it for the role they actually wanted
+                const switchRes = await authService.switchAccount();
+                updateUser(switchRes.user);
+                
+                setSuccess(true);
+                setTimeout(() => routeUser(switchRes.user.role), 800);
+                return;
+            } catch (fallbackErr) {
+                console.error("Fallback role select login error:", fallbackErr);
+            }
+        }
+
+        console.error("Role select login error:", err);
+        setError("Failed to login with selected account. Please try again.");
+        setSwitchLoading(false);
+        setShowRoleSelector(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -79,36 +140,27 @@ function Login() {
     
     try {
       const res = await login(username, password, rememberMe);
+      
       const userRole = res?.user?.role;
       setSuccess(true);
       
       // Delay navigation slightly for success animation
       setTimeout(() => {
-        const params = new URLSearchParams(window.location.search);
-        const returnUrl = params.get("returnUrl");
-        
-        // Safe internal redirect check
-        if (returnUrl && returnUrl.startsWith("/student/") && userRole === "STUDENT") {
-          navigate(returnUrl);
-          return;
-        }
-
-        if (userRole === "ADMIN") {
-          navigate("/admin/dashboard");
-        } else if (userRole === "MENTOR") {
-          navigate("/mentor/dashboard");
-        } else if (userRole === "VOLUNTEER") {
-          navigate("/trustee/volunteer/dashboard");
-        } else if (userRole === "TRUSTEE") {
-          navigate("/trustee/commercial/dashboard");
-        } else {
-          navigate("/student/profile");
-        }
+         routeUser(userRole);
       }, 800);
       
     } catch (err) {
       console.error("Login error:", err);
       const resData = err.response?.data;
+      
+      // Catch dual-role required error from backend
+      if (err.response?.status === 409 && resData?.code === "ACCOUNT_ROLE_REQUIRED") {
+        setPendingRoles(resData.roles || ['STUDENT', 'VOLUNTEER']);
+        setShowRoleSelector(true);
+        setLoading(false);
+        return;
+      }
+
       let msg = "Invalid credentials. Please try again.";
       if (resData) {
         if (typeof resData === "string") {
@@ -150,6 +202,37 @@ function Login() {
 
   return (
     <div className={styles.container}>
+      {showRoleSelector && pendingRoles.length > 0 && (
+        <div className={styles.roleSelectorOverlay}>
+          <div className={styles.roleSelectorModal}>
+            <h3>Select Dashboard</h3>
+            <p>You have access to multiple dashboards. Please select which one you want to enter.</p>
+            <div className={styles.roleOptions}>
+               {pendingRoles.map(role => (
+                 <button 
+                    key={role}
+                    className={styles.roleBtn} 
+                    onClick={() => handleRoleSelect(role)} 
+                    disabled={switchLoading || success}
+                 >
+                    {role === 'STUDENT' ? 'Student Dashboard' : role === 'VOLUNTEER' ? 'Volunteer Dashboard' : `${role} Dashboard`}
+                 </button>
+               ))}
+            </div>
+            {switchLoading && (
+               <div className={styles.loadingDots} style={{ marginTop: '20px', justifyContent: 'center' }}>
+                  <span></span><span></span><span></span>
+               </div>
+            )}
+            {success && (
+               <div style={{ color: 'var(--success-color)', marginTop: '20px', textAlign: 'center' }}>
+                  Redirecting...
+               </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className={styles.loginWrapper}>
         <div className={styles.leftSide}>
           <motion.div 

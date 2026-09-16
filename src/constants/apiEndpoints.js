@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
     // OTP-gated email verification registration flow
     SEND_VERIFICATION_OTP: "/api/auth/send-verification-otp/",
     VERIFY_EMAIL_OTP: "/api/auth/verify-email-otp/",
+    SWITCH_ACCOUNT: "/api/auth/switch-account/",
   },
 
   // Analytics
@@ -254,7 +255,7 @@ export const API_ENDPOINTS = {
     STUDENTS: "/api/students/",
     REMOVE_STUDENT: (id) => `/api/students/${id}/`,
 
-    // Commercial operations
+    // Main operations
     ANNOUNCEMENTS: "/api/trustee/announcements/",
     ANNOUNCEMENT_BY_ID: (id) => `/api/trustee/announcements/${id}/`,
     ACHIEVEMENTS: "/api/trustee/achievements/",

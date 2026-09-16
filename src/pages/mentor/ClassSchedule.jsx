@@ -212,9 +212,9 @@ function ClassSchedule() {
         await apiClient.patch(API_ENDPOINTS.TRAININGS.SESSION_BY_ID(sessionId), { class_status: "COMPLETED" });
       }
       setActiveSessions(prev => prev.filter(s => s.id !== sessionId));
-      alert("Class ended successfully.");
+      setTimeout(() => alert("Class ended successfully."), 10);
     } catch (err) {
-      alert("Failed to end class.");
+      setTimeout(() => alert("Failed to end class."), 10);
     }
   };
 
@@ -227,9 +227,9 @@ function ClassSchedule() {
         await apiClient.patch(API_ENDPOINTS.TRAININGS.SESSION_BY_ID(sessionId), { class_status: "CANCELLED" });
       }
       setActiveSessions(prev => prev.filter(s => s.id !== sessionId));
-      alert("Class cancelled successfully.");
+      setTimeout(() => alert("Class cancelled successfully."), 10);
     } catch (err) {
-      alert("Failed to cancel class.");
+      setTimeout(() => alert("Failed to cancel class."), 10);
     }
   };
 
@@ -253,6 +253,7 @@ function ClassSchedule() {
         end_time: editEndTime.length === 5 ? editEndTime + ":00" : editEndTime
       };
 
+      setEditingClassId(null); // Optimistically close the UI
       if (cls.type === "DOMAIN") {
         await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(cls.id), updatedData);
       } else {
@@ -263,10 +264,9 @@ function ClassSchedule() {
         c.id === cls.id ? { ...c, session_date: editDate, start_time: updatedData.start_time, end_time: updatedData.end_time } : c
       ));
 
-      setEditingClassId(null);
-      alert("✅ Class rescheduled successfully!");
+      setTimeout(() => alert("✅ Class rescheduled successfully!"), 10);
     } catch (error) {
-      alert("❌ Failed to reschedule. Please check the backend connection.");
+      setTimeout(() => alert("❌ Failed to reschedule. Please check the backend connection."), 10);
     }
   };
 

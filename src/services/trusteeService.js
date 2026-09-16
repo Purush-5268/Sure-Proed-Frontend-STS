@@ -62,7 +62,7 @@ export const updateAchievement = (id, data) =>
 export const deleteAchievement = (id) =>
   apiClient.delete(`/api/achievements/${id}/`).then((r) => r.data);
 
-// ── Commercial Updates ──
+// ── Main Updates ──
 export const getUpdates = () =>
   apiClient.get("/api/updates/").then((r) => r.data);
 

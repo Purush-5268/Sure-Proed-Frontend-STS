@@ -98,7 +98,7 @@ function Updates() {
           <p>Publish news related to partnerships, funding, and expansion.</p>
         </div>
         <div className={styles.headerActions}>
-          <Link to="/trustee/commercial/dashboard" className="btn btnSecondary">
+          <Link to="/trustee/main/dashboard" className="btn btnSecondary">
             ← Dashboard
           </Link>
           <button className="btn btnPrimary" onClick={() => openModal()}>

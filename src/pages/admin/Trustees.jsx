@@ -96,7 +96,7 @@ function Trustees() {
                       <span className="premium-badge premium-badge-indigo">
                         <FiShield style={{ marginRight: "4px" }} /> Advisor
                       </span>
-                    ) : t.profile?.trustee_type === "COMMERCIAL" ? (
+                    ) : t.profile?.trustee_type === "TRUSTEE" ? (
                       <span className="premium-badge premium-badge-purple">
                         <FiShield style={{ marginRight: "4px" }} /> Trustee
                       </span>

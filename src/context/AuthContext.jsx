@@ -213,7 +213,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const login = async (identifier, password, rememberMe = true) => {
+  const login = async (identifier, password, rememberMe = true, role = null) => {
     // 1. Instantly trigger the native prompt on the synchronous click event, 
     // bypassing strict browser spam-blocking rules (Edge/Chrome).
     let permissionPromise = null;
@@ -228,7 +228,7 @@ export function AuthProvider({ children }) {
     setRememberMe(rememberMe);
 
     try {
-      const data = await authService.login(cleanId, password);
+      const data = await authService.login(cleanId, password, role);
 
       let userObj;
       if (data?.user) {
@@ -246,6 +246,8 @@ export function AuthProvider({ children }) {
           admin_category: data.user.admin_category || null,
           is_active: data.user.is_active,
           permissions: data.user.permissions || [],
+          has_dual_access: data.user.has_dual_access || false,
+          linked_account_role: data.user.linked_account_role || null,
         };
       } else {
         const profile = await fetchUserProfile();
@@ -264,6 +266,8 @@ export function AuthProvider({ children }) {
             admin_category: profile.admin_category || null,
             is_active: profile.is_active,
             permissions: profile.permissions || [],
+            has_dual_access: profile.has_dual_access || false,
+            linked_account_role: profile.linked_account_role || null,
           };
         } else {
           const decoded = parseJwt(data.access) || {};
@@ -271,6 +275,8 @@ export function AuthProvider({ children }) {
             email: decoded.email || cleanId,
             role: decoded.role || "STUDENT",
             user_id: decoded.user_id,
+            has_dual_access: decoded.has_dual_access || false,
+            linked_account_role: decoded.linked_account_role || null,
           };
         }
       }
