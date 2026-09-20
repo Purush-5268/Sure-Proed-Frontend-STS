@@ -29,8 +29,8 @@ const getStorage = () => {
     // Fallback to a dummy storage object if access is denied
     return {
       getItem: () => null,
-      setItem: () => {},
-      removeItem: () => {},
+      setItem: () => { },
+      removeItem: () => { },
     };
   }
 };
@@ -38,7 +38,7 @@ const getStorage = () => {
 export const setRememberMe = (value) => {
   try {
     localStorage.setItem(REMEMBER_ME_KEY, value);
-  } catch (e) {}
+  } catch (e) { }
 };
 
 export const getAccessToken = () => getStorage().getItem(ACCESS_TOKEN_KEY);
@@ -65,7 +65,7 @@ export const removeAccessToken = () => {
   try {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-  } catch (e) {}
+  } catch (e) { }
 };
 
 export const getRefreshToken = () => getStorage().getItem(REFRESH_TOKEN_KEY);
@@ -74,7 +74,7 @@ export const removeRefreshToken = () => {
   try {
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     sessionStorage.removeItem(REFRESH_TOKEN_KEY);
-  } catch (e) {}
+  } catch (e) { }
 };
 
 export const getUserInfo = () => {

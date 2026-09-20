@@ -44,7 +44,7 @@ function Profile() {
     city: "", state: "", country: "", bio: "", tagline: "",
     skills: "", hobbies: "", languages: "", portfolio_url: "",
     linkedin_url: "", github_username: "",
-    courseId: "", courseBatch: "", profile_photo: null, resume: null,
+    courseId: "", courseBatch: "", profile_photo: null, banner_image: null, resume: null,
   });
 
   useEffect(() => {
@@ -198,7 +198,7 @@ function Profile() {
 
   const handleLinkedInConnect = async () => {
     try {
-      const data = await authService.getLinkedInConnectUrl();
+      const data = await authService.getLinkedInConnectUrl('/student/profile');
       if (data && data.authorization_url) {
         window.location.href = data.authorization_url;
       }
@@ -270,9 +270,12 @@ function Profile() {
     { id: "integrations", label: "Integrations", icon: <FiShield /> },
   ];
 
-  const requiredFields = ["firstName", "lastName", "email", "phoneNumber", "college", "degree", "specialization", "graduation_year", "linkedin_url", "github_username"];
-  const completedFields = requiredFields.filter(field => Boolean(formData[field]));
-  const completionPercentage = Math.round((completedFields.length / requiredFields.length) * 100);
+  const baseRequiredFields = ["firstName", "lastName", "email", "phoneNumber", "college", "degree", "specialization", "graduation_year"];
+  let completedCount = baseRequiredFields.filter(field => Boolean(formData[field])).length;
+  if (serverProfile?.is_linkedin_connected || formData.linkedin_url) completedCount++;
+  if (serverProfile?.is_github_connected || formData.github_username) completedCount++;
+  const totalRequired = baseRequiredFields.length + 2;
+  const completionPercentage = Math.round((completedCount / totalRequired) * 100);
 
   const getInitials = () => {
     if (formData.firstName && formData.lastName) return `${formData.firstName[0]}${formData.lastName[0]}`;
@@ -410,6 +413,19 @@ function Profile() {
                           <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Max size: 1MB</p>
                         </div>
                         <div className="premium-form-group">
+                          <label htmlFor="banner_image" className="premium-label">Banner Image (Update)</label>
+                          <input 
+                            type="file" 
+                            id="banner_image" 
+                            name="banner_image" 
+                            onChange={handleChange} 
+                            accept="image/jpeg,image/png" 
+                            className="premium-input" 
+                            style={{ padding: '8px' }}
+                          />
+                          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Max size: 5MB</p>
+                        </div>
+                        <div className="premium-form-group">
                           <label htmlFor="resume" className="premium-label">Resume (Upload)</label>
                           <input 
                             type="file" 
@@ -491,10 +507,10 @@ function Profile() {
                       <label htmlFor="profile_education_level" className="premium-label">Education Level</label>
                       <select id="profile_education_level" className="premium-input" name="education_level" value={formData.education_level} onChange={handleChange}>
                         <option value="">Select Level</option>
-                        <option value="Undergraduate">Undergraduate</option>
-                        <option value="Postgraduate">Postgraduate</option>
-                        <option value="Diploma">Diploma</option>
-                        <option value="Other">Other</option>
+                        <option value="UNDERGRADUATE">Undergraduate</option>
+                        <option value="POSTGRADUATE">Postgraduate</option>
+                        <option value="DIPLOMA">Diploma</option>
+                        <option value="OTHER">Other</option>
                       </select>
                     </div>
                     <div className="premium-form-group">
@@ -912,12 +928,21 @@ function Profile() {
                     <div style={{ padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontWeight: 'bold' }}><FiLinkedin color="#0a66c2" size={20} /> LinkedIn Status</div>
                       {serverProfile?.is_linkedin_connected ? (
-                        <div style={{ color: '#059669', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          ✅ Connected via Auth
-                          {serverProfile.linkedin_url && (
-                            <a href={serverProfile.linkedin_url} target="_blank" rel="noreferrer" className="premium-btn" style={{ padding: '6px 14px', fontSize: '13px', background: 'var(--student-glow-primary)', color: 'var(--primary-color)', border: '1px solid var(--primary-color)', minHeight: 'auto', gap: '6px', borderRadius: '8px', marginLeft: 'auto' }}>
-                              <FiExternalLink /> View Profile
-                            </a>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          <div style={{ color: '#059669', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            ✅ Connected via Auth
+                            {serverProfile?.linkedin_url && (
+                              <a href={serverProfile.linkedin_url} target="_blank" rel="noreferrer" className="premium-btn" style={{ padding: '6px 14px', fontSize: '13px', background: 'var(--student-glow-primary)', color: 'var(--primary-color)', border: '1px solid var(--primary-color)', minHeight: 'auto', gap: '6px', borderRadius: '8px', marginLeft: 'auto' }}>
+                                <FiExternalLink /> View Profile
+                              </a>
+                            )}
+                          </div>
+                          {!serverProfile?.linkedin_url && (
+                            <div className="premium-form-group">
+                              <label htmlFor="linkedin_url" className="premium-label" style={{ fontSize: '13px' }}>LinkedIn Public Profile URL *</label>
+                              <input id="linkedin_url" className="premium-input" name="linkedin_url" value={formData.linkedin_url || ""} onChange={handleChange} placeholder="https://linkedin.com/in/yourprofile" />
+                              <small style={{ color: 'var(--text-secondary)', fontSize: '12px', marginTop: '4px' }}>LinkedIn does not provide your URL automatically. Please type it here and save.</small>
+                            </div>
                           )}
                         </div>
                       ) : (

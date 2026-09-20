@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { cohortService } from '../../services/cohortService';
 import styles from './OpenCohorts.module.css';
 import { FaUserFriends, FaGraduationCap } from 'react-icons/fa';
+import { formatDisplayDate } from '../../utils/dateUtils';
 
 const OpenCohorts = ({ cohorts: propCohorts, loading: propLoading }) => {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ const OpenCohorts = ({ cohorts: propCohorts, loading: propLoading }) => {
 
   // strictly only show OPEN cohorts for applications
   const filteredPropCohorts = hasProps 
-    ? propCohorts.filter(c => c.status === 'OPEN')
+    ? propCohorts.filter(c => c.status === 'OPEN').slice(0, 5)
     : [];
 
   const cohorts = hasProps ? filteredPropCohorts : fetchedCohorts;
@@ -71,11 +72,7 @@ const OpenCohorts = ({ cohorts: propCohorts, loading: propLoading }) => {
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'TBA';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-  };
+
 
   const getCourseImage = (cohort) => {
     if (!cohort) return '/assets/web-dev.jpg';
@@ -153,7 +150,10 @@ const OpenCohorts = ({ cohorts: propCohorts, loading: propLoading }) => {
                   <span className={`${styles.statusBadge} ${isTrainingInProgress ? styles.badgeProgress : styles.badgeOpen}`}>
                     {isTrainingInProgress ? '🚀 Training In Progress' : '🔓 Open for Applications'}
                   </span>
-                  <span className={styles.startDate}>Starts {formatDate(cohort.start_date)}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', fontSize: '0.85rem', color: '#4b5563' }}>
+                    {cohort.application_end_date && <span>Deadline: {formatDisplayDate(cohort.application_end_date)}</span>}
+                    <span className={styles.startDate}>Starts {formatDisplayDate(cohort.start_date) || 'TBA'}</span>
+                  </div>
                 </div>
                 
                 <div className={styles.cardBody}>

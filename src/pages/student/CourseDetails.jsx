@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { courseService } from "../../services/courseService";
 import { applicationService } from "../../services/applicationService";
 import styles from "./CourseDetails.module.css";
@@ -14,8 +14,11 @@ function CourseDetails() {
   const [hasApplied, setHasApplied] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
   const [applyError, setApplyError] = useState("");
+  const [searchParams] = useSearchParams();
+  const preselectedCohort = searchParams.get("cohort");
+  
   const [openCohorts, setOpenCohorts] = useState([]);
-  const [selectedCohort, setSelectedCohort] = useState("");
+  const [selectedCohort, setSelectedCohort] = useState(preselectedCohort || "");
   const [cohortsLoading, setCohortsLoading] = useState(false);
 
   useEffect(() => {
@@ -60,6 +63,8 @@ function CourseDetails() {
            setOpenCohorts(cohortsData);
            if (cohortsData.length === 1) {
                setSelectedCohort(cohortsData[0].id);
+           } else if (preselectedCohort && cohortsData.some(c => String(c.id) === String(preselectedCohort))) {
+               setSelectedCohort(preselectedCohort);
            }
         }
       } catch (err) {

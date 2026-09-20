@@ -158,7 +158,7 @@ function ApplyCourse() {
   const location = useLocation();
   const { user } = useAuth();
   const [profileCompleted, setProfileCompleted] = useState(false);
-  const [courses, setCourses] = useState([]);
+  const [cohorts, setCohorts] = useState([]);
   const [appliedCourseIds, setAppliedCourseIds] = useState(new Set());
   const [activeApplication, setActiveApplication] = useState(null);
   const [hasQualified, setHasQualified] = useState(false);
@@ -175,13 +175,16 @@ function ApplyCourse() {
           apiClient.get("/api/applications/").catch(() => null),
         ]);
 
-        // 1. Check Profile Completion (Default to true so candidates can apply)
-        setProfileCompleted(true);
+        // 1. Check Profile Completion
+        setProfileCompleted(studentService.isProfileComplete(profileData));
 
-        // 2. Process Courses List (Filter by open cohorts)
+        // 2. Process Cohorts List (Fetch open cohorts)
+        const cohortsData = await apiClient.get("/api/cohorts/", { params: { status: 'OPEN' } }).catch(() => null);
+        const openCohorts = Array.isArray(cohortsData?.data) ? cohortsData.data : (cohortsData?.data?.results || []);
+        setCohorts(openCohorts);
+
+        // Fetch courses purely to check local storage cooldowns if needed, or we can just rely on the cohort.course object
         const rawCourses = Array.isArray(coursesData) ? coursesData : coursesData?.results || coursesData?.data || [];
-        const openCourses = rawCourses.filter(course => course.has_open_cohort === true);
-        setCourses(openCourses);
 
         // 3. Process Applications from Backend & Local Storage
         const appliedSet = new Set(JSON.parse(localStorage.getItem("sure_applied_course_ids") || "[]"));
@@ -296,20 +299,24 @@ function ApplyCourse() {
 
         {loading ? (
           <SkeletonLoader variant="cards" count={3} />
-        ) : courses.length === 0 ? (
+        ) : cohorts.length === 0 ? (
           <div style={{ textAlign: "center", padding: "40px", backgroundColor: "var(--bg-nested)", borderRadius: "12px", border: "1px dashed var(--border-color)" }}>
-            <h2 style={{ color: "var(--text-secondary)", marginBottom: "8px", fontSize: "18px" }}>No Courses Available</h2>
-            <p style={{ color: "var(--text-muted)" }}>There are currently no published internship courses available for application.</p>
+            <h2 style={{ color: "var(--text-secondary)", marginBottom: "8px", fontSize: "18px" }}>No Open Cohorts Available</h2>
+            <p style={{ color: "var(--text-muted)" }}>There are currently no open internship cohorts available for application.</p>
           </div>
         ) : (
           <div className={styles.courseGrid}>
-            {courses.map((course) => {
-              const hasApplied = appliedCourseIds.has(course.id);
-              const isUnderCooldown = cooldownCourseMap[course.id];
-              const isActiveTrack = activeApplication && (activeApplication.course?.id === course.id || activeApplication.course_id === course.id);
+            {cohorts.map((cohort) => {
+              const courseId = typeof cohort.course === 'object' ? cohort.course?.id : (cohort.course || cohort.course_id);
+              const courseName = cohort.course_name || (typeof cohort.course === 'object' ? cohort.course?.name : "Unknown Course");
+              const courseDetails = cohort.course_details || (typeof cohort.course === 'object' ? cohort.course : {});
+
+              const hasApplied = appliedCourseIds.has(courseId);
+              const isUnderCooldown = cooldownCourseMap[courseId];
+              const isActiveTrack = activeApplication && (activeApplication.course?.id === courseId || activeApplication.course_id === courseId);
 
               return (
-                <div key={course.id} className={styles.courseCard}>
+                <div key={cohort.id} className={styles.courseCard}>
                   <span
                     className={styles.badge}
                     style={{
@@ -317,27 +324,27 @@ function ApplyCourse() {
                       color: "#ffffff",
                     }}
                   >
-                    {isActiveTrack ? "Active Application Track" : hasApplied ? "Applied Track" : isUnderCooldown ? "Cooldown Active" : "Published"}
+                    {isActiveTrack ? "Active Application Track" : hasApplied ? "Applied Track" : isUnderCooldown ? "Cooldown Active" : "Open Cohort"}
                   </span>
-                  <h2>{course.name}</h2>
-                  <p>{course.description}</p>
+                  <h2>{cohort.name}</h2>
+                  <p><strong>{courseName}</strong> - {courseDetails.description}</p>
 
                   <div className={styles.info}>
                     <div>
                       <strong>Course Code</strong>
-                      <span>{course.code}</span>
+                      <span>{courseDetails.code || "N/A"}</span>
                     </div>
                     <div>
                       <strong>Domain</strong>
-                      <span>{course.domain}</span>
+                      <span>{courseDetails.domain || "N/A"}</span>
                     </div>
                     <div>
-                      <strong>Duration</strong>
-                      <span>{course.duration_weeks ? `${course.duration_weeks} Weeks` : "24 Weeks"}</span>
+                      <strong>Starts</strong>
+                      <span>{cohort.start_date || "TBA"}</span>
                     </div>
                     <div>
-                      <strong>Difficulty</strong>
-                      <span>{course.difficulty}</span>
+                      <strong>Deadline</strong>
+                      <span>{cohort.application_end_date || "N/A"}</span>
                     </div>
                   </div>
 
@@ -359,7 +366,7 @@ function ApplyCourse() {
                         REJECTED (15-Day Cooldown Active)
                       </button>
                     ) : profileCompleted ? (
-                      <Link to={`/student/course/${course.id}`} className={styles.detailsBtn}>
+                      <Link to={`/student/course/${courseId}?cohort=${cohort.id}`} className={styles.detailsBtn}>
                         View Details & Apply
                       </Link>
                     ) : (

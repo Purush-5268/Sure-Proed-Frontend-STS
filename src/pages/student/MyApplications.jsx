@@ -7,6 +7,7 @@ import { applicationService } from "../../services/applicationService";
 import { courseService } from "../../services/courseService";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./MyApplications.module.css";
+import { formatDisplayDate } from "../../utils/dateUtils";
 
 function MyApplications() {
   const navigate = useNavigate();
@@ -140,14 +141,25 @@ function MyApplications() {
     }
   };
 
-  const formatDate = (value) => {
-    if (!value) return "N/A";
-    return new Date(value).toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+  const handleJoinWhatsApp = async (appId, link) => {
+    try {
+      await apiClient.post(`${API_ENDPOINTS.APPLICATIONS.BASE}${appId}/confirm-whatsapp-join/`);
+      setActiveApplications(prev => prev.map(app => 
+        app.id === appId ? { ...app, whatsapp_joined: true } : app
+      ));
+      const localApps = JSON.parse(localStorage.getItem("sure_student_applications") || "[]");
+      const updatedLocalApps = localApps.map(app => 
+        app.id === appId ? { ...app, whatsapp_joined: true } : app
+      );
+      localStorage.setItem("sure_student_applications", JSON.stringify(updatedLocalApps));
+      window.open(link, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      console.error("Failed to confirm WhatsApp join:", err);
+      window.open(link, '_blank', 'noopener,noreferrer');
+    }
   };
+
+
 
   if (loading) {
     return (
@@ -273,7 +285,7 @@ function MyApplications() {
 
                     <div className={styles.infoBox}>
                       <strong>Applied On</strong>
-                      <span>{formatDate(activeApp.applied_at || activeApp.created_at)}</span>
+                      <span>{formatDisplayDate(activeApp.applied_at || activeApp.created_at)}</span>
                     </div>
                   </div>
 
@@ -315,19 +327,32 @@ function MyApplications() {
                     </div>
                   )}
 
+                  {activeApp.whatsapp_group_link && (
+                    <div style={{ margin: '1.5rem 0', padding: '1.5rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px' }}>
+                      {!activeApp.whatsapp_joined ? (
+                        <>
+                          <h4 style={{ color: '#166534', margin: '0 0 0.5rem 0' }}>Cohort onboarding</h4>
+                          <h3 style={{ color: '#15803d', margin: '0 0 1rem 0' }}>WhatsApp Group</h3>
+                          <p style={{ color: '#166534', marginBottom: '1rem' }}>Join the official cohort community</p>
+                          <button
+                            onClick={() => handleJoinWhatsApp(activeApp.id, activeApp.whatsapp_group_link)}
+                            style={{ backgroundColor: '#25D366', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                            Join WhatsApp Group
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <h3 style={{ color: '#15803d', margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            WHATSAPP JOINED ✓
+                          </h3>
+                          <p style={{ color: '#166534', margin: 0 }}>You're connected with your cohort.</p>
+                        </>
+                      )}
+                    </div>
+                  )}
                   <div className={styles.actionRow}>
-                    {activeApp.whatsapp_group_link && (
-                      <a
-                        href={activeApp.whatsapp_group_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`${styles.premiumBtn}`}
-                        style={{ backgroundColor: "#25D366", color: "white", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "8px" }}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                        Join WhatsApp Group
-                      </a>
-                    )}
                     <button
                       type="button"
                       onClick={() => setSelectedAppModal(activeApp)}
@@ -409,7 +434,7 @@ function MyApplications() {
 
                     <div className={styles.infoBox}>
                       <strong>Applied / Attempted On</strong>
-                      <span>{formatDate(app.applied_at || app.created_at)}</span>
+                      <span>{formatDisplayDate(app.applied_at || app.created_at)}</span>
                     </div>
                   </div>
 
@@ -457,7 +482,7 @@ function MyApplications() {
                     <div><strong>Marks Score:</strong> <span style={{ fontWeight: "bold", color: "var(--text-primary)" }}>{scoreText}</span></div>
                     <div><strong>Qualification:</strong> <span style={{ fontWeight: "bold", color: isQual ? "#16a34a" : (isRej ? "#dc2626" : "#d97706") }}>{qualText}</span></div>
                     <div><strong>Anti-Cheat Violations:</strong> {selectedAppModal.cheat_count || 0} / 5 Security Violations</div>
-                    <div><strong>Applied Date:</strong> {formatDate(selectedAppModal.applied_at || selectedAppModal.created_at)}</div>
+                    <div><strong>Applied Date:</strong> {formatDisplayDate(selectedAppModal.applied_at || selectedAppModal.created_at)}</div>
                   </>
                 );
               })()}

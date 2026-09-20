@@ -380,6 +380,9 @@ export const studentService = {
       if (updated.profile_photo instanceof File) {
         formData.append("profile_photo", updated.profile_photo);
       }
+      if (updated.banner_image instanceof File) {
+        formData.append("banner_image", updated.banner_image);
+      }
       if (updated.resume instanceof File) {
         formData.append("resume", updated.resume);
       }

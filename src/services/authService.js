@@ -58,8 +58,8 @@ export const authService = {
   },
 
   // LinkedIn OAuth Connect URL
-  async getLinkedInConnectUrl() {
-    const redirectUri = window.location.origin + '/login';
+  async getLinkedInConnectUrl(returnUrl = '/login') {
+    const redirectUri = window.location.origin + returnUrl;
     const response = await apiClient.get(API_ENDPOINTS.AUTH.LINKEDIN_CONNECT, {
       params: { next: redirectUri }
     });

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { cohortService } from '../../services/cohortService';
+import { formatDisplayDate } from '../../utils/dateUtils';
 import styles from './CohortInfo.module.css';
 
 const CohortInfo = () => {
@@ -88,37 +89,13 @@ const CohortInfo = () => {
             {/* Content section */}
             <div className={styles.body}>
               <div className={styles.grid}>
-                <div className={styles.infoBox}>
-                  <h3>Start Date</h3>
-                  <p>{cohort.start_date ? new Date(cohort.start_date).toLocaleDateString() : 'TBA'}</p>
-                </div>
-                
-                <div className={styles.infoBox}>
-                  <h3>End Date</h3>
-                  <p>{cohort.end_date ? new Date(cohort.end_date).toLocaleDateString() : 'TBA'}</p>
-                </div>
-
                 {cohort.application_end_date && (
                   <div className={styles.infoBox}>
                     <h3>Application Deadline</h3>
-                    <p>{new Date(cohort.application_end_date).toLocaleDateString()}</p>
+                    <p>{formatDisplayDate(cohort.application_end_date)}</p>
                   </div>
                 )}
               </div>
-
-              {/* Show WhatsApp link if authorized by backend */}
-              {cohort.whatsapp_group_link && (
-                 <div className={styles.courseDescription} style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px' }}>
-                   <h2 style={{ color: '#166534', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                     Join WhatsApp Group
-                   </h2>
-                   <p style={{ color: '#15803d', marginBottom: '1rem' }}>You have access to the official cohort WhatsApp group.</p>
-                   <a href={cohort.whatsapp_group_link} target="_blank" rel="noreferrer" style={{ display: 'inline-block', backgroundColor: '#22c55e', color: 'white', padding: '0.75rem 1.5rem', borderRadius: '6px', fontWeight: 'bold', textDecoration: 'none' }}>
-                     Join Group
-                   </a>
-                 </div>
-              )}
 
               {cohort.rules_and_regulations && (
                  <div className={styles.courseDescription} style={{ marginTop: '2rem' }}>

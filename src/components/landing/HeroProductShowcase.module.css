@@ -625,29 +625,31 @@
 .handwrittenArrow {
   position: absolute;
   bottom: -60px;
-  right: -50px;
+  right: 10px;
   font-family: 'Caveat', cursive, sans-serif;
   font-size: 1.4rem;
   font-weight: 600;
   color: #6366f1;
   transform: rotate(-5deg);
   z-index: 5;
-  white-space: nowrap;
+  white-space: normal;
   text-align: right;
+  max-width: 250px;
 }
 
 .handwrittenExplore {
   position: absolute;
   bottom: -80px;
-  left: 30%;
+  left: 20%;
   transform: translateX(-50%) rotate(2deg);
   font-family: 'Caveat', cursive, sans-serif;
   font-size: 1.4rem;
   font-weight: 600;
   color: #6366f1;
   z-index: 5;
-  white-space: nowrap;
+  white-space: normal;
   text-align: center;
+  max-width: 250px;
 }
 
 @keyframes float {
