@@ -1,30 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import styles from './HeroProductShowcase.module.css';
+import { useNavigate } from 'react-router-dom';
 import { 
   FaHome, FaBook, FaVideo, FaClipboardList, 
   FaUserCheck, FaCertificate, FaEnvelope,
   FaSearch, FaBell, FaChevronDown, FaArrowLeft
 } from 'react-icons/fa';
 
-const HeroProductShowcase = ({ cohorts = [], loading = false }) => {
+const HeroProductShowcase = ({ cohorts = [], courses = [], loading = false }) => {
+  const navigate = useNavigate();
   const [activeView, setActiveView] = useState('full');
-  const [activeCohortIndex, setActiveCohortIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  // Combine cohorts and courses if there aren't enough cohorts to make a dynamic showcase
+  const displayItems = cohorts.length >= 3 
+    ? cohorts 
+    : [...cohorts, ...courses].filter((v, i, a) => a.findIndex(t => (t.name === v.name)) === i);
+    
+  const safeItems = displayItems.length > 0 ? displayItems : [{ name: 'Explore SURE ProEd', course: { name: 'Learning Module' } }];
 
   useEffect(() => {
     let intervalId;
-    if (cohorts.length > 0) {
+    if (safeItems.length > 1) {
       intervalId = setInterval(() => {
-        setActiveCohortIndex((prev) => (prev + 1) % cohorts.length);
+        setActiveIndex((prev) => (prev + 1) % safeItems.length);
       }, 5000);
     }
     return () => { 
       if (intervalId) clearInterval(intervalId);
     };
-  }, [cohorts]);
+  }, [safeItems.length]);
 
-  const activeCohort = cohorts[activeCohortIndex];
-  const displayCohortName = activeCohort ? activeCohort.name : (loading ? "Loading..." : "Explore SURE ProEd");
-  const displayCourseName = activeCohort?.course?.name || "Learning Module";
+  const activeItem = safeItems[activeIndex];
+  const isCohort = !!activeItem?.course;
+  
+  const displayCohortName = isCohort 
+    ? activeItem.name 
+    : (loading ? "Loading..." : "Upcoming Batch");
+    
+  const displayCourseName = isCohort 
+    ? activeItem.course.name 
+    : (activeItem?.name || "Explore SURE ProEd");
+
+  const handleAction = () => {
+    if (!activeItem) return;
+    if (isCohort) {
+      navigate('/student/dashboard');
+    } else {
+      navigate(`/student/course/${activeItem.id}`);
+    }
+  };
 
   const getCourseImage = (cohort) => {
     if (!cohort) return '/assets/web-dev.jpg';
@@ -135,7 +160,7 @@ const HeroProductShowcase = ({ cohorts = [], loading = false }) => {
           <h2>My Courses</h2>
           <div className={styles.myCourseCard}>
             <div className={styles.courseImageWrapper}>
-              <img src={getCourseImage(activeCohort)} alt="Course" className={styles.courseImage} />
+              <img src={getCourseImage(activeItem)} alt="Course" className={styles.courseImage} />
             </div>
             <div className={styles.courseDetails}>
               <span className={styles.tag}>Active Cohort</span>
@@ -144,7 +169,7 @@ const HeroProductShowcase = ({ cohorts = [], loading = false }) => {
                 <div className={styles.progressFill} style={{width: '75%'}}></div>
               </div>
               <p className={styles.progressText}>In Progress</p>
-              <button className={styles.primaryBtn}>Resume Learning</button>
+              <button onClick={handleAction} className={styles.primaryBtn}>Resume Learning</button>
             </div>
           </div>
         </div>
@@ -161,8 +186,8 @@ const HeroProductShowcase = ({ cohorts = [], loading = false }) => {
               <h3>{displayCourseName}</h3>
               <p>{displayCohortName} • Live Session</p>
               <div className={styles.liveSessionAction}>
-                <button aria-label="Join Class" className={styles.primaryBtn}><FaVideo /> Join Class</button>
-                <button aria-label="View Material" className={styles.secondaryBtn}>View Material</button>
+                <button aria-label="Join Class" onClick={handleAction} className={styles.primaryBtn}><FaVideo /> Join Class</button>
+                <button aria-label="View Material" onClick={handleAction} className={styles.secondaryBtn}>View Material</button>
               </div>
             </div>
           </div>
@@ -171,10 +196,11 @@ const HeroProductShowcase = ({ cohorts = [], loading = false }) => {
             <div className={styles.upcomingItem}>
               <div className={styles.dateBlock}><span>Next</span><strong>Cls</strong></div>
               <div className={styles.upcomingDetails}>
-                <h3>Advanced Topics</h3>
-                <p>Scheduled Session</p>
+                <h4>{isCohort ? "Full Stack Architecture" : "Module 2 Introduction"}</h4>
+                <p>Tomorrow, 10:00 AM</p>
               </div>
             </div>
+            <button onClick={handleAction} className={styles.primaryBtn} style={{width: '100%', marginTop: 'auto'}}>View Schedule</button>
           </div>
         </div>
 

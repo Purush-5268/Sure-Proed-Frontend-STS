@@ -9,6 +9,7 @@ const WhySureProed = lazy(() => import("../../components/landing/WhySureProed"))
 const LearningPrograms = lazy(() => import("../../components/landing/LearningPrograms"));
 const Statistics = lazy(() => import("../../components/landing/Statistics"));
 const FinalCTA = lazy(() => import("../../components/landing/FinalCTA"));
+import ScrollReveal from "../../components/common/ScrollReveal";
 
 function Landing() {
   const location = useLocation();
@@ -28,30 +29,40 @@ function Landing() {
 
   return (
     <div className="landing-page-wrapper">
-      <Hero cohorts={cohorts} loading={loading} />
-      <OpenCohorts cohorts={cohorts} loading={loading} />
+      <Hero cohorts={cohorts} courses={courses} loading={loading} />
+      <ScrollReveal>
+        <OpenCohorts cohorts={cohorts} loading={loading} />
+      </ScrollReveal>
       
       <LazySection fallback={<div style={{ minHeight: '400px' }}></div>}>
         <Suspense fallback={<div style={{ minHeight: '400px' }}></div>}>
-          <WhySureProed />
+          <ScrollReveal>
+            <WhySureProed />
+          </ScrollReveal>
         </Suspense>
       </LazySection>
 
       <LazySection fallback={<div style={{ minHeight: '400px' }}></div>}>
         <Suspense fallback={<div style={{ minHeight: '400px' }}></div>}>
-          <LearningPrograms courses={courses} loading={loading} />
+          <ScrollReveal>
+            <LearningPrograms courses={courses} loading={loading} />
+          </ScrollReveal>
         </Suspense>
       </LazySection>
 
       <LazySection fallback={<div style={{ minHeight: '400px' }}></div>}>
         <Suspense fallback={<div style={{ minHeight: '400px' }}></div>}>
-          <Statistics />
+          <ScrollReveal>
+            <Statistics />
+          </ScrollReveal>
         </Suspense>
       </LazySection>
 
       <LazySection fallback={<div style={{ minHeight: '300px' }}></div>}>
         <Suspense fallback={<div style={{ minHeight: '300px' }}></div>}>
-          <FinalCTA />
+          <ScrollReveal>
+            <FinalCTA />
+          </ScrollReveal>
         </Suspense>
       </LazySection>
     </div>

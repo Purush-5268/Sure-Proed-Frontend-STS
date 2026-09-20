@@ -18,7 +18,7 @@ export const useLandingData = () => {
       try {
         // Fetch only public authoritative data
         const [cohortsRes, coursesRes] = await Promise.all([
-          cohortService.getCohorts({ status: 'OPEN' }, { signal: abortController.signal }),
+          cohortService.getCohorts({ public_all: 'true' }, { signal: abortController.signal }),
           courseService.getCourses({ signal: abortController.signal })
         ]);
 
@@ -27,12 +27,8 @@ export const useLandingData = () => {
         const cohortsList = Array.isArray(cohortsRes) ? cohortsRes : cohortsRes.results || [];
         const coursesList = Array.isArray(coursesRes) ? coursesRes : coursesRes.results || [];
 
-        // Filter active cohorts
-        const now = new Date();
-        const activeCohorts = cohortsList.filter(c => !c.application_end_date || new Date(c.application_end_date) > now);
-
         setData({
-          cohorts: activeCohorts,
+          cohorts: cohortsList,
           courses: coursesList,
           loading: false,
           error: null

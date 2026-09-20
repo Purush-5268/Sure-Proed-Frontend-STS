@@ -44,7 +44,12 @@ const OpenCohorts = ({ cohorts: propCohorts, loading: propLoading }) => {
     };
   }, [hasProps]);
 
-  const cohorts = hasProps ? propCohorts : fetchedCohorts;
+  // strictly only show OPEN cohorts for applications
+  const filteredPropCohorts = hasProps 
+    ? propCohorts.filter(c => c.status === 'OPEN')
+    : [];
+
+  const cohorts = hasProps ? filteredPropCohorts : fetchedCohorts;
   const loading = hasProps ? propLoading : isFetching;
 
   const handleApplyClick = (cohort) => {

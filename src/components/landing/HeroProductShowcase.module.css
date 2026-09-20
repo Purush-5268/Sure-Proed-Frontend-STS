@@ -730,16 +730,27 @@
 .liveSessionBody h3 {
   font-size: 1.4rem;
   margin: 0 0 8px;
+  color: white;
 }
 
 .liveSessionBody p {
-  color: #94a3b8;
+  color: #cbd5e1;
   margin: 0 0 24px;
 }
 
 .liveSessionAction {
   display: flex;
   gap: 12px;
+}
+
+.liveSessionAction .secondaryBtn {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.liveSessionAction .secondaryBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .upcomingItem {
@@ -984,23 +995,29 @@
   display: flex;
   background: white;
   border-radius: 16px;
-  overflow: hidden;
+  padding: 20px;
+  align-items: center;
   border: 1px solid #f1f5f9;
 }
 
 .courseImagePlaceholder {
-  width: 200px;
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
   background: linear-gradient(135deg, #a855f7, #6366f1);
 }
 
 .courseImageWrapper {
-  width: 180px;
+  width: 140px;
+  height: 140px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #f8fafc;
+  border-radius: 16px;
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .courseImage {
@@ -1010,7 +1027,7 @@
 }
 
 .courseDetails {
-  padding: 24px;
+  padding-left: 24px;
   flex: 1;
 }
 
@@ -1127,4 +1144,51 @@
   .handwrittenArrow {
     display: none;
   }
+}
+.primaryBtn {
+  background: #6366f1;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.primaryBtn:hover {
+  background: #4f46e5;
+  transform: translateY(-1px);
+}
+.secondaryBtn {
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.secondaryBtn:hover {
+  background: rgba(99, 102, 241, 0.2);
+  transform: translateY(-1px);
+}
+.textBtn {
+  background: transparent;
+  color: #6366f1;
+  border: none;
+  padding: 8px 0;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.textBtn:hover {
+  color: #4f46e5;
+  text-decoration: underline;
 }

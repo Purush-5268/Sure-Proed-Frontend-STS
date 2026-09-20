@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import HeroProductShowcase from "./HeroProductShowcase";
 import { FaUserTie, FaLaptopCode, FaBriefcase } from "react-icons/fa";
 
-function Hero({ cohorts, loading }) {
+function Hero({ cohorts, courses, loading }) {
   const { isAuthenticated, user } = useAuth();
 
   const getDashboardPath = () => {
@@ -85,7 +85,7 @@ function Hero({ cohorts, loading }) {
         </div>
 
         <div className={styles.right}>
-          <HeroProductShowcase cohorts={cohorts} loading={loading} />
+          <HeroProductShowcase cohorts={cohorts} courses={courses} loading={loading} />
         </div>
       </div>
       
