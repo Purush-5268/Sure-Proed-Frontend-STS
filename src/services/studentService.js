@@ -21,6 +21,7 @@ const normalizeProfile = (profile = {}) => {
   if (typeof window !== "undefined" && window.location.protocol === "https:") {
     // Only force https if the frontend itself is hosted on https (to avoid mixed content)
     if (photoUrl && photoUrl.startsWith("http:")) photoUrl = photoUrl.replace("http:", "https:");
+    if (bannerUrl && bannerUrl.startsWith("http:")) bannerUrl = bannerUrl.replace("http:", "https:");
     if (resumeUrl && resumeUrl.startsWith("http:")) resumeUrl = resumeUrl.replace("http:", "https:");
   }
 
@@ -84,7 +85,9 @@ export const isProfileComplete = (profile = {}) => {
     normalized.college &&
     normalized.degree &&
     normalized.specialization &&
-    normalized.graduation_year
+    normalized.graduation_year &&
+    (normalized.is_linkedin_connected || normalized.linkedin_url) &&
+    normalized.github_username
   );
 };
 
@@ -354,17 +357,17 @@ export const studentService = {
         }
       });
 
-      // JSON Fields (must be sent as valid JSON strings in multipart)
+      // JSON Fields (must be sent as comma-separated strings to match backend to_internal_value)
       const jsonFields = ["skills", "hobbies", "languages"];
       jsonFields.forEach(field => {
         if (updated[field] !== undefined) {
           const val = updated[field];
-          if (typeof val === "string") {
-             // Split by comma into array to match Django's default=list
-             const arr = val.split(',').map(s => s.trim()).filter(Boolean);
-             formData.append(field, JSON.stringify(arr));
+          if (Array.isArray(val)) {
+            formData.append(field, val.join(", "));
+          } else if (typeof val === "string") {
+            formData.append(field, val);
           } else {
-             formData.append(field, JSON.stringify(val || []));
+            formData.append(field, "");
           }
         }
       });
