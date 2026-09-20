@@ -12,6 +12,11 @@
   text-align: center;
 }
 
+:global([data-theme="dark"]) .header {
+  background: linear-gradient(135deg, #3b0764 0%, #0f172a 100%);
+  border: 1px solid var(--border-color);
+}
+
 .header h1 {
   font-size: 2.5rem;
   font-weight: 900;
@@ -20,10 +25,18 @@
   letter-spacing: -0.02em;
 }
 
+:global([data-theme="dark"]) .header h1 {
+  color: #e879f9;
+}
+
 .header p {
   color: #5b21b6;
   font-size: 1.15rem;
   font-weight: 500;
+}
+
+:global([data-theme="dark"]) .header p {
+  color: #c084fc;
 }
 
 .statsGrid {
@@ -32,7 +45,7 @@
   gap: 1.5rem;
 }
 
-.statCardAlerts, .statCardSchedule, .statCardAttendance, .statCardUsers {
+.statCardAlerts, .statCardSchedule, .statCardAttendance, .statCardUsers, .statCardCohorts {
   background: var(--bg-surface);
   border-radius: var(--radius-2xl);
   padding: 1.5rem;
@@ -72,7 +85,7 @@
   box-shadow: var(--shadow-md);
 }
 
-.iconAlerts, .iconSchedule, .iconAttendance, .iconUsers {
+.iconAlerts, .iconSchedule, .iconAttendance, .iconUsers, .iconCohorts {
   width: 48px;
   height: 48px;
   border-radius: var(--radius-md);
@@ -88,8 +101,9 @@
 .iconSchedule { background: #ccfbf1; color: #0d9488; }
 .iconAttendance { background: #dbeafe; color: #2563eb; }
 .iconUsers { background: #ffe4e6; color: #e11d48; }
+.iconCohorts { background: #fef9c3; color: #ca8a04; }
 
-.statCardAlerts h3, .statCardSchedule h3, .statCardAttendance h3, .statCardUsers h3 {
+.statCardAlerts h3, .statCardSchedule h3, .statCardAttendance h3, .statCardUsers h3, .statCardCohorts h3 {
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -98,7 +112,7 @@
   z-index: 10;
 }
 
-.statCardAlerts p, .statCardSchedule p, .statCardAttendance p, .statCardUsers p {
+.statCardAlerts p, .statCardSchedule p, .statCardAttendance p, .statCardUsers p, .statCardCohorts p {
   color: var(--text-secondary);
   font-size: 0.875rem;
   margin: 0;

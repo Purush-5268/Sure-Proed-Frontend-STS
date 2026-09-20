@@ -132,19 +132,50 @@ function Attendance() {
   const getSessionStatusInfo = (session) => {
     const data = session.student_dashboard_data || {};
     const attStatus = data.attendance_status;
-    const discStatus = data.discipline_status;
     const suspStatus = data.suspension_status;
     
-    if (attStatus === "NOT_READY") return { label: "Pending", code: "pending", color: "var(--status-pending)" };
-    if (session.class_status === "CANCELLED") return { label: "Cancelled", code: "cancelled", color: "var(--status-absent)" };
-    if (attStatus === "PRESENT") return { label: "Present", code: "present", color: "var(--status-present)" };
+    if (attStatus === "NOT_READY") return { label: "Pending", code: "pending", color: "var(--status-pending)", accessMessage: null, accessIcon: "" };
+    if (session.class_status === "CANCELLED") return { label: "Cancelled", code: "cancelled", color: "var(--status-absent)", accessMessage: null, accessIcon: "" };
     
-    if (attStatus === "ABSENT") {
-      if (suspStatus === "SUSPENDED") return { label: "Suspended", code: "suspended", color: "var(--status-suspended)" };
-      if (discStatus === "RESOLVED_BY_PRIOR_PERMISSION") return { label: "Excused", code: "excused", color: "var(--status-excused)" };
-      return { label: "Absent", code: "absent", color: "var(--status-absent)" };
+    let accessMessage = null; // null means don't show the Account Access block
+    let accessIcon = "";
+    
+    if (suspStatus === "SUSPENDED") {
+      accessMessage = "Suspended due to attendance below the required threshold.";
+      accessIcon = "🔴";
+    } else if (suspStatus === "SUSPENSION_REVOKED_PRIOR_PERMISSION") {
+      accessMessage = "Suspension revoked due to Prior Permission.";
+      accessIcon = "🟢";
+    } else if (suspStatus === "NO_SUSPENSION_PRIOR_PERMISSION") {
+      accessMessage = "No suspension applied — Prior Permission was granted.";
+      accessIcon = "🟢";
     }
-    return { label: "Pending", code: "pending", color: "var(--status-pending)" };
+
+    let color = "var(--status-present)";
+    let label = "Present";
+    let code = "present";
+
+    if (attStatus === "ABSENT") {
+      if (suspStatus === "SUSPENDED") {
+        label = "Suspended";
+        code = "suspended";
+        color = "var(--status-suspended)";
+      } else if (suspStatus === "SUSPENSION_REVOKED_PRIOR_PERMISSION" || suspStatus === "NO_SUSPENSION_PRIOR_PERMISSION") {
+        label = "Prior Permission";
+        code = "excused";
+        color = "var(--status-excused)";
+      } else {
+        label = "Absent";
+        code = "absent";
+        color = "var(--status-absent)";
+      }
+    } else if (attStatus !== "PRESENT") {
+        label = "Pending";
+        code = "pending";
+        color = "var(--status-pending)";
+    }
+    
+    return { label, code, color, accessMessage, accessIcon };
   };
 
   const renderCalendarDays = () => {
@@ -400,7 +431,7 @@ function Attendance() {
                             <div className={styles.metaProgress}>
                               <CircularProgress 
                                 percentage={data.attendance_percentage.toFixed(0)} 
-                                color="var(--status-present)" 
+                                color={statusInfo.color} 
                                 size={60} 
                                 strokeWidth={5} 
                               />
@@ -419,22 +450,25 @@ function Attendance() {
                          <div className={styles.cardFooterError}>
                            <FiInfo /> This session was cancelled by the training team. It is not counted in your attendance.
                          </div>
-                      ) : (
+                      ) : statusInfo.accessMessage ? (
+                         <div className={statusInfo.accessIcon === '🔴' ? styles.cardFooterError : styles.cardFooterSuccess} style={statusInfo.accessIcon === '🟢' ? { color: 'var(--status-excused)' } : {}}>
+                           <FiInfo /> {statusInfo.accessMessage}
+                         </div>
+                      ) : statusInfo.code === 'present' ? (
                          <div className={styles.cardFooterSuccess}>
                            “ Great consistency! Keep it up!
                          </div>
+                      ) : statusInfo.code === 'absent' ? (
+                         <div className={styles.cardFooterError}>
+                           <FiInfo /> You missed this session. Please maintain your attendance to avoid account suspension.
+                         </div>
+                      ) : (
+                         <div className={styles.cardFooterSuccess} style={{ opacity: 0.7 }}>
+                           <FiInfo /> Attendance for this session is pending.
+                         </div>
                       )}
 
-                      {data.discipline_status === "RESOLVED_BY_PRIOR_PERMISSION" && (
-                        <div className={styles.permissionSection}>
-                          <h4>Prior Permission Granted</h4>
-                          <p>
-                            {Array.isArray(session.prior_permissions) && profile?.id ? 
-                               (session.prior_permissions.find(p => p.student_id === profile.id)?.reason || "You have been excused from this session.") 
-                               : "You have been excused from this session."}
-                          </p>
-                        </div>
-                      )}
+                      {/* Prior permission is now handled in the Account Access footer */}
                     </div>
                   );
                 }))}

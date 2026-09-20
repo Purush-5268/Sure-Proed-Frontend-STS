@@ -4,7 +4,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import Card from "../../components/ui/Card";
 import EmptyState from "../../components/ui/EmptyState";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
-import { mentorAssignmentService } from "../../services/mentorAssignmentService";
+
 import { courseService } from "../../services/courseService";
 import styles from "./MentorAssignments.module.css";
 import { FiUsers, FiClock, FiSearch } from "react-icons/fi";
@@ -25,8 +25,7 @@ const MentorAssignments = () => {
       const coursesRes = await courseService.getCourses();
       setCourses(coursesRes.results || coursesRes || []);
       
-      // We call our mock service to ensure it doesn't crash
-      await mentorAssignmentService.getAssignments();
+
     } catch (error) {
       console.error("Error fetching assignments data:", error);
     } finally {

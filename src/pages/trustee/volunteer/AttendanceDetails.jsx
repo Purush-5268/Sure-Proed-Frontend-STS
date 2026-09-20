@@ -87,7 +87,7 @@ function AttendanceDetails() {
     }
   };
 
-  const fetchSessionDetails = async () => {
+  const fetchSessionDetails = async (forceRefresh = false) => {
     if (!sessionId) {
       setLoading(false);
       return;
@@ -95,7 +95,7 @@ function AttendanceDetails() {
     try {
       const [baseResponse, officialResponse] = await Promise.all([
         apiClient.get(`${API_ENDPOINTS.ATTENDANCE.BASE}${sessionId}/`),
-        apiClient.get(`${API_ENDPOINTS.ATTENDANCE.BASE}${sessionId}/official-attendance/`).catch(err => {
+        apiClient.get(`${API_ENDPOINTS.ATTENDANCE.BASE}${sessionId}/official-attendance/${forceRefresh ? '?force_refresh=true' : ''}`).catch(err => {
           console.warn("Could not fetch official attendance:", err);
           return { data: null };
         })
@@ -269,7 +269,29 @@ function AttendanceDetails() {
 
         {/* 🚨 OFFICIAL ATTENDANCE ROSTER */}
         <div style={{ marginTop: '40px' }}>
-          <h2 style={{ fontSize: '18px', marginBottom: '16px', color: 'var(--text-primary)' }}>Official Attendance Roster</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h2 style={{ fontSize: '18px', margin: 0, color: 'var(--text-primary)' }}>Official Attendance Roster</h2>
+            <button 
+              onClick={() => {
+                const btn = document.getElementById('sync-identities-btn-vol');
+                if (btn) btn.innerText = "Syncing...";
+                fetchSessionDetails(true).then(() => {
+                  if (btn) btn.innerText = "↻ Sync Identities";
+                });
+              }}
+              id="sync-identities-btn-vol"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                background: 'var(--bg-secondary)', border: '1px solid var(--border-color)',
+                padding: '6px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '500',
+                color: 'var(--text-primary)', cursor: 'pointer', transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'}
+              onMouseOut={(e) => e.currentTarget.style.background = 'var(--bg-secondary)'}
+            >
+              ↻ Sync Identities
+            </button>
+          </div>
           <div className="premium-table-container">
             <table className="premium-table">
               <thead>

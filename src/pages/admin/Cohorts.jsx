@@ -15,6 +15,10 @@ function Cohorts() {
   const [publishCohortId, setPublishCohortId] = useState(null);
   const [publishDate, setPublishDate] = useState("");
 
+  // Delete Modal State
+  const [deleteModalState, setDeleteModalState] = useState({ isOpen: false, cohort: null, input: "" });
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handlePublish = async (id) => {
     if (!publishDate) return alert("Please select an end date for applications.");
     try {
@@ -36,6 +40,30 @@ function Cohorts() {
       setCohorts(prev => prev.map(c => c.id === id ? { ...c, status: "CLOSED" } : c));
     } catch (err) {
       alert("❌ Failed to stop applications.");
+    }
+  };
+
+  const handleDeleteClick = (cohort) => {
+    setDeleteModalState({ isOpen: true, cohort, input: "" });
+  };
+
+  const executeDelete = async (e) => {
+    e.preventDefault();
+    const { cohort } = deleteModalState;
+    if (!cohort) return;
+
+    setIsDeleting(true);
+    try {
+      await apiClient.delete(`${API_ENDPOINTS.COHORTS.BASE}${cohort.id}/`, {
+        data: { confirmation: deleteModalState.input }
+      });
+      setCohorts(prev => prev.filter(c => c.id !== cohort.id));
+      alert("✅ Cohort deleted successfully!");
+      setDeleteModalState({ isOpen: false, cohort: null, input: "" });
+    } catch (err) {
+      alert(err.response?.data?.error || "❌ Failed to delete cohort. It might have active dependencies.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -95,6 +123,12 @@ function Cohorts() {
     if (!courseId) return "N/A";
     const course = courses.find(c => c.id === courseId);
     return course ? (course.name || course.title) : courseId; // Fallback to ID if not found
+  };
+
+  const getCourseCode = (courseId) => {
+    if (!courseId) return "";
+    const course = courses.find(c => c.id === courseId);
+    return course ? (course.code || "") : "";
   };
 
   const filteredCohorts = cohorts.filter((c) => {
@@ -219,8 +253,9 @@ function Cohorts() {
                   <div className={styles.actions} style={{ display: "flex", flexWrap: "wrap", gap: "8px", width: "100%" }}>
                     <Link to={`/admin/cohort-details/${cohort.id}`} className={styles.viewBtn} style={{ flex: 1, textAlign: "center" }}>View</Link>
                     <Link to={`/admin/edit-cohort/${cohort.id}`} className={styles.editBtn} style={{ flex: 1, textAlign: "center" }}>Edit</Link>
+                    <button onClick={() => handleDeleteClick(cohort)} className={styles.deleteBtn} style={{ flex: 1, textAlign: "center" }}>Delete</button>
                     
-                    {cohort.status !== "OPEN" && cohort.status !== "ACTIVE" ? (
+                    {cohort.status === "DRAFT" && (
                       <div className={styles.statusControls} style={{ display: "flex", flexWrap: "wrap", gap: "8px", width: "100%" }}>
                         {publishCohortId === cohort.id ? (
                           <>
@@ -238,7 +273,8 @@ function Cohorts() {
                           <button onClick={() => setPublishCohortId(cohort.id)} className={styles.publishBtn} style={{ flex: "1 1 100%" }}>Publish</button>
                         )}
                       </div>
-                    ) : (
+                    )}
+                    {(cohort.status === "OPEN" || cohort.status === "ACTIVE") && (
                       <button onClick={() => handleStop(cohort.id)} className={styles.stopBtn} style={{ flex: "1 1 100%" }}>Stop Applications</button>
                     )}
                   </div>
@@ -248,6 +284,73 @@ function Cohorts() {
           </AnimatePresence>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModalState.isOpen && deleteModalState.cohort && (() => {
+        const cohort = deleteModalState.cohort;
+        const courseCode = cohort.course_details?.code || getCourseCode(cohort.course);
+        const expectedPhrase = `DELETE ${cohort.code || ""} ${courseCode}`.trim();
+        const isMatch = deleteModalState.input.trim() === expectedPhrase;
+
+        return (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 999999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '20px'
+          }}>
+            <div className="premium-card" style={{ width: '450px', maxWidth: '100%', padding: '32px', backgroundColor: 'var(--bg-main)', position: 'relative' }}>
+              <h2 style={{ marginTop: 0, color: '#ef4444', marginBottom: '16px', fontSize: '22px' }}>Delete Cohort</h2>
+              
+              <div style={{ padding: '16px', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderLeft: '4px solid #ef4444', borderRadius: '4px', marginBottom: '24px' }}>
+                <p style={{ margin: 0, color: 'var(--text-primary)', fontSize: '14px', lineHeight: '1.5' }}>
+                  You are about to permanently delete <strong>{cohort.name || cohort.code}</strong>.
+                  This action is destructive and cannot be undone.
+                </p>
+              </div>
+
+              <form onSubmit={executeDelete}>
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: 'var(--text-secondary)' }}>
+                    To confirm, type <strong>{expectedPhrase}</strong> below:
+                  </label>
+                  <input 
+                    type="text" 
+                    value={deleteModalState.input}
+                    onChange={(e) => setDeleteModalState({ ...deleteModalState, input: e.target.value })}
+                    className="premium-input" 
+                    placeholder={expectedPhrase}
+                    style={{ width: '100%', fontFamily: 'monospace', fontSize: '14px' }}
+                    autoComplete="off"
+                  />
+                </div>
+                
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => setDeleteModalState({ isOpen: false, cohort: null, input: "" })} 
+                    className="premium-btn premium-btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    disabled={!isMatch || isDeleting} 
+                    className="premium-btn" 
+                    style={{ 
+                      background: isMatch ? '#ef4444' : 'var(--bg-disabled)', 
+                      color: isMatch ? '#fff' : 'var(--text-disabled)',
+                      cursor: isMatch ? 'pointer' : 'not-allowed'
+                    }}
+                  >
+                    {isDeleting ? 'Deleting...' : 'Confirm Delete'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { FiArrowLeft, FiShield } from "react-icons/fi";
+import { FiArrowLeft, FiShield, FiCheck } from "react-icons/fi";
 import apiClient, { normalizeListResponse } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
@@ -13,6 +13,11 @@ function TrusteeDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [cohorts, setCohorts] = useState([]);
+  const [selectedCohorts, setSelectedCohorts] = useState(new Set());
+  const [savingCohorts, setSavingCohorts] = useState(false);
+
+
   useEffect(() => {
     let isMounted = true;
 
@@ -20,14 +25,29 @@ function TrusteeDetails() {
       try {
         setLoading(true);
 
+       
         // Fetch User object
-        const userRes = await apiClient.get(API_ENDPOINTS.USERS.BY_ID(id));
+        const [userRes, assignRes] = await Promise.all([
+          apiClient.get(API_ENDPOINTS.USERS.BY_ID(id)),
+          apiClient.get(`/api/users/${id}/assign-cohorts/`).catch(() => ({ data: [] }))
+        ]);
         const userData = userRes.data;
+        const allCohorts = assignRes.data;
+        
+        const userCohortIds = new Set();
+        allCohorts.forEach(c => {
+          if (c.assigned_to_current_volunteer) {
+            userCohortIds.add(c.id);
+          }
+        });
 
         if (isMounted) {
           setUser(userData);
           setProfile(null);
+          setCohorts(allCohorts);
+          setSelectedCohorts(userCohortIds);
         }
+
       } catch (err) {
         console.error("Failed to fetch trustee details:", err);
         if (isMounted) {
@@ -46,6 +66,28 @@ function TrusteeDetails() {
       isMounted = false;
     };
   }, [id]);
+
+  
+  const handleToggleCohort = (cohortId) => {
+    const next = new Set(selectedCohorts);
+    if (next.has(cohortId)) next.delete(cohortId);
+    else next.add(cohortId);
+    setSelectedCohorts(next);
+  };
+
+  const handleSaveCohorts = async () => {
+    setSavingCohorts(true);
+    try {
+      await apiClient.post(`/api/users/${id}/assign-cohorts/`, {
+        cohort_ids: Array.from(selectedCohorts)
+      });
+      alert("Cohort assignments updated successfully!");
+    } catch (err) {
+      alert("Failed to assign cohorts: " + (err.response?.data?.detail || err.message));
+    } finally {
+      setSavingCohorts(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -138,9 +180,105 @@ function TrusteeDetails() {
             </div>
           </div>
         </div>
+        
+        <div style={{ marginTop: "32px" }}>
+          <h3 style={{ fontSize: "16px", color: "var(--text-primary)", marginBottom: "16px", borderBottom: "1px solid var(--border-color)", paddingBottom: "12px" }}>Assigned Cohorts</h3>
+          {user?.role === "VOLUNTEER" || user?.role === "TRUSTEE" ? (
+            <>
+              {(() => {
+                const grouped = cohorts.reduce((acc, c) => {
+                  const cat = (c.category || "OTHER").toUpperCase();
+                  if (!acc[cat]) acc[cat] = [];
+                  acc[cat].push(c);
+                  return acc;
+                }, {});
+
+                return Object.entries(grouped).map(([category, catCohorts]) => (
+                  <div key={category} style={{ marginBottom: "24px" }}>
+                    <h4 style={{ fontSize: "14px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "12px" }}>
+                      {category} - COHORTS
+                    </h4>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "12px" }}>
+                      {catCohorts.map(c => (
+                        <label key={c.id} style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "12px", background: "var(--bg-nested)", border: "1px solid var(--border-color)", borderRadius: "8px", cursor: "pointer" }}>
+                          <input 
+                            type="checkbox" 
+                            checked={selectedCohorts.has(c.id)}
+                            onChange={() => handleToggleCohort(c.id)}
+                            style={{ marginTop: "4px" }}
+                          />
+                          <div>
+                            <div style={{ fontWeight: "600", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "8px" }}>
+                              {c.name || c.code}
+                              {selectedCohorts.has(c.id) && (
+                                <span style={{ fontSize: "10px", backgroundColor: "#d1fae5", color: "#059669", padding: "2px 6px", borderRadius: "4px", fontWeight: "bold" }}>
+                                  Assigned
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{c.course_name}</div>
+                            {c.all_assigned_volunteers && c.all_assigned_volunteers.length > 0 && (
+                              <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }}>
+                                <strong>Assigned to:</strong> {c.all_assigned_volunteers.join(", ")}
+                              </div>
+                            )}
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ));
+              })()}
+              <button 
+                onClick={handleSaveCohorts}
+                disabled={savingCohorts}
+                className="premium-btn premium-btn-primary"
+              >
+                {savingCohorts ? "Saving..." : "Save Cohort Assignments"}
+              </button>
+            </>
+          ) : (
+            <p style={{ color: "var(--text-secondary)" }}>Cohort assignment is only available for Volunteers and Trustees.</p>
+          )}
+        </div>
+        
+        {/* Danger Zone */}
+        {user?.role === "VOLUNTEER" && (
+          <div style={{ marginTop: "40px", padding: "20px", border: "1px solid #ef4444", borderRadius: "12px", background: "rgba(239, 68, 68, 0.05)" }}>
+            <h3 style={{ fontSize: "16px", color: "#ef4444", marginBottom: "8px" }}>Volunteer Access</h3>
+            <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginBottom: "16px" }}>
+              This account currently has Volunteer permissions.
+            </p>
+            <button 
+              onClick={async () => {
+                const confirmed = window.confirm(
+                  "Are you sure you want to remove Volunteer access?\n\n" +
+                  "The Volunteer access will be revoked, but the person's Student account, profiles, and existing historical data are preserved.\n\n" +
+                  "They will return to normal Student access."
+                );
+                if (confirmed) {
+                  try {
+                    await apiClient.post(`/api/users/${id}/revoke-volunteer/`);
+                    alert("Volunteer access removed successfully.");
+                    window.location.reload();
+                  } catch (err) {
+                    alert("Failed to remove access: " + (err.response?.data?.detail || err.message));
+                  }
+                }
+              }}
+              className="premium-btn" 
+              style={{ background: "#ef4444", color: "white", border: "none" }}
+            >
+              Remove Volunteer Access
+            </button>
+          </div>
+        )}
+
       </div>
     </div>
   );
+
 }
 
 export default TrusteeDetails;
+

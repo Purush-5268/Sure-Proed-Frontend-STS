@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { courseService } from "../../services/courseService";
 import { applicationService } from "../../services/applicationService";
 import styles from "./CourseDetails.module.css";
+import apiClient from "../../services/apiClient";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function CourseDetails() {
@@ -13,6 +14,9 @@ function CourseDetails() {
   const [hasApplied, setHasApplied] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
   const [applyError, setApplyError] = useState("");
+  const [openCohorts, setOpenCohorts] = useState([]);
+  const [selectedCohort, setSelectedCohort] = useState("");
+  const [cohortsLoading, setCohortsLoading] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -45,6 +49,23 @@ function CourseDetails() {
         if (isMounted) setCourse(null);
       } finally {
         if (isMounted) setLoading(false);
+      }
+
+      // Fetch open cohorts for this course
+      try {
+        setCohortsLoading(true);
+        const cohortsRes = await apiClient.get('/api/cohorts/', { params: { course: id, status: 'OPEN' } });
+        if (isMounted) {
+           const cohortsData = Array.isArray(cohortsRes.data) ? cohortsRes.data : (cohortsRes.data?.results || []);
+           setOpenCohorts(cohortsData);
+           if (cohortsData.length === 1) {
+               setSelectedCohort(cohortsData[0].id);
+           }
+        }
+      } catch (err) {
+        console.error("Failed to load cohorts:", err);
+      } finally {
+        if (isMounted) setCohortsLoading(false);
       }
 
       // Fetch applications independently so failure doesn't block course rendering
@@ -132,7 +153,34 @@ function CourseDetails() {
               </ul>
             </div>
             
+            
+            {openCohorts.length > 0 && !hasApplied && (
+              <div className={styles.section} style={{ marginTop: '24px', padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <h3 style={{ margin: '0 0 12px 0' }}>Select a Cohort</h3>
+                {openCohorts.length > 1 ? (
+                  <select 
+                    value={selectedCohort}
+                    onChange={(e) => setSelectedCohort(e.target.value)}
+                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '15px' }}
+                  >
+                    <option value="">-- Choose a Cohort --</option>
+                    {openCohorts.map(c => (
+                      <option key={c.id} value={c.id}>{c.name || c.code} (Starts: {c.start_date || 'TBD'})</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--primary-color)' }}>
+                      <input type="radio" checked readOnly />
+                      <span><strong>{openCohorts[0].name || openCohorts[0].code}</strong> (Starts: {openCohorts[0].start_date || 'TBD'})</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
             {applyError && (
+
               <div style={{ color: 'var(--danger-color)', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '12px', borderRadius: '6px', marginBottom: '16px' }}>
                 {applyError}
               </div>
@@ -168,7 +216,12 @@ function CourseDetails() {
               setIsApplying(true);
               setApplyError("");
               try {
-                await applicationService.createApplication({ course_id: id });
+                if (!selectedCohort) {
+                  setApplyError("Please select a cohort before applying.");
+                  setIsApplying(false);
+                  return;
+                }
+                await applicationService.createApplication({ course_id: id, assigned_cohort: selectedCohort });
                 setHasApplied(true);
                 navigate("/student/application-success");
               } catch (err) {

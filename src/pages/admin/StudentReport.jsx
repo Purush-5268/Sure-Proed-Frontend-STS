@@ -19,7 +19,7 @@ function StudentReport() {
         </Link>
       </div>
 
-      <div className="premium-grid-2">
+      <div className="responsive-grid">
 
         <div className="premium-card">
           <h2 className="premium-subtitle">Total Students</h2>

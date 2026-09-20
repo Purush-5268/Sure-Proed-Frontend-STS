@@ -92,7 +92,7 @@ function AddTrustee() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="premium-grid-2">
+        <form onSubmit={handleSubmit} className="responsive-grid">
           {/* User Fields */}
           <div className="premium-form-group">
             <label className="premium-label">First Name *</label>

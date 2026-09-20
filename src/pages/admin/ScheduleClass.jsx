@@ -504,7 +504,7 @@ function ScheduleClass() {
             )}
 
             <form onSubmit={handleSetupAutomation}>
-              <div className="premium-grid-2" style={{ marginBottom: '1rem' }}>
+              <div className="responsive-grid" style={{ marginBottom: '1rem' }}>
                 <div>
                   <label className="premium-label">First Sunday Date *</label>
                   <input type="date" value={automationForm.firstSunday} onChange={e => setAutomationForm({...automationForm, firstSunday: e.target.value})} required className="premium-input" />
@@ -517,7 +517,7 @@ function ScheduleClass() {
                   </select>
                 </div>
               </div>
-              <div className="premium-grid-2" style={{ marginBottom: '1.5rem' }}>
+              <div className="responsive-grid" style={{ marginBottom: '1.5rem' }}>
                 <div>
                   <label className="premium-label">Start Time *</label>
                   <TimePicker value={automationForm.startTime} onChange={e => setAutomationForm({...automationForm, startTime: e.target.value})} required className="premium-input" />
@@ -552,7 +552,7 @@ function ScheduleClass() {
           </div>
 
           {request.sessionType === "Domain" && (
-            <div className={`premium-section premium-grid-2 ${styles.animatedField}`}>
+            <div className={`premium-section responsive-grid ${styles.animatedField}`}>
               <div>
                 <label className="premium-label">Select Stream *</label>
                 <select value={request.streamId} onChange={(e) => setRequest({ ...request, streamId: e.target.value })} required className={`premium-input ${styles.formInput}`}>
@@ -581,7 +581,7 @@ function ScheduleClass() {
 
           {["LST", "Soft Skills", "Celebration", "Universal"].includes(request.sessionType) && (
             <div className={`premium-section ${styles.animatedField}`}>
-              <div className="premium-grid-2">
+              <div className="responsive-grid">
                 {request.sessionType === "LST" && (
                   <div>
                     <label className="premium-label">LST Batch Number *</label>
@@ -694,7 +694,7 @@ function ScheduleClass() {
             <input type="date" value={request.classDate} onChange={(e) => setRequest({ ...request, classDate: e.target.value })} required className="premium-input" style={{ width: "100%" }} />
           </div>
 
-          <div className="premium-grid-2">
+          <div className="responsive-grid">
             <div>
               <label className="premium-label">Start Time *</label>
               <TimePicker value={request.startTime} onChange={(e) => setRequest({ ...request, startTime: e.target.value })} required className="premium-input" />

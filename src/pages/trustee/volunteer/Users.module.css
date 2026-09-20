@@ -201,6 +201,7 @@
 
 /* Action Buttons */
 .actions {
+  flex-wrap: wrap;
   display: flex;
   gap: 8px;
   align-items: center;

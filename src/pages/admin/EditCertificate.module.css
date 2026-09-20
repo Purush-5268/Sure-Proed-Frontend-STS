@@ -41,12 +41,16 @@
 }
 
 .form {
+  min-width: 0;
+  width: 100%;
   display: grid;
-  grid-template-columns: repeat(2,1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   gap: 20px;
 }
 
 .group {
+  min-width: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -61,6 +65,10 @@
 .group input,
 .group select,
 .full textarea {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
   padding: 12px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -71,17 +79,23 @@
 .group input:focus,
 .group select:focus,
 .full textarea:focus {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
   border-color: #2563eb;
 }
 
 .full {
-  grid-column: 1 / 3;
+  min-width: 0;
+  width: 100%;
+  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
 }
 
 button {
-  grid-column: 1 / 3;
+  grid-column: 1 / -1;
   padding: 14px;
   background: #2563eb;
   color: white;

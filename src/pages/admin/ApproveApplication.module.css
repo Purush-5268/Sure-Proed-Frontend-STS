@@ -58,6 +58,7 @@ textarea:focus {
 }
 
 .buttons {
+  flex-wrap: wrap;
   display: flex;
   justify-content: flex-end;
 }

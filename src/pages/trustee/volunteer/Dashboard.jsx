@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { FaChartLine } from "react-icons/fa";
 import { attendanceService } from "../../../services/attendanceService";
 import { useAuth } from "../../../context/AuthContext";
 import { normalizeListResponse } from "../../../services/apiClient";
@@ -95,6 +96,12 @@ function VolunteerDashboard() {
       </div>
 
       <div className={styles.statsGrid}>
+        <Link to="/trustee/volunteer/cohorts" className={styles.statCardCohorts}>
+          <div className={styles.iconCohorts}>📚</div>
+          <h3>Assigned Cohorts</h3>
+          <p>View and manage the specific cohorts you are assigned to.</p>
+        </Link>
+
         <Link to="/trustee/volunteer/alerts" className={styles.statCardAlerts}>
           <div className={styles.iconAlerts}>⚠️</div>
           <h3>System Alerts</h3>
@@ -178,6 +185,11 @@ function VolunteerDashboard() {
                             >
                               ➕ Add Guest
                             </button>
+                            <Link to="/trustee/volunteer/schedule">
+                              <button className={styles.btnOutlineTeal} style={{ color: 'var(--accent-color)', borderColor: 'var(--accent-color)' }}>
+                                🛡️ Permissions
+                              </button>
+                            </Link>
                             <button
                               className={styles.btnOutlineTeal}
                               onClick={() => handleSpectate(session)}

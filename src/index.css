@@ -684,6 +684,9 @@ p {
 
 .premium-input {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   min-height: var(--input-height);
   height: auto;
   padding: var(--space-sm) var(--space-md);
@@ -693,13 +696,19 @@ p {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
-  box-sizing: border-box;
   line-height: 1.4;
 }
 
 select.premium-input {
   appearance: auto;
   white-space: normal;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+textarea.premium-input {
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 input[type="datetime-local"].premium-input::-webkit-datetime-edit,
@@ -713,8 +722,6 @@ input[type="date"].premium-input,
 input[type="time"].premium-input {
   color-scheme: var(--native-color-scheme, light);
 }
-
-
 
 .premium-input:focus {
   outline: none;
@@ -999,6 +1006,18 @@ input[type="time"].premium-input {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-md);
+}
+
+/* Highly responsive grid that wraps dynamically without fixed breakpoints */
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: var(--space-md);
+}
+
+/* Flex safety to prevent children from bursting bounds */
+.safe-flex-child {
+  min-width: 0;
 }
 
 .premium-btn {

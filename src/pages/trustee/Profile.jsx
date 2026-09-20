@@ -8,16 +8,15 @@ import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "../student/Profile.module.css";
 import { FiUser, FiActivity, FiBriefcase, FiMail, FiCalendar } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
+import VolunteerContributions from "./volunteer/ContributionTab";
 
 function Profile() {
   const { user, updateUser } = useAuth();
   const [activeTab, setActiveTab] = useState("personal");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [statsLoading, setStatsLoading] = useState(false);
 
   const [profileId, setProfileId] = useState(null);
-  const [statsData, setStatsData] = useState(null);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -37,7 +36,7 @@ function Profile() {
 
   const [serverPhoto, setServerPhoto] = useState(null);
   
-  const isVolunteer = user?.role === "VOLUNTEER";
+  const isVolunteer = user?.role === "VOLUNTEER" || user?.role === "TRUSTEE";
 
   useEffect(() => {
     let isMounted = true;
@@ -78,25 +77,6 @@ function Profile() {
     fetchProfile();
     return () => { isMounted = false; };
   }, [user]);
-
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchStats() {
-      if (activeTab === "contribution" && profileId && isVolunteer && !statsData) {
-        setStatsLoading(true);
-        try {
-          const res = await apiClient.get(API_ENDPOINTS.VOLUNTEER_PROFILES.STATS(profileId));
-          if (isMounted) setStatsData(res.data);
-        } catch (err) {
-          console.error("Failed to fetch volunteer stats", err);
-        } finally {
-          if (isMounted) setStatsLoading(false);
-        }
-      }
-    }
-    fetchStats();
-    return () => { isMounted = false; };
-  }, [activeTab, profileId, isVolunteer, statsData]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -308,121 +288,7 @@ function Profile() {
 
           {activeTab === "contribution" && isVolunteer && (
             <motion.div key="contribution" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-              {statsLoading ? (
-                <div style={{ padding: "40px" }}><SkeletonLoader variant="table" rows={6} /></div>
-              ) : statsData ? (
-                statsData.classes_generated === 0 ? (
-                  <div style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary)" }}>
-                    No contributions yet
-                  </div>
-                ) : (
-                <div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px", marginBottom: "24px" }}>
-                    <div style={{ background: "var(--bg-nested)", padding: "20px", borderRadius: "12px", border: "1px solid var(--border-color)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                      <span style={{ fontSize: "32px", fontWeight: "bold", color: "var(--primary-color)" }}>{statsData.classes_generated}</span>
-                      <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>Classes Generated</span>
-                    </div>
-                    <div style={{ background: "var(--bg-nested)", padding: "20px", borderRadius: "12px", border: "1px solid var(--border-color)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                      <span style={{ fontSize: "32px", fontWeight: "bold", color: "#059669" }}>{statsData.classes_completed}</span>
-                      <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>Classes Completed</span>
-                    </div>
-                    <div style={{ background: "var(--bg-nested)", padding: "20px", borderRadius: "12px", border: "1px solid var(--border-color)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                      <span style={{ fontSize: "32px", fontWeight: "bold", color: "#8b5cf6" }}>{statsData.total_completed_class_hours}</span>
-                      <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>Completed Hours</span>
-                    </div>
-                    <div style={{ background: "var(--bg-nested)", padding: "20px", borderRadius: "12px", border: "1px solid var(--border-color)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                      <span style={{ fontSize: "32px", fontWeight: "bold", color: "#f59e0b" }}>{statsData.cohort_breakdown.length}</span>
-                      <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>Cohorts Supported</span>
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", gap: "24px", marginBottom: "32px", flexWrap: "wrap" }}>
-                    {statsData.first_contribution_date && (
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-primary)" }}>
-                        <FiCalendar style={{ color: "var(--text-secondary)" }} />
-                        <span><strong>First Contribution:</strong> {statsData.first_contribution_date}</span>
-                      </div>
-                    )}
-                    {statsData.latest_contribution_date && (
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-primary)" }}>
-                        <FiCalendar style={{ color: "var(--text-secondary)" }} />
-                        <span><strong>Latest Contribution:</strong> {statsData.latest_contribution_date}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <h3 className="premium-h4" style={{ marginBottom: "16px" }}>Class Type Breakdown</h3>
-                  <div style={{ overflowX: "auto", marginBottom: "32px" }}>
-                    <table className="premium-table">
-                      <thead>
-                        <tr>
-                          <th>Class Type</th>
-                          <th>Generated</th>
-                          <th>Completed</th>
-                          <th>Cancelled</th>
-                          <th>Completed Hours</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {statsData.class_type_breakdown.map((ct) => (
-                          <tr key={ct.class_type}>
-                            <td style={{ fontWeight: "600" }}>{ct.class_type}</td>
-                            <td>{ct.generated}</td>
-                            <td>{ct.completed}</td>
-                            <td>{ct.cancelled}</td>
-                            <td>{ct.completed_hours}</td>
-                          </tr>
-                        ))}
-                        {statsData.class_type_breakdown.length === 0 && (
-                          <tr><td colSpan="5" style={{ textAlign: "center" }}>No class types recorded</td></tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <h3 className="premium-h4" style={{ marginBottom: "16px" }}>Cohort Contribution</h3>
-                  <div style={{ overflowX: "auto" }}>
-                    <table className="premium-table">
-                      <thead>
-                        <tr>
-                          <th>Cohort Name</th>
-                          <th>Course</th>
-                          <th>Generated</th>
-                          <th>Completed</th>
-                          <th>Cancelled</th>
-                          <th>Completed Hours</th>
-                          <th>Last Class Date</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {statsData.cohort_breakdown.map((ch) => (
-                          <tr key={ch.cohort_id}>
-                            <td style={{ fontWeight: "600" }}>{ch.cohort_name}</td>
-                            <td>{ch.course_name}</td>
-                            <td>{ch.classes_generated}</td>
-                            <td>{ch.classes_completed}</td>
-                            <td>{ch.classes_cancelled}</td>
-                            <td>{ch.total_completed_hours}</td>
-                            <td>{ch.last_class_date || "N/A"}</td>
-                          </tr>
-                        ))}
-                        {statsData.cohort_breakdown.length === 0 && (
-                          <tr><td colSpan="7" style={{ textAlign: "center" }}>No cohorts supported yet</td></tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-                )
-              ) : !profileId ? (
-                <div style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary)" }}>
-                  No contributions yet
-                </div>
-              ) : (
-                <div style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary)" }}>
-                  Failed to load statistics.
-                </div>
-              )}
+              <VolunteerContributions />
             </motion.div>
           )}
         </AnimatePresence>

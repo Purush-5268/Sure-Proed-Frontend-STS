@@ -70,7 +70,7 @@ function Reports() {
           <p>There is no report data to display at this time.</p>
         </div>
       ) : (
-        <div className="premium-grid-2">
+        <div className="responsive-grid">
           {reports.map((report, index) => (
             <div key={index} className="premium-card">
               <h2 className="premium-title" style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>{report.title}</h2>

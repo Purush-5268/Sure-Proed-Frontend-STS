@@ -58,6 +58,9 @@
 }
 
 .searchBox input {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
   width: 100%;
   height: var(--input-height);
   padding: 8px 14px;
@@ -71,6 +74,10 @@
 }
 
 .searchBox input:focus {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
@@ -297,5 +304,13 @@
   color: white;
 }
 .stopBtn:hover {
+  background-color: #dc2626;
+}
+
+.deleteBtn {
+  background-color: #ef4444;
+  color: white;
+}
+.deleteBtn:hover {
   background-color: #dc2626;
 }

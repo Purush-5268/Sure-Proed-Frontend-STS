@@ -25,8 +25,8 @@ function VolunteerAlerts() {
 
   const handleSendWarning = async (student) => {
     // Attempt to resolve IDs from the alert payload
-    const studentId = student.studentId || student.student_id || student.id;
-    const sessionId = student.sessionId || student.session_id;
+    const studentId = student.student_id || student.id;
+    const sessionId = student.session_id || student.session;
 
     if (!studentId) return alert("Student ID not found in alert data.");
 
@@ -39,7 +39,7 @@ function VolunteerAlerts() {
         session_id: sessionId || null, // Optional depending on backend
         note: customNote
       });
-      alert(`Warning successfully sent to ${student.name}!`);
+      alert(`Warning successfully sent to ${student.student_name}!`);
     } catch (error) {
       console.error("Failed to send warning:", error);
       alert("Failed to send warning. Please check console for errors.");
@@ -78,22 +78,22 @@ function VolunteerAlerts() {
           {flaggedStudents.map((student, idx) => (
             <div key={idx} className={styles.alertCard}>
               <div className={styles.studentInfo}>
-                <h3>{student.name}</h3>
+                <h3>{student.student_name}</h3>
                 <p>
                   <span className={styles.badgeLabel}>
-                    {student.sessionType}
+                    {student.session_title}
                   </span>
-                  {student.streamName}
-                  {student.groupName !== "General Batch" && (
+                  {student.domain_name}
+                  {student.group_name !== "General Batch" && (
                     <span className={styles.groupText}>
                       {" "}
-                      | Group: {student.groupName}
+                      | Group: {student.group_name}
                     </span>
                   )}
                 </p>
                 <div className={styles.missedDate}>
                   🗓️ MISSED ON:{" "}
-                  {new Date(student.sessionDate).toLocaleDateString(undefined, {
+                  {new Date(student.class_date).toLocaleDateString(undefined, {
                     weekday: "long",
                     year: "numeric",
                     month: "long",
@@ -106,7 +106,7 @@ function VolunteerAlerts() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span className={styles.statLabel}>Attendance Rate</span>
                     <span className={styles.statValue}>
-                      {student.totalDurationPercent}%
+                      {student.total_duration_percent}%
                     </span>
                   </div>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>

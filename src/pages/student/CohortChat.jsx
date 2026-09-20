@@ -693,6 +693,27 @@ function CohortChat() {
           attemptMarkRead();
         }}
       >
+        {/* Instruction Alert */}
+        <div style={{
+          margin: '0 16px 16px',
+          padding: '12px 16px',
+          background: 'rgba(239, 68, 68, 0.05)',
+          border: '1px solid rgba(239, 68, 68, 0.2)',
+          borderLeft: '4px solid #ef4444',
+          borderRadius: '6px',
+          fontSize: '13px',
+          color: 'var(--text-secondary)',
+          display: 'flex',
+          gap: '12px',
+          alignItems: 'flex-start'
+        }}>
+          <FiAlertCircle size={18} style={{ color: '#ef4444', flexShrink: 0, marginTop: '2px' }} />
+          <div>
+            <strong style={{ color: 'var(--text-primary)', display: 'block', marginBottom: '4px' }}>Community Guidelines</strong>
+            Please ensure all messages are strictly relevant to the cohort and training. Unwanted or spam messages are prohibited and will result in strict disciplinary action. <strong>Note: All chat activity is recorded and permanently retained by administrators, even if messages are deleted.</strong>
+          </div>
+        </div>
+
         {/* Load older */}
         {loadingOlder && (
           <div style={{ textAlign: 'center', padding: '8px', color: 'var(--text-muted)', fontSize: '13px' }}>

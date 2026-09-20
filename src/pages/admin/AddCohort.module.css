@@ -41,14 +41,16 @@
 }
 
 .form {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 20px;
 }
 
 .group {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  width: 100%;
 }
 
 .group label {
@@ -61,6 +63,10 @@
 .group input,
 .group select,
 .multiSelect {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 12px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -74,6 +80,10 @@
 .group input:focus,
 .group select:focus,
 .multiSelect:focus {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1);
 }
@@ -99,7 +109,9 @@
 }
 
 .full {
-  grid-column: 1 / 3;
+  min-width: 0;
+  width: 100%;
+  grid-column: 1 / -1;
 }
 
 .submitBtn {
@@ -115,7 +127,9 @@
 }
 
 .submitBtn:hover:not(:disabled) {
-  background: var(--primary-color-hover);
+  background: var(--primary-color-hover, #7c3aed);
+  color: white;
+  opacity: 0.9;
 }
 .submitBtn:disabled {
   opacity: 0.7;
@@ -158,4 +172,61 @@
   margin-bottom: 24px;
   font-weight: 600;
   border-left: 4px solid #166534;
+}
+.fullGroup {
+  display: flex;
+  flex-direction: column;
+  grid-column: 1 / -1;
+}
+
+.fullGroup label {
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.fullGroup textarea {
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  outline: none;
+  font-size: 15px;
+  transition: border-color 0.2s;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.fullGroup textarea:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+  width: 100%;
+  min-width: 0;
+}
+
+.sectionTitle {
+  grid-column: 1 / -1;
+  font-size: 1.1rem;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+}
+
+.actions {
+  flex-wrap: wrap;
+  display: flex;
+  gap: 16px;
+  margin-top: 30px;
+  grid-column: 1 / -1;
 }

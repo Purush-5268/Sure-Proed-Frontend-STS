@@ -141,11 +141,11 @@ function Attendance() {
     }
   };
 
-  const handleViewSession = async (session) => {
+  const handleViewSession = async (session, forceRefresh = false) => {
     setSelectedSessionView(session);
     setSelectedSessionLoading(true);
     try {
-      const response = await apiClient.get(`${API_ENDPOINTS.ATTENDANCE.BY_ID(session.id)}official-attendance/`);
+      const response = await apiClient.get(`${API_ENDPOINTS.ATTENDANCE.BY_ID(session.id)}official-attendance/${forceRefresh ? '?force_refresh=true' : ''}`);
       if (response.data && response.data.status === "READY") {
         setSelectedSessionOfficialData(response.data);
       } else {
@@ -251,9 +251,31 @@ function Attendance() {
         
         {/* 🚨 OFFICIAL ATTENDANCE ROSTER */}
         <div>
-          <h3 style={{ fontSize: "16px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px", color: "var(--text-primary)" }}>
-            <FiCheck /> Official Attendance Roster
-          </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <h3 style={{ fontSize: "16px", margin: 0, display: "flex", alignItems: "center", gap: "8px", color: "var(--text-primary)" }}>
+              <FiCheck /> Official Attendance Roster
+            </h3>
+            <button 
+              onClick={() => {
+                const btn = document.getElementById('sync-identities-btn-mentor');
+                if (btn) btn.innerText = "Syncing...";
+                handleViewSession(selectedSessionView, true).then(() => {
+                  if (btn) btn.innerText = "↻ Sync Identities";
+                });
+              }}
+              id="sync-identities-btn-mentor"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                background: 'var(--bg-secondary)', border: '1px solid var(--border-color)',
+                padding: '6px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '500',
+                color: 'var(--text-primary)', cursor: 'pointer', transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'}
+              onMouseOut={(e) => e.currentTarget.style.background = 'var(--bg-secondary)'}
+            >
+              ↻ Sync Identities
+            </button>
+          </div>
           <div className="premium-table-container">
             <table className="premium-table">
               <thead>

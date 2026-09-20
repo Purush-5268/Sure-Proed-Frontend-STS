@@ -13,12 +13,14 @@ function EditCohort() {
     code: "",
     name: "",
     course: "",
+    status: "DRAFT",
     start_date: "",
     end_date: "",
-    max_students: "",
-    status: "",
-    meeting_link: "",
+    application_end_date: "",
+    max_students: 30,
+    whatsapp_group_link: "",
     lst_batch: "",
+    rules_and_regulations: "",
   });
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
@@ -38,12 +40,14 @@ function EditCohort() {
           code: data.code || "",
           name: data.name || "",
           course: data.course?.id || data.course || "",
+          status: data.status || "DRAFT",
           start_date: data.start_date || "",
           end_date: data.end_date || "",
-          max_students: data.max_students || "",
-          status: data.status || "DRAFT",
-          meeting_link: data.meeting_link || "",
+          application_end_date: data.application_end_date ? new Date(data.application_end_date).toISOString().slice(0, 16) : "",
+          max_students: data.max_students || 30,
+          whatsapp_group_link: data.whatsapp_group_link || "",
           lst_batch: data.lst_batch || "",
+          rules_and_regulations: data.rules_and_regulations || "",
         });
       } catch (err) {
         console.error("Failed to load cohort data:", err);

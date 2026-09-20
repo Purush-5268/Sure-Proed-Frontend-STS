@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { 
   FaTachometerAlt, FaExclamationTriangle, FaCalendarAlt, 
   FaUserClock, FaUserShield, FaBullhorn, 
-  FaTrophy, FaBriefcase, FaUser, FaClipboardList, FaDesktop
+  FaTrophy, FaBriefcase, FaUser, FaClipboardList, FaDesktop, FaUsers
 } from "react-icons/fa";
 
 import Navbar from "../components/layout/Navbar";
@@ -19,6 +19,7 @@ function TrusteeLayout() {
 
   const volunteerLinks = [
     { label: "Command Center", path: "/trustee/volunteer/dashboard", icon: <FaTachometerAlt /> },
+    { label: "Cohorts", path: "/trustee/volunteer/cohorts", icon: <FaUsers /> },
     { label: "System Alerts", path: "/trustee/volunteer/alerts", icon: <FaExclamationTriangle /> },
     { label: "Schedule Classes", path: "/trustee/volunteer/schedule", icon: <FaCalendarAlt /> },
     { label: "Attendance & CSV", path: "/trustee/volunteer/attendance", icon: <FaUserClock /> },

@@ -169,7 +169,7 @@ const ScheduleClass = lazy(() => import("../pages/admin/ScheduleClass"));
 /* Attendance Management */
 const AttendanceManagement = lazy(() => import("../pages/admin/AttendanceManagement"));
 const AttendanceDetails = lazy(() => import("../pages/admin/AttendanceDetails"));
-const UpdateAttendance = lazy(() => import("../pages/admin/UpdateAttendance"));
+
 const AttendanceHistoryAdmin = lazy(() => import("../pages/admin/AttendanceHistoryAdmin"));
 const PermissionsAdmin = lazy(() => import("../pages/admin/PermissionsAdmin"));
 const PermissionsStudent = lazy(() => import("../pages/student/PermissionsStudent"));
@@ -381,7 +381,7 @@ function AppRoutes() {
               <Route path="attendance" element={<AttendanceManagement />} />
               <Route path="attendance-management" element={<AttendanceManagement />} />
               <Route path="attendance-details" element={<AttendanceDetails />} />
-              <Route path="update-attendance" element={<UpdateAttendance />} />
+
               <Route path="attendance-history-admin" element={<AttendanceHistoryAdmin />} />
               <Route path="permissions" element={<PermissionsAdmin />} />
 
@@ -467,7 +467,7 @@ function AppRoutes() {
               <Route path="volunteer/schedule" element={<VolunteerSchedule />} />
               <Route path="volunteer/attendance" element={<VolunteerAttendance />} />
               <Route path="volunteer/attendance-details" element={<AttendanceDetails />} />
-              <Route path="volunteer/update-attendance" element={<UpdateAttendance />} />
+
               <Route path="volunteer/users" element={<VolunteerUsers />} />
               <Route path="volunteer/add-student" element={<VolunteerAddUser />} />
               <Route path="volunteer/student-details/:id" element={<VolunteerUserDetails />} />

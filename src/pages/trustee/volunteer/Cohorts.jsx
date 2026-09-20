@@ -125,8 +125,10 @@ function VolunteerCohorts() {
         <div style={{ padding: "20px 0" }}>
           <SkeletonLoader variant="table" rows={6} />
         </div>
-      ) : cohorts.length === 0 ? (
-        <p>No cohorts have been assigned yet.</p>
+      ) : filteredCohorts.length === 0 ? (
+        <div className="premium-alert-warning" style={{marginTop: "20px"}}>
+          ⚠️ You have not been assigned to any cohorts yet. Please contact an administrator.
+        </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px", marginTop: "20px" }}>
           <AnimatePresence>
