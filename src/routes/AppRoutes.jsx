@@ -26,6 +26,8 @@ const OfferLetterVerify = lazy(() => import("../pages/public/OfferLetterVerify")
 const CohortChat = lazy(() => import("../pages/student/CohortChat"));
 const OpenCohorts = lazy(() => import("../pages/landing/OpenCohorts"));
 const CohortInfo = lazy(() => import("../pages/landing/CohortInfo"));
+const PrivacyPolicy = lazy(() => import("../pages/legal/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("../pages/legal/TermsOfService"));
 
 /* Theme Enforcer for Public Pages */
 function ThemeEnforcer() {
@@ -33,7 +35,7 @@ function ThemeEnforcer() {
   const { theme } = useTheme();
 
   useEffect(() => {
-    const publicPaths = ['/', '/partners', '/login', '/signup', '/setup-password', '/forgot-password', '/reset-password', '/email-verification', '/open-cohorts'];
+    const publicPaths = ['/', '/partners', '/login', '/signup', '/setup-password', '/forgot-password', '/reset-password', '/email-verification', '/open-cohorts', '/privacy-policy', '/terms-of-service'];
     const isPublic = publicPaths.includes(location.pathname) || location.pathname.startsWith('/verify-offer-letter') || location.pathname.startsWith('/certificate/verify') || location.pathname.startsWith('/cohort-info');
 
     const applyTheme = () => {
@@ -259,6 +261,8 @@ function AppRoutes() {
             <Route path="/certificate/verify/:code" element={<CertificateVerify />} />
             <Route path="/open-cohorts" element={<OpenCohorts />} />
             <Route path="/cohort-info/:cohortId" element={<CohortInfo />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
           </Route>
 
           {/* ================= STUDENT MODULE (PROTECTED) ================= */}

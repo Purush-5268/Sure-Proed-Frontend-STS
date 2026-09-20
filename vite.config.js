@@ -38,18 +38,18 @@
 //     ],
 //     proxy: {
 //       '/api': {
-//         target: 'https://sureproed.com',
+//         target: 'https://api.sureproed.com',
 //         changeOrigin: true,
 //         secure: false,
 //       },
 //       '/ws': {
-//         target: 'wss://sureproed.com',
+//         target: 'wss://api.sureproed.com',
 //         ws: true,
 //         secure: false,
 //         changeOrigin: true,
 //       },
 //       '/media': {
-//         target: 'https://sureproed.com',
+//         target: 'https://api.sureproed.com',
 //         changeOrigin: true,
 //         secure: false,
 //       },
@@ -58,18 +58,18 @@
 //   preview: {
 //     proxy: {
 //       '/api': {
-//         target: 'https://sureproed.com',
+//         target: 'https://api.sureproed.com',
 //         changeOrigin: true,
 //         secure: false,
 //       },
 //       '/ws': {
-//         target: 'wss://sureproed.com',
+//         target: 'wss://api.sureproed.com',
 //         ws: true,
 //         secure: false,
 //         changeOrigin: true,
 //       },
 //       '/media': {
-//         target: 'https://sureproed.com',
+//         target: 'https://api.sureproed.com',
 //         changeOrigin: true,
 //         secure: false,
 //       },
@@ -127,18 +127,18 @@ export default defineConfig({
     ],
     proxy: {
       '/api': {
-        target: 'https://sureproed.com',
+        target: 'https://api.sureproed.com',
         changeOrigin: true,
         secure: false,
       },
       '/ws': {
-        target: 'wss://sureproed.com',
+        target: 'wss://api.sureproed.com',
         ws: true,
         secure: false,
         changeOrigin: true,
       },
       '/media': {
-        target: 'https://sureproed.com',
+        target: 'https://api.sureproed.com',
         changeOrigin: true,
         secure: false,
       },
@@ -147,18 +147,18 @@ export default defineConfig({
   preview: {
     proxy: {
       '/api': {
-        target: 'https://sureproed.com',
+        target: 'https://api.sureproed.com',
         changeOrigin: true,
         secure: false,
       },
       '/ws': {
-        target: 'wss://sureproed.com',
+        target: 'wss://api.sureproed.com',
         ws: true,
         secure: false,
         changeOrigin: true,
       },
       '/media': {
-        target: 'https://sureproed.com',
+        target: 'https://api.sureproed.com',
         changeOrigin: true,
         secure: false,
       },

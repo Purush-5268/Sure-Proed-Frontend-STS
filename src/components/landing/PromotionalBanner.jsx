@@ -106,10 +106,10 @@ const PromotionalBanner = () => {
         {/* Navigation Arrows if multiple items */}
         {openCohorts.length > 1 && (
           <>
-            <button className={`${styles.navButton} ${styles.prevButton}`} onClick={handlePrev}>
+            <button aria-label="Previous Announcement" className={`${styles.navButton} ${styles.prevButton}`} onClick={handlePrev}>
               &#10094;
             </button>
-            <button className={`${styles.navButton} ${styles.nextButton}`} onClick={handleNext}>
+            <button aria-label="Next Announcement" className={`${styles.navButton} ${styles.nextButton}`} onClick={handleNext}>
               &#10095;
             </button>
           </>

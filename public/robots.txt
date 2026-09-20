@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sureproed.com/sitemap.xml

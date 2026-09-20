@@ -45,11 +45,11 @@ export const StudentJourneyChart = ({ data }) => {
 
   // The slices representing mutually-exclusive student journey stages
   const chartData = [
-    { name: 'Active / Before Cohort', value: activeBeforeCohort, fill: '#3b82f6' }, // Blue
-    { name: 'Training', value: training, fill: '#10b981' }, // Green
-    { name: 'Internship', value: internship, fill: '#eab308' }, // Yellow
-    { name: 'Soft Skills', value: softSkills, fill: '#a855f7' }, // Purple
-    { name: 'Placed', value: placed, fill: '#06b6d4' }, // Teal
+    { name: 'Active / Before Cohort', value: activeBeforeCohort, fill: '#6366f1' }, // Indigo
+    { name: 'Training', value: training, fill: '#a855f7' }, // Purple
+    { name: 'Internship', value: internship, fill: '#ec4899' }, // Pink
+    { name: 'Soft Skills', value: softSkills, fill: '#f97316' }, // Orange
+    { name: 'Placed', value: placed, fill: '#14b8a6' }, // Teal
   ];
 
   if (remaining > 0) {
@@ -147,8 +147,8 @@ export const EcosystemChart = ({ data }) => {
   const total = mentors + volunteers;
 
   const chartData = [
-    { name: 'Mentors', value: mentors, fill: '#3b82f6' }, // Blue
-    { name: 'Volunteers', value: volunteers, fill: '#10b981' }, // Green
+    { name: 'Mentors', value: mentors, fill: '#f59e0b' }, // Amber
+    { name: 'Volunteers', value: volunteers, fill: '#ec4899' }, // Pink
   ];
 
   const CustomTooltip = ({ active, payload }) => {

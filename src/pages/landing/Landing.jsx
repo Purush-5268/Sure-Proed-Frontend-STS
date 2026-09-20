@@ -1,13 +1,18 @@
 import React, { Suspense, lazy, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Hero from "../../components/landing/Hero";
-import Features from "../../components/landing/Features";
-import PromotionalBanner from "../../components/landing/PromotionalBanner";
+import OpenCohorts from "./OpenCohorts";
+import { useLandingData } from "../../hooks/useLandingData";
+import LazySection from "../../components/common/LazySection";
 
+const WhySureProed = lazy(() => import("../../components/landing/WhySureProed"));
+const LearningPrograms = lazy(() => import("../../components/landing/LearningPrograms"));
 const Statistics = lazy(() => import("../../components/landing/Statistics"));
+const FinalCTA = lazy(() => import("../../components/landing/FinalCTA"));
 
 function Landing() {
   const location = useLocation();
+  const { cohorts, courses, loading } = useLandingData();
 
   useEffect(() => {
     if (location.hash) {
@@ -17,21 +22,40 @@ function Landing() {
         if (element) {
           element.scrollIntoView({ behavior: "smooth" });
         }
-      }, 300); // Short delay to allow lazy components to render
+      }, 300);
     }
   }, [location]);
 
   return (
-    <>
-      <Hero />
-      <PromotionalBanner />
-      <Features />
-      <Suspense fallback={<div style={{ minHeight: '400px' }}></div>}>
-        <Statistics />
-      </Suspense>
-    </>
+    <div className="landing-page-wrapper">
+      <Hero cohorts={cohorts} loading={loading} />
+      <OpenCohorts cohorts={cohorts} loading={loading} />
+      
+      <LazySection fallback={<div style={{ minHeight: '400px' }}></div>}>
+        <Suspense fallback={<div style={{ minHeight: '400px' }}></div>}>
+          <WhySureProed />
+        </Suspense>
+      </LazySection>
+
+      <LazySection fallback={<div style={{ minHeight: '400px' }}></div>}>
+        <Suspense fallback={<div style={{ minHeight: '400px' }}></div>}>
+          <LearningPrograms courses={courses} loading={loading} />
+        </Suspense>
+      </LazySection>
+
+      <LazySection fallback={<div style={{ minHeight: '400px' }}></div>}>
+        <Suspense fallback={<div style={{ minHeight: '400px' }}></div>}>
+          <Statistics />
+        </Suspense>
+      </LazySection>
+
+      <LazySection fallback={<div style={{ minHeight: '300px' }}></div>}>
+        <Suspense fallback={<div style={{ minHeight: '300px' }}></div>}>
+          <FinalCTA />
+        </Suspense>
+      </LazySection>
+    </div>
   );
 }
-
 
 export default Landing;

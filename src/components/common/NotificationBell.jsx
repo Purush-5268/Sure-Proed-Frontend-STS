@@ -432,6 +432,7 @@ function NotificationBell() {
                     <button
                       onClick={(e) => handleClearNotification(e, notification.id)}
                       title="Clear notification"
+                      aria-label="Clear notification"
                       style={{
                         position: 'absolute',
                         right: '8px',
