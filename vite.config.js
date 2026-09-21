@@ -81,15 +81,20 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
+import legacy from '@vitejs/plugin-legacy'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    legacy({
+      targets: ['defaults', 'not IE 11'],
+    }),
     visualizer({ filename: 'stats.html', template: 'treemap', open: false })
   ],
   assetsInclude: ['**/*.lottie'],
   build: {
+    target: ['es2015', 'safari11'],
     modulePreload: false,
     chunkSizeWarningLimit: 600,
     rollupOptions: {

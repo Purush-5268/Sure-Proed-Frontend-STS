@@ -1,6 +1,9 @@
 export const formatDisplayDate = (dateString) => {
   if (!dateString) return null;
-  const date = new Date(dateString);
+  const safeDateStr = typeof dateString === 'string' && dateString.includes(' ') && !dateString.includes('T')
+    ? dateString.replace(' ', 'T')
+    : dateString;
+  const date = new Date(safeDateStr);
   if (isNaN(date.getTime())) return null;
 
   return date.toLocaleDateString('en-GB', {
@@ -12,7 +15,10 @@ export const formatDisplayDate = (dateString) => {
 
 export const formatDisplayDateTime = (dateString) => {
   if (!dateString) return null;
-  const date = new Date(dateString);
+  const safeDateStr = typeof dateString === 'string' && dateString.includes(' ') && !dateString.includes('T')
+    ? dateString.replace(' ', 'T')
+    : dateString;
+  const date = new Date(safeDateStr);
   if (isNaN(date.getTime())) return null;
 
   return date.toLocaleString('en-GB', {

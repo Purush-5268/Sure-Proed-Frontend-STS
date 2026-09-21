@@ -536,7 +536,7 @@ function ExamInstructions() {
 
   // Canonical status determination
   const examStatusDisplay = isEnrolled
-    ? String(activeApplication?.status || "ACTIVE COHORT").replaceAll("_", " ")
+    ? String(activeApplication?.status || "ACTIVE COHORT").replace(/_/g, " ")
     : isCompleted
       ? isQualifiedCandidate
         ? "QUALIFIED / PASSED"

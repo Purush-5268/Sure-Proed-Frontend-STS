@@ -28,7 +28,14 @@ const OpenCohorts = ({ cohorts: propCohorts, loading: propLoading }) => {
         );
         const list = Array.isArray(data) ? data : data.results || [];
         const now = new Date();
-        const activeCohorts = list.filter(c => !c.application_end_date || new Date(c.application_end_date) > now);
+        const activeCohorts = list.filter(c => {
+          if (!c.application_end_date) return true;
+          // Safari compatibility: replace space with 'T' for ISO 8601 parsing
+          const safeDateStr = c.application_end_date.includes(' ') && !c.application_end_date.includes('T') 
+            ? c.application_end_date.replace(' ', 'T') 
+            : c.application_end_date;
+          return new Date(safeDateStr) > now;
+        });
         setFetchedCohorts(activeCohorts);
       } catch (error) {
         if (error.name !== 'CanceledError' && error.code !== 'ERR_CANCELED') {
