@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Hero from "../../components/landing/Hero";
+import CohortAnnouncementBanner from "../../components/landing/CohortAnnouncementBanner";
 import OpenCohorts from "./OpenCohorts";
 import { useLandingData } from "../../hooks/useLandingData";
 import LazySection from "../../components/common/LazySection";
@@ -14,6 +15,7 @@ import ScrollReveal from "../../components/common/ScrollReveal";
 function Landing() {
   const location = useLocation();
   const { cohorts, courses, loading } = useLandingData();
+  const hasOpenCohorts = cohorts && cohorts.some(c => c.status === 'OPEN');
 
   useEffect(() => {
     if (location.hash) {
@@ -29,6 +31,7 @@ function Landing() {
 
   return (
     <div className="landing-page-wrapper">
+      {hasOpenCohorts && <CohortAnnouncementBanner />}
       <Hero cohorts={cohorts} courses={courses} loading={loading} />
       <ScrollReveal>
         <OpenCohorts cohorts={cohorts} loading={loading} />

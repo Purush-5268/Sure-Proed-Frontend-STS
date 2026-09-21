@@ -1,0 +1,205 @@
+.bannerContainer {
+  width: 100%;
+  background: linear-gradient(90deg, #fefeff 0%, #f5f3ff 50%, #fefeff 100%);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 24px;
+  position: relative;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.bannerContainer::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 80px;
+  background: radial-gradient(ellipse at center, rgba(167, 139, 250, 0.15) 0%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.bannerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  position: relative;
+  z-index: 1;
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.emojiIcon {
+  font-size: 1.6rem;
+  line-height: 1;
+  animation: wiggle 3s ease-in-out infinite;
+  display: inline-block;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+@keyframes wiggle {
+  0% { transform: rotate(-10deg); }
+  5% { transform: rotate(10deg); }
+  10% { transform: rotate(-10deg); }
+  15% { transform: rotate(5deg); }
+  20% { transform: rotate(-5deg); }
+  25% { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.primaryText {
+  font-weight: 800;
+  color: #7c3aed;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.divider {
+  color: #e2e8f0;
+  font-weight: 300;
+  margin: 0 4px;
+}
+
+.secondaryText {
+  color: #64748b;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.buttonWrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.sparkleLeft {
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.sparkleRight {
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.ctaButton {
+  background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 10px 24px;
+  border-radius: 9999px;
+  border: none;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  z-index: 2;
+  letter-spacing: 0.02em;
+}
+
+.ctaButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background 0.2s, color 0.2s;
+  font-size: 1.1rem;
+}
+
+.closeButton:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #64748b;
+}
+
+/* Dark theme overrides */
+:global([data-theme="dark"]) .bannerContainer {
+  background: linear-gradient(90deg, #1e1b4b 0%, #2e1065 50%, #1e1b4b 100%);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+}
+:global([data-theme="dark"]) .bannerContainer::before {
+  background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.25) 0%, transparent 70%);
+}
+:global([data-theme="dark"]) .primaryText {
+  color: #c4b5fd;
+}
+:global([data-theme="dark"]) .secondaryText {
+  color: #cbd5e1;
+}
+:global([data-theme="dark"]) .divider {
+  color: #475569;
+}
+:global([data-theme="dark"]) .closeButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+}
+:global([data-theme="dark"]) .sparkleLeft path,
+:global([data-theme="dark"]) .sparkleRight path {
+  stroke: #c4b5fd;
+}
+
+@media (max-width: 1024px) {
+  .secondaryText {
+    display: none;
+  }
+  .divider {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .bannerContent {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  .secondaryText, .divider {
+    display: none;
+  }
+  .rightSection {
+    width: 100%;
+    justify-content: center;
+    position: relative;
+  }
+  .closeButton {
+    position: absolute;
+    right: 0;
+    top: -42px;
+  }
+  .sparkleLeft, .sparkleRight {
+    display: none;
+  }
+}

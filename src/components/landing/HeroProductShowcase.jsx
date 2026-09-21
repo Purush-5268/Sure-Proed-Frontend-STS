@@ -354,12 +354,6 @@ const HeroProductShowcase = ({ cohorts = [], courses = [], loading = false }) =>
         </div>
       </div>
       
-      <div className={styles.handwrittenArrow}>
-        Your Learning Journey Starts Here ↴
-      </div>
-      <div className={styles.handwrittenExplore}>
-        Explore the platform <br/> Click on any section ⬏
-      </div>
     </div>
   );
 };

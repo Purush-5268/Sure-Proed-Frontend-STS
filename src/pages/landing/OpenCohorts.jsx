@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { cohortService } from '../../services/cohortService';
@@ -46,9 +46,18 @@ const OpenCohorts = ({ cohorts: propCohorts, loading: propLoading }) => {
   }, [hasProps]);
 
   // strictly only show OPEN cohorts for applications
-  const filteredPropCohorts = hasProps 
-    ? propCohorts.filter(c => c.status === 'OPEN').slice(0, 5)
-    : [];
+  const allOpenPropCohorts = useMemo(() => {
+    if (!hasProps) return [];
+    const open = [...propCohorts].filter(c => c.status === 'OPEN');
+    for (let i = open.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [open[i], open[j]] = [open[j], open[i]];
+    }
+    return open;
+  }, [propCohorts, hasProps]);
+
+  const filteredPropCohorts = hasProps ? allOpenPropCohorts.slice(0, 6) : [];
+  const hasMoreCohorts = hasProps && allOpenPropCohorts.length > 6;
 
   const cohorts = hasProps ? filteredPropCohorts : fetchedCohorts;
   const loading = hasProps ? propLoading : isFetching;
@@ -116,7 +125,7 @@ const OpenCohorts = ({ cohorts: propCohorts, loading: propLoading }) => {
   };
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} id="open-cohorts">
       <div className={styles.container}>
         <div className={styles.header}>
           <div className={styles.headerContent}>
@@ -195,6 +204,15 @@ const OpenCohorts = ({ cohorts: propCohorts, loading: propLoading }) => {
             <h3>No Open Programs Right Now</h3>
             <p>Check back later for new announcements or browse our courses.</p>
             <button className={styles.btnDetails} onClick={() => navigate('/student/courses')}>Explore Courses</button>
+          </div>
+        )}
+
+        {hasMoreCohorts && (
+          <div style={{ textAlign: 'center', marginTop: '40px' }}>
+            <p style={{ color: '#64748b', marginBottom: '16px', fontSize: '1.05rem' }}>More open cohorts are available!</p>
+            <Link to="/open-cohorts" className={styles.btnApply} style={{ padding: '12px 32px', textDecoration: 'none', display: 'inline-block' }}>
+              Click here to view all cohorts
+            </Link>
           </div>
         )}
       </div>

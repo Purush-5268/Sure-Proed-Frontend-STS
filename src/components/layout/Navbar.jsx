@@ -75,16 +75,17 @@ function Navbar() {
   const getDashboardPath = () => {
     if (user?.role === "ADMIN") return "/admin/dashboard";
     if (user?.role === "MENTOR") return "/mentor/dashboard";
-    if (user?.role === "TRUSTEE" || user?.role === "VOLUNTEER" || user?.role === "ADVISOR") return "/trustee/dashboard";
+    if (user?.role === "ADVISOR" || (user?.role === "TRUSTEE" && user?.admin_category === "ADVISORY")) return "/trustee/advisor/dashboard";
+    if (user?.role === "TRUSTEE" || user?.role === "VOLUNTEER") return "/trustee/dashboard";
     return "/student/dashboard";
   };
 
   const getProfilePath = () => {
     if (user?.role === "ADMIN") return "/admin/profile-settings";
     if (user?.role === "MENTOR") return "/mentor/profile";
-    if (user?.role === "TRUSTEE" || user?.role === "VOLUNTEER" || user?.role === "ADVISOR") {
-      return `/trustee/${user?.trustee_type?.toLowerCase() || 'volunteer'}/profile`;
-    }
+    if (user?.role === "ADVISOR" || (user?.role === "TRUSTEE" && user?.admin_category === "ADVISORY")) return "/trustee/advisor/profile";
+    if (user?.role === "TRUSTEE") return "/trustee/main/profile";
+    if (user?.role === "VOLUNTEER") return "/trustee/volunteer/profile";
     return "/student/profile";
   };
 

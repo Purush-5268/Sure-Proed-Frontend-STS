@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './LearningPrograms.module.css';
 import { FaBookOpen } from 'react-icons/fa';
@@ -27,7 +27,17 @@ const LearningPrograms = ({ courses: propCourses, loading: propLoading }) => {
     return () => { isMounted = false; };
   }, [hasProps]);
 
-  const programs = hasProps ? propCourses : fetchedPrograms;
+  const allPrograms = useMemo(() => {
+    const list = hasProps ? (propCourses ? [...propCourses] : []) : [...fetchedPrograms];
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list;
+  }, [propCourses, fetchedPrograms, hasProps]);
+
+  const programs = allPrograms.slice(0, 9);
+  const hasMorePrograms = allPrograms.length > 9;
   const loading = hasProps ? propLoading : isFetching;
 
   return (
@@ -73,6 +83,15 @@ const LearningPrograms = ({ courses: propCourses, loading: propLoading }) => {
           <div className={styles.emptyState}>
             <h3>No Programs Available</h3>
             <p>Check back soon for new learning tracks.</p>
+          </div>
+        )}
+        
+        {hasMorePrograms && (
+          <div className={styles.moreMessageContainer}>
+            <p className={styles.moreMessageText}>More programs are available!</p>
+            <Link to="/student/courses" className={styles.viewMoreBtn}>
+              Click here to view all programs
+            </Link>
           </div>
         )}
       </div>

@@ -55,16 +55,23 @@ function TrusteeLayout() {
 
   // Handle generic /trustee or /trustee/dashboard entry points
   if (currentPath === "/trustee" || currentPath === "/trustee/" || currentPath === "/trustee/dashboard" || currentPath === "/trustee/dashboard/") {
+    if (isAdvisor) {
+      return <Navigate to="/trustee/advisor/dashboard" replace />;
+    }
     return <Navigate to={isHigherLevel ? "/trustee/main/dashboard" : "/trustee/volunteer/dashboard"} replace />;
   }
 
   // Route Protection: Prevent cross-trustee manual URL navigation
-  if (user?.role === "VOLUNTEER" && currentPath.includes("/main/")) {
+  if (user?.role === "VOLUNTEER" && (currentPath.includes("/main/") || currentPath.includes("/advisor/"))) {
     return <Navigate to="/trustee/volunteer/dashboard" replace />;
   }
   
-  if (isHigherLevel && currentPath.includes("/volunteer/")) {
+  if (isHigherLevel && !isAdvisor && (currentPath.includes("/volunteer/") || currentPath.includes("/advisor/"))) {
     return <Navigate to="/trustee/main/dashboard" replace />;
+  }
+
+  if (isAdvisor && (currentPath.includes("/volunteer/") || currentPath.includes("/main/"))) {
+    return <Navigate to="/trustee/advisor/dashboard" replace />;
   }
 
   // Inject Volunteer specific theme variables
