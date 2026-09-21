@@ -94,7 +94,6 @@ export default defineConfig({
   ],
   assetsInclude: ['**/*.lottie'],
   build: {
-    target: ['es2015', 'safari11'],
     modulePreload: false,
     chunkSizeWarningLimit: 600,
     rollupOptions: {
