@@ -789,8 +789,8 @@ function Profile() {
                                       </div>
                                     ) : isMatched === false ? (
                                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <FiAlertCircle size={16} color="#d97706" />
-                                        <span style={{ fontSize: '14px', fontWeight: 600, color: '#d97706' }}>Name Change Required</span>
+                                        <FiInfo size={16} color="#059669" />
+                                        <span style={{ fontSize: '14px', fontWeight: 600, color: '#059669' }}>Recommended Format</span>
                                       </div>
                                     ) : (
                                       <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-secondary)' }}>—</div>
@@ -827,21 +827,17 @@ function Profile() {
                                   padding: '12px 16px',
                                   borderRadius: '10px',
                                   marginBottom: '16px',
-                                  background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.08), rgba(245, 158, 11, 0.05))',
-                                  border: '1px solid rgba(217, 119, 6, 0.2)',
+                                  background: 'rgba(16, 185, 129, 0.05)',
+                                  border: '1px solid rgba(16, 185, 129, 0.2)',
                                   display: 'flex',
                                   alignItems: 'flex-start',
                                   gap: '10px',
                                 }}>
-                                  <FiAlertCircle size={16} color="#d97706" style={{ marginTop: '2px', flexShrink: 0 }} />
+                                  <FiInfo size={16} color="#059669" style={{ marginTop: '2px', flexShrink: 0 }} />
                                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <strong style={{ color: 'var(--text-primary)', fontSize: '13px', marginBottom: '4px' }}>Name Change Required</strong>
+                                    <strong style={{ color: '#059669', fontSize: '13px', marginBottom: '4px' }}>Please Make Sure You Have This Format</strong>
                                     <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
-                                      {matchMsg ? (
-                                        matchMsg
-                                      ) : (
-                                        <>Your Google Account name does not follow the recommended SURE ProEd naming format (<strong style={{ color: 'var(--text-primary)' }}>{meetIdentity}</strong>). This is for identification consistency only and does not affect your attendance.</>
-                                      )}
+                                      Please ensure your Google Account name matches this format: <strong style={{ color: 'var(--text-primary)' }}>{meetIdentity}</strong>. This helps mentors easily identify you!
                                     </p>
                                   </div>
                                 </div>

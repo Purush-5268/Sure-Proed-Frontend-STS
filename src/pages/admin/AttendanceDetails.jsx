@@ -25,6 +25,38 @@ function AttendanceDetails() {
   const [permissionReason, setPermissionReason] = useState("");
   const [isSubmittingPermission, setIsSubmittingPermission] = useState(false);
 
+  const [syncToastMessage, setSyncToastMessage] = useState(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const [showResolveModal, setShowResolveModal] = useState(false);
+  const [resolveParticipant, setResolveParticipant] = useState(null);
+  const [selectedResolveStudentId, setSelectedResolveStudentId] = useState("");
+  const [isResolving, setIsResolving] = useState(false);
+
+  useEffect(() => {
+    let interval;
+    if (isSyncing) {
+      interval = setInterval(async () => {
+        try {
+          const res = await apiClient.get(`${API_ENDPOINTS.ATTENDANCE.BASE}${sessionId}/official-attendance/`);
+          if (res.data && res.data.status === "READY") {
+            setOfficialData(res.data);
+            setIsSyncing(false);
+            setSyncToastMessage("Identity sync completed.");
+            setTimeout(() => setSyncToastMessage(null), 4000);
+          } else if (res.data && res.data.status === "ATTENDANCE_FAILED") {
+            setIsSyncing(false);
+            setSyncToastMessage("Identity sync failed.");
+            setTimeout(() => setSyncToastMessage(null), 4000);
+          }
+        } catch (e) {
+          console.warn("Polling error:", e);
+        }
+      }, 5000);
+    }
+    return () => clearInterval(interval);
+  }, [isSyncing, sessionId]);
+
 
   // 🚨 ADDED SEND WARNING LOGIC
   const handleSendWarning = async (studentId, studentName) => {
@@ -88,6 +120,29 @@ function AttendanceDetails() {
     }
   };
 
+  const handleResolveSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedResolveStudentId || !resolveParticipant) return;
+    
+    setIsResolving(true);
+    try {
+      await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BASE}${sessionId}/resolve-identity/`, {
+        student_id: selectedResolveStudentId,
+        participant_email: resolveParticipant.email !== "N/A" ? resolveParticipant.email : null,
+        participant_name: resolveParticipant.name
+      });
+      alert(`Identity resolved successfully.`);
+      setShowResolveModal(false);
+      setResolveParticipant(null);
+      setSelectedResolveStudentId("");
+      fetchSessionDetails();
+    } catch (error) {
+      alert(error.response?.data?.error || "Failed to resolve identity.");
+    } finally {
+      setIsResolving(false);
+    }
+  };
+
   const fetchSessionDetails = async (forceRefresh = false) => {
     if (!sessionId) {
       setLoading(false);
@@ -104,6 +159,9 @@ function AttendanceDetails() {
       setSessionData(baseResponse.data);
       if (officialResponse.data && officialResponse.data.status === "READY") {
         setOfficialData(officialResponse.data);
+      } else if (officialResponse.data && (officialResponse.data.status === "SYNC_QUEUED" || officialResponse.data.status === "SYNC_IN_PROGRESS")) {
+        setSyncToastMessage(officialResponse.data.message || "Identity sync started. You can continue working.");
+        setIsSyncing(true);
       }
     } catch (err) {
       console.error("Failed to load session attendance details:", err);
@@ -273,14 +331,18 @@ function AttendanceDetails() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h2 style={{ fontSize: '18px', margin: 0, color: 'var(--text-primary)' }}>Official Attendance Roster</h2>
             <button 
-              onClick={() => {
-                const btn = document.getElementById('sync-identities-btn');
-                if (btn) btn.innerText = "Syncing...";
+              onClick={(e) => {
+                const btn = e.currentTarget;
+                if (isSyncing) return;
+                btn.innerText = "Syncing...";
+                btn.style.opacity = "0.7";
                 fetchSessionDetails(true).then(() => {
-                  if (btn) btn.innerText = "↻ Sync Identities";
+                  btn.innerText = "↻ Sync Identities";
+                  btn.style.opacity = "1";
                 });
               }}
               id="sync-identities-btn"
+              disabled={isSyncing}
               style={{
                 display: 'flex', alignItems: 'center', gap: '6px',
                 background: 'var(--bg-secondary)', border: '1px solid var(--border-color)',
@@ -522,6 +584,16 @@ function AttendanceDetails() {
                               {isAmbiguous ? "⚠ Ambiguous" : "⚠ Unresolved"}
                             </span>
                             <span style={{ color: "var(--text-secondary)", fontSize: "11px" }}>Requires Admin Review</span>
+                            <button 
+                              onClick={() => {
+                                setResolveParticipant(unmatched);
+                                setShowResolveModal(true);
+                              }}
+                              className="premium-btn" 
+                              style={{ background: '#d97706', fontSize: '11px', padding: '4px 8px', marginTop: '4px', width: 'fit-content' }}
+                            >
+                              {isAmbiguous ? "Resolve Ambiguity" : "Resolve Identity"}
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -583,6 +655,79 @@ function AttendanceDetails() {
           document.body
         )}
 
+        {showResolveModal && createPortal(
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 999999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <div className="premium-card" style={{ width: '400px', maxWidth: '90%', padding: '24px', backgroundColor: 'var(--bg-main)' }}>
+              <h3 style={{ marginTop: 0, color: 'var(--text-primary)', marginBottom: '16px' }}>Resolve Participant Identity</h3>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                Map the unmatched Google Meet participant to an expected student in the roster.
+              </p>
+              
+              <div style={{ marginBottom: '16px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '6px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Google Participant:</div>
+                <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{resolveParticipant?.name || "Unknown"}</div>
+                {resolveParticipant?.email && resolveParticipant.email !== "N/A" && (
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{resolveParticipant.email}</div>
+                )}
+              </div>
+
+              <form onSubmit={handleResolveSubmit}>
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                    Select Student to Map To:
+                  </label>
+                  <select 
+                    className="premium-input"
+                    value={selectedResolveStudentId}
+                    onChange={(e) => setSelectedResolveStudentId(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px 12px' }}
+                  >
+                    <option value="">-- Select an Expected Student --</option>
+                    {officialData?.expected_students && Object.entries(officialData.expected_students).map(([id, s]) => (
+                      <option key={id} value={id}>
+                        {s.name} ({s.email}) - {s.status}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                  <button type="button" onClick={() => { setShowResolveModal(false); setResolveParticipant(null); setSelectedResolveStudentId(""); }} className="premium-btn premium-btn-secondary">Cancel</button>
+                  <button type="submit" disabled={isResolving || !selectedResolveStudentId} className="premium-btn" style={{ background: '#d97706' }}>
+                    {isResolving ? 'Resolving...' : 'Confirm Mapping'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {syncToastMessage && (
+        <div style={{
+          position: "fixed", bottom: "24px", right: "24px",
+          backgroundColor: "#1f2937", color: "#f9fafb", padding: "14px 24px",
+          borderRadius: "8px", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
+          zIndex: 9999, fontSize: "14px", fontWeight: "500", display: "flex", alignItems: "center", gap: "12px",
+          border: "1px solid #374151"
+        }}>
+          {isSyncing && (
+            <svg style={{ animation: "spin 1s linear infinite", width: "18px", height: "18px", color: "#60a5fa" }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeOpacity="0.25"></circle>
+              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          )}
+          {!isSyncing && (
+            <svg style={{ width: "18px", height: "18px", color: "#34d399" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+          )}
+          {syncToastMessage}
+        </div>
+      )}
       </div>
     </div>
   );
