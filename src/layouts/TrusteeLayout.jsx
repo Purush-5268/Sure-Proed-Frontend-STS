@@ -38,7 +38,7 @@ function TrusteeLayout() {
   ];
 
   const isHigherLevel = user?.role === "TRUSTEE";
-  const isAdvisor = user?.admin_category === "ADVISORY";
+  const isAdvisor = user?.admin_category === "ADVISORY" || user?.role === "ADVISOR";
   const activeLinks = isHigherLevel ? higherLevelTrusteeLinks : volunteerLinks;
   
   let layoutTitle = "Volunteer Dashboard";
@@ -46,7 +46,7 @@ function TrusteeLayout() {
     layoutTitle = isAdvisor ? "Advisor Dashboard" : "Trustee Dashboard";
   }
 
-  if (!user || (user.role !== "TRUSTEE" && user.role !== "VOLUNTEER")) {
+  if (!user || (user.role !== "TRUSTEE" && user.role !== "VOLUNTEER" && user.role !== "ADVISOR")) {
     return <Navigate to="/login" replace />;
   }
 

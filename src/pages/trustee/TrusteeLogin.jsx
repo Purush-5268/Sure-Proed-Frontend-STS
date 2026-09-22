@@ -20,14 +20,21 @@ function TrusteeLogin() {
     try {
       const res = await login(username, password);
       const userRole = res?.user?.role;
+      const isAdvisor = res?.user?.admin_category === "ADVISORY" || userRole === "ADVISOR";
 
       if (userRole === "TRUSTEE") {
-        navigate("/trustee/main/dashboard");
+        if (isAdvisor) {
+          navigate("/trustee/advisor/dashboard");
+        } else {
+          navigate("/trustee/main/dashboard");
+        }
+      } else if (userRole === "ADVISOR") {
+        navigate("/trustee/advisor/dashboard");
       } else if (userRole === "VOLUNTEER") {
         navigate("/trustee/volunteer/dashboard");
       } else {
         setError(
-          `Login successful, but your account role is '${userRole}'. Trustee or Volunteer privileges required.`
+          `Login successful, but your account role is '${userRole}'. Trustee, Volunteer, or Advisor privileges required.`
         );
       }
     } catch (err) {

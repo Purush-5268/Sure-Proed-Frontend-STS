@@ -15,8 +15,13 @@ function ProtectedRoute({ allowedRoles, redirectTo = "/login" }) {
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  if (allowedRoles && allowedRoles.length > 0 && user?.role && !allowedRoles.includes(user.role)) {
-    return <Error403 />;
+  if (allowedRoles && allowedRoles.length > 0 && user?.role) {
+    const isAdvisor = user.role === "ADVISOR" || (user.role === "TRUSTEE" && user.admin_category === "ADVISORY");
+    const effectiveRole = isAdvisor ? "ADVISOR" : user.role;
+
+    if (!allowedRoles.includes(effectiveRole)) {
+      return <Error403 />;
+    }
   }
 
   return <Outlet />;
