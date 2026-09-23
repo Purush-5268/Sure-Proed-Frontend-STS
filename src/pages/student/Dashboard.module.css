@@ -1355,6 +1355,21 @@
   .summaryGrid {
     grid-template-columns: 1fr;
   }
+
+  .heroBanner {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+    padding: 24px;
+  }
+
+  .heroValues, .heroSignature {
+    text-align: center;
+  }
+
+  .shiningLine {
+    margin: 12px auto;
+  }
 }
 
 @media (max-width: 600px) {
@@ -1364,6 +1379,10 @@
   .quickActionsWrapper {
     padding-left: 16px;
     padding-right: 16px;
+  }
+
+  .heroBanner {
+    padding: 20px 16px;
   }
 }
 

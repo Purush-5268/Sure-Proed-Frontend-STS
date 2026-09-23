@@ -162,7 +162,7 @@ function Profile() {
     try {
       const payload = {
         ...formData,
-        courseBatch: formData.courseBatch.trim(),
+        courseBatch: (formData.courseBatch || "").trim(),
         isExistingStudent: isExistingStudent ? "yes" : "no"
       };
 
@@ -316,7 +316,7 @@ function Profile() {
           style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : {}}
         />
         
-        <div style={{ padding: "0 24px" }}>
+        <div className={styles.heroContentWrapper}>
           <div className={styles.identitySection}>
             <div className={styles.avatarWrapper}>
               {displayPhoto ? (
@@ -362,7 +362,7 @@ function Profile() {
         </div>
       </div>
 
-      <div style={{ padding: "0 24px" }}>
+      <div className={styles.heroContentWrapper}>
         {/* TABS */}
         <div className={styles.tabContainer} style={{ marginBottom: '24px' }}>
         <div className={styles.tabList}>

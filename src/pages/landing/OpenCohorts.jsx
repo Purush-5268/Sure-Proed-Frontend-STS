@@ -183,7 +183,7 @@ const OpenCohorts = ({ cohorts: propCohorts, loading: propLoading }) => {
                 <div className={styles.cardStats}>
                   <div className={styles.stat}>
                     <FaUserFriends /> 
-                    <span><strong>{cohort.enrolled_count || 0}</strong> enrolled</span>
+                    <span><strong>{cohort.students_count || 0}</strong> enrolled</span>
                   </div>
                 </div>
 

@@ -844,6 +844,9 @@
 }
 
 @media (max-width: 640px) {
+  .page {
+    padding: 16px 0;
+  }
   .calendarGrid {
     gap: 4px;
   }
