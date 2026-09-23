@@ -102,7 +102,17 @@ function MyStudents() {
       case 'AVAILABLE': return <Badge variant="success">Active</Badge>;
       case 'BUSY': return <Badge variant="warning">Busy</Badge>;
       case 'NOT_AVAILABLE': return <Badge variant="default">Inactive</Badge>;
-      default: return <Badge variant="default">{status || 'Unknown'}</Badge>;
+      case 'TRAINING': return <Badge variant="success">Training</Badge>;
+      case 'INTERNSHIP': return <Badge variant="success">Internship</Badge>;
+      case 'SUSPENDED': return <Badge variant="danger">Suspended</Badge>;
+      case 'DROPPED': 
+      case 'DROPPED_OUT': return <Badge variant="danger">Dropped</Badge>;
+      case 'COMPLETED': return <Badge variant="primary">Completed</Badge>;
+      case 'IN_PROGRESS': return <Badge variant="success">In Progress</Badge>;
+      case 'SOFT_SKILLS': return <Badge variant="warning">Soft Skills</Badge>;
+      case 'TRANSFER_COHORT': return <Badge variant="warning">Transfer</Badge>;
+      case 'COHORT_ASSIGNED': return <Badge variant="success">Cohort Assigned</Badge>;
+      default: return <Badge variant="default">{status ? status.replace(/_/g, ' ') : 'Unknown'}</Badge>;
     }
   };
 
@@ -184,7 +194,7 @@ function MyStudents() {
                         </div>
                       </td>
                       <td className={styles.collegeName}>{student.college || "—"}</td>
-                      <td>{getStatusBadge(student.status)}</td>
+                      <td>{getStatusBadge(student.application_status || student.status)}</td>
                       <td>
                         <button
                           className={styles.messageBtn}

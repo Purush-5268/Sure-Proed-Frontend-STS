@@ -42,13 +42,17 @@ const PushNotificationBanner = () => {
         </h4>
         <p style={{ margin: 0, fontSize: '14px', color: 'rgba(255, 255, 255, 0.9)', lineHeight: '1.5' }}>
           {pushStatus === "denied"
-            ? "You are missing important alerts! Please click the 🔒 icon in your browser's URL bar, change Notifications to 'Allow', and refresh this page."
+            ? "You are missing important alerts! Please click the 'Site Information' icon (🎛️ or 🔒) in your browser's URL bar, change Notifications to 'Allow', and refresh this page."
             : "Enable browser notifications to receive instant alerts for classes, assignments, and announcements."}
         </p>
       </div>
-      {pushStatus === "default" && (
+      {(pushStatus === "default" || pushStatus === "denied") && (
         <button
           onClick={async () => {
+            if (pushStatus === "denied") {
+              alert("Push notifications are currently blocked by your browser. Please click the 'Site Information' icon (the sliders 🎛️ or padlock 🔒) next to the URL in the address bar, set Notifications to 'Allow', and reload the page.");
+              return;
+            }
             setIsPushLoading(true);
             try {
               const perm = await Notification.requestPermission();
@@ -74,7 +78,7 @@ const PushNotificationBanner = () => {
           onMouseEnter={(e) => { if(!isPushLoading) e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)' }}
           onMouseLeave={(e) => { if(!isPushLoading) e.currentTarget.style.transform = 'translateY(0) scale(1)' }}
         >
-          {isPushLoading ? "Enabling..." : "Enable Notifications"}
+          {isPushLoading ? "Enabling..." : pushStatus === "denied" ? "Unblock Notifications" : "Enable Notifications"}
         </button>
       )}
     </div>

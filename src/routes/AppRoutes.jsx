@@ -28,6 +28,7 @@ const CohortChat = lazy(() => import("../pages/student/CohortChat"));
 const CohortInfo = lazy(() => import("../pages/landing/CohortInfo"));
 const PrivacyPolicy = lazy(() => import("../pages/legal/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("../pages/legal/TermsOfService"));
+const ExplorePrograms = lazy(() => import("../pages/landing/ExplorePrograms"));
 
 /* Theme Enforcer for Public Pages */
 function ThemeEnforcer() {
@@ -263,6 +264,7 @@ function AppRoutes() {
             <Route path="/cohort-info/:cohortId" element={<CohortInfo />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/explore-programs" element={<ExplorePrograms />} />
           </Route>
 
           {/* ================= STUDENT MODULE (PROTECTED) ================= */}

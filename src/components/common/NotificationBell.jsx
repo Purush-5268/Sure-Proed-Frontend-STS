@@ -252,6 +252,11 @@ function NotificationBell() {
   const handleTogglePush = async () => {
     if (!pushNotificationService.isSupported()) return;
 
+    if (pushStatus === "denied" || Notification.permission === "denied") {
+      alert("Push notifications are currently blocked by your browser. Please click the 'Site Information' icon (the sliders 🎛️ or padlock 🔒) next to the URL in the address bar, set Notifications to 'Allow', and reload the page.");
+      return;
+    }
+
     setIsPushLoading(true);
     try {
       if (isSubscribed) {
@@ -389,12 +394,12 @@ function NotificationBell() {
               <div className={styles.emptyState}>
                 <FaBell className={styles.emptyIcon} />
                 <p>You're all caught up!</p>
-                {pushNotificationService.isSupported() && pushStatus === "default" && (
+                {pushNotificationService.isSupported() && (pushStatus === "default" || pushStatus === "denied") && (
                    <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-nested)', borderRadius: '8px', border: '1px solid var(--border-color)', textAlign: 'left' }}>
                      <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: 'var(--text-primary)' }}>Stay Updated 🚀</h4>
                      <p style={{ margin: '0 0 12px 0', fontSize: '12px', color: 'var(--text-secondary)' }}>Enable browser notifications to instantly know when a student requests support, misses a class, or when a new cohort session begins.</p>
                      <button onClick={handleTogglePush} disabled={isPushLoading} className="premium-btn premium-btn-primary" style={{ width: '100%', padding: '8px', fontSize: '13px', justifyContent: 'center' }}>
-                       {isPushLoading ? "Enabling..." : "Enable Notifications"}
+                       {isPushLoading ? "Enabling..." : pushStatus === "denied" ? "Unblock Notifications" : "Enable Notifications"}
                      </button>
                    </div>
                 )}
@@ -479,8 +484,22 @@ function NotificationBell() {
                   </button>
                 ) : pushStatus === "denied" ? (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                    <span style={{ color: "var(--danger-color)", fontWeight: "500" }}>Blocked by Browser</span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Click the 🔒 icon in the URL bar to allow</span>
+                    <span style={{ color: "var(--danger-color)", fontWeight: "500", fontSize: "0.8rem" }}>Blocked by Browser</span>
+                    <button
+                      onClick={handleTogglePush}
+                      style={{
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        background: "var(--primary-color)",
+                        color: "white",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: "0.8rem",
+                        fontWeight: "500"
+                      }}
+                    >
+                      Unblock
+                    </button>
                   </div>
                 ) : (
                   <button

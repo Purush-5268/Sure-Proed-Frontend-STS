@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const LazySection = ({ children, fallback, threshold = 0.1 }) => {
+const LazySection = ({ children, fallback, threshold = 0.1, id }) => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
 
@@ -29,7 +29,7 @@ const LazySection = ({ children, fallback, threshold = 0.1 }) => {
   }, [threshold]);
 
   return (
-    <div ref={sectionRef} style={{ minHeight: '1px' }}>
+    <div ref={sectionRef} id={id} style={{ minHeight: '1px' }}>
       {isVisible ? children : fallback}
     </div>
   );

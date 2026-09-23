@@ -16,12 +16,12 @@ export const staggerContainer = {
   }
 };
 
-const ScrollReveal = ({ children, variant = fadeUpVariant, delay = 0, threshold = 0.2, className = "" }) => {
+const ScrollReveal = ({ children, variant = fadeUpVariant, delay = 0, threshold = 0.1, className = "" }) => {
   return (
     <motion.div
       initial="hidden"
       whileInView="show"
-      viewport={{ once: true, amount: threshold }}
+      viewport={{ once: true, margin: "-10%" }}
       variants={variant}
       style={{ width: '100%' }}
       className={className}

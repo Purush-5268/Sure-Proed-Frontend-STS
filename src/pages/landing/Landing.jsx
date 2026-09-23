@@ -37,7 +37,7 @@ function Landing() {
         <OpenCohorts cohorts={cohorts} loading={loading} />
       </ScrollReveal>
       
-      <LazySection fallback={<div style={{ minHeight: '400px' }}></div>}>
+      <LazySection id="features" fallback={<div style={{ minHeight: '400px' }}></div>}>
         <Suspense fallback={<div style={{ minHeight: '400px' }}></div>}>
           <ScrollReveal>
             <WhySureProed />
@@ -45,7 +45,7 @@ function Landing() {
         </Suspense>
       </LazySection>
 
-      <LazySection fallback={<div style={{ minHeight: '400px' }}></div>}>
+      <LazySection id="programs" fallback={<div style={{ minHeight: '400px' }}></div>}>
         <Suspense fallback={<div style={{ minHeight: '400px' }}></div>}>
           <ScrollReveal>
             <LearningPrograms courses={courses} loading={loading} />
@@ -53,7 +53,7 @@ function Landing() {
         </Suspense>
       </LazySection>
 
-      <LazySection fallback={<div style={{ minHeight: '400px' }}></div>}>
+      <LazySection id="statistics" fallback={<div style={{ minHeight: '400px' }}></div>}>
         <Suspense fallback={<div style={{ minHeight: '400px' }}></div>}>
           <ScrollReveal>
             <Statistics />

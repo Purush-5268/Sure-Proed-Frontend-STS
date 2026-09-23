@@ -7,6 +7,7 @@ import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
 import { studentService } from "../../services/studentService";
 import NotificationBell from "../common/NotificationBell";
 import NavbarThemeSwitcher from "../common/NavbarThemeSwitcher";
+import { authService } from "../../services/authService";
 
 function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -209,7 +210,6 @@ function Navbar() {
                       <button 
                         onClick={async () => {
                           try {
-                            const { authService } = await import("../../services/authService");
                             const res = await authService.switchAccount();
                             closeMenu(); 
                             setProfileDropdownOpen(false);
