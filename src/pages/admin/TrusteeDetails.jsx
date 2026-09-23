@@ -154,7 +154,7 @@ function TrusteeDetails() {
             </h2>
             <p style={{ color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "6px" }}>
               <FiShield /> {
-                user?.role === "TRUSTEE" && user?.admin_category === "ADVISORY" ? "Advisor" :
+                (user?.role === "ADVISOR" || (user?.role === "TRUSTEE" && user?.admin_category === "ADVISORY")) ? "Advisor" :
                 user?.role === "VOLUNTEER" ? "Volunteer" :
                 user?.role === "TRUSTEE" ? "Trustee" :
                 "No Type Assigned"

@@ -92,7 +92,7 @@ function Trustees() {
                       <span className="premium-badge premium-badge-green">
                         <FiShield style={{ marginRight: "4px" }} /> Volunteer
                       </span>
-                    ) : t.profile?.trustee_type === "ADVISOR" ? (
+                    ) : (t.profile?.trustee_type === "ADVISOR" || t.admin_category === "ADVISORY" || t.role === "ADVISOR") ? (
                       <span className="premium-badge premium-badge-indigo">
                         <FiShield style={{ marginRight: "4px" }} /> Advisor
                       </span>
