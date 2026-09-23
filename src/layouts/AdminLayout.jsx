@@ -26,6 +26,7 @@ const adminLinks = [
   { label: "Exam Proctoring", path: "/admin/exam-proctoring", icon: <FaShieldAlt /> },
   { label: "Certificates", path: "/admin/certificates", icon: <FaCertificate /> },
   { label: "Requests & Support", path: "/admin/requests-support", icon: <FaHeadset /> },
+  { label: "Messages", path: "/admin/messages", icon: <FaComments /> },
   { label: "Notifications", path: "/admin/notifications", icon: <FaBell /> },
   { label: "Reports & Analytics", path: "/admin/reports", icon: <FaChartBar /> },
   { label: "Mentors", path: "/admin/mentors", icon: <FaChalkboardTeacher /> },
