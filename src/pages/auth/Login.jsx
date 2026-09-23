@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { authService } from "../../services/authService";
 import { setAccessToken, setRefreshToken, setUserInfo, parseJwt } from "../../utils/tokenStorage";
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import loginUrl from "../../assets/animations/Login.lottie?url";
 import styles from "./Login.module.css";
 

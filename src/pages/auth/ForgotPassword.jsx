@@ -3,8 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { authService } from "../../services/authService";
 import { FaCheckCircle, FaArrowLeft, FaShieldAlt, FaKey, FaLock, FaUserShield } from "react-icons/fa";
 import { motion } from "framer-motion";
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import forgotPasswordUrl from "../../assets/animations/forgot-password.lottie";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import forgotPasswordUrl from "../../assets/animations/forgot-password.lottie?url";
 import styles from "./ForgotPassword.module.css";
 
 function ForgotPassword() {

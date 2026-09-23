@@ -11,7 +11,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import GlassCard from "../../components/common/GlassCard";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import styles from "./Profile.module.css";
-import { FiUser, FiBook, FiShield, FiUploadCloud, FiCheckCircle, FiClock, FiAlertCircle, FiSettings, FiGithub, FiLinkedin, FiBriefcase, FiExternalLink } from "react-icons/fi";
+import { FiUser, FiBook, FiShield, FiUploadCloud, FiCheckCircle, FiClock, FiAlertCircle, FiSettings, FiGithub, FiLinkedin, FiBriefcase, FiExternalLink, FiInfo } from "react-icons/fi";
 
 function Profile() {
   const navigate = useNavigate();
@@ -189,7 +189,10 @@ function Profile() {
       console.log("Profile successfully saved. Latest profile:", latestProfile);
     } catch (err) {
       console.error("Profile Save Error:", err);
-      const msg = err.response?.data ? JSON.stringify(err.response.data) : "Save failed";
+      let msg = err.response?.data ? JSON.stringify(err.response.data) : (err.message || "Save failed");
+      if (msg === "Save failed" || msg === "Network Error") {
+        msg = "Network Error. If you uploaded files, one of them might be too large (over 10MB). Please try uploading a smaller file.";
+      }
       alert("Save failed: " + msg);
     } finally {
       setSaving(false);
@@ -200,7 +203,7 @@ function Profile() {
     try {
       const data = await authService.getLinkedInConnectUrl('/student/profile');
       if (data && data.authorization_url) {
-        window.location.href = data.authorization_url;
+        window.open(data.authorization_url, '_blank');
       }
     } catch (err) {
       alert("Could not initiate LinkedIn connection");
@@ -211,7 +214,7 @@ function Profile() {
     try {
       const data = await authService.getGithubConnectUrl();
       if (data && data.authorization_url) {
-        window.location.href = data.authorization_url;
+        window.open(data.authorization_url, '_blank');
       }
     } catch (err) {
       alert("Could not initiate GitHub connection");
@@ -222,7 +225,7 @@ function Profile() {
     try {
       const data = await authService.getGoogleConnectUrl();
       if (data && data.authorization_url) {
-        window.location.href = data.authorization_url;
+        window.open(data.authorization_url, '_blank');
       }
     } catch (err) {
       alert("Could not initiate Google connection. Please try again.");
@@ -770,6 +773,7 @@ function Profile() {
                           const isMatched = matchObj?.is_matched ?? matchObj?.is_compliant ?? matchObj;
                           const matchMsg = matchObj?.message;
                           const meetIdentity = serverProfile.current_application?.meet_identity || serverProfile.current_application?.required_meet_display_name;
+                          const recommendedIdentity = serverProfile.current_application?.recommended_meet_identity || meetIdentity;
 
                           return (
                             <>
@@ -837,7 +841,7 @@ function Profile() {
                                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                                     <strong style={{ color: '#059669', fontSize: '13px', marginBottom: '4px' }}>Please Make Sure You Have This Format</strong>
                                     <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
-                                      Please ensure your Google Account name matches this format: <strong style={{ color: 'var(--text-primary)' }}>{meetIdentity}</strong>. This helps mentors easily identify you!
+                                      Please ensure your Google Account name matches this format: <strong style={{ color: 'var(--text-primary)' }}>{recommendedIdentity}</strong>. This helps mentors easily identify you!
                                     </p>
                                   </div>
                                 </div>
@@ -849,7 +853,11 @@ function Profile() {
 
 
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                          Connected on {new Date(serverProfile.google_identity.connected_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                          Connected on {(() => {
+                            if (!serverProfile?.google_identity?.connected_at) return "Unknown date";
+                            const d = new Date(serverProfile.google_identity.connected_at);
+                            return isNaN(d) ? "Unknown date" : d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+                          })()}
                         </div>
                       </div>
                     ) : (
@@ -897,7 +905,11 @@ function Profile() {
                     </div>
                     <div className="premium-form-group">
                       <label htmlFor="profile_identity_issued_at" className="premium-label">Identity Issued At</label>
-                      <input id="profile_identity_issued_at" className="premium-input" value={serverProfile?.student_identity_issued_at ? new Date(serverProfile.student_identity_issued_at).toLocaleString() : "Pending Qualification"} disabled />
+                      <input id="profile_identity_issued_at" className="premium-input" value={(() => {
+                        if (!serverProfile?.student_identity_issued_at) return "Pending Qualification";
+                        const d = new Date(serverProfile.student_identity_issued_at);
+                        return isNaN(d) ? "Invalid date" : d.toLocaleString();
+                      })()} disabled />
                     </div>
                     <div className="premium-form-group">
                       <label htmlFor="profile_current_course" className="premium-label">Current Course</label>
