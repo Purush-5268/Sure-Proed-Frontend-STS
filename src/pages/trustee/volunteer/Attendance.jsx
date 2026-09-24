@@ -87,8 +87,9 @@ function AttendanceManagement() {
 
   const getCohortName = (cohortId, title) => {
     const cohort = cohorts.find((item) => String(item.id) === String(cohortId));
-    if (cohort && cohort.course?.name) return cohort.course.name;
-    if (cohort && cohort.name) return cohort.name;
+    if (cohort && cohort.name) {
+      return cohort.code ? `${cohort.name} (${cohort.code})` : cohort.name;
+    }
     if (title) {
       if (title.includes("[")) return title.replace(/\[.*?\]/g, "").trim();
       const parts = title.split(" - ");
@@ -312,7 +313,7 @@ function AttendanceManagement() {
               <tr>
                 <th>Date</th>
                 <th>Domain Name</th>
-                <th>Group Number</th>
+                <th>Session Title</th>
                 <th>Meet Start</th>
                 <th>Meet End</th>
                 <th>Total Students</th>
@@ -334,7 +335,7 @@ function AttendanceManagement() {
                   <tr key={item.id}>
                     <td style={{ verticalAlign: "middle" }}>{item.class_date}</td>
                     <td style={{ verticalAlign: "middle" }}>{getCohortName(item.cohort, item.title)}</td>
-                    <td style={{ verticalAlign: "middle" }}>{getCohortBatch(item.cohort, item.title)}</td>
+                    <td style={{ verticalAlign: "middle" }}>{item.title || "N/A"}</td>
                     <td style={{ verticalAlign: "middle", whiteSpace: "nowrap" }}>
                       {item.start_time
                         ? new Date(`${item.class_date}T${item.start_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })

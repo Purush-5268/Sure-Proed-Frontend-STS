@@ -445,34 +445,46 @@ function ScheduleClass() {
           </div>
 
           {request.sessionType === "Domain" && (
-            <div className={`premium-section premium-grid-2 ${styles.animatedField}`}>
-              <div>
-                <label className="premium-label">Select Stream *</label>
-                <select value={request.streamId} onChange={(e) => setRequest({ ...request, streamId: e.target.value })} required className={`premium-input ${styles.formInput}`}>
-                  <option value="">-- Select Stream --</option>
-                  {courses.map(c => <option key={c.id} value={c.id}>{c.name || c.title}</option>)}
-                </select>
+            <div className={`premium-section ${styles.animatedField}`}>
+              <div className="premium-grid-2">
+                <div>
+                  <label className="premium-label">Select Stream *</label>
+                  <select value={request.streamId} onChange={(e) => setRequest({ ...request, streamId: e.target.value })} required className={`premium-input ${styles.formInput}`}>
+                    <option value="">-- Select Stream --</option>
+                    {courses.map(c => <option key={c.id} value={c.id}>{c.name || c.title}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="premium-label">Select Cohort *</label>
+                  <select 
+                    value={request.cohortId || ""} 
+                    onChange={(e) => {
+                      const selected = cohorts.find(c => c.id === e.target.value);
+                      setRequest({ ...request, cohortId: e.target.value, groupName: selected?.code || selected?.name || "" });
+                    }} 
+                    required 
+                    className={`premium-input ${styles.formInput}`}
+                    disabled={!request.streamId || loadingCohorts}
+                  >
+                    <option value="">{loadingCohorts ? "Loading Cohorts..." : "-- Select Cohort --"}</option>
+                    {cohorts.map(c => <option key={c.id} value={c.id}>{c.name} ({c.code})</option>)}
+                  </select>
+                  {!loadingCohorts && request.streamId && cohorts.length === 0 && (
+                    <div className="premium-alert-warning" style={{marginTop: "10px", fontSize: "13px", padding: "8px"}}>
+                      ⚠️ No cohorts assigned in this stream.
+                    </div>
+                  )}
+                </div>
               </div>
-              <div>
-                <label className="premium-label">Select Cohort *</label>
-                <select 
-                  value={request.cohortId || ""} 
-                  onChange={(e) => {
-                    const selected = cohorts.find(c => c.id === e.target.value);
-                    setRequest({ ...request, cohortId: e.target.value, groupName: selected?.code || selected?.name || "" });
-                  }} 
-                  required 
-                  className={`premium-input ${styles.formInput}`}
-                  disabled={!request.streamId || loadingCohorts}
-                >
-                  <option value="">{loadingCohorts ? "Loading Cohorts..." : "-- Select Cohort --"}</option>
-                  {cohorts.map(c => <option key={c.id} value={c.id}>{c.name} ({c.code})</option>)}
-                </select>
-                {!loadingCohorts && request.streamId && cohorts.length === 0 && (
-                  <div className="premium-alert-warning" style={{marginTop: "10px", fontSize: "13px", padding: "8px"}}>
-                    ⚠️ No cohorts assigned in this stream.
-                  </div>
-                )}
+              <div style={{ marginTop: '1rem' }}>
+                <label className="premium-label">Session Title (Optional)</label>
+                <input 
+                  type="text" 
+                  value={request.title || ""} 
+                  onChange={(e) => setRequest({ ...request, title: e.target.value })} 
+                  placeholder="e.g. Introduction to Python" 
+                  className={`premium-input ${styles.formInput}`} 
+                />
               </div>
             </div>
           )}
