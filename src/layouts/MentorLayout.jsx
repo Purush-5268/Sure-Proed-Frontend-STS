@@ -42,8 +42,10 @@ function MentorLayout() {
       .then(res => {
         const data = Array.isArray(res.data?.results) ? res.data.results : (Array.isArray(res.data) ? res.data : []);
         setCohorts(data);
-        if (data.length > 0) {
+        if (data.length === 1) {
           setSelectedGlobalCohort(String(data[0].id));
+        } else {
+          setSelectedGlobalCohort("");
         }
       })
       .catch(err => console.error("Failed to load global cohorts for mentor", err));
@@ -72,16 +74,19 @@ function MentorLayout() {
               {cohorts.length === 0 ? (
                 <option value="">No assigned cohorts</option>
               ) : (
-                cohorts.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.course_name} — {c.code}
-                  </option>
-                ))
+                <>
+                  <option value="">All Assigned Cohorts ({cohorts.length})</option>
+                  {cohorts.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.course_name} — {c.code || c.name}
+                    </option>
+                  ))}
+                </>
               )}
             </select>
           </div>
 
-          <Outlet context={{ globalCohort: selectedGlobalCohort }} />
+          <Outlet context={{ globalCohort: selectedGlobalCohort, setGlobalCohort: setSelectedGlobalCohort, cohorts }} />
         </main>
       </div>
 

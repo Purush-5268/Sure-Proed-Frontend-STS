@@ -274,16 +274,28 @@ function ApplyCourse() {
         )}
 
         {/* 🚨 ACTIVE APPLICATION LOCK BANNER 🚨 */}
-        {!loading && !hasQualified && activeApplication && (
-          <div style={{ backgroundColor: "#eff6ff", border: "1px solid #93c5fd", padding: "1rem 1.5rem", borderRadius: "12px", marginBottom: "2rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ color: "#1e40af", fontWeight: "bold", fontSize: "14px" }}>
-              🔒 Active Application Pending: You currently hold an active application ({activeApplication.application_number || "Active Track"}). 1 active application allowed at a time.
-            </span>
-            <Link to="/student/applications" style={{ padding: "8px 18px", backgroundColor: "#2563eb", color: "white", borderRadius: "8px", textDecoration: "none", fontWeight: "bold", fontSize: "14px" }}>
-              View Active Application
-            </Link>
-          </div>
-        )}
+        {!loading && !hasQualified && activeApplication && (() => {
+          const isExamScheduled = Boolean(activeApplication?.pre_screening?.scheduled_at);
+          return (
+            <div style={{ backgroundColor: "#eff6ff", border: "1px solid #93c5fd", padding: "1.2rem 1.5rem", borderRadius: "12px", marginBottom: "2rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+              <div>
+                <span style={{ color: "#1e40af", fontWeight: "bold", fontSize: "14px", display: "block" }}>
+                  🔒 Active Application: {activeApplication.application_number || "Active Track"} ({activeApplication.course_display || activeApplication.course_name || activeApplication.course?.name || "Internship Course"})
+                </span>
+                <span style={{ color: isExamScheduled ? "#059669" : "#b45309", fontSize: "13.5px", fontWeight: "600", marginTop: "4px", display: "block" }}>
+                  {isExamScheduled ? (
+                    `📅 Exam Scheduled: ${new Date(activeApplication.pre_screening.scheduled_at).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric", year: "numeric" })} at ${new Date(activeApplication.pre_screening.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                  ) : (
+                    `⏳ Your screening exam is not scheduled yet. Please wait for the admin to schedule the exam date and time.`
+                  )}
+                </span>
+              </div>
+              <Link to="/student/applications" style={{ padding: "8px 18px", backgroundColor: "#2563eb", color: "white", borderRadius: "8px", textDecoration: "none", fontWeight: "bold", fontSize: "14px", whiteSpace: "nowrap" }}>
+                View Active Application
+              </Link>
+            </div>
+          );
+        })()}
 
         {/* 🚨 PROFILE INCOMPLETE WARNING BANNER 🚨 */}
         {!loading && !profileCompleted && !hasQualified && !activeApplication && (
@@ -314,17 +326,24 @@ function ApplyCourse() {
               const hasApplied = appliedCourseIds.has(courseId);
               const isUnderCooldown = cooldownCourseMap[courseId];
               const isActiveTrack = activeApplication && (activeApplication.course?.id === courseId || activeApplication.course_id === courseId);
+              const isExamScheduled = Boolean(activeApplication?.pre_screening?.scheduled_at);
 
               return (
                 <div key={cohort.id} className={styles.courseCard}>
                   <span
                     className={styles.badge}
                     style={{
-                      backgroundColor: hasApplied ? "#059669" : isUnderCooldown ? "#dc2626" : "#2563eb",
+                      backgroundColor: isActiveTrack ? (isExamScheduled ? "#059669" : "#d97706") : hasApplied ? "#059669" : isUnderCooldown ? "#dc2626" : "#2563eb",
                       color: "#ffffff",
                     }}
                   >
-                    {isActiveTrack ? "Active Application Track" : hasApplied ? "Applied Track" : isUnderCooldown ? "Cooldown Active" : "Open Cohort"}
+                    {isActiveTrack
+                      ? (isExamScheduled ? "Exam Scheduled" : "Exam Not Scheduled Yet")
+                      : hasApplied
+                      ? "Applied Track"
+                      : isUnderCooldown
+                      ? "Cooldown Active"
+                      : "Open Cohort"}
                   </span>
                   <h2>{cohort.name}</h2>
                   <p><strong>{courseName}</strong> - {courseDetails.description}</p>
@@ -355,7 +374,7 @@ function ApplyCourse() {
                       </button>
                     ) : isActiveTrack ? (
                       <Link to="/student/applications" className={`${styles.detailsBtn} ${styles.btnActive}`}>
-                        ✓ Active Application (View Status)
+                        {isExamScheduled ? "✓ Exam Scheduled (View Status)" : "⏳ Exam Not Scheduled Yet (View Status)"}
                       </Link>
                     ) : activeApplication ? (
                       <button disabled className={`${styles.detailsBtn} ${styles.btnDisabled}`}>

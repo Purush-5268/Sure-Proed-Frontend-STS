@@ -663,36 +663,40 @@
 }
 
 .badgeNotVisited {
-  background: linear-gradient(180deg, var(--bg-card) 0%, #f1f3f5 50%, #e2e6ea 100%);
-  border: 1.5px solid var(--text-muted);
-  color: var(--text-secondary);
+  background: #f1f5f9;
+  border: 1.5px solid #94a3b8;
+  color: #0f172a;
   border-radius: 4px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .badgeNotAnswered {
-  background: linear-gradient(135deg, var(--status-pending-text, #9a3412) 0%, #ea580c 25%, #f97316 100%);
-  color: var(--bg-card);
+  background: #ea580c;
+  border: 1.5px solid #c2410c;
+  color: #ffffff;
   border-radius: 3px;
   clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
 }
 
 .badgeAnswered {
-  background: linear-gradient(135deg, var(--status-active-text, #166534) 0%, #22c55e 25%, #16a34a 100%);
-  color: var(--bg-card);
+  background: #16a34a;
+  border: 1.5px solid #15803d;
+  color: #ffffff;
   border-radius: 3px;
   clip-path: polygon(0% 0%, 100% 15%, 100% 85%, 0% 100%);
 }
 
 .badgeMarked {
-  background: linear-gradient(135deg, #7e22ce 0%, #9333ea 50%, #a855f7 100%);
-  color: var(--bg-card);
+  background: #9333ea;
+  border: 1.5px solid #7e22ce;
+  color: #ffffff;
   border-radius: 50%;
 }
 
 .badgeAnsMarked {
-  background: linear-gradient(135deg, #6b21a8 0%, #7e22ce 100%);
-  color: var(--bg-card);
+  background: #6366f1;
+  border: 1.5px solid #4f46e5;
+  color: #ffffff;
   border-radius: 50%;
   position: relative;
 }
@@ -753,104 +757,107 @@
   z-index: 5 !important;
 }
 
-/* 1. NOT VISITED (Light grey rounded 3D button - matching 04-08 in pic 1) */
+/* 1. NOT VISITED (High-contrast slate tile - 100% visible in both light & dark) */
 .tileNotVisited {
-  background: linear-gradient(180deg, var(--bg-card) 0%, #f1f3f5 50%, #e2e6ea 100%) !important;
-  border: 1.5px solid var(--text-muted) !important;
-  border-radius: 4px !important;
-  color: var(--text-secondary) !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  background: #f1f5f9 !important;
+  border: 1.5px solid #94a3b8 !important;
+  border-radius: 6px !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
 }
 
 .tileNotVisited:hover {
-  background: linear-gradient(180deg, var(--bg-card) 0%, #e8ecf0 100%) !important;
-  border-color: var(--text-secondary) !important;
+  background: #e2e8f0 !important;
+  border-color: #64748b !important;
+  color: #0f172a !important;
 }
 
-/* 2. ANSWERED (Green polygon/trapezoid - matching 01, 02 in pic 1) */
+/* 2. ANSWERED (Emerald Green with crisp white text) */
 .tileAnswered {
-  background: linear-gradient(135deg, var(--status-active-text, #166534) 0%, #22c55e 25%, #16a34a 100%) !important;
-  border: 1.5px solid var(--status-active-text, #166534) !important;
-  border-radius: 4px !important;
-  color: var(--bg-card) !important;
-  box-shadow: 0 1px 2px rgba(21, 128, 61, 0.35) !important;
+  background: #16a34a !important;
+  border: 1.5px solid #15803d !important;
+  border-radius: 6px !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(22, 163, 74, 0.35) !important;
 }
 
 .tileAnswered:hover {
-  box-shadow: 0 2px 4px rgba(21, 128, 61, 0.5) !important;
-  filter: brightness(1.08) !important;
+  background: #15803d !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.5) !important;
 }
 
-/* 3. NOT ANSWERED (Orange polygon/trapezoid - NTA standard) */
+/* 3. NOT ANSWERED (Vivid Orange with crisp white text) */
 .tileNotAnswered {
-  background: linear-gradient(135deg, var(--status-pending-text, #9a3412) 0%, #ea580c 25%, #f97316 100%) !important;
-  border: 1.5px solid var(--status-pending-text, #9a3412) !important;
-  border-radius: 4px !important;
-  color: var(--bg-card) !important;
-  box-shadow: 0 1px 2px rgba(194, 65, 12, 0.35) !important;
+  background: #ea580c !important;
+  border: 1.5px solid #c2410c !important;
+  border-radius: 6px !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(234, 88, 12, 0.35) !important;
 }
 
 .tileNotAnswered:hover {
-  box-shadow: 0 2px 4px rgba(194, 65, 12, 0.5) !important;
-  filter: brightness(1.08) !important;
+  background: #c2410c !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(234, 88, 12, 0.5) !important;
 }
 
-/* 4. MARKED FOR REVIEW (Purple circle) */
+/* 4. MARKED FOR REVIEW (Vibrant Purple with crisp white text) */
 .tileMarked {
-  background: linear-gradient(135deg, #7e22ce 0%, #9333ea 50%, #a855f7 100%) !important;
-  border: 1.5px solid #6b21a8 !important;
-  border-radius: 4px !important;
-  color: var(--bg-card) !important;
-  box-shadow: 0 1.5px 3px rgba(126, 34, 206, 0.4) !important;
+  background: #9333ea !important;
+  border: 1.5px solid #7e22ce !important;
+  border-radius: 6px !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(147, 51, 234, 0.35) !important;
 }
 
 .tileMarked:hover {
-  box-shadow: 0 2px 5px rgba(126, 34, 206, 0.6) !important;
-  filter: brightness(1.08) !important;
+  background: #7e22ce !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(147, 51, 234, 0.5) !important;
 }
 
-/* 5. ANSWERED & MARKED FOR REVIEW (Purple circle with green badge) */
+/* 5. ANSWERED & MARKED FOR REVIEW (Indigo with crisp white text + green indicator) */
 .tileAnsMarked {
-  background: linear-gradient(135deg, #6b21a8 0%, #7e22ce 100%) !important;
-  border: 1.5px solid #581c87 !important;
-  border-radius: 4px !important;
-  color: var(--bg-card) !important;
+  background: #6366f1 !important;
+  border: 1.5px solid #4f46e5 !important;
+  border-radius: 6px !important;
+  color: #ffffff !important;
   position: relative !important;
-  box-shadow: 0 1.5px 3px rgba(107, 33, 168, 0.4) !important;
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.35) !important;
+}
+
+.tileAnsMarked:hover {
+  background: #4f46e5 !important;
+  color: #ffffff !important;
 }
 
 .tileAnsMarked::after {
   content: "✓" !important;
   position: absolute !important;
-  bottom: -1px !important;
-  right: -1px !important;
-  width: 13px !important;
-  height: 13px !important;
+  bottom: -2px !important;
+  right: -2px !important;
+  width: 14px !important;
+  height: 14px !important;
   background: #16a34a !important;
-  border: 1px solid var(--bg-card) !important;
+  border: 1.5px solid #ffffff !important;
   border-radius: 50% !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   font-size: 9px !important;
   font-weight: 900 !important;
-  color: var(--bg-card) !important;
+  color: #ffffff !important;
   line-height: 1 !important;
 }
 
-/* CURRENT ACTIVE QUESTION HIGHLIGHT (matching 03 in pic 1) */
+/* CURRENT ACTIVE QUESTION HIGHLIGHT */
 .navTileCurrent {
-  box-shadow: 0 0 0 2px var(--text-primary) !important;
-  border-color: var(--text-primary) !important;
+  outline: 2.5px solid #2563eb !important;
+  outline-offset: 1px !important;
+  box-shadow: 0 0 0 2px #ffffff, 0 3px 8px rgba(37, 99, 235, 0.5) !important;
+  transform: scale(1.08) !important;
   z-index: 10 !important;
-}
-
-.tileAnswered.navTileCurrent {
-  box-shadow: 0 0 0 2px var(--text-primary) !important;
-}
-
-.tileNotAnswered.navTileCurrent {
-  box-shadow: 0 0 0 2px var(--text-primary) !important;
 }
 
 /* SIDEBAR FOOTER ACTION BUTTONS */
@@ -1175,14 +1182,21 @@
 }
 
 [data-theme="dark"] .tileNotVisited,
-[data-theme="dark"] .navTileCurrent {
-  background: var(--bg-nested);
-  border-color: var(--border-color);
-  color: var(--text-primary);
+[data-theme="dark"] .badgeNotVisited {
+  background: #1e293b !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
 }
 
 [data-theme="dark"] .tileNotVisited:hover {
-  background: var(--bg-subtle);
+  background: #334155 !important;
+  border-color: #64748b !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .navTileCurrent {
+  outline: 2.5px solid #38bdf8 !important;
+  box-shadow: 0 0 0 2px #0f172a, 0 3px 8px rgba(56, 189, 248, 0.6) !important;
 }
 
 [data-theme="dark"] .zoomBtn,
@@ -1237,4 +1251,31 @@
 [data-theme="dark"] .modalSummaryTable tr:nth-child(even) {
   background: var(--bg-nested);
 }
+/* ================= QUESTION IMAGE STYLING ================= */
+.questionImageContainer {
+  margin: 16px 0 24px 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  background: var(--bg-card);
+  padding: 12px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 100%;
+}
 
+.questionImage {
+  max-width: 100%;
+  max-height: 480px;
+  object-fit: contain;
+  border-radius: 6px;
+  user-select: none;
+  -webkit-user-drag: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .questionImageContainer {
+  background: var(--bg-nested);
+  border-color: var(--border-color);
+}

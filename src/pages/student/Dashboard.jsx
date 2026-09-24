@@ -437,6 +437,57 @@ function Dashboard() {
         </div>
       )}
 
+      {resolvedEnrollment?.status === "COHORT_ASSIGNED" && (
+        <div style={{
+          display: 'flex', gap: '16px', alignItems: 'center', backgroundColor: '#e0f2fe',
+          padding: '20px 24px', borderRadius: '16px', marginBottom: '32px', border: '1px solid #bae6fd',
+          boxShadow: '0 4px 6px -1px rgba(14, 165, 233, 0.1)'
+        }}>
+          <div style={{ fontSize: '32px' }}>⏳</div>
+          <div style={{ flex: 1 }}>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', color: '#0369a1' }}>You are enrolled! Your cohort starts soon.</h4>
+            <p style={{ margin: 0, color: '#075985', fontSize: '14px', lineHeight: '1.5' }}>
+              Your application is verified and you are assigned to <strong>{stats?.active_cohort?.name || profile?.current_application?.assigned_cohort?.name || "your cohort"}</strong>. 
+              Once the start date arrives, you will automatically gain access to your learning modules, class schedules, and other resources.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {resolvedEnrollment?.status === "QUALIFIED" && (
+        <div style={{
+          display: 'flex', gap: '16px', alignItems: 'center', backgroundColor: '#ecfdf5',
+          padding: '20px 24px', borderRadius: '16px', marginBottom: '32px', border: '1px solid #a7f3d0',
+          boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.1)'
+        }}>
+          <div style={{ fontSize: '32px' }}>🎉</div>
+          <div style={{ flex: 1 }}>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', color: '#065f46' }}>Congratulations! You have Qualified for Admission</h4>
+            <p style={{ margin: 0, color: '#047857', fontSize: '14px', lineHeight: '1.5' }}>
+              You have successfully cleared the pre-screening criteria for <strong>{resolvedEnrollment?.courseName || profile?.current_application?.course?.name || "your selected course"}</strong>. 
+              Our admissions team is currently preparing the upcoming cohort batch. You will receive an official cohort assignment and onboarding schedule shortly.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {resolvedEnrollment?.status === "EXAM_COMPLETED" && (
+        <div style={{
+          display: 'flex', gap: '16px', alignItems: 'center', backgroundColor: '#fef3c7',
+          padding: '20px 24px', borderRadius: '16px', marginBottom: '32px', border: '1px solid #fde68a',
+          boxShadow: '0 4px 6px -1px rgba(245, 158, 11, 0.1)'
+        }}>
+          <div style={{ fontSize: '32px' }}>📝</div>
+          <div style={{ flex: 1 }}>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', color: '#92400e' }}>Assessment Completed — Evaluation in Progress</h4>
+            <p style={{ margin: 0, color: '#b45309', fontSize: '14px', lineHeight: '1.5' }}>
+              Your pre-screening assessment for <strong>{resolvedEnrollment?.courseName || profile?.current_application?.course?.name || "your course"}</strong> has been received and is being processed. 
+              Once your evaluation is published by the administration, your qualification status and cohort details will be updated here automatically.
+            </p>
+          </div>
+        </div>
+      )}
+
 
       {/* SECTION 2: Summary Cards */}
       <div className={styles.summaryGrid}>
@@ -549,13 +600,26 @@ function Dashboard() {
               <div className={styles.enrollmentMetaItem}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <FiCalendar size={14} color="var(--text-muted)" />
-                  <span className={styles.enrollmentMetaLabel}>Start Date</span>
+                  <span className={styles.enrollmentMetaLabel}>Cohort Start</span>
                 </div>
                 <span className={styles.enrollmentMetaValue}>
                   {(() => {
                     const cohortData = stats?.active_cohort || profile?.current_application?.assigned_cohort || {};
-                    const d = stats?.cohort_start_date || resolvedEnrollment?.startDate || cohortData.start_date || cohortData.startDate || profile?.current_application?.applied_at || profile?.current_application?.created_at || profile?.created_at || new Date().toISOString();
-                    return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const d = stats?.cohort_start_date || cohortData.start_date || cohortData.startDate || resolvedEnrollment?.startDate;
+                    return d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD';
+                  })()}
+                </span>
+              </div>
+              <div className={styles.enrollmentMetaItem}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <FiCalendar size={14} color="var(--text-muted)" />
+                  <span className={styles.enrollmentMetaLabel}>Cohort End</span>
+                </div>
+                <span className={styles.enrollmentMetaValue}>
+                  {(() => {
+                    const cohortData = stats?.active_cohort || profile?.current_application?.assigned_cohort || {};
+                    const d = stats?.cohort_end_date || cohortData.end_date || cohortData.endDate || resolvedEnrollment?.endDate;
+                    return d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD';
                   })()}
                 </span>
               </div>
@@ -793,7 +857,7 @@ function Dashboard() {
           </div>
 
           {(stats?.upcoming_exams?.length > 0 || profile?.current_application?.requires_exam) && (
-            <div className={styles.quickAction} onClick={() => navigate('/student/exams')}>
+            <div className={styles.quickAction} onClick={() => navigate('/student/exam-instructions')}>
               <div className={styles.quickActionIcon} style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}><FiEdit size={24} /></div>
               <div style={{ flexGrow: 1 }}>
                 <h4 className={styles.quickActionTitle}>Take Exam</h4>

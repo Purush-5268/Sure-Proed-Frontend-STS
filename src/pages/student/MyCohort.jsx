@@ -22,6 +22,7 @@ function MyCohort() {
   const [hasEnrollment, setHasEnrollment] = useState(Boolean(initialCohort || cachedProfile?.current_application || cachedProfile?.course_name));
   const [enrollmentStatus, setEnrollmentStatus] = useState(cachedProfile?.current_application?.status || null);
   const [mentorsMap, setMentorsMap] = useState({});
+  const [classSession, setClassSession] = useState(null);
   const [loading, setLoading] = useState(!initialCohort);
 
   useEffect(() => {
@@ -123,6 +124,21 @@ function MyCohort() {
             }
           }
           setCohort(resolvedCohort);
+
+          if (resolvedCohort?.id) {
+            try {
+              const sessionRes = await apiClient.get(API_ENDPOINTS.TRAININGS?.SESSIONS || "/api/trainings/sessions/", {
+                params: { cohort: resolvedCohort.id }
+              }).catch(() => null);
+              const sList = Array.isArray(sessionRes?.data?.results) ? sessionRes.data.results : (Array.isArray(sessionRes?.data) ? sessionRes.data : []);
+              const validSession = sList.find(s => s.meeting_link);
+              if (isMounted && validSession) {
+                setClassSession(validSession);
+              }
+            } catch (sErr) {
+              console.warn("Could not fetch cohort class session", sErr);
+            }
+          }
         }
       } catch (err) {
         console.error("Failed to load student cohort:", err);
@@ -184,25 +200,54 @@ function MyCohort() {
                 </div>
               )}
 
-              <div className={styles.infoBox}>
-                <h3>Mentor(s)</h3>
-                <Link to="/student/mentor-details" className="premium-badge premium-badge-active" style={{ textDecoration: 'none', display: 'inline-block' }}>
-                  {(() => {
-                    let mentorCount = 0;
-                    if (cohort.active_mentors && cohort.active_mentors.length > 0) {
-                      mentorCount = cohort.active_mentors.length;
-                    } else if (cohort.mentors && cohort.mentors.length > 0) {
-                      mentorCount = cohort.mentors.length;
-                    } else if (cohort.mentor_name && cohort.mentor_name !== "Not assigned") {
-                      mentorCount = cohort.mentor_name.split(',').length;
-                    } else if (cohort.active_mentor) {
-                      mentorCount = 1;
+              <div className={styles.infoBox} style={{ gridColumn: '1 / -1' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <h3 style={{ margin: 0 }}>Assigned Mentor(s)</h3>
+                  <Link to="/student/mentor-details" style={{ fontSize: '0.85rem', color: 'var(--primary-color)', fontWeight: '600', textDecoration: 'none' }}>
+                    View All Profiles &rarr;
+                  </Link>
+                </div>
+                {(() => {
+                  const resolvedMentorsList = (() => {
+                    if (Array.isArray(cohort.active_mentors) && cohort.active_mentors.length > 0) {
+                      return cohort.active_mentors;
                     }
-                    
-                    if (mentorCount === 0) return "Unassigned";
-                    return `${mentorCount} Mentor${mentorCount > 1 ? 's' : ''}`;
-                  })()}
-                </Link>
+                    if (Array.isArray(cohort.mentors) && cohort.mentors.length > 0) {
+                      return cohort.mentors.map((m, idx) => {
+                        if (typeof m === 'object' && m !== null) return m;
+                        const prof = mentorsMap[m];
+                        if (prof) return { ...prof, name: `${prof.first_name || ''} ${prof.last_name || ''}`.trim() || prof.email };
+                        const fallbackNames = cohort.mentor_name && cohort.mentor_name !== "Not assigned" ? cohort.mentor_name.split(',').map(n => n.trim()) : [];
+                        return { id: m, name: fallbackNames[idx] || "Assigned Mentor" };
+                      });
+                    }
+                    if (cohort.mentor_name && cohort.mentor_name !== "Not assigned") {
+                      return cohort.mentor_name.split(',').map((name, idx) => ({ id: `mentor-${idx}`, name: name.trim() }));
+                    }
+                    return [];
+                  })();
+
+                  if (resolvedMentorsList.length === 0) {
+                    return <p style={{ color: 'var(--text-secondary)', margin: 0 }}>No mentors currently assigned.</p>;
+                  }
+
+                  return (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
+                      {resolvedMentorsList.map((m, idx) => (
+                        <Link
+                          key={m.id || idx}
+                          to="/student/mentor-details"
+                          state={{ mentorId: m.id || m.user }}
+                          className="premium-badge premium-badge-active"
+                          style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.875rem' }}
+                        >
+                          <FiUser size={14} />
+                          {m.name || `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.email || "Mentor"}
+                        </Link>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
 
               <div className={styles.infoBox}>
@@ -228,13 +273,21 @@ function MyCohort() {
               </div>
 
               <div className={styles.infoBox} style={{ gridColumn: '1 / -1' }}>
-                <h3>Meeting</h3>
-                <p>
-                  {cohort.meeting_link || cohort.google_meet_link ? (
-                    <a href={cohort.meeting_link || cohort.google_meet_link} target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary-color)", fontWeight: "bold", textDecoration: "underline" }}>
-                      Join Class Meeting
-                    </a>
-                  ) : "Not configured"}
+                <h3>Class Meeting</h3>
+                <p style={{ margin: 0, marginTop: '4px' }}>
+                  {(() => {
+                    const effectiveMeetingLink = classSession?.meeting_link || 
+                      (cohort.meeting_link && cohort.meeting_link !== cohort.pre_screening?.meeting_link ? cohort.meeting_link : null);
+
+                    if (effectiveMeetingLink) {
+                      return (
+                        <a href={effectiveMeetingLink} target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary-color)", fontWeight: "bold", textDecoration: "underline" }}>
+                          Join Class Meeting {classSession?.title ? `(${classSession.title})` : ""}
+                        </a>
+                      );
+                    }
+                    return <span style={{ color: "var(--text-secondary)", fontStyle: "italic" }}>No meeting link available</span>;
+                  })()}
                 </p>
               </div>
             </div>

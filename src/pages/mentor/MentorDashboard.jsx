@@ -7,6 +7,7 @@ import apiClient, { fetchAllPages } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import PageHeader from "../../components/ui/PageHeader";
 import Card from "../../components/ui/Card";
+import Badge from "../../components/ui/Badge";
 import EmptyState from "../../components/ui/EmptyState";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import PushNotificationBanner from "../../components/common/PushNotificationBanner";
@@ -22,6 +23,10 @@ import {
   FiPlus,
   FiBarChart2,
   FiBookOpen,
+  FiSearch,
+  FiMail,
+  FiX,
+  FiSend,
 } from "react-icons/fi";
 
 function getSalutation(gender) {
@@ -36,11 +41,104 @@ function MentorDashboard() {
   const { user } = useAuth();
   const { globalCohort } = useOutletContext() || {};
   const [cohorts, setCohorts] = useState([]);
+  const [allCohorts, setAllCohorts] = useState([]);
   const [totalStudents, setTotalStudents] = useState(0);
   const [todaySessions, setTodaySessions] = useState([]);
   const [recentSubmissions, setRecentSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Cohort Students section state
+  const [selectedCohort, setSelectedCohort] = useState(globalCohort || "");
+  const [students, setStudents] = useState([]);
+  const [studentsLoading, setStudentsLoading] = useState(false);
+  const [studentSearch, setStudentSearch] = useState("");
+  const [debouncedStudentSearch, setDebouncedStudentSearch] = useState("");
+  const [studentPage, setStudentPage] = useState(1);
+  const [totalStudentCount, setTotalStudentCount] = useState(0);
+  const [hasNextStudentPage, setHasNextStudentPage] = useState(false);
+  const [hasPrevStudentPage, setHasPrevStudentPage] = useState(false);
+  const [messageDialog, setMessageDialog] = useState(null);
+  const [messageText, setMessageText] = useState("");
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const [messageSent, setMessageSent] = useState(false);
+
+  // Sync selectedCohort when globalCohort changes
+  useEffect(() => {
+    if (globalCohort !== undefined) {
+      setSelectedCohort(globalCohort || "");
+      setStudentPage(1);
+    }
+  }, [globalCohort]);
+
+  // Debounce student search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedStudentSearch(studentSearch);
+      setStudentPage(1);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [studentSearch]);
+
+  // Fetch scoped cohort students
+  useEffect(() => {
+    let isMounted = true;
+    const fetchStudents = async () => {
+      setStudentsLoading(true);
+      try {
+        const params = { page: studentPage };
+        if (selectedCohort) params.cohort = selectedCohort;
+        if (debouncedStudentSearch) params.search = debouncedStudentSearch;
+        const res = await apiClient.get(API_ENDPOINTS.STUDENTS.BASE, { params });
+        if (isMounted) {
+          const data = res.data;
+          setStudents(Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []));
+          setTotalStudentCount(data?.count || 0);
+          setHasNextStudentPage(!!data?.next);
+          setHasPrevStudentPage(!!data?.previous);
+        }
+      } catch (err) {
+        console.error("Failed to load cohort students", err);
+      } finally {
+        if (isMounted) setStudentsLoading(false);
+      }
+    };
+    fetchStudents();
+    return () => { isMounted = false; };
+  }, [selectedCohort, debouncedStudentSearch, studentPage]);
+
+  const handleSendMessage = async () => {
+    if (!messageText.trim() || !messageDialog) return;
+    setSendingMessage(true);
+    try {
+      await apiClient.post("/api/notifications/", {
+        user_id: messageDialog.studentId,
+        title: "Message from Mentor",
+        message: messageText.trim(),
+        notification_type: "INFO",
+      });
+      setMessageSent(true);
+      setTimeout(() => {
+        setMessageDialog(null);
+        setMessageText("");
+        setMessageSent(false);
+      }, 1500);
+    } catch (err) {
+      console.error("Failed to send message:", err);
+      alert("Failed to send message. Please try again.");
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  const getStudentStatusBadge = (status) => {
+    switch (status?.toUpperCase()) {
+      case 'AVAILABLE': return <Badge variant="success">Active</Badge>;
+      case 'BUSY': return <Badge variant="warning">Busy</Badge>;
+      case 'NOT_AVAILABLE': return <Badge variant="default">Inactive</Badge>;
+      default: return <Badge variant="default">{status || 'Enrolled'}</Badge>;
+    }
+  };
 
   useEffect(() => {
     // If there is no globalCohort yet (meaning cohorts haven't loaded in layout or none assigned), wait.
@@ -73,7 +171,9 @@ function MentorDashboard() {
 
         if (cohortsRes.status === "fulfilled") {
           const data = cohortsRes.value.data;
-          let myCohorts = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
+          const rawCohorts = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
+          setAllCohorts(rawCohorts);
+          let myCohorts = rawCohorts;
           if (globalCohort) {
             myCohorts = myCohorts.filter(c => String(c.id) === String(globalCohort));
           }
@@ -213,7 +313,7 @@ function MentorDashboard() {
           {/* Stat Cards */}
           <motion.div variants={item} className={styles.statsRow}>
             <StatBox icon={<FiBookOpen />} label="Active Cohorts" value={cohorts.length} href="/mentor/cohorts" color="var(--primary-color)" />
-            <StatBox icon={<FiUsers />} label="My Students" value={totalStudents} href="/mentor/students" color="#10b981" />
+            <StatBox icon={<FiUsers />} label="My Students" value={totalStudentCount || totalStudents} href="/mentor/students" color="#10b981" />
             <StatBox icon={<FiClock />} label="Live Today" value={todaySessions.length} href="/mentor/meeting-links" color="#f59e0b" />
             <StatBox icon={<FiFileText />} label="Submissions" value={recentSubmissions.length} href="/mentor/assignments" color="#8b5cf6" />
           </motion.div>
@@ -351,8 +451,232 @@ function MentorDashboard() {
               </motion.div>
             </div>
           </div>
+
+          {/* Scoped Cohort Students Section */}
+          <motion.div variants={item} className={styles.studentsSection}>
+            <div className={styles.studentsHeader}>
+              <div className={styles.studentsHeaderLeft}>
+                <h2 className={styles.studentsTitle}>
+                  <FiUsers /> Cohort Students
+                </h2>
+                <p className={styles.studentsSub}>
+                  Students enrolled in your assigned cohorts.
+                </p>
+              </div>
+
+              <div className={styles.studentsControls}>
+                {allCohorts.length > 1 && (
+                  <select
+                    className={styles.cohortFilterSelect}
+                    value={selectedCohort}
+                    onChange={(e) => {
+                      setSelectedCohort(e.target.value);
+                      setStudentPage(1);
+                    }}
+                  >
+                    <option value="">All Assigned Cohorts ({allCohorts.length})</option>
+                    {allCohorts.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.course_name} — {c.code || c.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                <div className={styles.searchWrapper}>
+                  <FiSearch className={styles.searchIcon} />
+                  <input
+                    type="text"
+                    placeholder="Search students..."
+                    value={studentSearch}
+                    onChange={e => setStudentSearch(e.target.value)}
+                    className={styles.searchInput}
+                  />
+                  {studentSearch && (
+                    <button className={styles.clearSearch} onClick={() => setStudentSearch("")}>
+                      <FiX />
+                    </button>
+                  )}
+                </div>
+
+                <span style={{ fontSize: "13px", fontWeight: "600", color: "var(--text-secondary)", background: "var(--bg-nested)", padding: "6px 12px", borderRadius: "20px", border: "1px solid var(--border-color)" }}>
+                  {totalStudentCount} Student{totalStudentCount !== 1 ? "s" : ""}
+                </span>
+              </div>
+            </div>
+
+            <div className={styles.studentsTableCard}>
+              {studentsLoading ? (
+                <div style={{ padding: "2rem" }}>
+                  <SkeletonLoader width="100%" height="45px" borderRadius="8px" />
+                  <div style={{ height: "10px" }} />
+                  <SkeletonLoader width="100%" height="45px" borderRadius="8px" />
+                  <div style={{ height: "10px" }} />
+                  <SkeletonLoader width="100%" height="45px" borderRadius="8px" />
+                </div>
+              ) : students.length === 0 ? (
+                <div style={{ padding: "2.5rem 1rem" }}>
+                  <EmptyState
+                    icon={<FiUsers />}
+                    title="No students found"
+                    description={
+                      studentSearch
+                        ? `No students matching "${studentSearch}".`
+                        : "There are no students enrolled in the selected cohort."
+                    }
+                  />
+                </div>
+              ) : (
+                <>
+                  <table className={styles.studentsTable}>
+                    <thead>
+                      <tr>
+                        <th>Student</th>
+                        <th>Student Code</th>
+                        <th>Cohort / Course</th>
+                        <th>College</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {students.map(student => {
+                        const studentFullName = `${student.first_name || ""} ${student.last_name || ""}`.trim() || student.email;
+                        const cohortDisplay = student.active_cohort?.code || student.cohort_code || student.cohort || "Assigned Cohort";
+                        return (
+                          <tr key={student.id}>
+                            <td>
+                              <div className={styles.studentInfo}>
+                                <div className={styles.studentAvatar}>
+                                  {studentFullName.charAt(0).toUpperCase()}
+                                </div>
+                                <div className={styles.studentDetails}>
+                                  <span className={styles.studentName}>{studentFullName}</span>
+                                  <span className={styles.studentEmail}>{student.email}</span>
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <span className={styles.studentCodeBadge}>
+                                {student.student_code || "—"}
+                              </span>
+                            </td>
+                            <td>
+                              <div style={{ display: "flex", flexDirection: "column" }}>
+                                <span style={{ fontWeight: "600", fontSize: "0.85rem" }}>{cohortDisplay}</span>
+                                <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>{student.course_name || ""}</span>
+                              </div>
+                            </td>
+                            <td style={{ color: "var(--text-secondary)", fontSize: "0.85rem" }}>
+                              {student.college || "—"}
+                            </td>
+                            <td>{getStudentStatusBadge(student.status)}</td>
+                            <td>
+                              <button
+                                className={styles.messageBtn}
+                                onClick={() => setMessageDialog({
+                                  studentId: student.id,
+                                  studentEmail: student.email,
+                                  studentName: studentFullName,
+                                })}
+                              >
+                                <FiMail /> Message
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+
+                  {/* Pagination footer */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 20px", borderTop: "1px solid var(--border-color)", background: "var(--bg-nested)" }}>
+                    <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                      Page {studentPage}
+                    </span>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button
+                        className={styles.secondaryButton}
+                        style={{ padding: "4px 10px", fontSize: "12px" }}
+                        disabled={!hasPrevStudentPage}
+                        onClick={() => setStudentPage(p => Math.max(1, p - 1))}
+                      >
+                        Previous
+                      </button>
+                      <button
+                        className={styles.secondaryButton}
+                        style={{ padding: "4px 10px", fontSize: "12px" }}
+                        disabled={!hasNextStudentPage}
+                        onClick={() => setStudentPage(p => p + 1)}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </motion.div>
         </motion.div>
       )}
+
+      {/* Message Dialog */}
+      <AnimatePresence>
+        {messageDialog && (
+          <motion.div
+            className={styles.dialogOverlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={e => e.target === e.currentTarget && setMessageDialog(null)}
+          >
+            <motion.div
+              className={styles.dialog}
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            >
+              <div className={styles.dialogHeader}>
+                <div>
+                  <h3 className={styles.dialogTitle}>Message Student</h3>
+                  <p className={styles.dialogSub}>To: {messageDialog.studentName}</p>
+                </div>
+                <button className={styles.dialogClose} onClick={() => setMessageDialog(null)}>
+                  <FiX />
+                </button>
+              </div>
+
+              {messageSent ? (
+                <div className={styles.messageSentState}>
+                  Message sent successfully!
+                </div>
+              ) : (
+                <>
+                  <textarea
+                    className={styles.messageTextarea}
+                    placeholder="Write a message or notification to this student..."
+                    value={messageText}
+                    onChange={e => setMessageText(e.target.value)}
+                    rows={4}
+                  />
+                  <div className={styles.dialogActions}>
+                    <button className={styles.cancelBtn} onClick={() => setMessageDialog(null)}>
+                      Cancel
+                    </button>
+                    <button
+                      className={styles.sendBtn}
+                      onClick={handleSendMessage}
+                      disabled={!messageText.trim() || sendingMessage}
+                    >
+                      <FiSend /> {sendingMessage ? "Sending..." : "Send Message"}
+                    </button>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

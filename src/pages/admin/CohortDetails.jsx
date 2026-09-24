@@ -88,7 +88,7 @@
 
 // export default CohortDetails;
 import { useEffect, useState } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useSearchParams, useNavigate } from "react-router-dom";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { applicationService } from "../../services/applicationService";
@@ -98,10 +98,12 @@ import { cohortChatService } from "../../services/cohortChatService";
 import styles from "./CohortDetails.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import CohortScreeningPanel from "./CohortScreeningPanel";
-import { FiMessageCircle, FiEdit2, FiArrowLeft, FiUser, FiCalendar, FiUsers, FiVideo, FiCheckCircle, FiXCircle } from "react-icons/fi";
+import { FiMessageCircle, FiEdit2, FiArrowLeft, FiUser, FiCalendar, FiUsers, FiVideo, FiCheckCircle, FiXCircle, FiDownload } from "react-icons/fi";
 
 function CohortDetails() {
-  const { id } = useParams();
+  const { id: paramId } = useParams();
+  const [searchParams] = useSearchParams();
+  const id = paramId || searchParams.get("id");
   const navigate = useNavigate();
   const [cohort, setCohort] = useState(null);
   const [courseName, setCourseName] = useState("");
@@ -199,40 +201,42 @@ function CohortDetails() {
     }
   };
 
-  useEffect(() => {
-    let isMounted = true;
-    const loadData = async () => {
-      try {
-        // Fetch Cohort Details
-        const cohortRes = await apiClient.get(API_ENDPOINTS.COHORTS.BY_ID(id));
-        const cohortData = cohortRes.data;
-        if (!isMounted) return;
-        setCohort(cohortData);
+  const loadCohortData = async () => {
+    try {
+      // Fetch Cohort Details
+      const cohortRes = await apiClient.get(API_ENDPOINTS.COHORTS.BY_ID(id));
+      const cohortData = cohortRes.data;
+      setCohort(cohortData);
 
-        // Fetch Course Name
-        if (cohortData.course && typeof cohortData.course === "string") {
-          courseService.getCourseById(cohortData.course).then(courseRes => {
-            if (isMounted) setCourseName(courseRes?.name || courseRes?.title || cohortData.course);
-          });
-        } else {
-          setCourseName(cohortData.course?.name || "N/A");
-        }
-
-        // Fetch Unread Count
-        cohortChatService.getUnreadCount(id).then(res => {
-          if (isMounted && res.unread_count) setUnreadCount(res.unread_count);
-        }).catch(err => console.error("Failed to fetch unread count", err));
-
-      } catch (err) {
-        console.error("Failed to load details:", err);
-        if (isMounted) setError("Unable to load complete cohort details.");
-      } finally {
-        if (isMounted) setLoading(false);
+      // Fetch Course Name
+      if (cohortData.course && typeof cohortData.course === "string") {
+        courseService.getCourseById(cohortData.course).then(courseRes => {
+          setCourseName(courseRes?.name || courseRes?.title || cohortData.course);
+        });
+      } else {
+        setCourseName(cohortData.course?.name || "N/A");
       }
-    };
 
-    if (id) loadData();
-    return () => { isMounted = false; };
+      // Fetch Unread Count
+      cohortChatService.getUnreadCount(id).then(res => {
+        if (res.unread_count) setUnreadCount(res.unread_count);
+      }).catch(err => console.error("Failed to fetch unread count", err));
+
+    } catch (err) {
+      console.error("Failed to load details:", err);
+      setError("Unable to load complete cohort details.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      loadCohortData();
+    } else {
+      setError("No cohort ID provided.");
+      setLoading(false);
+    }
   }, [id]);
 
   if (loading) return <div className={styles.pageContainer}><SkeletonLoader variant="detail" /></div>;
@@ -259,6 +263,11 @@ function CohortDetails() {
   };
 
   const mentorName = cohort.mentor_name || "Pending Assignment";
+
+  const isCohortStarted = Boolean(
+    (cohort?.start_date && new Date() >= new Date(cohort.start_date)) ||
+    ["TRAINING", "INTERNSHIP", "SOFT_SKILLS", "COMPLETED"].includes(cohort?.status)
+  );
 
   return (
     <div className={styles.pageContainer}>
@@ -329,8 +338,65 @@ function CohortDetails() {
         </div>
       </div>
 
-      {/* Cohort Screening Panel */}
-      <CohortScreeningPanel cohortId={id} cohort={cohort} />
+      {/* Cohort Screening Panel - Hidden once cohort start time has arrived */}
+      {isCohortStarted ? (
+        <div style={{
+          margin: "24px 0",
+          padding: "20px 24px",
+          borderRadius: "16px",
+          background: "var(--bg-card)",
+          border: "1px solid var(--border-color)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "16px",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)"
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+            <div style={{
+              width: "44px",
+              height: "44px",
+              borderRadius: "12px",
+              background: "rgba(16, 185, 129, 0.12)",
+              color: "#10b981",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "22px"
+            }}>
+              <FiCheckCircle />
+            </div>
+            <div>
+              <h4 style={{ margin: "0 0 4px 0", fontSize: "16px", fontWeight: "700", color: "var(--text-primary)" }}>
+                Cohort Training Phase is Active
+              </h4>
+              <p style={{ margin: 0, fontSize: "13px", color: "var(--text-secondary)", maxWidth: "600px" }}>
+                The cohort start date has arrived. The pre-screening schedule and candidate results table are archived from this cohort view. You can review and download the screening results anytime from the Exams section.
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/admin/exams"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "10px 18px",
+              backgroundColor: "var(--primary-color)",
+              color: "#ffffff",
+              borderRadius: "8px",
+              fontWeight: "600",
+              fontSize: "13px",
+              textDecoration: "none",
+            }}
+          >
+            <FiDownload /> Download Screening Results in Exams
+          </Link>
+        </div>
+      ) : (
+        <CohortScreeningPanel cohortId={id} cohort={cohort} onSync={loadCohortData} />
+      )}
 
       {/* Dynamic Timeline */}
       {cohort.start_date && (
@@ -395,9 +461,11 @@ function CohortDetails() {
         <div className={styles.metricCard}>
           <div className={styles.metricHeader}>
             <FiUsers size={16} aria-hidden="true" />
-            <span className={styles.metricLabel}>Capacity</span>
+            <span className={styles.metricLabel}>Enrolled Students</span>
           </div>
-          <p className={styles.metricValue}>{cohort.max_students || "Unlimited"}</p>
+          <p className={styles.metricValue}>
+            {cohort.students_count ?? 0} {cohort.max_students ? `/ ${cohort.max_students}` : ""}
+          </p>
         </div>
 
         <div className={styles.metricCard}>
