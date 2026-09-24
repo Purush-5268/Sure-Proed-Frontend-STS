@@ -82,6 +82,9 @@ const Announcements = lazy(() => import("../pages/trustee/main/Announcements"));
 const Achievements = lazy(() => import("../pages/trustee/main/Achievements"));
 const Updates = lazy(() => import("../pages/trustee/main/Updates"));
 
+/* Role Communications */
+const Messages = lazy(() => import("../pages/communications/Messages"));
+
 /* Advisor */
 import AdvisorLayout from "../layouts/AdvisorLayout";
 const AdvisorDashboard = lazy(() => import("../pages/advisor/Dashboard"));
@@ -429,6 +432,9 @@ function AppRoutes() {
               {/* Cohort Chat (Admin) */}
               <Route path="cohort-chat/:cohortId" element={<CohortChat />} />
 
+              {/* Role Communications (Admin) */}
+              <Route path="messages" element={<Messages />} />
+
               {/* Settings */}
               <Route path="settings" element={<Settings />} />
               <Route path="profile-settings" element={<ProfileSettings />} />
@@ -494,6 +500,7 @@ function AppRoutes() {
               <Route path="volunteer/cohorts" element={<VolunteerCohorts />} />
               <Route path="volunteer/cohort-details/:id" element={<VolunteerCohortDetails />} />
               <Route path="volunteer/cohort-chat/:cohortId" element={<CohortChat />} />
+              <Route path="volunteer/messages" element={<Messages />} />
               <Route path="volunteer/profile" element={<TrusteeProfile />} />
               <Route path="volunteer/exam-proctoring" element={<ProctorDashboard />} />
               <Route path="volunteer/assessments" element={<MentorAssessments />} />
@@ -504,6 +511,7 @@ function AppRoutes() {
           <Route element={<ProtectedRoute allowedRoles={["TRUSTEE"]} redirectTo="/login" />}>
             <Route path="/trustee" element={<TrusteeLayout />}>
               <Route path="main/dashboard" element={<MainDashboard />} />
+              <Route path="main/messages" element={<Messages />} />
               <Route path="main/announcements" element={<Announcements />} />
               <Route path="main/achievements" element={<Achievements />} />
               <Route path="main/updates" element={<Updates />} />
@@ -516,6 +524,7 @@ function AppRoutes() {
             <Route path="/trustee/advisor" element={<AdvisorLayout />}>
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<AdvisorDashboard />} />
+              <Route path="messages" element={<Messages />} />
               <Route path="batches" element={<AdvisorBatches />} />
               <Route path="students" element={<AdvisorStudents />} />
               <Route path="announcements" element={<Announcements />} />

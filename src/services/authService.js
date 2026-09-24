@@ -24,10 +24,11 @@ export const authService = {
     setAccessToken(access);
     setRefreshToken(refresh);
 
-    // Decode token payload for basic info
+    // Store full user payload with admin_category and basic token claims
     const decoded = parseJwt(access);
-    if (decoded) {
-      setUserInfo(decoded);
+    const userPayload = response.data?.user ? { ...decoded, ...response.data.user } : decoded;
+    if (userPayload) {
+      setUserInfo(userPayload);
     }
 
     return response.data;
@@ -49,10 +50,11 @@ export const authService = {
     setAccessToken(access);
     setRefreshToken(refresh);
 
-    // Decode token payload for basic info
+    // Store full user payload with admin_category and basic token claims
     const decoded = parseJwt(access);
-    if (decoded) {
-      setUserInfo(decoded);
+    const userPayload = response.data?.user ? { ...decoded, ...response.data.user } : decoded;
+    if (userPayload) {
+      setUserInfo(userPayload);
     }
     return response.data;
   },

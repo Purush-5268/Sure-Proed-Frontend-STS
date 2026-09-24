@@ -5,7 +5,8 @@ import {
   FaUserGraduate, 
   FaBullhorn, 
   FaBriefcase, 
-  FaUser 
+  FaUser,
+  FaComments
 } from "react-icons/fa";
 
 import Navbar from "../components/layout/Navbar";
@@ -15,6 +16,7 @@ import styles from "./AdvisorLayout.module.css";
 
 const advisorLinks = [
   { label: "Overview", path: "/trustee/advisor/dashboard", icon: <FaTachometerAlt /> },
+  { label: "Messages", path: "/trustee/advisor/messages", icon: <FaComments /> },
   { label: "Assigned Batches", path: "/trustee/advisor/batches", icon: <FaUsers /> },
   { label: "Assigned Students", path: "/trustee/advisor/students", icon: <FaUserGraduate /> },
   { label: "Announcements", path: "/trustee/advisor/announcements", icon: <FaBullhorn /> },
