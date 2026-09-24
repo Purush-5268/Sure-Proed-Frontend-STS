@@ -111,6 +111,8 @@ function Profile() {
   // Handle Google OAuth callback query params
   useEffect(() => {
     const oauthStatus = searchParams.get("google_oauth");
+    const genericError = searchParams.get("error");
+
     if (oauthStatus) {
       if (oauthStatus === "success") {
         setGoogleOAuthToast({ type: "success", message: "Google account connected successfully!" });
@@ -126,6 +128,12 @@ function Profile() {
       setSearchParams(searchParams, { replace: true });
       // Auto-dismiss toast
       setTimeout(() => setGoogleOAuthToast(null), 6000);
+    } else if (genericError) {
+      // Handle generic errors like LinkedIn already connected
+      setGoogleOAuthToast({ type: "error", message: genericError });
+      searchParams.delete("error");
+      setSearchParams(searchParams, { replace: true });
+      setTimeout(() => setGoogleOAuthToast(null), 8000);
     }
   }, [searchParams, setSearchParams]);
 
@@ -292,17 +300,17 @@ function Profile() {
   const handleDownloadResume = async (e) => {
     e.preventDefault();
     if (!serverProfile?.resume) return;
-    
+
     try {
       const response = await apiClient.get(serverProfile.resume, { responseType: 'blob' });
-      
+
       // Determine the content type from the response to display properly in the new tab
       const contentType = response.headers['content-type'] || 'application/pdf';
       const url = window.URL.createObjectURL(new Blob([response.data], { type: contentType }));
-      
+
       // Open the Blob URL in a new tab instead of forcing a download
       window.open(url, '_blank');
-      
+
       // We can't immediately revoke the URL because the new tab needs time to load it
       setTimeout(() => window.URL.revokeObjectURL(url), 10000);
     } catch (error) {
@@ -314,11 +322,11 @@ function Profile() {
     <>
       {/* 1. HERO BANNER & IDENTITY OVERLAP (Edge to Edge) */}
       <div className={styles.heroContainer}>
-        <div 
-          className={styles.heroBanner} 
+        <div
+          className={styles.heroBanner}
           style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : {}}
         />
-        
+
         <div className={styles.heroContentWrapper}>
           <div className={styles.identitySection}>
             <div className={styles.avatarWrapper}>
@@ -328,7 +336,7 @@ function Profile() {
                 <span className={styles.avatarFallback}>{getInitials()}</span>
               )}
             </div>
-            
+
             <div className={styles.userInfo}>
               <h1 className={styles.userName}>
                 {formData.firstName || user?.first_name} {formData.lastName || user?.last_name}
@@ -341,7 +349,7 @@ function Profile() {
               </div>
               <div className={styles.userMeta}>
                 <span>
-                  <FiBook style={{ marginTop: '2px', flexShrink: 0 }} /> 
+                  <FiBook style={{ marginTop: '2px', flexShrink: 0 }} />
                   <span style={{ wordBreak: 'break-word' }}>{formData.college || "No College Added"}</span>
                 </span>
                 <span style={{ whiteSpace: 'nowrap' }}>
@@ -368,653 +376,653 @@ function Profile() {
       <div className={styles.heroContentWrapper}>
         {/* TABS */}
         <div className={styles.tabContainer} style={{ marginBottom: '24px' }}>
-        <div className={styles.tabList}>
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`${styles.tabBtn} ${activeTab === tab.id ? styles.activeTab : ""}`}
-            >
-              {tab.icon} {tab.label}
-              {activeTab === tab.id && <motion.div layoutId="activeTabIndicator" className={styles.tabIndicator} />}
-            </button>
-          ))}
+          <div className={styles.tabList}>
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`${styles.tabBtn} ${activeTab === tab.id ? styles.activeTab : ""}`}
+              >
+                {tab.icon} {tab.label}
+                {activeTab === tab.id && <motion.div layoutId="activeTabIndicator" className={styles.tabIndicator} />}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* MAIN CONTENT GRID */}
-      <div className={styles.mainGrid}>
-        <div className={styles.leftColumn}>
-          <GlassCard>
-            <form onSubmit={handleSubmit} className="premium-form">
-              <AnimatePresence mode="wait">
+        {/* MAIN CONTENT GRID */}
+        <div className={styles.mainGrid}>
+          <div className={styles.leftColumn}>
+            <GlassCard>
+              <form onSubmit={handleSubmit} className="premium-form">
+                <AnimatePresence mode="wait">
 
-                {/* PERSONAL TAB */}
-                {activeTab === "personal" && (
-                  <motion.div key="personal" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-                    <div className="premium-section">
-                      <h2 style={{ marginBottom: "6px", display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <FiUser /> Personal Information
-                      </h2>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '24px' }}>
-                        Keep your profile updated to help mentors and the team know you better.
-                      </p>
-
-                      {/* File Uploads Grid */}
-                      <div className="premium-grid-2" style={{ marginBottom: "24px" }}>
-                        <div className="premium-form-group">
-                          <label htmlFor="profile_photo" className="premium-label">Profile Photo (Update)</label>
-                          <input 
-                            type="file" 
-                            id="profile_photo" 
-                            name="profile_photo" 
-                            onChange={handleChange} 
-                            accept="image/jpeg,image/png" 
-                            className="premium-input" 
-                            style={{ padding: '8px' }} 
-                          />
-                          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Max size: 1MB</p>
-                        </div>
-                        <div className="premium-form-group">
-                          <label htmlFor="banner_image" className="premium-label">Banner Image (Update)</label>
-                          <input 
-                            type="file" 
-                            id="banner_image" 
-                            name="banner_image" 
-                            onChange={handleChange} 
-                            accept="image/jpeg,image/png" 
-                            className="premium-input" 
-                            style={{ padding: '8px' }}
-                          />
-                          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Max size: 5MB</p>
-                        </div>
-                        <div className="premium-form-group">
-                          <label htmlFor="resume" className="premium-label">Resume (Upload)</label>
-                          <input 
-                            type="file" 
-                            id="resume" 
-                            name="resume" 
-                            onChange={handleChange} 
-                            accept=".pdf,.doc,.docx" 
-                            className="premium-input" 
-                            style={{ padding: '8px' }} 
-                          />
-                          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Max size: 1MB</p>
-                          {serverProfile?.resume && (
-                            <a 
-                              href="#" 
-                              onClick={handleDownloadResume} 
-                              style={{ color: '#d946ef', fontSize: '13px', display: 'inline-block', marginTop: '4px', textDecoration: 'none', cursor: 'pointer' }}
-                            >
-                              View Current Resume
-                            </a>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="premium-grid-2">
-                        <div className="premium-form-group">
-                          <label htmlFor="profile_firstName" className="premium-label">First Name *</label>
-                          <input id="profile_firstName" className="premium-input" name="firstName" value={formData.firstName} onChange={handleChange} required />
-                        </div>
-                        <div className="premium-form-group">
-                          <label htmlFor="profile_lastName" className="premium-label">Last Name *</label>
-                          <input id="profile_lastName" className="premium-input" name="lastName" value={formData.lastName} onChange={handleChange} required />
-                        </div>
-                        <div className="premium-form-group">
-                          <label htmlFor="profile_email" className="premium-label">Email *</label>
-                          <input id="profile_email" className="premium-input" name="email" value={formData.email} onChange={handleChange} required disabled />
-                        </div>
-                        <div className="premium-form-group">
-                          <label htmlFor="profile_phoneNumber" className="premium-label">Phone *</label>
-                          <input id="profile_phoneNumber" className="premium-input" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
-                        </div>
-                        <div className="premium-form-group">
-                          <label htmlFor="profile_gender" className="premium-label">Gender</label>
-                          <select id="profile_gender" className="premium-input" name="gender" value={formData.gender} onChange={handleChange}>
-                            <option value="">Select Gender</option>
-                            <option value="MALE">Male</option>
-                            <option value="FEMALE">Female</option>
-                            <option value="OTHER">Other</option>
-                          </select>
-                        </div>
-                        <div className="premium-form-group">
-                          <label htmlFor="profile_dob" className="premium-label">Date of Birth</label>
-                          <input id="profile_dob" className="premium-input" type="date" name="dob" value={formData.dob} onChange={handleChange} />
-                        </div>
-                      </div>
-
-                      <div className="premium-form-group" style={{ marginTop: "24px" }}>
-                        <label htmlFor="profile_tagline" className="premium-label">Tagline / Headline</label>
-                        <input id="profile_tagline" className="premium-input" name="tagline" value={formData.tagline} onChange={handleChange} placeholder="e.g. Aspiring Full-Stack Developer" />
-                      </div>
-                      <div className="premium-form-group" style={{ marginTop: "16px" }}>
-                        <label htmlFor="profile_bio" className="premium-label">About You</label>
-                        <textarea id="profile_bio" className="premium-input" name="bio" value={formData.bio} onChange={handleChange} rows="4" placeholder="Tell us about yourself..." />
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
-            {/* ACADEMIC TAB */}
-            {activeTab === "academic" && (
-              <motion.div key="academic" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
-                <div className="premium-section">
-                  <h2 style={{ marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px' }}><FiBook /> Education & Location</h2>
-                  <div className="premium-grid-2">
-                    <div className="premium-form-group" style={{ gridColumn: 'span 2' }}>
-                      <label htmlFor="profile_college" className="premium-label">College / University Name *</label>
-                      <input id="profile_college" className="premium-input" name="college" value={formData.college} onChange={handleChange} required />
-                    </div>
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_education_level" className="premium-label">Education Level</label>
-                      <select id="profile_education_level" className="premium-input" name="education_level" value={formData.education_level} onChange={handleChange}>
-                        <option value="">Select Level</option>
-                        <option value="UNDERGRADUATE">Undergraduate</option>
-                        <option value="POSTGRADUATE">Postgraduate</option>
-                        <option value="DIPLOMA">Diploma</option>
-                        <option value="OTHER">Other</option>
-                      </select>
-                    </div>
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_degree" className="premium-label">Degree *</label>
-                      <input id="profile_degree" className="premium-input" name="degree" value={formData.degree} onChange={handleChange} placeholder="e.g. B.Tech" required />
-                    </div>
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_specialization" className="premium-label">Specialization / Branch *</label>
-                      <input id="profile_specialization" className="premium-input" name="specialization" value={formData.specialization} onChange={handleChange} placeholder="e.g. Computer Science" required />
-                    </div>
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_graduation_year" className="premium-label">Graduation Year *</label>
-                      <input id="profile_graduation_year" className="premium-input" type="number" name="graduation_year" value={formData.graduation_year} onChange={handleChange} required />
-                    </div>
-                  </div>
-
-                  <h2 style={{ marginTop: "24px", marginBottom: "16px", color: "var(--text-primary)" }}>Location</h2>
-                  <div className="premium-grid-2">
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_city" className="premium-label">City</label>
-                      <input id="profile_city" className="premium-input" name="city" value={formData.city} onChange={handleChange} />
-                    </div>
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_state" className="premium-label">State</label>
-                      <input id="profile_state" className="premium-input" name="state" value={formData.state} onChange={handleChange} />
-                    </div>
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_country" className="premium-label">Country</label>
-                      <input id="profile_country" className="premium-input" name="country" value={formData.country} onChange={handleChange} />
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* SKILLS TAB */}
-            {activeTab === "skills" && (
-              <motion.div key="skills" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
-                <div className="premium-section">
-                  <h2 style={{ marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px' }}><FiSettings /> Skills & Preferences</h2>
-                  <div className="premium-form-group">
-                    <label className="premium-label">Technical Skills</label>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
-                      {(formData.skills ? formData.skills.split(",").map(s => s.trim()).filter(Boolean) : []).map((skill, index) => (
-                        <div key={index} style={{
-                          display: 'flex', alignItems: 'center', gap: '6px',
-                          background: 'var(--primary-color)', color: 'white',
-                          padding: '6px 12px', borderRadius: '16px', fontSize: '13px', fontWeight: '500'
-                        }}>
-                          {skill}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveSkill(skill)}
-                            style={{
-                              background: 'transparent', border: 'none', color: 'white',
-                              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              padding: '0', margin: '0'
-                            }}
-                            title="Remove Skill"
-                          >
-                            &times;
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <input
-                        id="profile_skill_input"
-                        className="premium-input"
-                        value={skillInput}
-                        onChange={(e) => setSkillInput(e.target.value)}
-                        onKeyDown={handleSkillKeyDown}
-                        placeholder="e.g. React, Python, Django (Press Enter to add)"
-                        style={{ flex: 1 }}
-                      />
-                      <button
-                        type="button"
-                        onClick={handleAddSkill}
-                        className="premium-btn premium-btn-primary"
-                        style={{ padding: '0 16px', minHeight: 'auto' }}
-                      >
-                        Add Skill
-                      </button>
-                    </div>
-                  </div>
-                  <div className="premium-form-group" style={{ marginTop: "16px" }}>
-                    <label htmlFor="profile_hobbies" className="premium-label">Hobbies</label>
-                    <input id="profile_hobbies" className="premium-input" name="hobbies" value={formData.hobbies} onChange={handleChange} placeholder="e.g. Reading, Coding, Travel" />
-                  </div>
-                  <div className="premium-form-group" style={{ marginTop: "16px" }}>
-                    <label htmlFor="profile_languages" className="premium-label">Languages</label>
-                    <input id="profile_languages" className="premium-input" name="languages" value={formData.languages} onChange={handleChange} placeholder="e.g. English, Telugu, Hindi" />
-                  </div>
-                  <div className="premium-grid" style={{ marginTop: "16px" }}>
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_portfolio_url" className="premium-label">Portfolio URL</label>
-                      <input id="profile_portfolio_url" className="premium-input" name="portfolio_url" value={formData.portfolio_url || ""} onChange={handleChange} placeholder="https://yourportfolio.com" />
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* VERIFICATION TAB — Google Identity (Required) */}
-            {activeTab === "verification" && (
-              <motion.div key="verification" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
-                <div className="premium-section">
-                  <h2 style={{ marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}><FiCheckCircle /> SURE ProEd Verification</h2>
-                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px' }}>Your verified identity for attendance tracking and Google Meet sessions.</p>
-
-                  {/* Google OAuth Toast */}
-                  {googleOAuthToast && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -12 }}
-                      style={{
-                        padding: '14px 20px',
-                        borderRadius: '12px',
-                        marginBottom: '20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        fontWeight: 600,
-                        fontSize: '14px',
-                        background: googleOAuthToast.type === 'success'
-                          ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(5, 150, 105, 0.08))'
-                          : 'linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(220, 38, 38, 0.08))',
-                        border: `1px solid ${googleOAuthToast.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
-                        color: googleOAuthToast.type === 'success' ? '#059669' : '#dc2626',
-                      }}
-                    >
-                      {googleOAuthToast.type === 'success' ? <FiCheckCircle size={18} /> : <FiAlertCircle size={18} />}
-                      {googleOAuthToast.message}
-                      <button
-                        type="button"
-                        onClick={() => setGoogleOAuthToast(null)}
-                        style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', fontSize: '18px', lineHeight: 1 }}
-                        aria-label="Dismiss"
-                      >
-                        ×
-                      </button>
-                    </motion.div>
-                  )}
-
-                  {/* Google Identity Card */}
-                  <div style={{
-                    padding: '24px',
-                    background: 'var(--bg-nested)',
-                    borderRadius: '14px',
-                    border: serverProfile?.google_identity?.is_connected
-                      ? '1px solid rgba(16, 185, 129, 0.3)'
-                      : '1px solid var(--border-color)',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    marginBottom: '20px',
-                  }}>
-                    {/* Top accent bar for connected state */}
-                    {serverProfile?.google_identity?.is_connected && (
-                      <div style={{
-                        position: 'absolute',
-                        top: 0, left: 0, right: 0,
-                        height: '3px',
-                        background: 'linear-gradient(90deg, #10b981, #34d399, #10b981)',
-                        borderRadius: '14px 14px 0 0',
-                      }} />
-                    )}
-
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold', fontSize: '16px' }}>
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                        </svg>
-                        Google Identity
-                      </div>
-                      <span style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '5px',
-                        padding: '4px 10px',
-                        borderRadius: '6px',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                        background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.06))',
-                        color: '#dc2626',
-                        border: '1px solid rgba(239, 68, 68, 0.2)',
-                      }}>Required</span>
-                    </div>
-
-                    {serverProfile?.google_identity?.is_connected ? (
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-                          <span style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            padding: '6px 14px',
-                            borderRadius: '20px',
-                            fontSize: '12px',
-                            fontWeight: 700,
-                            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1))',
-                            color: '#059669',
-                            border: '1px solid rgba(16, 185, 129, 0.25)',
-                          }}>
-                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px rgba(16, 185, 129, 0.6)' }} />
-                            Verified — Connected
-                          </span>
-                          
-                          <button
-                            type="button"
-                            onClick={handleGoogleConnect}
-                            className="premium-btn"
-                            style={{
-                              background: 'var(--bg-primary)',
-                              color: 'var(--text-primary)',
-                              border: '1px solid var(--border-color)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              padding: '8px 16px',
-                              fontSize: '13px'
-                            }}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                            </svg>
-                            Re-Sync Name
-                          </button>
-                        </div>
-
-                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.5 }}>
-                          <strong>Note:</strong> Only click "Re-Sync Name" if you have recently changed your name in your Google Account settings (e.g., to match the required <strong>Name-Cohort-Course</strong> format). Otherwise, no action is needed.
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                          <div style={{ padding: '14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                            <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Google Email</div>
-                            <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)', wordBreak: 'break-all' }}>{serverProfile.google_identity.google_email}</div>
-                          </div>
-                          <div style={{ padding: '14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                            <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Google Profile Name</div>
-                            <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>{serverProfile.google_identity.google_profile_name}</div>
-                          </div>
-                        </div>
-
-                        {/* Compute Identity Match and Meet Identity from both old and new backend keys */}
-                        {(() => {
-                          const matchObj = serverProfile.google_identity.identity_match || serverProfile.google_identity.naming_compliant;
-                          const isMatched = matchObj?.is_matched ?? matchObj?.is_compliant ?? matchObj;
-                          const matchMsg = matchObj?.message;
-                          const meetIdentity = serverProfile.current_application?.meet_identity || serverProfile.current_application?.required_meet_display_name;
-                          const recommendedIdentity = serverProfile.current_application?.recommended_meet_identity || meetIdentity;
-
-                          return (
-                            <>
-                              {/* Meet Identity & Identity Match */}
-                              {meetIdentity && (
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                                  <div style={{ padding: '14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                                    <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Meet Identity</div>
-                                    <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>{meetIdentity}</div>
-                                  </div>
-                                  <div style={{ padding: '14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                                    <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Identity Match</div>
-                                    {isMatched === true ? (
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <FiCheckCircle size={16} color="#059669" />
-                                        <span style={{ fontSize: '14px', fontWeight: 600, color: '#059669' }}>Matching Successful</span>
-                                      </div>
-                                    ) : isMatched === false ? (
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <FiInfo size={16} color="#059669" />
-                                        <span style={{ fontSize: '14px', fontWeight: 600, color: '#059669' }}>Recommended Format</span>
-                                      </div>
-                                    ) : (
-                                      <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-secondary)' }}>—</div>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Compliant advisory */}
-                              {isMatched === true && (
-                                <div style={{
-                                  padding: '12px 16px',
-                                  borderRadius: '10px',
-                                  marginBottom: '16px',
-                                  background: 'rgba(16, 185, 129, 0.05)',
-                                  border: '1px solid rgba(16, 185, 129, 0.2)',
-                                  display: 'flex',
-                                  alignItems: 'flex-start',
-                                  gap: '10px',
-                                }}>
-                                  <FiCheckCircle size={16} color="#059669" style={{ marginTop: '2px', flexShrink: 0 }} />
-                                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <strong style={{ color: '#059669', fontSize: '13px', marginBottom: '4px' }}>Attendance Tracking Active</strong>
-                                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
-                                      {matchMsg || "Your Google identity matches your SURE ProEd attendance identity. Attendance tracking is active."}
-                                    </p>
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Non-compliant advisory */}
-                              {isMatched === false && (
-                                <div style={{
-                                  padding: '12px 16px',
-                                  borderRadius: '10px',
-                                  marginBottom: '16px',
-                                  background: 'rgba(16, 185, 129, 0.05)',
-                                  border: '1px solid rgba(16, 185, 129, 0.2)',
-                                  display: 'flex',
-                                  alignItems: 'flex-start',
-                                  gap: '10px',
-                                }}>
-                                  <FiInfo size={16} color="#059669" style={{ marginTop: '2px', flexShrink: 0 }} />
-                                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <strong style={{ color: '#059669', fontSize: '13px', marginBottom: '4px' }}>Please Make Sure You Have This Format</strong>
-                                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
-                                      Please ensure your Google Account name matches this format: <strong style={{ color: 'var(--text-primary)' }}>{recommendedIdentity}</strong>. This helps mentors easily identify you!
-                                    </p>
-                                  </div>
-                                </div>
-                              )}
-                            </>
-                          );
-                        })()}
-
-
-
-                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                          Connected on {(() => {
-                            if (!serverProfile?.google_identity?.connected_at) return "Unknown date";
-                            const d = new Date(serverProfile.google_identity.connected_at);
-                            return isNaN(d) ? "Unknown date" : d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-                          })()}
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '18px', lineHeight: 1.6 }}>
-                          Connect the same Google account you use for SURE ProEd Google Meet classes. Your Google Meet identity will be verified for accurate attendance tracking.
+                  {/* PERSONAL TAB */}
+                  {activeTab === "personal" && (
+                    <motion.div key="personal" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                      <div className="premium-section">
+                        <h2 style={{ marginBottom: "6px", display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <FiUser /> Personal Information
+                        </h2>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '24px' }}>
+                          Keep your profile updated to help mentors and the team know you better.
                         </p>
-                        <button
-                          type="button"
-                          onClick={handleGoogleConnect}
-                          className="premium-btn"
-                          style={{
-                            background: 'var(--bg-primary)',
-                            color: 'var(--text-primary)',
-                            border: '1px solid var(--border-color)',
-                            width: '100%',
-                            justifyContent: 'center',
-                            gap: '10px',
-                            fontWeight: 600,
-                            padding: '14px 20px',
-                            borderRadius: '10px',
-                            transition: 'all 0.2s ease',
-                          }}
-                          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                          </svg>
-                          Connect with Google
-                        </button>
-                      </div>
-                    )}
-                  </div>
 
-                  {/* Read-Only Admin Information */}
-                  <h3 className="premium-h4" style={{ marginTop: '24px' }}>Academic Status</h3>
-                  <div className="premium-grid-2">
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_student_code" className="premium-label">Student Code</label>
-                      <input id="profile_student_code" className="premium-input" value={serverProfile?.student_code || "Not Generated"} disabled />
-                    </div>
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_identity_issued_at" className="premium-label">Identity Issued At</label>
-                      <input id="profile_identity_issued_at" className="premium-input" value={(() => {
-                        if (!serverProfile?.student_identity_issued_at) return "Pending Qualification";
-                        const d = new Date(serverProfile.student_identity_issued_at);
-                        return isNaN(d) ? "Invalid date" : d.toLocaleString();
-                      })()} disabled />
-                    </div>
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_current_course" className="premium-label">Current Course</label>
-                      <input id="profile_current_course" className="premium-input" value={serverProfile?.current_application?.course?.name || "Not Enrolled"} disabled />
-                    </div>
-                    <div className="premium-form-group">
-                      <label htmlFor="profile_current_cohort" className="premium-label">Current Cohort</label>
-                      <input id="profile_current_cohort" className="premium-input" value={serverProfile?.current_application?.assigned_cohort?.name || "Not Assigned"} disabled />
-                    </div>
-                  </div>
-
-                </div>
-              </motion.div>
-            )}
-
-            {/* INTEGRATIONS TAB — Professional Links (Optional) */}
-            {activeTab === "integrations" && (
-              <motion.div key="integrations" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
-                <div className="premium-section">
-                  <h2 style={{ marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}><FiShield /> Professional Integrations</h2>
-                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px' }}>Mandatory links to your professional profiles.</p>
-
-                  <div className="premium-grid-2" style={{ marginBottom: '24px' }}>
-                    <div style={{ padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontWeight: 'bold' }}><FiLinkedin color="#0a66c2" size={20} /> LinkedIn Status</div>
-                      {serverProfile?.is_linkedin_connected ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                          <div style={{ color: '#059669', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            ✅ Connected via Auth
-                            {serverProfile?.linkedin_url && (
-                              <a href={serverProfile.linkedin_url} target="_blank" rel="noreferrer" className="premium-btn" style={{ padding: '6px 14px', fontSize: '13px', background: 'var(--student-glow-primary)', color: 'var(--primary-color)', border: '1px solid var(--primary-color)', minHeight: 'auto', gap: '6px', borderRadius: '8px', marginLeft: 'auto' }}>
-                                <FiExternalLink /> View Profile
+                        {/* File Uploads Grid */}
+                        <div className="premium-grid-2" style={{ marginBottom: "24px" }}>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_photo" className="premium-label">Profile Photo (Update)</label>
+                            <input
+                              type="file"
+                              id="profile_photo"
+                              name="profile_photo"
+                              onChange={handleChange}
+                              accept="image/jpeg,image/png"
+                              className="premium-input"
+                              style={{ padding: '8px' }}
+                            />
+                            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Max size: 1MB</p>
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="banner_image" className="premium-label">Banner Image (Update)</label>
+                            <input
+                              type="file"
+                              id="banner_image"
+                              name="banner_image"
+                              onChange={handleChange}
+                              accept="image/jpeg,image/png"
+                              className="premium-input"
+                              style={{ padding: '8px' }}
+                            />
+                            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Max size: 5MB</p>
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="resume" className="premium-label">Resume (Upload)</label>
+                            <input
+                              type="file"
+                              id="resume"
+                              name="resume"
+                              onChange={handleChange}
+                              accept=".pdf,.doc,.docx"
+                              className="premium-input"
+                              style={{ padding: '8px' }}
+                            />
+                            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Max size: 1MB</p>
+                            {serverProfile?.resume && (
+                              <a
+                                href="#"
+                                onClick={handleDownloadResume}
+                                style={{ color: '#d946ef', fontSize: '13px', display: 'inline-block', marginTop: '4px', textDecoration: 'none', cursor: 'pointer' }}
+                              >
+                                View Current Resume
                               </a>
                             )}
                           </div>
-                          {!serverProfile?.linkedin_url && (
-                            <div className="premium-form-group">
-                              <label htmlFor="linkedin_url" className="premium-label" style={{ fontSize: '13px' }}>LinkedIn Public Profile URL *</label>
-                              <input id="linkedin_url" className="premium-input" name="linkedin_url" value={formData.linkedin_url || ""} onChange={handleChange} placeholder="https://linkedin.com/in/yourprofile" />
-                              <small style={{ color: 'var(--text-secondary)', fontSize: '12px', marginTop: '4px' }}>LinkedIn does not provide your URL automatically. Please type it here and save.</small>
+                        </div>
+
+                        <div className="premium-grid-2">
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_firstName" className="premium-label">First Name *</label>
+                            <input id="profile_firstName" className="premium-input" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_lastName" className="premium-label">Last Name *</label>
+                            <input id="profile_lastName" className="premium-input" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_email" className="premium-label">Email *</label>
+                            <input id="profile_email" className="premium-input" name="email" value={formData.email} onChange={handleChange} required disabled />
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_phoneNumber" className="premium-label">Phone *</label>
+                            <input id="profile_phoneNumber" className="premium-input" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_gender" className="premium-label">Gender</label>
+                            <select id="profile_gender" className="premium-input" name="gender" value={formData.gender} onChange={handleChange}>
+                              <option value="">Select Gender</option>
+                              <option value="MALE">Male</option>
+                              <option value="FEMALE">Female</option>
+                              <option value="OTHER">Other</option>
+                            </select>
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_dob" className="premium-label">Date of Birth</label>
+                            <input id="profile_dob" className="premium-input" type="date" name="dob" value={formData.dob} onChange={handleChange} />
+                          </div>
+                        </div>
+
+                        <div className="premium-form-group" style={{ marginTop: "24px" }}>
+                          <label htmlFor="profile_tagline" className="premium-label">Tagline / Headline</label>
+                          <input id="profile_tagline" className="premium-input" name="tagline" value={formData.tagline} onChange={handleChange} placeholder="e.g. Aspiring Full-Stack Developer" />
+                        </div>
+                        <div className="premium-form-group" style={{ marginTop: "16px" }}>
+                          <label htmlFor="profile_bio" className="premium-label">About You</label>
+                          <textarea id="profile_bio" className="premium-input" name="bio" value={formData.bio} onChange={handleChange} rows="4" placeholder="Tell us about yourself..." />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* ACADEMIC TAB */}
+                  {activeTab === "academic" && (
+                    <motion.div key="academic" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
+                      <div className="premium-section">
+                        <h2 style={{ marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px' }}><FiBook /> Education & Location</h2>
+                        <div className="premium-grid-2">
+                          <div className="premium-form-group" style={{ gridColumn: 'span 2' }}>
+                            <label htmlFor="profile_college" className="premium-label">College / University Name *</label>
+                            <input id="profile_college" className="premium-input" name="college" value={formData.college} onChange={handleChange} required />
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_education_level" className="premium-label">Education Level</label>
+                            <select id="profile_education_level" className="premium-input" name="education_level" value={formData.education_level} onChange={handleChange}>
+                              <option value="">Select Level</option>
+                              <option value="UNDERGRADUATE">Undergraduate</option>
+                              <option value="POSTGRADUATE">Postgraduate</option>
+                              <option value="DIPLOMA">Diploma</option>
+                              <option value="OTHER">Other</option>
+                            </select>
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_degree" className="premium-label">Degree *</label>
+                            <input id="profile_degree" className="premium-input" name="degree" value={formData.degree} onChange={handleChange} placeholder="e.g. B.Tech" required />
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_specialization" className="premium-label">Specialization / Branch *</label>
+                            <input id="profile_specialization" className="premium-input" name="specialization" value={formData.specialization} onChange={handleChange} placeholder="e.g. Computer Science" required />
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_graduation_year" className="premium-label">Graduation Year *</label>
+                            <input id="profile_graduation_year" className="premium-input" type="number" name="graduation_year" value={formData.graduation_year} onChange={handleChange} required />
+                          </div>
+                        </div>
+
+                        <h2 style={{ marginTop: "24px", marginBottom: "16px", color: "var(--text-primary)" }}>Location</h2>
+                        <div className="premium-grid-2">
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_city" className="premium-label">City</label>
+                            <input id="profile_city" className="premium-input" name="city" value={formData.city} onChange={handleChange} />
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_state" className="premium-label">State</label>
+                            <input id="profile_state" className="premium-input" name="state" value={formData.state} onChange={handleChange} />
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_country" className="premium-label">Country</label>
+                            <input id="profile_country" className="premium-input" name="country" value={formData.country} onChange={handleChange} />
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* SKILLS TAB */}
+                  {activeTab === "skills" && (
+                    <motion.div key="skills" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
+                      <div className="premium-section">
+                        <h2 style={{ marginBottom: "16px", display: 'flex', alignItems: 'center', gap: '8px' }}><FiSettings /> Skills & Preferences</h2>
+                        <div className="premium-form-group">
+                          <label className="premium-label">Technical Skills</label>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                            {(formData.skills ? formData.skills.split(",").map(s => s.trim()).filter(Boolean) : []).map((skill, index) => (
+                              <div key={index} style={{
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                background: 'var(--primary-color)', color: 'white',
+                                padding: '6px 12px', borderRadius: '16px', fontSize: '13px', fontWeight: '500'
+                              }}>
+                                {skill}
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveSkill(skill)}
+                                  style={{
+                                    background: 'transparent', border: 'none', color: 'white',
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    padding: '0', margin: '0'
+                                  }}
+                                  title="Remove Skill"
+                                >
+                                  &times;
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <input
+                              id="profile_skill_input"
+                              className="premium-input"
+                              value={skillInput}
+                              onChange={(e) => setSkillInput(e.target.value)}
+                              onKeyDown={handleSkillKeyDown}
+                              placeholder="e.g. React, Python, Django (Press Enter to add)"
+                              style={{ flex: 1 }}
+                            />
+                            <button
+                              type="button"
+                              onClick={handleAddSkill}
+                              className="premium-btn premium-btn-primary"
+                              style={{ padding: '0 16px', minHeight: 'auto' }}
+                            >
+                              Add Skill
+                            </button>
+                          </div>
+                        </div>
+                        <div className="premium-form-group" style={{ marginTop: "16px" }}>
+                          <label htmlFor="profile_hobbies" className="premium-label">Hobbies</label>
+                          <input id="profile_hobbies" className="premium-input" name="hobbies" value={formData.hobbies} onChange={handleChange} placeholder="e.g. Reading, Coding, Travel" />
+                        </div>
+                        <div className="premium-form-group" style={{ marginTop: "16px" }}>
+                          <label htmlFor="profile_languages" className="premium-label">Languages</label>
+                          <input id="profile_languages" className="premium-input" name="languages" value={formData.languages} onChange={handleChange} placeholder="e.g. English, Telugu, Hindi" />
+                        </div>
+                        <div className="premium-grid" style={{ marginTop: "16px" }}>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_portfolio_url" className="premium-label">Portfolio URL</label>
+                            <input id="profile_portfolio_url" className="premium-input" name="portfolio_url" value={formData.portfolio_url || ""} onChange={handleChange} placeholder="https://yourportfolio.com" />
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* VERIFICATION TAB — Google Identity (Required) */}
+                  {activeTab === "verification" && (
+                    <motion.div key="verification" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
+                      <div className="premium-section">
+                        <h2 style={{ marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}><FiCheckCircle /> SURE ProEd Verification</h2>
+                        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px' }}>Your verified identity for attendance tracking and Google Meet sessions.</p>
+
+                        {/* Google OAuth Toast */}
+                        {googleOAuthToast && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -12 }}
+                            style={{
+                              padding: '14px 20px',
+                              borderRadius: '12px',
+                              marginBottom: '20px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '10px',
+                              fontWeight: 600,
+                              fontSize: '14px',
+                              background: googleOAuthToast.type === 'success'
+                                ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(5, 150, 105, 0.08))'
+                                : 'linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(220, 38, 38, 0.08))',
+                              border: `1px solid ${googleOAuthToast.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+                              color: googleOAuthToast.type === 'success' ? '#059669' : '#dc2626',
+                            }}
+                          >
+                            {googleOAuthToast.type === 'success' ? <FiCheckCircle size={18} /> : <FiAlertCircle size={18} />}
+                            {googleOAuthToast.message}
+                            <button
+                              type="button"
+                              onClick={() => setGoogleOAuthToast(null)}
+                              style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', fontSize: '18px', lineHeight: 1 }}
+                              aria-label="Dismiss"
+                            >
+                              ×
+                            </button>
+                          </motion.div>
+                        )}
+
+                        {/* Google Identity Card */}
+                        <div style={{
+                          padding: '24px',
+                          background: 'var(--bg-nested)',
+                          borderRadius: '14px',
+                          border: serverProfile?.google_identity?.is_connected
+                            ? '1px solid rgba(16, 185, 129, 0.3)'
+                            : '1px solid var(--border-color)',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          marginBottom: '20px',
+                        }}>
+                          {/* Top accent bar for connected state */}
+                          {serverProfile?.google_identity?.is_connected && (
+                            <div style={{
+                              position: 'absolute',
+                              top: 0, left: 0, right: 0,
+                              height: '3px',
+                              background: 'linear-gradient(90deg, #10b981, #34d399, #10b981)',
+                              borderRadius: '14px 14px 0 0',
+                            }} />
+                          )}
+
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold', fontSize: '16px' }}>
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                              </svg>
+                              Google Identity
+                            </div>
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px',
+                              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.06))',
+                              color: '#dc2626',
+                              border: '1px solid rgba(239, 68, 68, 0.2)',
+                            }}>Required</span>
+                          </div>
+
+                          {serverProfile?.google_identity?.is_connected ? (
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                                <span style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  padding: '6px 14px',
+                                  borderRadius: '20px',
+                                  fontSize: '12px',
+                                  fontWeight: 700,
+                                  background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1))',
+                                  color: '#059669',
+                                  border: '1px solid rgba(16, 185, 129, 0.25)',
+                                }}>
+                                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px rgba(16, 185, 129, 0.6)' }} />
+                                  Verified — Connected
+                                </span>
+
+                                <button
+                                  type="button"
+                                  onClick={handleGoogleConnect}
+                                  className="premium-btn"
+                                  style={{
+                                    background: 'var(--bg-primary)',
+                                    color: 'var(--text-primary)',
+                                    border: '1px solid var(--border-color)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '8px 16px',
+                                    fontSize: '13px'
+                                  }}
+                                >
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+                                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
+                                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                                  </svg>
+                                  Re-Sync Name
+                                </button>
+                              </div>
+
+                              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.5 }}>
+                                <strong>Note:</strong> Only click "Re-Sync Name" if you have recently changed your name in your Google Account settings (e.g., to match the required <strong>Name-Cohort-Course</strong> format). Otherwise, no action is needed.
+                              </div>
+
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                                <div style={{ padding: '14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                                  <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Google Email</div>
+                                  <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)', wordBreak: 'break-all' }}>{serverProfile.google_identity.google_email}</div>
+                                </div>
+                                <div style={{ padding: '14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                                  <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Google Profile Name</div>
+                                  <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>{serverProfile.google_identity.google_profile_name}</div>
+                                </div>
+                              </div>
+
+                              {/* Compute Identity Match and Meet Identity from both old and new backend keys */}
+                              {(() => {
+                                const matchObj = serverProfile.google_identity.identity_match || serverProfile.google_identity.naming_compliant;
+                                const isMatched = matchObj?.is_matched ?? matchObj?.is_compliant ?? matchObj;
+                                const matchMsg = matchObj?.message;
+                                const meetIdentity = serverProfile.current_application?.meet_identity || serverProfile.current_application?.required_meet_display_name;
+                                const recommendedIdentity = serverProfile.current_application?.recommended_meet_identity || meetIdentity;
+
+                                return (
+                                  <>
+                                    {/* Meet Identity & Identity Match */}
+                                    {meetIdentity && (
+                                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                                        <div style={{ padding: '14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                                          <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Meet Identity</div>
+                                          <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>{meetIdentity}</div>
+                                        </div>
+                                        <div style={{ padding: '14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                                          <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Identity Match</div>
+                                          {isMatched === true ? (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                              <FiCheckCircle size={16} color="#059669" />
+                                              <span style={{ fontSize: '14px', fontWeight: 600, color: '#059669' }}>Matching Successful</span>
+                                            </div>
+                                          ) : isMatched === false ? (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                              <FiInfo size={16} color="#059669" />
+                                              <span style={{ fontSize: '14px', fontWeight: 600, color: '#059669' }}>Recommended Format</span>
+                                            </div>
+                                          ) : (
+                                            <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-secondary)' }}>—</div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Compliant advisory */}
+                                    {isMatched === true && (
+                                      <div style={{
+                                        padding: '12px 16px',
+                                        borderRadius: '10px',
+                                        marginBottom: '16px',
+                                        background: 'rgba(16, 185, 129, 0.05)',
+                                        border: '1px solid rgba(16, 185, 129, 0.2)',
+                                        display: 'flex',
+                                        alignItems: 'flex-start',
+                                        gap: '10px',
+                                      }}>
+                                        <FiCheckCircle size={16} color="#059669" style={{ marginTop: '2px', flexShrink: 0 }} />
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                          <strong style={{ color: '#059669', fontSize: '13px', marginBottom: '4px' }}>Attendance Tracking Active</strong>
+                                          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                                            {matchMsg || "Your Google identity matches your SURE ProEd attendance identity. Attendance tracking is active."}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Non-compliant advisory */}
+                                    {isMatched === false && (
+                                      <div style={{
+                                        padding: '12px 16px',
+                                        borderRadius: '10px',
+                                        marginBottom: '16px',
+                                        background: 'rgba(16, 185, 129, 0.05)',
+                                        border: '1px solid rgba(16, 185, 129, 0.2)',
+                                        display: 'flex',
+                                        alignItems: 'flex-start',
+                                        gap: '10px',
+                                      }}>
+                                        <FiInfo size={16} color="#059669" style={{ marginTop: '2px', flexShrink: 0 }} />
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                          <strong style={{ color: '#059669', fontSize: '13px', marginBottom: '4px' }}>Please Make Sure You Have This Format</strong>
+                                          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                                            Please ensure your Google Account name matches this format: <strong style={{ color: 'var(--text-primary)' }}>{recommendedIdentity}</strong>. This helps mentors easily identify you!
+                                          </p>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </>
+                                );
+                              })()}
+
+
+
+                              <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                                Connected on {(() => {
+                                  if (!serverProfile?.google_identity?.connected_at) return "Unknown date";
+                                  const d = new Date(serverProfile.google_identity.connected_at);
+                                  return isNaN(d) ? "Unknown date" : d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+                                })()}
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '18px', lineHeight: 1.6 }}>
+                                Connect the same Google account you use for SURE ProEd Google Meet classes. Your Google Meet identity will be verified for accurate attendance tracking.
+                              </p>
+                              <button
+                                type="button"
+                                onClick={handleGoogleConnect}
+                                className="premium-btn"
+                                style={{
+                                  background: 'var(--bg-primary)',
+                                  color: 'var(--text-primary)',
+                                  border: '1px solid var(--border-color)',
+                                  width: '100%',
+                                  justifyContent: 'center',
+                                  gap: '10px',
+                                  fontWeight: 600,
+                                  padding: '14px 20px',
+                                  borderRadius: '10px',
+                                  transition: 'all 0.2s ease',
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                              >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+                                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
+                                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                                </svg>
+                                Connect with Google
+                              </button>
                             </div>
                           )}
                         </div>
-                      ) : (
-                        <div>
-                          <div style={{ color: '#d97706', fontWeight: 'bold', marginBottom: '12px' }}>⏳ Not Connected via Auth</div>
-                          <button type="button" onClick={handleLinkedInConnect} className="premium-btn" style={{ background: '#0a66c2', color: 'var(--text-inverse)', width: '100%', justifyContent: 'center' }}>
-                            Connect LinkedIn
-                          </button>
-                        </div>
-                      )}
-                    </div>
 
-                    <div style={{ padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontWeight: 'bold' }}><FiGithub color="var(--text-primary)" size={20} /> GitHub Status</div>
-                      {serverProfile?.is_github_connected ? (
-                        <div style={{ color: '#059669', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          ✅ Connected ({serverProfile.github_username})
-                          {serverProfile.github_username && (
-                            <a href={`https://github.com/${serverProfile.github_username}`} target="_blank" rel="noreferrer" className="premium-btn" style={{ padding: '6px 14px', fontSize: '13px', background: 'var(--student-glow-primary)', color: 'var(--primary-color)', border: '1px solid var(--primary-color)', minHeight: 'auto', gap: '6px', borderRadius: '8px', marginLeft: 'auto' }}>
-                              <FiExternalLink /> View Profile
-                            </a>
-                          )}
+                        {/* Read-Only Admin Information */}
+                        <h3 className="premium-h4" style={{ marginTop: '24px' }}>Academic Status</h3>
+                        <div className="premium-grid-2">
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_student_code" className="premium-label">Student Code</label>
+                            <input id="profile_student_code" className="premium-input" value={serverProfile?.student_code || "Not Generated"} disabled />
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_identity_issued_at" className="premium-label">Identity Issued At</label>
+                            <input id="profile_identity_issued_at" className="premium-input" value={(() => {
+                              if (!serverProfile?.student_identity_issued_at) return "Pending Qualification";
+                              const d = new Date(serverProfile.student_identity_issued_at);
+                              return isNaN(d) ? "Invalid date" : d.toLocaleString();
+                            })()} disabled />
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_current_course" className="premium-label">Current Course</label>
+                            <input id="profile_current_course" className="premium-input" value={serverProfile?.current_application?.course?.name || "Not Enrolled"} disabled />
+                          </div>
+                          <div className="premium-form-group">
+                            <label htmlFor="profile_current_cohort" className="premium-label">Current Cohort</label>
+                            <input id="profile_current_cohort" className="premium-input" value={serverProfile?.current_application?.assigned_cohort?.name || "Not Assigned"} disabled />
+                          </div>
                         </div>
-                      ) : (
-                        <div>
-                          <div style={{ color: '#d97706', fontWeight: 'bold', marginBottom: '12px' }}>⏳ Not Connected via Auth</div>
-                          <button type="button" onClick={handleGithubConnect} className="premium-btn" style={{ background: '#24292e', color: 'var(--text-inverse)', width: '100%', justifyContent: 'center' }}>
-                            Connect GitHub
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
 
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* INTEGRATIONS TAB — Professional Links (Optional) */}
+                  {activeTab === "integrations" && (
+                    <motion.div key="integrations" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
+                      <div className="premium-section">
+                        <h2 style={{ marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}><FiShield /> Professional Integrations</h2>
+                        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px' }}>Mandatory links to your professional profiles.</p>
+
+                        <div className="premium-grid-2" style={{ marginBottom: '24px' }}>
+                          <div style={{ padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontWeight: 'bold' }}><FiLinkedin color="#0a66c2" size={20} /> LinkedIn Status</div>
+                            {serverProfile?.is_linkedin_connected ? (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                <div style={{ color: '#059669', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                  ✅ Connected via Auth
+                                  {serverProfile?.linkedin_url && (
+                                    <a href={serverProfile.linkedin_url} target="_blank" rel="noreferrer" className="premium-btn" style={{ padding: '6px 14px', fontSize: '13px', background: 'var(--student-glow-primary)', color: 'var(--primary-color)', border: '1px solid var(--primary-color)', minHeight: 'auto', gap: '6px', borderRadius: '8px', marginLeft: 'auto' }}>
+                                      <FiExternalLink /> View Profile
+                                    </a>
+                                  )}
+                                </div>
+                                {!serverProfile?.linkedin_url && (
+                                  <div className="premium-form-group">
+                                    <label htmlFor="linkedin_url" className="premium-label" style={{ fontSize: '13px' }}>LinkedIn Public Profile URL *</label>
+                                    <input id="linkedin_url" className="premium-input" name="linkedin_url" value={formData.linkedin_url || ""} onChange={handleChange} placeholder="https://linkedin.com/in/yourprofile" />
+                                    <small style={{ color: 'var(--text-secondary)', fontSize: '12px', marginTop: '4px' }}>LinkedIn does not provide your URL automatically. Please type it here and save.</small>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div>
+                                <div style={{ color: '#d97706', fontWeight: 'bold', marginBottom: '12px' }}>⏳ Not Connected via Auth</div>
+                                <button type="button" onClick={handleLinkedInConnect} className="premium-btn" style={{ background: '#0a66c2', color: 'var(--text-inverse)', width: '100%', justifyContent: 'center' }}>
+                                  Connect LinkedIn
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          <div style={{ padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontWeight: 'bold' }}><FiGithub color="var(--text-primary)" size={20} /> GitHub Status</div>
+                            {serverProfile?.is_github_connected ? (
+                              <div style={{ color: '#059669', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                ✅ Connected ({serverProfile.github_username})
+                                {serverProfile.github_username && (
+                                  <a href={`https://github.com/${serverProfile.github_username}`} target="_blank" rel="noreferrer" className="premium-btn" style={{ padding: '6px 14px', fontSize: '13px', background: 'var(--student-glow-primary)', color: 'var(--primary-color)', border: '1px solid var(--primary-color)', minHeight: 'auto', gap: '6px', borderRadius: '8px', marginLeft: 'auto' }}>
+                                    <FiExternalLink /> View Profile
+                                  </a>
+                                )}
+                              </div>
+                            ) : (
+                              <div>
+                                <div style={{ color: '#d97706', fontWeight: 'bold', marginBottom: '12px' }}>⏳ Not Connected via Auth</div>
+                                <button type="button" onClick={handleGithubConnect} className="premium-btn" style={{ background: '#24292e', color: 'var(--text-inverse)', width: '100%', justifyContent: 'center' }}>
+                                  Connect GitHub
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                      </div>
+                    </motion.div>
+                  )}
+
+                </AnimatePresence>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
+                  <button type="submit" className="premium-btn premium-btn-primary" disabled={saving}>
+                    {saving ? "Saving..." : "Save Profile Updates"}
+                  </button>
                 </div>
-              </motion.div>
-            )}
-
-          </AnimatePresence>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
-            <button type="submit" className="premium-btn premium-btn-primary" disabled={saving}>
-              {saving ? "Saving..." : "Save Profile Updates"}
-            </button>
+              </form>
+            </GlassCard>
           </div>
-        </form>
-      </GlassCard>
-      </div>
-      </div>
+        </div>
 
-      {/* Toast Notification */}
-      <AnimatePresence>
-        {successToast && (
-          <motion.div 
-            className={styles.toast}
-            initial={{ opacity: 0, y: 50 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            exit={{ opacity: 0, y: 50 }}
-          >
-            <FiCheckCircle size={20} color="var(--primary-color)" />
-            {successToast}
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {/* Toast Notification */}
+        <AnimatePresence>
+          {successToast && (
+            <motion.div
+              className={styles.toast}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+            >
+              <FiCheckCircle size={20} color="var(--primary-color)" />
+              {successToast}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </>
   );

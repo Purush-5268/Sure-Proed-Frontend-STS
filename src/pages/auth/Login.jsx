@@ -73,7 +73,11 @@ function Login() {
       }, 500);
     };
 
-    if (access) {
+    const errorParam = params.get("error");
+    if (errorParam) {
+      setError(errorParam);
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (access) {
       processTokens(access, refresh);
     }
   }, [navigate, updateUser]);
