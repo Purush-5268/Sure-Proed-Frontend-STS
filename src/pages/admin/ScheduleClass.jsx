@@ -559,7 +559,7 @@ function ScheduleClass() {
                   <label className="premium-label">Select Stream *</label>
                   <select value={request.streamId} onChange={(e) => setRequest({ ...request, streamId: e.target.value })} required className={`premium-input ${styles.formInput}`}>
                     <option value="">-- Select Stream --</option>
-                    {courses.map(c => <option key={c.id} value={c.id}>{c.name || c.title}</option>)}
+                    {courses.slice().sort((a,b) => (a.name || a.title || a.code || "").localeCompare(b.name || b.title || b.code || "")).map(c => <option key={c.id} value={c.id}>{c.name || c.title}</option>)}
                   </select>
                 </div>
                 <div>
@@ -575,7 +575,7 @@ function ScheduleClass() {
                     disabled={!request.streamId || loadingCohorts}
                   >
                     <option value="">{loadingCohorts ? "Loading Cohorts..." : "-- Select Cohort --"}</option>
-                    {cohorts.map(c => <option key={c.id} value={c.id}>{c.name} ({c.code})</option>)}
+                    {cohorts.slice().sort((a,b) => (a.name || a.code || a.title || "").localeCompare(b.name || b.code || b.title || "")).map(c => <option key={c.id} value={c.id}>{c.name} ({c.code})</option>)}
                   </select>
                 </div>
               </div>

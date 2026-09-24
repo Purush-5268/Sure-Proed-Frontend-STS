@@ -92,7 +92,7 @@ function Courses() {
         </div>
       ) : (
         <div className={styles.courseGrid}>
-          {courses.map((course) => (
+          {courses.slice().sort((a,b) => (a.name || a.title || a.code || "").localeCompare(b.name || b.title || b.code || "")).map((course) => (
             <div 
               key={course.id} 
               className={styles.courseCard} 

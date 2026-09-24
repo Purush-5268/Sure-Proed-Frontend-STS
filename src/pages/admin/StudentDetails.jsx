@@ -281,7 +281,7 @@ function StudentDetails() {
           <div style={{ backgroundColor: "var(--bg-surface)", padding: "1.5rem", borderRadius: "12px", marginBottom: "1.5rem", border: "1px solid var(--border-color)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
             <h3 style={{ margin: "0 0 16px 0", fontSize: "16px", color: "var(--text-primary)", borderBottom: "1px solid var(--border-color)", paddingBottom: "8px" }}>Completed Courses</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {student.completed_cohorts.map((cc, i) => (
+              {student.completed_cohorts.slice().sort((a,b) => (a.name || a.code || a.title || "").localeCompare(b.name || b.code || b.title || "")).map((cc, i) => (
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", backgroundColor: "var(--bg-nested)", borderRadius: "8px", fontSize: "13px" }}>
                   <div>
                     <strong>{cc.course_name}</strong> · {cc.cohort_code || "N/A"}

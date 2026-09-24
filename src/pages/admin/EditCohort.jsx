@@ -165,7 +165,7 @@ function EditCohort() {
                 <label>Assign Course / Domain *</label>
                 <select name="course" value={form.course} onChange={handleChange} required>
                   <option value="">-- Select a Domain --</option>
-                  {courses.map((course) => (
+                  {courses.slice().sort((a,b) => (a.name || a.title || a.code || "").localeCompare(b.name || b.title || b.code || "")).map((course) => (
                     <option key={course.id} value={course.id}>{course.name || course.title || course.code}</option>
                   ))}
                 </select>

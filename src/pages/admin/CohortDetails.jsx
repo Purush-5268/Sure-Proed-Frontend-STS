@@ -98,7 +98,7 @@ import { cohortChatService } from "../../services/cohortChatService";
 import styles from "./CohortDetails.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import CohortScreeningPanel from "./CohortScreeningPanel";
-import { FiMessageCircle, FiEdit2, FiArrowLeft, FiUser, FiCalendar, FiUsers, FiVideo, FiCheckCircle, FiXCircle } from "react-icons/fi";
+import { FiMessageCircle, FiEdit2, FiArrowLeft, FiUser, FiCalendar, FiUsers, FiVideo, FiCheckCircle, FiXCircle, FiTrash2 } from "react-icons/fi";
 
 function CohortDetails() {
   const { id } = useParams();
@@ -113,6 +113,18 @@ function CohortDetails() {
   const [updatingBatch, setUpdatingBatch] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [bulkGenStatus, setBulkGenStatus] = useState("");
+
+  const handleDeleteCohort = async () => {
+    if (window.confirm("Are you sure you want to delete this cohort? This action cannot be undone.")) {
+      try {
+        await apiClient.delete(API_ENDPOINTS.COHORTS.BY_ID(cohort.id));
+        alert("Cohort deleted successfully.");
+        navigate("/admin/cohorts");
+      } catch (err) {
+        alert(err.response?.data?.error || "Failed to delete cohort.");
+      }
+    }
+  };
 
   const handleBulkGenerateOfferLetters = async () => {
     if (!window.confirm("Generate Offer Letters for all eligible students in this cohort?")) return;
@@ -322,6 +334,11 @@ function CohortDetails() {
             <FiEdit2 size={16} aria-hidden="true" />
             Edit
           </Link>
+
+          <button onClick={handleDeleteCohort} className={styles.btn} aria-label="Delete Cohort" style={{ background: '#dc2626', color: 'white', border: 'none', cursor: 'pointer', padding: '0.6rem 1.2rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.875rem', fontWeight: '500' }}>
+            <FiTrash2 size={16} aria-hidden="true" />
+            Delete
+          </button>
           
           <Link to="/admin/cohorts" className={`${styles.btn} ${styles.btnTertiary}`} aria-label="Back to Cohorts">
             <FiArrowLeft size={20} aria-hidden="true" />

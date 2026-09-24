@@ -207,7 +207,7 @@ function ClassSchedule() {
     if (!window.confirm("Are you sure you want to end this class?")) return;
     try {
       if (type === "DOMAIN") {
-        await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId), { conducted: true, class_status: "COMPLETED" });
+        await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId), { conducted: false, class_status: "COMPLETED" });
       } else {
         await apiClient.patch(API_ENDPOINTS.TRAININGS.SESSION_BY_ID(sessionId), { class_status: "COMPLETED" });
       }

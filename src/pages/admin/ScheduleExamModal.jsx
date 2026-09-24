@@ -346,7 +346,7 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
                     disabled={loadingInitial}
                   >
                     <option value="">-- Choose an active cohort --</option>
-                    {cohorts.map((c) => (
+                    {cohorts.slice().sort((a,b) => (a.name || a.code || a.title || "").localeCompare(b.name || b.code || b.title || "")).map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name} ({c.code || "Cohort"}) — {c.course?.name || c.course_title || "Course"}
                       </option>
@@ -498,7 +498,7 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
                     disabled={loadingInitial}
                   >
                     <option value="">-- Choose Course --</option>
-                    {courses.map((crs) => (
+                    {courses.slice().sort((a,b) => (a.name || a.title || a.code || "").localeCompare(b.name || b.title || b.code || "")).map((crs) => (
                       <option key={crs.id} value={crs.id}>
                         {crs.name || crs.title}
                       </option>

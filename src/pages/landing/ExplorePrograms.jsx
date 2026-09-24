@@ -85,7 +85,7 @@ const ExplorePrograms = () => {
             </div>
           ) : (
             <div className={styles.grid}>
-              {filteredCourses.map((course, index) => {
+              {filteredCourses.slice().sort((a,b) => (a.name || a.title || a.code || "").localeCompare(b.name || b.title || b.code || "")).map((course, index) => {
                 const colorClasses = [styles.colorBlue, styles.colorGreen, styles.colorPink, styles.colorTeal, styles.colorPurple];
                 const colorClass = colorClasses[index % colorClasses.length];
                 return (

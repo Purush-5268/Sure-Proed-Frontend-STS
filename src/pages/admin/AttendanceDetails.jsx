@@ -369,7 +369,9 @@ function AttendanceDetails() {
               </thead>
               <tbody>
                 {officialData && officialData.expected_students ? (
-                  Object.values(officialData.expected_students).map((student, idx) => {
+                  Object.values(officialData.expected_students)
+                    .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+                    .map((student, idx) => {
                     const attPercentage = student.attendance_percentage || 0;
                     const hasPriorPermission = student.prior_permission?.has_permission === true;
                     const isAbsent = student.status === "ABSENT";
@@ -552,7 +554,7 @@ function AttendanceDetails() {
                   </tr>
                 </thead>
                 <tbody>
-                  {officialData.unmatched_participants.map((unmatched, idx) => {
+                  {officialData.unmatched_participants.slice().sort((a, b) => (a.name || "").localeCompare(b.name || "")).map((unmatched, idx) => {
                     const isAmbiguous = unmatched.ambiguity_reason && unmatched.ambiguity_reason.toLowerCase().includes("multiple");
                     
                     const formatTime = (isoString) => {
@@ -688,7 +690,9 @@ function AttendanceDetails() {
                     style={{ width: '100%', padding: '8px 12px' }}
                   >
                     <option value="">-- Select an Expected Student --</option>
-                    {officialData?.expected_students && Object.entries(officialData.expected_students).map(([id, s]) => (
+                    {officialData?.expected_students && Object.entries(officialData.expected_students)
+                      .sort((a, b) => (a[1].name || "").localeCompare(b[1].name || ""))
+                      .map(([id, s]) => (
                       <option key={id} value={id}>
                         {s.name} ({s.email}) - {s.status}
                       </option>

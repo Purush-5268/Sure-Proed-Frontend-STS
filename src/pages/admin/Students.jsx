@@ -366,7 +366,7 @@ function Students() {
           style={{ flex: 1, minWidth: "200px" }}
         >
           <option value="">All Courses</option>
-          {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          {courses.slice().sort((a,b) => (a.name || "").localeCompare(b.name || "")).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
 
         <select
@@ -381,7 +381,7 @@ function Students() {
             // Cohort serializer returns `course` as a UUID string
             const cId = c.course?.id || c.course || c.course_id;
             return String(cId) === String(selectedCourseId);
-          }).map(coh => (
+          }).sort((a,b) => (a.code || a.name || "").localeCompare(b.code || b.name || "")).map(coh => (
             <option key={coh.id} value={coh.id}>
               {coh.code || coh.name || "Batch"}
             </option>

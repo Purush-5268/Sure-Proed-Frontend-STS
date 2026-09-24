@@ -104,7 +104,7 @@ export default function ContributionTab() {
             <h2 className="premium-section-title">My Cohorts</h2>
             {data.cohorts.length > 0 ? (
               <div className={styles.cohortList}>
-                {data.cohorts.map(c => (
+                {data.cohorts.slice().sort((a,b) => (a.name || a.code || a.title || "").localeCompare(b.name || b.code || b.title || "")).map(c => (
                   <Link to={`/trustee/volunteer/cohorts/${c.id}`} key={c.id} className={styles.cohortItem}>
                     <div className={styles.cohortMain}>
                        <span className={styles.cohortCode}>{c.code}</span>

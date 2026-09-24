@@ -81,7 +81,7 @@ const MentorAssignments = () => {
             }}
           >
             <AnimatePresence mode="popLayout">
-              {filteredCourses.map((course) => (
+              {filteredCourses.slice().sort((a,b) => (a.name || a.title || a.code || "").localeCompare(b.name || b.title || b.code || "")).map((course) => (
                 <Card key={course.id || course.code} hoverable className={styles.courseCard}>
                   <div className={styles.cardHeader}>
                     <h3 className={styles.courseName}>{course.name}</h3>

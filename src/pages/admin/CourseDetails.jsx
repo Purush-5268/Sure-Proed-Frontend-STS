@@ -34,6 +34,18 @@ function CourseDetails() {
   if (error) return <div className={styles.page}><div className="premium-card"><h1>Course Details</h1><p style={{ color: "#b91c1c" }}>{error}</p></div></div>;
   if (!course) return <div className={styles.page}><div className="premium-card"><h1>Course Details</h1><p>No course found.</p></div></div>;
 
+  const handleDeleteCourse = async () => {
+    if (window.confirm("Are you sure you want to delete this course? This action cannot be undone.")) {
+      try {
+        await apiClient.delete(API_ENDPOINTS.COURSES.BY_ID(course.id));
+        alert("Course deleted successfully.");
+        navigate("/admin/courses");
+      } catch (err) {
+        alert(err.response?.data?.error || "Failed to delete course.");
+      }
+    }
+  };
+
   return (
     <div className={styles.page}>
       <div className="premium-card">
@@ -86,6 +98,7 @@ function CourseDetails() {
 
         <div className={styles.buttons}>
           <Link to={`/admin/edit-course/${course.id}`} className={styles.editBtn}>Edit Course</Link>
+          <button onClick={handleDeleteCourse} className={styles.editBtn} style={{ background: '#dc2626', borderColor: '#dc2626', color: 'white' }}>Delete Course</button>
           <a href="#" onClick={(e) => { e.preventDefault(); navigate(-1); }}  className={styles.cancelBtn}>Back to Courses</a>
         </div>
       </div>

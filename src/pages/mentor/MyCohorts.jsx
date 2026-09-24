@@ -121,7 +121,7 @@ function MyCohorts() {
           animate="show"
         >
           <AnimatePresence mode="popLayout">
-            {cohorts.map((cohort) => (
+            {cohorts.slice().sort((a,b) => (a.name || a.code || a.title || "").localeCompare(b.name || b.code || b.title || "")).map((cohort) => (
               <motion.div key={cohort.id} variants={item} layout>
                 <Card hoverable className={styles.cohortCard}>
                   <div className={styles.cardHeader}>

@@ -487,7 +487,7 @@ function Attendance() {
               value={selectedCohort} 
               onChange={(e) => setSelectedCohort(e.target.value)}
             >
-              {cohorts.map(c => (
+              {cohorts.slice().sort((a,b) => (a.name || a.code || a.title || "").localeCompare(b.name || b.code || b.title || "")).map(c => (
                 <option key={c.id} value={c.id}>{c.name} ({c.code})</option>
               ))}
             </select>

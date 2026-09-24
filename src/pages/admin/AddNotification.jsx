@@ -103,7 +103,7 @@ function AddNotification() {
               <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Select Batch *</label>
               <select name="cohortId" value={form.cohortId} onChange={handleChange} required style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
                 <option value="">-- Choose Batch --</option>
-                {cohorts.map(c => <option key={`cohort-${c.id}`} value={c.id}>{c.name || c.code}</option>)}
+                {cohorts.slice().sort((a,b) => (a.name || a.code || a.title || "").localeCompare(b.name || b.code || b.title || "")).map(c => <option key={`cohort-${c.id}`} value={c.id}>{c.name || c.code}</option>)}
               </select>
             </div>
           )}

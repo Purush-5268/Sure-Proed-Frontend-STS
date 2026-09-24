@@ -72,7 +72,7 @@ function MentorLayout() {
               {cohorts.length === 0 ? (
                 <option value="">No assigned cohorts</option>
               ) : (
-                cohorts.map(c => (
+                cohorts.slice().sort((a,b) => (a.name || a.code || a.title || "").localeCompare(b.name || b.code || b.title || "")).map(c => (
                   <option key={c.id} value={c.id}>
                     {c.course_name} — {c.code}
                   </option>

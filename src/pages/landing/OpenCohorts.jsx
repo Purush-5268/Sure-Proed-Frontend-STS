@@ -158,7 +158,7 @@ const OpenCohorts = ({ cohorts: propCohorts, loading: propLoading }) => {
           </div>
         ) : cohorts.length > 0 ? (
           <div className={`${styles.grid} ${cohorts.length === 1 ? styles.gridSingle : ''}`}>
-            {cohorts.map(cohort => {
+            {cohorts.slice().sort((a,b) => (a.name || a.code || a.title || "").localeCompare(b.name || b.code || b.title || "")).map(cohort => {
               const isTrainingInProgress = cohort.status === 'ACTIVE' || cohort.status === 'IN_PROGRESS';
               return (
               <div key={cohort.id} className={styles.card}>

@@ -293,7 +293,7 @@ function QuestionBanks() {
           Course
           <select name="course_id" value={form.course_id} onChange={update} required>
             <option value="">Select course</option>
-            {courses.map((course) => <option key={course.id} value={course.id}>{course.code} · {course.name}</option>)}
+            {courses.slice().sort((a,b) => (a.name || a.title || a.code || "").localeCompare(b.name || b.title || b.code || "")).map((course) => <option key={course.id} value={course.id}>{course.code} · {course.name}</option>)}
           </select>
         </label>
 
@@ -360,7 +360,7 @@ function QuestionBanks() {
             >
               <option value="ALL">All Cohorts & Prerequisites</option>
               <option value="PRESCREENING">Prerequisites Only (No Cohort)</option>
-              {cohorts.map((c) => {
+              {cohorts.slice().sort((a,b) => (a.name || a.code || a.title || "").localeCompare(b.name || b.code || b.title || "")).map((c) => {
                 const courseName = typeof c.course === 'object' ? c.course.name : courses.find(course => course.id === c.course)?.name;
                 const label = c.name || `${c.code}${courseName ? ` - ${courseName}` : ''}`;
                 return <option key={c.id} value={c.id}>{label}</option>;

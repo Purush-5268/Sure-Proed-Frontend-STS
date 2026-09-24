@@ -152,7 +152,7 @@ function AddMentor() {
             <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Assigned Course</label>
             <select name="domain" value={form.domain} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
               <option value="">-- Select Course (Optional) --</option>
-              {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              {courses.slice().sort((a,b) => (a.name || a.title || a.code || "").localeCompare(b.name || b.title || b.code || "")).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
 

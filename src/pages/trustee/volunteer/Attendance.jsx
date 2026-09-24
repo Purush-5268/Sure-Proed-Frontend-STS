@@ -246,7 +246,7 @@ function AttendanceManagement() {
           style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}
         >
           <option value="">-- All Courses --</option>
-          {courses.map((c) => (
+          {courses.slice().sort((a,b) => (a.name || a.title || "").localeCompare(b.name || b.title || "")).map((c) => (
             <option key={c.id} value={c.id}>
               {c.name || c.title}
             </option>
@@ -260,7 +260,7 @@ function AttendanceManagement() {
           disabled={!selectedCourse}
         >
           <option value="">-- All Cohorts --</option>
-          {cohorts.map((c) => (
+          {cohorts.slice().sort((a,b) => (a.name || a.code || "").localeCompare(b.name || b.code || "")).map((c) => (
             <option key={c.id} value={c.id}>
               {c.name || c.code}
             </option>
@@ -327,7 +327,7 @@ function AttendanceManagement() {
             <tbody>
               {filteredAttendance.map((item) => {
                 const whitelistCount = item.whitelist_email_count || 0;
-                const totalStudents = item.google_total_students ?? (item.total_attendee_count || item.actual_student_count || 0);
+                const totalStudents = item.google_total_students ?? item.actual_student_count ?? item.total_attendee_count ?? 0;
                 const joinedStudents = item.google_joined_count ?? (Array.isArray(item.joined_students) ? item.joined_students.length : 0);
                 const absentStudents = item.google_absent_count ?? Math.max(0, totalStudents - joinedStudents);
 

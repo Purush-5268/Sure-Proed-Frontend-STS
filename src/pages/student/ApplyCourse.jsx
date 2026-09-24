@@ -80,7 +80,7 @@
 //         ) : (
 //           <div className={styles.courseGrid}>
 
-//             {courses.map((course) => (
+//             {courses.slice().sort((a,b) => (a.name || a.title || a.code || "").localeCompare(b.name || b.title || b.code || "")).map((course) => (
 //               <div
 //                 key={course.id}
 //                 className={styles.courseCard}
@@ -306,7 +306,7 @@ function ApplyCourse() {
           </div>
         ) : (
           <div className={styles.courseGrid}>
-            {cohorts.map((cohort) => {
+            {cohorts.slice().sort((a,b) => (a.name || a.code || a.title || "").localeCompare(b.name || b.code || b.title || "")).map((cohort) => {
               const courseId = typeof cohort.course === 'object' ? cohort.course?.id : (cohort.course || cohort.course_id);
               const courseName = cohort.course_name || (typeof cohort.course === 'object' ? cohort.course?.name : "Unknown Course");
               const courseDetails = cohort.course_details || (typeof cohort.course === 'object' ? cohort.course : {});

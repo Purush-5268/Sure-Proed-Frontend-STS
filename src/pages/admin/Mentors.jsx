@@ -131,7 +131,7 @@ function Mentors() {
   // Helper to get formatted assignments string
   const getAssignmentsString = (mentor) => {
     if (!mentor.assigned_cohorts || mentor.assigned_cohorts.length === 0) return "None";
-    return mentor.assigned_cohorts.map(c => `${c.code} ${c.course}`).join(", ");
+    return mentor.assigned_cohorts.slice().sort((a,b) => (a.name || a.code || a.title || "").localeCompare(b.name || b.code || b.title || "")).map(c => `${c.code} ${c.course}`).join(", ");
   };
 
   const handleAssign = async (mentorId) => {
@@ -323,7 +323,7 @@ function Mentors() {
             }}
           >
             <option value="">Select Course ▼</option>
-            {courses.map(c => <option key={c.id} value={c.id}>{c.name || c.title}</option>)}
+            {courses.slice().sort((a,b) => (a.name || a.title || a.code || "").localeCompare(b.name || b.title || b.code || "")).map(c => <option key={c.id} value={c.id}>{c.name || c.title}</option>)}
           </select>
         )}
       </div>
@@ -348,7 +348,7 @@ function Mentors() {
               }}
             >
               <option value="">Select Active Cohort ▼</option>
-              {cohorts.map(c => <option key={c.id} value={c.id}>{c.code} - {c.name}</option>)}
+              {cohorts.slice().sort((a,b) => (a.name || a.code || a.title || "").localeCompare(b.name || b.code || b.title || "")).map(c => <option key={c.id} value={c.id}>{c.code} - {c.name}</option>)}
             </select>
           )}
         </div>

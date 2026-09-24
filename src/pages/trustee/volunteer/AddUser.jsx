@@ -206,7 +206,7 @@ function AddUser() {
             <label className="premium-label">Domain (Optional)</label>
             <select name="domain" value={form.domain} onChange={handleChange} className="premium-input">
               <option value="">-- Select Domain --</option>
-              {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              {courses.slice().sort((a,b) => (a.name || a.title || a.code || "").localeCompare(b.name || b.title || b.code || "")).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
 

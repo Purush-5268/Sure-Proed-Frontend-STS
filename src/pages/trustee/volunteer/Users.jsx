@@ -312,7 +312,7 @@ function Users() {
             className={styles.filterSelect}
           >
             <option value="">All Courses</option>
-            {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            {courses.slice().sort((a,b) => (a.name || a.title || a.code || "").localeCompare(b.name || b.title || b.code || "")).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
 
           <select
