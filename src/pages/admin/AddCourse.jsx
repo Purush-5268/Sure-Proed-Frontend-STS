@@ -63,9 +63,9 @@ function AddCourse() {
         code: form.code.trim(),
         name: form.name.trim(),
         domain: form.domain.trim(),
-        subject: form.subject.trim() || null,
+        subject: form.subject.trim(),
         description: form.description.trim(),
-        prerequisites: form.prerequisites.trim() || null,
+        prerequisites: form.prerequisites.trim(),
         duration_weeks: Number(form.duration_weeks) || 4,
         difficulty: form.difficulty,
         status: form.status,
@@ -76,10 +76,26 @@ function AddCourse() {
       setSuccess("Course created successfully.");
       navigate("/admin/courses");
     } catch (err) {
-      const message =
-        err?.response?.data?.detail ||
-        err?.response?.data?.message ||
-        "Unable to create the course right now.";
+      const data = err?.response?.data;
+      let message = "Unable to create the course right now.";
+      if (data) {
+        if (typeof data === "string") {
+          message = data;
+        } else if (data.detail) {
+          message = data.detail;
+        } else if (data.message) {
+          message = data.message;
+        } else if (data.code && Array.isArray(data.code)) {
+          message = `Code Error: ${data.code[0]}`;
+        } else if (data.name && Array.isArray(data.name)) {
+          message = `Name Error: ${data.name[0]}`;
+        } else {
+           const firstKey = Object.keys(data)[0];
+           if (firstKey && Array.isArray(data[firstKey])) {
+             message = `${firstKey}: ${data[firstKey][0]}`;
+           }
+        }
+      }
       setError(message);
     } finally {
       setLoading(false);

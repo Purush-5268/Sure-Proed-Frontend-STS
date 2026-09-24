@@ -78,7 +78,26 @@ function EditCourse() {
       await apiClient.patch(API_ENDPOINTS.COURSES.BY_ID(id), payload);
       navigate("/admin/courses");
     } catch (err) {
-      const message = err?.response?.data?.detail || "Unable to update the course.";
+      const data = err?.response?.data;
+      let message = "Unable to update the course.";
+      if (data) {
+        if (typeof data === "string") {
+          message = data;
+        } else if (data.detail) {
+          message = data.detail;
+        } else if (data.message) {
+          message = data.message;
+        } else if (data.code && Array.isArray(data.code)) {
+          message = `Code Error: ${data.code[0]}`;
+        } else if (data.name && Array.isArray(data.name)) {
+          message = `Name Error: ${data.name[0]}`;
+        } else {
+           const firstKey = Object.keys(data)[0];
+           if (firstKey && Array.isArray(data[firstKey])) {
+             message = `${firstKey}: ${data[firstKey][0]}`;
+           }
+        }
+      }
       setError(message);
     } finally {
       setLoading(false);

@@ -11,7 +11,8 @@ function CourseDetails() {
   const { id } = useParams();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [hasApplied, setHasApplied] = useState(false);
+  const [hasAppliedToThis, setHasAppliedToThis] = useState(false);
+  const [hasOtherApplication, setHasOtherApplication] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
   const [applyError, setApplyError] = useState("");
   const [searchParams] = useSearchParams();
@@ -77,8 +78,10 @@ function CourseDetails() {
       try {
         const appsData = await applicationService.getApplications();
         if (isMounted) {
-          const alreadyApplied = appsData.some(app => String(app.course?.id || app.course_id) === String(id));
-          setHasApplied(alreadyApplied);
+          const appliedToThis = appsData.some(app => String(app.course?.id || app.course_id) === String(id));
+          const hasAny = appsData.length > 0;
+          setHasAppliedToThis(appliedToThis);
+          setHasOtherApplication(hasAny && !appliedToThis);
         }
       } catch (err) {
         console.warn("Failed to check existing applications, application button duplicate protection may be incomplete:", err);
@@ -158,8 +161,7 @@ function CourseDetails() {
               </ul>
             </div>
             
-            
-            {openCohorts.length > 0 && !hasApplied && (
+            {openCohorts.length > 0 && !hasAppliedToThis && !hasOtherApplication && (
               <div className={styles.section} style={{ marginTop: '24px', padding: '16px', background: 'var(--bg-nested)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                 <h3 style={{ margin: '0 0 12px 0' }}>Select a Cohort</h3>
                 {openCohorts.length > 1 ? (
@@ -185,9 +187,14 @@ function CourseDetails() {
             )}
             
             {applyError && (
-
               <div style={{ color: 'var(--danger-color)', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '12px', borderRadius: '6px', marginBottom: '16px' }}>
                 {applyError}
+              </div>
+            )}
+
+            {hasOtherApplication && !applyError && (
+              <div style={{ color: 'var(--warning-color)', backgroundColor: 'rgba(245, 158, 11, 0.1)', padding: '12px', borderRadius: '6px', marginBottom: '16px' }}>
+                You already have an active program or application. Students are limited to one active program at a time.
               </div>
             )}
           </>
@@ -217,7 +224,7 @@ function CourseDetails() {
           <button 
             className={styles.applyBtn} 
             onClick={async () => {
-              if (isApplying || hasApplied) return;
+              if (isApplying || hasAppliedToThis || hasOtherApplication) return;
               setIsApplying(true);
               setApplyError("");
               try {
@@ -227,7 +234,7 @@ function CourseDetails() {
                   return;
                 }
                 await applicationService.createApplication({ course_id: id, assigned_cohort: selectedCohort });
-                setHasApplied(true);
+                setHasAppliedToThis(true);
                 navigate("/student/application-success");
               } catch (err) {
                 setApplyError(err.response?.data?.detail || err.response?.data?.error || err.response?.data?.non_field_errors?.[0] || "Failed to submit application. You may have already applied or the course is unavailable.");
@@ -235,10 +242,10 @@ function CourseDetails() {
                 setIsApplying(false);
               }
             }}
-            disabled={loading || !course || hasApplied || isApplying}
-            style={{ flex: '2', ...(hasApplied ? { backgroundColor: 'var(--success-color)', cursor: 'not-allowed', opacity: 1 } : {}) }}
+            disabled={loading || !course || hasAppliedToThis || hasOtherApplication || isApplying}
+            style={{ flex: '2', ...((hasAppliedToThis || hasOtherApplication) ? { backgroundColor: 'var(--success-color)', cursor: 'not-allowed', opacity: 1 } : {}) }}
           >
-            {isApplying ? "Applying..." : hasApplied ? "✓ Already Applied" : "Apply for this Course"}
+            {isApplying ? "Applying..." : hasAppliedToThis ? "✓ Already Applied" : hasOtherApplication ? "Enrollment Restricted" : "Apply for this Course"}
           </button>
         </div>
       </div>

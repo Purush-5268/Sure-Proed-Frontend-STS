@@ -37,7 +37,7 @@ const WhySureProed = () => {
   ];
 
   return (
-    <section id="features" className={styles.section}>
+    <section className={styles.section}>
       <div className={styles.container}>
         <div className={styles.header}>
           <div className={styles.badge}>WHY SURE PROED</div>

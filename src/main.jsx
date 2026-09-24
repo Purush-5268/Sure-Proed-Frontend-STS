@@ -3,7 +3,10 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext'
+import { setWasmUrl } from '@lottiefiles/dotlottie-react'
 
+// Set local WASM URL to prevent Brave/Adblockers from blocking the cross-origin WASM download
+setWasmUrl('/dotlottie-player.wasm');
 import { ThemeProvider } from './context/ThemeContext'
 
 import ErrorBoundary from './components/common/ErrorBoundary'

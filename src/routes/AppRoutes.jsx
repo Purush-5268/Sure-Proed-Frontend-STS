@@ -28,6 +28,7 @@ const CohortChat = lazy(() => import("../pages/student/CohortChat"));
 const CohortInfo = lazy(() => import("../pages/landing/CohortInfo"));
 const PrivacyPolicy = lazy(() => import("../pages/legal/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("../pages/legal/TermsOfService"));
+const ExplorePrograms = lazy(() => import("../pages/landing/ExplorePrograms"));
 
 /* Theme Enforcer for Public Pages */
 function ThemeEnforcer() {
@@ -80,6 +81,16 @@ const MainDashboard = lazy(() => import("../pages/trustee/main/Dashboard"));
 const Announcements = lazy(() => import("../pages/trustee/main/Announcements"));
 const Achievements = lazy(() => import("../pages/trustee/main/Achievements"));
 const Updates = lazy(() => import("../pages/trustee/main/Updates"));
+
+/* Role Communications */
+const Messages = lazy(() => import("../pages/communications/Messages"));
+
+/* Advisor */
+import AdvisorLayout from "../layouts/AdvisorLayout";
+const AdvisorDashboard = lazy(() => import("../pages/advisor/Dashboard"));
+const AdvisorProfile = lazy(() => import("../pages/advisor/Profile"));
+const AdvisorBatches = lazy(() => import("../pages/advisor/Batches"));
+const AdvisorStudents = lazy(() => import("../pages/advisor/Students"));
 
 /* Student */
 const StudentDashboard = lazy(() => import("../pages/student/Dashboard"));
@@ -264,6 +275,7 @@ function AppRoutes() {
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/quiz" element={<Navigate to="/student/exam-instructions" replace />} />
+            <Route path="/explore-programs" element={<ExplorePrograms />} />
           </Route>
 
           {/* ================= STUDENT MODULE (PROTECTED) ================= */}
@@ -422,6 +434,9 @@ function AppRoutes() {
               {/* Cohort Chat (Admin) */}
               <Route path="cohort-chat/:cohortId" element={<CohortChat />} />
 
+              {/* Role Communications (Admin) */}
+              <Route path="messages" element={<Messages />} />
+
               {/* Settings */}
               <Route path="settings" element={<Settings />} />
               <Route path="profile-settings" element={<ProfileSettings />} />
@@ -458,17 +473,21 @@ function AppRoutes() {
             </Route>
           </Route>
 
-          {/* ================= TRUSTEE MODULE (PROTECTED) ================= */}
-          <Route element={<ProtectedRoute allowedRoles={["TRUSTEE", "VOLUNTEER"]} redirectTo="/login" />}>
+          {/* ================= TRUSTEE PORTAL ENTRY POINT (PROTECTED) ================= */}
+          <Route element={<ProtectedRoute allowedRoles={["TRUSTEE", "VOLUNTEER", "ADVISOR"]} redirectTo="/login" />}>
             <Route path="/trustee" element={<TrusteeLayout />}>
               {/* 
                 The index and dashboard paths are handled directly by TrusteeLayout.jsx 
-                which securely redirects based on the trusteeType (VOLUNTEER vs COMMERCIAL). 
+                which securely redirects based on the role (TRUSTEE vs VOLUNTEER vs ADVISOR). 
               */}
               <Route index element={null} />
               <Route path="dashboard" element={null} />
+            </Route>
+          </Route>
 
-              {/* Volunteer Trustee */}
+          {/* ================= VOLUNTEER MODULE (PROTECTED) ================= */}
+          <Route element={<ProtectedRoute allowedRoles={["VOLUNTEER"]} redirectTo="/login" />}>
+            <Route path="/trustee" element={<TrusteeLayout />}>
               <Route path="volunteer/dashboard" element={<VolunteerDashboard />} />
               <Route path="volunteer/alerts" element={<VolunteerAlerts />} />
               <Route path="volunteer/schedule" element={<VolunteerSchedule />} />
@@ -484,17 +503,41 @@ function AppRoutes() {
               <Route path="volunteer/cohorts" element={<VolunteerCohorts />} />
               <Route path="volunteer/cohort-details/:id" element={<VolunteerCohortDetails />} />
               <Route path="volunteer/cohort-chat/:cohortId" element={<CohortChat />} />
+              <Route path="volunteer/messages" element={<Messages />} />
               <Route path="volunteer/profile" element={<TrusteeProfile />} />
               <Route path="volunteer/exam-proctoring" element={<ProctorDashboard />} />
               <Route path="volunteer/assessments" element={<MentorAssessments />} />
-              {/* Commercial Trustee */}
+            </Route>
+          </Route>
+
+          {/* ================= TRUSTEE MODULE (PROTECTED) ================= */}
+          <Route element={<ProtectedRoute allowedRoles={["TRUSTEE"]} redirectTo="/login" />}>
+            <Route path="/trustee" element={<TrusteeLayout />}>
               <Route path="main/dashboard" element={<MainDashboard />} />
+              <Route path="main/messages" element={<Messages />} />
               <Route path="main/announcements" element={<Announcements />} />
               <Route path="main/achievements" element={<Achievements />} />
               <Route path="main/updates" element={<Updates />} />
               <Route path="main/profile" element={<TrusteeProfile />} />
             </Route>
           </Route>
+
+          {/* ================= ADVISOR MODULE (PROTECTED) ================= */}
+          <Route element={<ProtectedRoute allowedRoles={["ADVISOR"]} redirectTo="/login" />}>
+            <Route path="/trustee/advisor" element={<AdvisorLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<AdvisorDashboard />} />
+              <Route path="messages" element={<Messages />} />
+              <Route path="batches" element={<AdvisorBatches />} />
+              <Route path="students" element={<AdvisorStudents />} />
+              <Route path="announcements" element={<Announcements />} />
+              <Route path="updates" element={<Updates />} />
+              <Route path="profile" element={<AdvisorProfile />} />
+            </Route>
+          </Route>
+
+          {/* Legacy / fallback redirect from /advisor to /trustee/advisor/dashboard */}
+          <Route path="/advisor/*" element={<Navigate to="/trustee/advisor/dashboard" replace />} />
 
           {/* ================= 404 NOT FOUND ================= */}
           <Route path="*" element={<NotFound />} />

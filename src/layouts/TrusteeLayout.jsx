@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { 
   FaTachometerAlt, FaExclamationTriangle, FaCalendarAlt, 
   FaUserClock, FaUserShield, FaBullhorn, 
-  FaTrophy, FaBriefcase, FaUser, FaClipboardList, FaDesktop, FaUsers
+  FaTrophy, FaBriefcase, FaUser, FaClipboardList, FaDesktop, FaUsers, FaComments
 } from "react-icons/fa";
 
 import Navbar from "../components/layout/Navbar";
@@ -20,6 +20,7 @@ function TrusteeLayout() {
   const volunteerLinks = [
     { label: "Command Center", path: "/trustee/volunteer/dashboard", icon: <FaTachometerAlt /> },
     { label: "Cohorts", path: "/trustee/volunteer/cohorts", icon: <FaUsers /> },
+    { label: "Messages", path: "/trustee/volunteer/messages", icon: <FaComments /> },
     { label: "System Alerts", path: "/trustee/volunteer/alerts", icon: <FaExclamationTriangle /> },
     { label: "Schedule Classes", path: "/trustee/volunteer/schedule", icon: <FaCalendarAlt /> },
     { label: "Attendance & CSV", path: "/trustee/volunteer/attendance", icon: <FaUserClock /> },
@@ -31,6 +32,7 @@ function TrusteeLayout() {
 
   const higherLevelTrusteeLinks = [
     { label: "Dashboard Overview", path: "/trustee/main/dashboard", icon: <FaTachometerAlt /> },
+    { label: "Messages", path: "/trustee/main/messages", icon: <FaComments /> },
     { label: "Announcements", path: "/trustee/main/announcements", icon: <FaBullhorn /> },
     { label: "Achievements", path: "/trustee/main/achievements", icon: <FaTrophy /> },
     { label: "Updates", path: "/trustee/main/updates", icon: <FaBriefcase /> },
@@ -38,7 +40,7 @@ function TrusteeLayout() {
   ];
 
   const isHigherLevel = user?.role === "TRUSTEE";
-  const isAdvisor = user?.admin_category === "ADVISORY";
+  const isAdvisor = user?.admin_category === "ADVISORY" || user?.role === "ADVISOR";
   const activeLinks = isHigherLevel ? higherLevelTrusteeLinks : volunteerLinks;
   
   let layoutTitle = "Volunteer Dashboard";
@@ -46,7 +48,7 @@ function TrusteeLayout() {
     layoutTitle = isAdvisor ? "Advisor Dashboard" : "Trustee Dashboard";
   }
 
-  if (!user || (user.role !== "TRUSTEE" && user.role !== "VOLUNTEER")) {
+  if (!user || (user.role !== "TRUSTEE" && user.role !== "VOLUNTEER" && user.role !== "ADVISOR")) {
     return <Navigate to="/login" replace />;
   }
 

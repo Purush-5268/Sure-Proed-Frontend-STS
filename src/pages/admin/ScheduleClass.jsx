@@ -416,7 +416,8 @@ function ScheduleClass() {
 
       // We rely on loadActiveClasses to fetch the freshly created session(s)
       // because LST sessions might return different ID keys or multiple records
-      await loadActiveClasses();
+      // Execute asynchronously so it doesn't block the UI
+      loadActiveClasses();
 
       setRequest({
         sessionType: "Domain",
@@ -552,29 +553,41 @@ function ScheduleClass() {
           </div>
 
           {request.sessionType === "Domain" && (
-            <div className={`premium-section responsive-grid ${styles.animatedField}`}>
-              <div>
-                <label className="premium-label">Select Stream *</label>
-                <select value={request.streamId} onChange={(e) => setRequest({ ...request, streamId: e.target.value })} required className={`premium-input ${styles.formInput}`}>
-                  <option value="">-- Select Stream --</option>
-                  {courses.map(c => <option key={c.id} value={c.id}>{c.name || c.title}</option>)}
-                </select>
+            <div className={`premium-section ${styles.animatedField}`}>
+              <div className="responsive-grid">
+                <div>
+                  <label className="premium-label">Select Stream *</label>
+                  <select value={request.streamId} onChange={(e) => setRequest({ ...request, streamId: e.target.value })} required className={`premium-input ${styles.formInput}`}>
+                    <option value="">-- Select Stream --</option>
+                    {courses.map(c => <option key={c.id} value={c.id}>{c.name || c.title}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="premium-label">Select Cohort *</label>
+                  <select 
+                    value={request.cohortId || ""} 
+                    onChange={(e) => {
+                      const selected = cohorts.find(c => c.id === e.target.value);
+                      setRequest({ ...request, cohortId: e.target.value, groupName: selected?.code || selected?.name || "" });
+                    }} 
+                    required 
+                    className={`premium-input ${styles.formInput}`}
+                    disabled={!request.streamId || loadingCohorts}
+                  >
+                    <option value="">{loadingCohorts ? "Loading Cohorts..." : "-- Select Cohort --"}</option>
+                    {cohorts.map(c => <option key={c.id} value={c.id}>{c.name} ({c.code})</option>)}
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="premium-label">Select Cohort *</label>
-                <select 
-                  value={request.cohortId || ""} 
-                  onChange={(e) => {
-                    const selected = cohorts.find(c => c.id === e.target.value);
-                    setRequest({ ...request, cohortId: e.target.value, groupName: selected?.code || selected?.name || "" });
-                  }} 
-                  required 
-                  className={`premium-input ${styles.formInput}`}
-                  disabled={!request.streamId || loadingCohorts}
-                >
-                  <option value="">{loadingCohorts ? "Loading Cohorts..." : "-- Select Cohort --"}</option>
-                  {cohorts.map(c => <option key={c.id} value={c.id}>{c.name} ({c.code})</option>)}
-                </select>
+              <div style={{ marginTop: '1rem' }}>
+                <label className="premium-label">Session Title (Optional)</label>
+                <input 
+                  type="text" 
+                  value={request.title || ""} 
+                  onChange={(e) => setRequest({ ...request, title: e.target.value })} 
+                  placeholder="e.g. Introduction to Python" 
+                  className={`premium-input ${styles.formInput}`} 
+                />
               </div>
             </div>
           )}

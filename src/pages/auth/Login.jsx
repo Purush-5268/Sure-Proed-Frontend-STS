@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { authService } from "../../services/authService";
 import { setAccessToken, setRefreshToken, setUserInfo, parseJwt } from "../../utils/tokenStorage";
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import loginUrl from "../../assets/animations/Login.lottie?url";
 import styles from "./Login.module.css";
 
@@ -59,22 +59,30 @@ function Login() {
       // Route based on role
       setTimeout(() => {
         const returnUrl = params.get("returnUrl");
+        const isAdvisor = userObj?.admin_category === "ADVISORY" || role === "ADVISOR";
         if (returnUrl && returnUrl.startsWith("/student/") && role === "STUDENT") {
           navigate(returnUrl, { replace: true });
         } else if (role === "ADMIN") navigate("/admin/dashboard", { replace: true });
         else if (role === "MENTOR") navigate("/mentor/dashboard", { replace: true });
         else if (role === "VOLUNTEER") navigate("/trustee/volunteer/dashboard", { replace: true });
-        else if (role === "TRUSTEE") navigate("/trustee/main/dashboard", { replace: true });
+        else if (role === "TRUSTEE") {
+          if (isAdvisor) navigate("/trustee/advisor/dashboard", { replace: true });
+          else navigate("/trustee/main/dashboard", { replace: true });
+        } else if (role === "ADVISOR") navigate("/trustee/advisor/dashboard", { replace: true });
         else navigate("/student/profile", { replace: true });
       }, 500);
     };
 
-    if (access) {
+    const errorParam = params.get("error");
+    if (errorParam) {
+      setError(errorParam);
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (access) {
       processTokens(access, refresh);
     }
   }, [navigate, updateUser]);
 
-  const routeUser = (role) => {
+  const routeUser = (role, userObj) => {
     const params = new URLSearchParams(window.location.search);
     const returnUrl = params.get("returnUrl");
     
@@ -83,6 +91,8 @@ function Login() {
       return;
     }
 
+    const isAdvisor = userObj?.admin_category === "ADVISORY" || role === "ADVISOR";
+
     if (role === "ADMIN") {
       navigate("/admin/dashboard");
     } else if (role === "MENTOR") {
@@ -90,7 +100,13 @@ function Login() {
     } else if (role === "VOLUNTEER") {
       navigate("/trustee/volunteer/dashboard");
     } else if (role === "TRUSTEE") {
-      navigate("/trustee/main/dashboard");
+      if (isAdvisor) {
+        navigate("/trustee/advisor/dashboard");
+      } else {
+        navigate("/trustee/main/dashboard");
+      }
+    } else if (role === "ADVISOR") {
+      navigate("/trustee/advisor/dashboard");
     } else {
       navigate("/student/profile");
     }
@@ -103,7 +119,7 @@ function Login() {
         const res = await login(username, password, rememberMe, selectedRole);
         const userRole = res?.user?.role;
         setSuccess(true);
-        setTimeout(() => routeUser(userRole), 800);
+        setTimeout(() => routeUser(userRole, res?.user), 800);
     } catch (err) {
         // If they provided the password for their OTHER linked account, the direct login will fail with 401.
         // We can try to authenticate with their other role to get a valid JWT, then securely switch accounts!
@@ -118,7 +134,7 @@ function Login() {
                 updateUser(switchRes.user);
                 
                 setSuccess(true);
-                setTimeout(() => routeUser(switchRes.user.role), 800);
+                setTimeout(() => routeUser(switchRes.user.role, switchRes.user), 800);
                 return;
             } catch (fallbackErr) {
                 console.error("Fallback role select login error:", fallbackErr);
@@ -146,7 +162,7 @@ function Login() {
       
       // Delay navigation slightly for success animation
       setTimeout(() => {
-         routeUser(userRole);
+         routeUser(userRole, res?.user);
       }, 800);
       
     } catch (err) {

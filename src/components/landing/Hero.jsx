@@ -39,9 +39,9 @@ function Hero({ cohorts, courses, loading }) {
               </Link>
             ) : (
               <>
-                <Link to="/#programs" className={styles.primaryBtn}>
+                <a href="#programs" className={styles.primaryBtn}>
                   Explore Programs →
-                </Link>
+                </a>
                 <Link to="/signup" className={styles.secondaryBtn}>
                   Join SURE ProEd
                 </Link>

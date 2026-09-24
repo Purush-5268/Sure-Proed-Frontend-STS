@@ -28,7 +28,7 @@ const LearningPrograms = ({ courses: propCourses, loading: propLoading }) => {
   }, [hasProps]);
 
   const allPrograms = useMemo(() => {
-    const list = hasProps ? (propCourses ? [...propCourses] : []) : [...fetchedPrograms];
+    const list = (hasProps ? (propCourses ? [...propCourses] : []) : [...fetchedPrograms]).filter(c => c.status !== 'ARCHIVED');
     for (let i = list.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [list[i], list[j]] = [list[j], list[i]];
@@ -36,19 +36,19 @@ const LearningPrograms = ({ courses: propCourses, loading: propLoading }) => {
     return list;
   }, [propCourses, fetchedPrograms, hasProps]);
 
-  const programs = allPrograms.slice(0, 9);
-  const hasMorePrograms = allPrograms.length > 9;
+  const programs = allPrograms.slice(0, 6);
+  const hasMorePrograms = allPrograms.length > 6;
   const loading = hasProps ? propLoading : isFetching;
 
   return (
-    <section id="programs" className={styles.section}>
+    <section className={styles.section}>
       <div className={styles.container}>
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <h2 className={styles.title}>Our Learning Programs</h2>
             <p className={styles.subtitle}>Choose your path. Learn in-demand skills. Build a better tomorrow.</p>
           </div>
-          <Link to="/student/courses" className={styles.viewAllBtn}>
+          <Link to="/explore-programs" className={styles.viewAllBtn}>
             View All Programs →
           </Link>
         </div>
@@ -89,7 +89,7 @@ const LearningPrograms = ({ courses: propCourses, loading: propLoading }) => {
         {hasMorePrograms && (
           <div className={styles.moreMessageContainer}>
             <p className={styles.moreMessageText}>More programs are available!</p>
-            <Link to="/student/courses" className={styles.viewMoreBtn}>
+            <Link to="/explore-programs" className={styles.viewMoreBtn}>
               Click here to view all programs
             </Link>
           </div>

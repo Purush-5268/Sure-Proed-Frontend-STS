@@ -124,7 +124,7 @@ function Statistics() {
 
   if (error) {
     return (
-      <section id="statistics" className={styles.statistics}>
+      <section className={styles.statistics}>
         <div className={styles.starsOverlay}></div>
         <div className={styles.container}>
           <div className={styles.header}>
@@ -144,7 +144,7 @@ function Statistics() {
   }
 
   return (
-    <section id="statistics" className={styles.statistics} ref={chartsRef}>
+    <section className={styles.statistics} ref={chartsRef}>
       <div className={styles.starsOverlay}></div>
       <div className={styles.container}>
 

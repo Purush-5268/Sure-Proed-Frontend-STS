@@ -15,8 +15,18 @@ function ProtectedRoute({ allowedRoles, redirectTo = "/login" }) {
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  if (allowedRoles && allowedRoles.length > 0 && user?.role && !allowedRoles.includes(user.role)) {
-    return <Error403 />;
+  if (allowedRoles && allowedRoles.length > 0 && user?.role) {
+    const isAdvisor = user.role === "ADVISOR" || (user.role === "TRUSTEE" && user.admin_category === "ADVISORY");
+    
+    // Check role access without mutating or converting user.role:
+    // - Direct role match (e.g. TRUSTEE, ADMIN, MENTOR, STUDENT, VOLUNTEER)
+    // - Advisory Trustee match (allowedRoles includes ADVISOR and user is an Advisory Trustee or Advisor)
+    const hasRoleMatch = allowedRoles.includes(user.role);
+    const hasAdvisorMatch = isAdvisor && allowedRoles.includes("ADVISOR");
+
+    if (!hasRoleMatch && !hasAdvisorMatch) {
+      return <Error403 />;
+    }
   }
 
   return <Outlet />;

@@ -302,4 +302,13 @@ export const API_ENDPOINTS = {
     BASE: "/api/training-sessions/",
     BY_ID: (id) => `/api/training-sessions/${id}/`,
   },
+
+  // Role Communications (Admin, Trustee, Advisor, Volunteer)
+  COMMUNICATIONS: {
+    CONVERSATIONS: "/api/communications/conversations/",
+    MESSAGES: (groupType) => `/api/communications/conversations/${groupType}/messages/`,
+    MARK_READ: (groupType) => `/api/communications/conversations/${groupType}/read/`,
+    UNREAD_SUMMARY: "/api/communications/unread-summary/",
+    ATTACHMENT_DOWNLOAD: (id) => `/api/communications/attachments/${id}/download/`,
+  },
 };
