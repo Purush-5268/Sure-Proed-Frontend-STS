@@ -4,6 +4,7 @@ import apiClient from "../../../services/apiClient";
 import SkeletonLoader from "../../../components/common/SkeletonLoader";
 import styles from "./ContributionTab.module.css";
 import { FaClock, FaChalkboardTeacher, FaUserGraduate, FaChartLine } from "react-icons/fa";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function ContributionTab() {
   const [data, setData] = useState(null);
@@ -85,20 +86,20 @@ export default function ContributionTab() {
             <h2 className="premium-section-title">Contribution Overview</h2>
             <div className={styles.chartContainer}>
                {data.monthly_hours.length > 0 ? (
-                 <div className={styles.cssChart}>
-                   {data.monthly_hours.map((m, i) => {
-                     const maxHours = Math.max(...data.monthly_hours.map(x => x.hours), 1);
-                     const heightPct = (m.hours / maxHours) * 100;
-                     return (
-                       <div key={i} className={styles.chartBarWrapper} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end', gap: '8px' }}>
-                         <span style={{ fontSize: '12px', color: '#9ca3af', fontWeight: 'bold' }}>{m.hours}h</span>
-                         <div className={styles.chartBar} style={{height: `${heightPct}%`, minHeight: '20px', width: '40px', background: 'linear-gradient(to top, #3b82f6, #60a5fa)', borderRadius: '4px 4px 0 0', position: 'relative'}}>
-                           <span className={styles.chartTooltip}>{m.hours} hrs</span>
-                         </div>
-                         <div className={styles.chartLabel} style={{ fontSize: '12px', color: '#6b7280' }}>{new Date(m.month + '-01').toLocaleDateString('en-US', {month: 'short'})}</div>
-                       </div>
-                     );
-                   })}
+                 <div style={{ width: '100%', height: '220px' }}>
+                   <ResponsiveContainer width="100%" height="100%">
+                     <BarChart data={data.monthly_hours} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
+                       <XAxis dataKey="month" tickFormatter={(val) => new Date(val + '-01').toLocaleDateString('en-US', {month: 'short'})} stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
+                       <YAxis stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
+                       <Tooltip
+                         cursor={{fill: 'rgba(255,255,255,0.05)'}}
+                         contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px', color: '#f3f4f6' }}
+                         formatter={(value) => [`${value} hrs`, 'Hours']}
+                         labelFormatter={(label) => new Date(label + '-01').toLocaleDateString('en-US', {month: 'long', year: 'numeric'})}
+                       />
+                       <Bar dataKey="hours" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40} />
+                     </BarChart>
+                   </ResponsiveContainer>
                  </div>
                ) : (
                  <p className="premium-text-muted">No monthly data available.</p>

@@ -162,6 +162,11 @@ function AttendanceDetails() {
       } else if (officialResponse.data && (officialResponse.data.status === "SYNC_QUEUED" || officialResponse.data.status === "SYNC_IN_PROGRESS")) {
         setSyncToastMessage(officialResponse.data.message || "Identity sync started. You can continue working.");
         setIsSyncing(true);
+        if (baseResponse.data?.google_meet_attendance_data?.status === "DUMMY_ROSTER") {
+          setOfficialData(baseResponse.data.google_meet_attendance_data);
+        }
+      } else if (baseResponse.data?.google_meet_attendance_data?.status === "DUMMY_ROSTER") {
+        setOfficialData(baseResponse.data.google_meet_attendance_data);
       }
     } catch (err) {
       console.error("Failed to load session attendance details:", err);

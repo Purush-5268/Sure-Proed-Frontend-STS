@@ -148,12 +148,18 @@ function Attendance() {
       const response = await apiClient.get(`${API_ENDPOINTS.ATTENDANCE.BY_ID(session.id)}official-attendance/${forceRefresh ? '?force_refresh=true' : ''}`);
       if (response.data && response.data.status === "READY") {
         setSelectedSessionOfficialData(response.data);
+      } else if (session.google_meet_attendance_data?.status === "DUMMY_ROSTER") {
+        setSelectedSessionOfficialData(session.google_meet_attendance_data);
       } else {
         setSelectedSessionOfficialData(null);
       }
     } catch (error) {
       console.warn("Failed to fetch official attendance:", error);
-      setSelectedSessionOfficialData(null);
+      if (session.google_meet_attendance_data?.status === "DUMMY_ROSTER") {
+        setSelectedSessionOfficialData(session.google_meet_attendance_data);
+      } else {
+        setSelectedSessionOfficialData(null);
+      }
     } finally {
       setSelectedSessionLoading(false);
     }

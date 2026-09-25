@@ -755,7 +755,7 @@ function ScheduleClass() {
           {activeAdminClasses.map(cls => (
             <div key={cls.id} className={`premium-card ${styles.animatedCard}`} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-              <div className="premium-flex-between">
+              <div className="premium-flex-between" style={{ flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                   <h3 style={{ margin: "0 0 5px 0", color: "var(--text-primary)", fontSize: "1.2rem" }}>{cls.title}</h3>
                   <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: "14px" }}>
@@ -774,23 +774,23 @@ function ScheduleClass() {
                   )}
                 </div>
 
-                <div className="premium-flex-row">
+                <div className="premium-flex-row" style={{ flexWrap: 'wrap', justifyContent: 'flex-end', gap: '10px' }}>
                   {editingClassId !== cls.id ? (
                     <>
-                      <button onClick={() => { setManagingClassId(managingClassId === cls.id ? null : cls.id); setNewWhitelistEmail(""); }} className="premium-btn premium-btn-secondary" style={{ backgroundColor: managingClassId === cls.id ? "rgba(255,255,255,0.1)" : "" }}>
-                        👥 Manage Attendees
+                      <button onClick={() => { setManagingClassId(managingClassId === cls.id ? null : cls.id); setNewWhitelistEmail(""); }} className="premium-btn premium-btn-secondary" style={{ backgroundColor: managingClassId === cls.id ? "rgba(255,255,255,0.1)" : "", padding: "6px 12px", fontSize: "13px", minHeight: "32px", height: "32px" }}>
+                        👥 Manage
                       </button>
-                      <button onClick={() => handleStartEdit(cls)} className="premium-btn premium-btn-secondary">
+                      <button onClick={() => handleStartEdit(cls)} className="premium-btn premium-btn-secondary" style={{ padding: "6px 12px", fontSize: "13px", minHeight: "32px", height: "32px" }}>
                         ✏️ Reschedule
                       </button>
-                      <button onClick={() => window.open(cls.meeting_link?.startsWith('http') ? cls.meeting_link : `https://${cls.meeting_link}`, '_blank')} disabled={!cls.meeting_link} className="premium-btn premium-btn-primary">
+                      <button onClick={() => window.open(cls.meeting_link?.startsWith('http') ? cls.meeting_link : `https://${cls.meeting_link}`, '_blank')} disabled={!cls.meeting_link} className="premium-btn premium-btn-primary" style={{ padding: "6px 12px", fontSize: "13px", minHeight: "32px", height: "32px" }}>
                         👁️ Spectate
                       </button>
-                      <button onClick={() => handleForceEndClass(cls.id)} className="premium-btn premium-btn-danger">
-                        🛑 End Class
+                      <button onClick={() => handleForceEndClass(cls.id)} className="premium-btn premium-btn-danger" style={{ padding: "6px 12px", fontSize: "13px", minHeight: "32px", height: "32px" }}>
+                        🛑 End
                       </button>
-                      <button onClick={() => handleDeleteClass(cls.id, cls.title)} className="premium-btn premium-btn-danger">
-                        🗑️ Delete Class
+                      <button onClick={() => handleDeleteClass(cls.id, cls.title)} className="premium-btn premium-btn-danger" style={{ padding: "6px 12px", fontSize: "13px", minHeight: "32px", height: "32px" }}>
+                        🗑️ Delete
                       </button>
                     </>
                   ) : (
