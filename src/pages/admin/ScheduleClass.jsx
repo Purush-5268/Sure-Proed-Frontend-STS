@@ -6,6 +6,7 @@ import { attendanceService } from "../../services/attendanceService";
 import { normalizeListResponse } from "../../services/apiClient";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import { promptForClassEndTime } from "../../utils/classSessionActions";
 import styles from "./ScheduleClass.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import TimePicker from "../../components/common/TimePicker";
@@ -318,21 +319,39 @@ function ScheduleClass() {
     }
   };
 
-  // 🚨 FIXED: Force End Class must send 'conducted: false' so backend intercepts it
   const handleForceEndClass = async (classId) => {
-    if (!window.confirm("Are you sure you want to end this class and calculate attendance?")) return;
+    const endTime = promptForClassEndTime();
+    if (!endTime) return;
+    if (!window.confirm(`End this class at ${endTime.substring(0, 5)} and calculate attendance using that cutoff?`)) return;
     try {
       // Optimistic instant removal
       setActiveAdminClasses(prev => prev.filter(c => c.id !== classId));
 
-      // 🚨 FIX: MUST send conducted: false so Django triggers the aggregate_completed_session logic!
-      await attendanceService.patchAttendanceRecord(classId, { status: "COMPLETED", conducted: false });
+      await attendanceService.patchAttendanceRecord(classId, {
+        class_status: "COMPLETED",
+        conducted: false,
+        end_time: endTime,
+      });
 
-      setTimeout(() => alert("✅ Class ended successfully. Attendance calculated."), 10);
+      setTimeout(() => alert("✅ Class ended successfully. Attendance finalization has started."), 10);
     } catch (err) {
       console.error("Failed to end class:", err);
       loadActiveClasses(); // Revert if failed
-      setTimeout(() => alert("❌ Failed to end class. Check backend endpoints."), 10);
+      const message = err?.response?.data?.end_time || err?.response?.data?.detail || "Failed to end class.";
+      setTimeout(() => alert(`❌ ${message}`), 10);
+    }
+  };
+
+  const handleDeleteClass = async (classId, title) => {
+    if (!window.confirm(`Permanently delete “${title || "this class"}”? This cannot be undone.`)) return;
+    try {
+      await attendanceService.deleteAttendanceRecord(classId);
+      setActiveAdminClasses(prev => prev.filter(c => c.id !== classId));
+      setTimeout(() => alert("Class deleted successfully."), 10);
+    } catch (err) {
+      console.error("Failed to delete class:", err);
+      const message = err?.response?.data?.detail || "Failed to delete class.";
+      setTimeout(() => alert(`❌ ${message}`), 10);
     }
   };
 
@@ -769,6 +788,9 @@ function ScheduleClass() {
                       </button>
                       <button onClick={() => handleForceEndClass(cls.id)} className="premium-btn premium-btn-danger">
                         🛑 End Class
+                      </button>
+                      <button onClick={() => handleDeleteClass(cls.id, cls.title)} className="premium-btn premium-btn-danger">
+                        🗑️ Delete Class
                       </button>
                     </>
                   ) : (

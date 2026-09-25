@@ -4,6 +4,7 @@ import TimePicker from "../../components/common/TimePicker";
 import { motion, AnimatePresence } from "framer-motion";
 import apiClient, { fetchAllPages } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
+import { promptForClassEndTime } from "../../utils/classSessionActions";
 import PageHeader from "../../components/ui/PageHeader";
 import Card from "../../components/ui/Card";
 import EmptyState from "../../components/ui/EmptyState";
@@ -204,17 +205,42 @@ function ClassSchedule() {
   };
 
   const handleEndClass = async (sessionId, type) => {
-    if (!window.confirm("Are you sure you want to end this class?")) return;
+    const endTime = promptForClassEndTime();
+    if (!endTime) return;
+    if (!window.confirm(`End this class at ${endTime.substring(0, 5)}? This time will be used as the attendance cutoff.`)) return;
     try {
       if (type === "DOMAIN") {
-        await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId), { conducted: false, class_status: "COMPLETED" });
+        await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId), {
+          conducted: false,
+          class_status: "COMPLETED",
+          end_time: endTime,
+        });
       } else {
-        await apiClient.patch(API_ENDPOINTS.TRAININGS.SESSION_BY_ID(sessionId), { class_status: "COMPLETED" });
+        await apiClient.patch(API_ENDPOINTS.TRAININGS.SESSION_BY_ID(sessionId), {
+          class_status: "COMPLETED",
+          end_time: endTime,
+        });
       }
       setActiveSessions(prev => prev.filter(s => s.id !== sessionId));
-      setTimeout(() => alert("Class ended successfully."), 10);
+      setTimeout(() => alert("Class ended successfully. Attendance finalization has started."), 10);
     } catch (err) {
-      setTimeout(() => alert("Failed to end class."), 10);
+      const message = err?.response?.data?.end_time || err?.response?.data?.detail || "Failed to end class.";
+      setTimeout(() => alert(`❌ ${message}`), 10);
+    }
+  };
+
+  const handleDeleteClass = async (sessionId, type, title) => {
+    if (!window.confirm(`Permanently delete “${title || "this class"}”? This cannot be undone.`)) return;
+    try {
+      const endpoint = type === "DOMAIN"
+        ? API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId)
+        : API_ENDPOINTS.TRAININGS.SESSION_BY_ID(sessionId);
+      await apiClient.delete(endpoint);
+      setActiveSessions(prev => prev.filter(s => s.id !== sessionId));
+      setTimeout(() => alert("Class deleted successfully."), 10);
+    } catch (err) {
+      const message = err?.response?.data?.detail || "Failed to delete class.";
+      setTimeout(() => alert(`❌ ${message}`), 10);
     }
   };
 
@@ -516,6 +542,12 @@ function ClassSchedule() {
                           style={{ background: session.type === 'TRAINING' ? '#8b5cf6' : '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
                         >
                           End Class
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClass(session.id, session.type, session.title)}
+                          style={{ background: '#7f1d1d', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
+                        >
+                          Delete Class
                         </button>
                       </>
                     ) : (
