@@ -27,7 +27,10 @@ function AddCertificate() {
     application: "",
     certificate_type: "COURSE",
     title: "",
-    issued_at: new Date().toISOString().slice(0, 16),
+    issued_at: (() => {
+      const d = new Date();
+      return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    })(),
     status: "ACTIVE",
   });
 

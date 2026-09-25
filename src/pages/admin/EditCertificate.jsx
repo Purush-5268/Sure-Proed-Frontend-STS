@@ -13,7 +13,12 @@ function EditCertificate() {
     title: cert?.title || cert?.subject_display || "",
     status: cert?.status || "ACTIVE",
     revocation_reason: cert?.revocation_reason || "",
-    issued_at: cert?.issued_at ? new Date(cert.issued_at).toISOString().slice(0, 16) : "",
+    issued_at: cert?.issued_at 
+      ? (() => {
+          const d = new Date(cert.issued_at);
+          return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        })() 
+      : "",
   });
 
   const [loading, setLoading] = useState(false);

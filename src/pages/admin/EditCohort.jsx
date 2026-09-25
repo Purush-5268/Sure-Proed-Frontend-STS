@@ -64,7 +64,12 @@ function EditCohort() {
           status: data.status || "DRAFT",
           start_date: data.start_date || "",
           end_date: data.end_date || "",
-          application_end_date: data.application_end_date ? new Date(data.application_end_date).toISOString().slice(0, 16) : "",
+          application_end_date: data.application_end_date 
+            ? (() => {
+                const d = new Date(data.application_end_date);
+                return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+              })() 
+            : "",
           max_students: data.max_students || 30,
           whatsapp_group_link: data.whatsapp_group_link || "",
           lst_batch: data.lst_batch || "",
@@ -123,8 +128,13 @@ function EditCohort() {
       setSuccess("Cohort updated successfully.");
       setTimeout(() => navigate("/admin/cohorts"), 1000);
     } catch (err) {
-      const message = err?.response?.data?.detail || "Unable to update the cohort.";
-      setError(message);
+      if (err?.response?.data && typeof err.response.data === 'object' && !err.response.data.detail) {
+        const errors = Object.entries(err.response.data).map(([k, v]) => `${k}: ${v}`).join(" | ");
+        setError(errors || "Unable to update the cohort. Check backend validation.");
+      } else {
+        const message = err?.response?.data?.detail || "Unable to update the cohort.";
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
