@@ -272,6 +272,27 @@
     min-width: 100%;
   }
 
+  /* Defensive fallback while React synchronizes a desktop collapse state. */
+  .sidebarCollapsed .titleWrapper {
+    display: flex;
+  }
+
+  .sidebarCollapsed .title {
+    display: block;
+  }
+
+  .sidebarCollapsed .titleCollapsed {
+    display: none;
+  }
+
+  .sidebarCollapsed .linkIcon {
+    margin-right: var(--space-sm);
+  }
+
+  .sidebarCollapsed .linkLabel {
+    display: inline;
+  }
+
   .header {
     margin-bottom: 0;
     padding-bottom: 0;
@@ -295,7 +316,7 @@
     margin-top: var(--space-sm);
     padding-top: var(--space-sm);
     border-top: 1px solid var(--border-color);
-    max-height: 60vh;
+    max-height: min(60vh, calc(100dvh - var(--navbar-height) - 56px));
     overflow-y: auto;
   }
 

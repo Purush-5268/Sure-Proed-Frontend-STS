@@ -1157,10 +1157,90 @@ input[type="time"].premium-input {
 
 @media (max-width: 768px) {
 
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    min-width: 320px;
+    overflow-x: hidden;
+  }
+
+  /* iOS zooms form controls smaller than 16px, which makes scheduling forms
+     jump while a user is entering dates and times. */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+    max-width: 100%;
+  }
+
+  .premium-page-container {
+    padding: var(--space-lg);
+  }
+
+  .premium-page-header {
+    margin-bottom: var(--space-lg);
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+
+  .premium-title {
+    font-size: var(--font-xl);
+    overflow-wrap: anywhere;
+  }
+
+  .premium-card,
+  .premium-card-large {
+    padding: var(--space-lg);
+  }
+
+  .premium-flex-row,
+  .premium-flex-between {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .premium-btn {
+    min-height: 44px;
+    height: auto;
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .premium-table-container,
+  .table-responsive {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .premium-table {
+    min-width: 640px;
+  }
+
   .premium-grid-2,
   .premium-grid-3,
   .premium-grid-4 {
     grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .premium-page-container {
+    padding: var(--space-md);
+  }
+
+  .premium-card,
+  .premium-card-large {
+    padding: var(--space-md);
+  }
+
+  .premium-title {
+    font-size: var(--font-lg);
   }
 }
 

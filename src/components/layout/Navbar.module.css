@@ -138,6 +138,9 @@
     box-shadow: var(--shadow-md);
     border-bottom: 1px solid var(--border-color);
     display: none;
+    max-height: calc(100dvh - var(--navbar-height));
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .mobileOpen {
@@ -161,6 +164,17 @@
   .loginBtn {
     width: 100%;
     text-align: center;
+  }
+
+  .profileTextInfo {
+    display: none;
+  }
+
+  .profileDropdownMenu {
+    position: fixed;
+    top: calc(var(--navbar-height) + 8px);
+    right: 12px;
+    width: min(320px, calc(100vw - 24px));
   }
 }
 
