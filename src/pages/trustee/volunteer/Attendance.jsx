@@ -231,9 +231,6 @@ function AttendanceManagement() {
           <h1>Attendance Management</h1>
           <p>Manage daily attendance records</p>
         </div>
-        <Link to="/trustee/volunteer/update-attendance" className={styles.addBtn}>
-          + Update Attendance
-        </Link>
       </div>
 
       <div style={{ display: "flex", gap: "16px", marginBottom: "24px", backgroundColor: "var(--bg-surface)", padding: "16px", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>

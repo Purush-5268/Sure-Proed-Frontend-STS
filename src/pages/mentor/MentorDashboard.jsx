@@ -333,7 +333,8 @@ function MentorDashboard() {
       });
       setTodaySessions(activeSessions);
     } catch (err) {
-      alert("Failed to end session.");
+      const errorMsg = err?.response?.data?.detail || err?.response?.data?.end_time || "Failed to end session.";
+      alert(`❌ ${errorMsg}`);
     } finally {
       setLoading(false);
     }

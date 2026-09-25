@@ -72,6 +72,11 @@ export default function ContributionTab() {
            <div className={styles.statValue}>{data.summary.average_attendance}%</div>
            <div className={styles.statLabel}>Avg. Attendance</div>
         </div>
+        <div className="premium-glass-card">
+           <div className={styles.iconWrapper} style={{background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444'}}><FaUserGraduate size={24} /></div>
+           <div className={styles.statValue}>{data.summary.permissions_granted || 0}</div>
+           <div className={styles.statLabel}>Permissions Granted</div>
+        </div>
       </div>
 
       <div className={styles.mainLayout}>
@@ -85,11 +90,12 @@ export default function ContributionTab() {
                      const maxHours = Math.max(...data.monthly_hours.map(x => x.hours), 1);
                      const heightPct = (m.hours / maxHours) * 100;
                      return (
-                       <div key={i} className={styles.chartBarWrapper}>
-                         <div className={styles.chartBar} style={{height: `${heightPct}%`}}>
+                       <div key={i} className={styles.chartBarWrapper} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end', gap: '8px' }}>
+                         <span style={{ fontSize: '12px', color: '#9ca3af', fontWeight: 'bold' }}>{m.hours}h</span>
+                         <div className={styles.chartBar} style={{height: `${heightPct}%`, minHeight: '20px', width: '40px', background: 'linear-gradient(to top, #3b82f6, #60a5fa)', borderRadius: '4px 4px 0 0', position: 'relative'}}>
                            <span className={styles.chartTooltip}>{m.hours} hrs</span>
                          </div>
-                         <div className={styles.chartLabel}>{new Date(m.month + '-01').toLocaleDateString('en-US', {month: 'short'})}</div>
+                         <div className={styles.chartLabel} style={{ fontSize: '12px', color: '#6b7280' }}>{new Date(m.month + '-01').toLocaleDateString('en-US', {month: 'short'})}</div>
                        </div>
                      );
                    })}
@@ -133,10 +139,10 @@ export default function ContributionTab() {
                     <div key={act.id} className={styles.activityItem}>
                       <div className={styles.activityDot}></div>
                       <div className={styles.activityContent}>
-                         <div className={styles.activityTitle}>Hosted {act.type} session</div>
-                         <div className={styles.activitySubtitle}>{act.cohort_name}</div>
+                         <div className={styles.activityTitle}>{act.title}</div>
+                         <div className={styles.activitySubtitle}>{act.subtitle}</div>
                          <div className={styles.activityMeta}>
-                            <span>{Math.floor(act.duration_seconds/60)} mins</span> • <span>{new Date(act.date).toLocaleDateString()}</span>
+                            {act.meta_text && <span>{act.meta_text} • </span>}<span>{new Date(act.date).toLocaleDateString()}</span>
                          </div>
                       </div>
                     </div>

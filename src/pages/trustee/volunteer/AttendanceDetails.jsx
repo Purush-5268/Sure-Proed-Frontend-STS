@@ -585,11 +585,6 @@ function AttendanceDetails() {
           </div>
         )}
 
-        <div className={styles.buttons} style={{ marginTop: '24px' }}>
-          <Link to="/trustee/volunteer/update-attendance" className="premium-btn premium-btn-primary" style={{ padding: '10px 20px', textDecoration: 'none' }}>
-            Manual Attendance Update
-          </Link>
-        </div>
 
         {showPermissionModal && (
           <div style={{

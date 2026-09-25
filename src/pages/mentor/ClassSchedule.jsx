@@ -508,11 +508,10 @@ function ClassSchedule() {
                     <div style={{ marginTop: '1rem', background: 'rgba(0,0,0,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                         <div style={{ flex: 1, minWidth: '150px' }}>
+                          <label style={{ fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '0.25rem' }}>New Date</label>
+                          <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} className={styles.input} style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem' }} />
                           <label style={{ fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '0.25rem' }}>New Start Time</label>
-                          <div style={{ display: "flex", gap: "5px" }}>
-                            <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} className={styles.input} style={{ flex: 1, minWidth: 0, padding: '0.25rem 0.5rem' }} />
-                            <div style={{ flex: 1, minWidth: 0 }}><TimePicker value={editStartTime} onChange={e => setEditStartTime(e.target.value)} className={styles.input} /></div>
-                          </div>
+                          <TimePicker value={editStartTime} onChange={e => setEditStartTime(e.target.value)} className={styles.input} />
                         </div>
                         <div style={{ flex: 1, minWidth: '150px' }}>
                           <label style={{ fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '0.25rem' }}>New End Time</label>
