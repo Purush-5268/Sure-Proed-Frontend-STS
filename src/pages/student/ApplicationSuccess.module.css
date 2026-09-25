@@ -59,3 +59,20 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 16px var(--student-glow-primary);
 }
+
+.infoBox {
+  text-align: left;
+  padding: 16px;
+  margin: 20px 0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-nested);
+}
+
+.infoBox p {
+  margin: 0 0 8px;
+}
+
+.infoBox p:last-child {
+  margin-bottom: 0;
+}

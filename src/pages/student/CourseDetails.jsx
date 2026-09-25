@@ -108,6 +108,11 @@ function CourseDetails() {
     return item;
   };
 
+  const displayValue = (value, fallback = "Information unavailable") => {
+    if (value === null || value === undefined || value === "" || value === "null" || value === "undefined") return fallback;
+    return value;
+  };
+
   return (
     <div className={styles.courseDetailsPage}>
       <div className={styles.container}>
@@ -130,7 +135,7 @@ function CourseDetails() {
 
               <div>
                 <h3>Duration</h3>
-                <p>{course.duration_weeks ? `${course.duration_weeks} Weeks` : "N/A"}</p>
+                <p>{course.duration_weeks ? `${course.duration_weeks} Weeks` : displayValue(course.duration, "Duration unavailable")}</p>
               </div>
 
               <div>
@@ -138,6 +143,14 @@ function CourseDetails() {
                 <p>{course.difficulty || "N/A"}</p>
               </div>
             </div>
+
+            {openCohorts.length > 0 && (
+              <div className={styles.infoGrid} style={{ marginTop: "20px" }}>
+                <div><h3>Cohort</h3><p>{displayValue(openCohorts.find((c) => String(c.id) === String(selectedCohort))?.name || openCohorts.find((c) => String(c.id) === String(selectedCohort))?.code)}</p></div>
+                <div><h3>Starts</h3><p>{displayValue(openCohorts.find((c) => String(c.id) === String(selectedCohort))?.start_date, "Start date unavailable")}</p></div>
+                <div><h3>Ends</h3><p>{displayValue(openCohorts.find((c) => String(c.id) === String(selectedCohort))?.end_date, "End date unavailable")}</p></div>
+              </div>
+            )}
 
             <div className={styles.section}>
               <h2>Prerequisites</h2>
@@ -233,9 +246,9 @@ function CourseDetails() {
                   setIsApplying(false);
                   return;
                 }
-                await applicationService.createApplication({ course_id: id, assigned_cohort: selectedCohort });
+                const createdApplication = await applicationService.createApplication({ course_id: id, assigned_cohort: selectedCohort });
                 setHasAppliedToThis(true);
-                navigate("/student/application-success");
+                navigate("/student/application-success", { state: { application: createdApplication, course, cohort: openCohorts.find((c) => String(c.id) === String(selectedCohort)) } });
               } catch (err) {
                 setApplyError(err.response?.data?.detail || err.response?.data?.error || err.response?.data?.non_field_errors?.[0] || "Failed to submit application. You may have already applied or the course is unavailable.");
               } finally {

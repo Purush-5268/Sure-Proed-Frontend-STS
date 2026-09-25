@@ -19,9 +19,11 @@ import {
   FiAlertCircle,
   FiRotateCcw,
   FiLock,
+  FiChevronDown,
+  FiChevronUp,
 } from "react-icons/fi";
 
-const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
+const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal, onResultsSaved }) => {
   const location = useLocation();
   const [questionBanks, setQuestionBanks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +68,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
   const [editForm, setEditForm] = useState({
     scheduled_at: defaultStartTimeISO,
     end_time: defaultEndTimeISO,
-    duration_minutes: 45,
+    duration_minutes: 10,
     pass_percentage: 40,
     question_bank_id: "",
     meeting_link: "",
@@ -78,7 +80,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
     question_bank_id: "",
     scheduled_at: defaultStartTimeISO,
     end_time: defaultEndTimeISO,
-    duration_minutes: 45,
+    duration_minutes: 10,
     pass_percentage: 40,
     total_questions: "",
     meeting_link: "",
@@ -97,13 +99,17 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
 
   // Derive authoritative live status
   const now = new Date();
+  const meetingStarted = Boolean(
+    screening?.scheduled_at && now >= new Date(screening.scheduled_at)
+  );
   const isStarted = Boolean(
     screening?.admin_started_at &&
     (!screening?.scheduled_at || new Date(screening.admin_started_at).getTime() >= new Date(screening.scheduled_at).getTime() - 15 * 60 * 1000)
   );
-  const isEnded = screening?.end_time && now > new Date(screening.end_time);
+  const isEnded = screening?.end_time && now >= new Date(screening.end_time);
   const isActive = !isEnded && isStarted;
-  const isScheduled = !isEnded && !isActive;
+  const isScheduled = !isEnded && !isActive && !meetingStarted;
+  const canStartExam = !isEnded && !isStarted && meetingStarted;
 
   // Real-time Countdown Timer for Screening Exam (Mentor / Admin)
   const [remainingSeconds, setRemainingSeconds] = useState(null);
@@ -114,7 +120,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
       return;
     }
 
-    const durationMinutes = Number(screening?.duration_minutes || 45);
+    const durationMinutes = Number(screening?.duration_minutes || 10);
     const startMs = new Date(screening.admin_started_at).getTime();
     const endMs = startMs + durationMinutes * 60 * 1000;
 
@@ -142,13 +148,13 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
   );
 
   const [updatingAppId, setUpdatingAppId] = useState(null);
+  const [resultMarks, setResultMarks] = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const manageResults = Boolean(manageResultsExternal);
 
-  const unenrolledQualifiedCount = applications.filter((app) => {
-    const exam = app.screening_exam || app.exam || {};
-    const isQual = app.status === "QUALIFIED" || exam.qualified === true;
-    const isEnrolled = app.status === "COHORT_ASSIGNED" || ["IN_PROGRESS", "ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS", "COMPLETED"].includes(app.status);
-    return isQual && !isEnrolled;
-  }).length;
+  useEffect(() => {
+    if (manageResultsExternal) setShowResults(true);
+  }, [manageResultsExternal]);
 
   const handleSaveMeetingLink = async () => {
     if (!screening?.id) return;
@@ -169,6 +175,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
   };
 
   const handleStartEditSchedule = async () => {
+    if (isStarted || isEnded) return;
     const toLocalISO = (dStr) => {
       if (!dStr) return "";
       const d = new Date(dStr);
@@ -204,7 +211,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
     const prevDuration = src?.duration_minutes ??
                          firstExam?.duration_minutes ??
                          cohort?.pre_screening?.duration_minutes ??
-                         form.duration_minutes ?? 45;
+                         form.duration_minutes ?? 10;
 
     const prevPassPct = src?.pass_percentage ??
                         firstExam?.pass_percentage ??
@@ -245,10 +252,10 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const shouldEdit = params.get("editSchedule") === "true" || location.state?.editSchedule;
-    if (shouldEdit && screening) {
+    if (shouldEdit && screening && !isStarted && !isEnded) {
       handleStartEditSchedule();
     }
-  }, [screening, location.search, location.state]);
+  }, [screening, location.search, location.state, isStarted, isEnded]);
 
   const handleSaveSchedule = async (e) => {
     e.preventDefault();
@@ -270,6 +277,12 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
       alert("Please select an approved Question Bank.");
       return;
     }
+    const editQuestionBank = questionBanks.find((bank) => String(bank.id) === String(editForm.question_bank_id));
+    const editBankTotal = Number(editQuestionBank?.total_questions_per_set || editQuestionBank?.total_questions || editQuestionBank?.questions_count || 0);
+    if (editBankTotal && Number(editForm.total_questions) > editBankTotal) {
+      alert(`Total questions cannot exceed the selected bank total of ${editBankTotal}.`);
+      return;
+    }
 
     setBusy(true);
     setEditMeetLinkAlert("");
@@ -278,7 +291,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
         question_bank_id: editForm.question_bank_id,
         scheduled_at: start.toISOString(),
         end_time: end.toISOString(),
-        duration_minutes: Number(editForm.duration_minutes) || 45,
+        duration_minutes: Number(editForm.duration_minutes) || 10,
         pass_percentage: Number(editForm.pass_percentage) || 40,
         meeting_link: editForm.meeting_link?.trim() || null,
         total_questions: editForm.total_questions ? Number(editForm.total_questions) : null,
@@ -294,7 +307,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
         ...screening,
         scheduled_at: start.toISOString(),
         end_time: end.toISOString(),
-        duration_minutes: Number(editForm.duration_minutes) || 45,
+        duration_minutes: Number(editForm.duration_minutes) || 10,
         pass_percentage: Number(editForm.pass_percentage) || 40,
         total_questions: editForm.total_questions ? Number(editForm.total_questions) : null,
         question_bank_id: editForm.question_bank_id,
@@ -399,7 +412,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
 
   useEffect(() => {
     loadApplications();
-  }, [cohortId]);
+  }, [cohortId, cohort]);
 
   const handleSyncData = async () => {
     setSyncing(true);
@@ -430,80 +443,74 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
     }
   };
 
-  const handleUpdateCandidateStatus = async (app, targetStatus) => {
+  const saveScreeningResult = async (app, marksValue = resultMarks[app.id]) => {
+    const exam = app.screening_exam || app.exam || {};
+    if (!exam.id) return;
+    const marks = Number(marksValue);
+    const totalMarks = Number(exam.total_marks || screening?.total_questions || 10);
+    if (!Number.isFinite(marks) || marks < 0 || marks > totalMarks) {
+      alert(`Enter marks between 0 and ${totalMarks}.`);
+      return;
+    }
+    const percentage = totalMarks ? Number(((marks / totalMarks) * 100).toFixed(2)) : 0;
+    const passPercentage = Number(exam.pass_percentage ?? screening?.pass_percentage ?? 40);
+    const expectedQualified = percentage >= passPercentage;
     setUpdatingAppId(app.id);
     try {
-      await apiClient.patch(API_ENDPOINTS.APPLICATIONS.BY_ID(app.id), {
-        status: targetStatus,
-        reason: `Status updated to ${targetStatus} by admin via Cohort Screening Panel`
+      await apiClient.patch(`/api/exams/${exam.id}/`, {
+        marks_obtained: marks,
+        total_marks: totalMarks,
+        percentage,
+        qualified: expectedQualified,
+        status: "EVALUATED",
+        submitted_at: new Date().toISOString(),
       });
-      setSuccessMessage(`Updated status for ${getCandidateName(app)} to ${targetStatus.replace(/_/g, " ")}.`);
-      setTimeout(() => setSuccessMessage(""), 4000);
+      await apiClient.post(API_ENDPOINTS.APPLICATIONS.REPAIR_STATE(app.id), {
+        status: expectedQualified ? "QUALIFIED" : "REJECTED",
+        reason: "Administrator corrected the screening examination result.",
+      });
       await loadApplications();
-      if (typeof onSync === "function") {
-        await onSync();
-      }
+      setSuccessMessage("Screening result updated successfully.");
     } catch (err) {
-      console.error("Failed to update status:", err);
-      alert(err.response?.data?.detail || err.response?.data?.error || "Failed to update candidate status.");
+      alert(err.response?.data?.detail || err.response?.data?.error || "Failed to update screening result.");
     } finally {
       setUpdatingAppId(null);
     }
   };
 
-  const handleEnrollAllQualified = async () => {
-    const unenrolledQualified = applications.filter((app) => {
-      const exam = app.screening_exam || app.exam || {};
-      const isQual = app.status === "QUALIFIED" || exam.qualified === true;
-      const isEnrolled = app.status === "COHORT_ASSIGNED" || ["IN_PROGRESS", "ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS", "COMPLETED"].includes(app.status);
-      return isQual && !isEnrolled;
-    });
-
-    if (unenrolledQualified.length === 0) {
-      alert("No unenrolled qualified candidates found.");
+  const saveAllScreeningResults = async () => {
+    const entries = applications
+      .map((app) => ({ app, exam: app.screening_exam || app.exam || {}, marks: resultMarks[app.id] }))
+      .filter(({ exam, marks }) => exam.id && marks !== undefined && marks !== "");
+    if (!entries.length) {
+      alert("Enter marks for at least one candidate before saving.");
       return;
     }
-
-    if (!window.confirm(`Enroll all ${unenrolledQualified.length} qualified candidate(s) into this cohort?`)) {
-      return;
-    }
-
-    setBusy(true);
+    setUpdatingAppId("all");
     try {
-      let count = 0;
-      for (const app of unenrolledQualified) {
-        try {
-          await apiClient.patch(API_ENDPOINTS.APPLICATIONS.BY_ID(app.id), {
-            status: "COHORT_ASSIGNED",
-            reason: "Bulk enrolled qualified candidate from screening"
-          });
-          count++;
-        } catch (itemErr) {
-          console.error(`Failed to enroll ${app.id}:`, itemErr);
-        }
+      for (const { app, marks } of entries) {
+        await saveScreeningResult(app, marks);
       }
-      setSuccessMessage(`Successfully enrolled ${count} qualified candidate(s) into cohort!`);
-      setTimeout(() => setSuccessMessage(""), 4000);
-      await loadApplications();
-      if (typeof onSync === "function") {
-        await onSync();
-      }
-    } catch (err) {
-      alert("Error during enrollment: " + (err.response?.data?.detail || err.message));
+      setSuccessMessage("Screening results saved and qualification statuses updated automatically.");
+      onResultsSaved?.();
     } finally {
-      setBusy(false);
+      setUpdatingAppId(null);
     }
   };
 
   const [exportFilter, setExportFilter] = useState("ALL");
 
-  const handleExportExcel = () => {
-    if (!applications || applications.length === 0) {
+  const handleExportExcel = async (filterOverride = exportFilter) => {
+    let exportApplications = applications;
+    if (!exportApplications || exportApplications.length === 0) {
+      exportApplications = await applicationService.getApplications({ cohort: cohortId, page_size: 200 }).catch(() => []);
+    }
+    if (!exportApplications || exportApplications.length === 0) {
       alert("No applicant records found to export.");
       return;
     }
 
-    const filteredApps = applications.filter((app) => {
+    const filteredApps = exportApplications.filter((app) => {
       const exam = app.screening_exam || app.exam || {};
       const hasSubmitted = Boolean(
         exam.submitted_at ||
@@ -515,27 +522,41 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
         app.qualification_score != null
       );
       const isAbsentOrUnsubmitted = isEnded && !hasSubmitted;
-      const isQual = app.status === "QUALIFIED" || exam.qualified === true;
+      const qualifiedStatuses = [
+        "QUALIFIED",
+        "COHORT_ASSIGNED",
+        "IN_PROGRESS",
+        "TRAINING",
+        "INTERNSHIP_ASSIGNED",
+        "SOFT_SKILLS",
+        "COMPLETED",
+      ];
+      const isQual =
+        qualifiedStatuses.includes(String(app.status || "")) ||
+        exam.qualified === true ||
+        app.status === "QUALIFIED";
       const isNotQual =
         app.status === "NOT_QUALIFIED" ||
         app.status === "REJECTED" ||
         exam.qualified === false ||
         isAbsentOrUnsubmitted;
 
-      if (exportFilter === "PASSED") return isQual;
-      if (exportFilter === "FAILED") return isNotQual;
+      if (filterOverride === "PASSED") return isQual;
+      if (filterOverride === "FAILED") return isNotQual;
       return true;
     });
 
     if (filteredApps.length === 0) {
-      alert(`No applicant records found for filter: ${exportFilter}`);
+      alert(`No applicant records found for filter: ${filterOverride}`);
       return;
     }
-    const headers = ["Student Name", "Email", "Application ID", "Status", "Score", "Percentage"];
+    const cohortName = cohort?.name || cohort?.code || cohortId;
+    const headers = ["Student Name", "Email", "Application ID", "Course", "Cohort", "Status", "Score", "Percentage"];
     const rows = filteredApps.map((app) => {
       const name = getCandidateName(app);
       const email = getCandidateEmail(app);
       const exam = app.screening_exam || app.exam || {};
+      const isEnrolled = ["COHORT_ASSIGNED", "IN_PROGRESS", "TRAINING", "INTERNSHIP_ASSIGNED", "SOFT_SKILLS", "COMPLETED"].includes(app.status);
       const hasSubmitted = Boolean(
         exam.submitted_at ||
         exam.status === "EVALUATED" ||
@@ -552,66 +573,38 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
       let pct = exam.percentage != null ? `${exam.percentage}%` : (app.qualification_score != null ? `${app.qualification_score}%` : "");
 
       if (isAbsentOrUnsubmitted) {
-        finalStatus = "FAILED (Absent)";
+        finalStatus = "REJECTED";
         score = 0;
         pct = "0%";
+      } else if (isEnrolled) {
+        finalStatus = "ENROLLED";
       } else if (app.status === "QUALIFIED" || exam.qualified === true) {
-        finalStatus = "PASSED";
+        finalStatus = "QUALIFIED";
       } else if (app.status === "NOT_QUALIFIED" || app.status === "REJECTED" || exam.qualified === false) {
-        finalStatus = "FAILED";
+        finalStatus = "REJECTED";
       }
 
       return [
         `"${name}"`,
         `"${email}"`,
         `"${app.application_number || app.id}"`,
+        `"${app.course_name || app.course_title || ""}"`,
+        `"${cohortName}"`,
         `"${finalStatus}"`,
         `"${score}"`,
         `"${pct}"`,
       ];
     });
-    const csvContent =
-      "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
+    const csvContent = [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const file = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const downloadUrl = URL.createObjectURL(file);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Screening_Results_Cohort_${cohortId}.csv`);
+    link.setAttribute("href", downloadUrl);
+    link.setAttribute("download", `Exam_Results_${String(cohortName).replace(/[^a-zA-Z0-9_-]/g, "_")}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
-
-  const [deletingAppId, setDeletingAppId] = useState(null);
-
-  const handleDeleteApplication = async (app) => {
-    const name = getCandidateName(app);
-
-    const confirmed = window.confirm(
-      `Are you sure you want to delete the application for "${name}"?\n\n` +
-      `• This will permanently remove their application from this cohort.\n` +
-      `• Their screening exam and result records will be removed.\n` +
-      `• The candidate will be able to apply afresh.\n\n` +
-      `Click OK to confirm.`
-    );
-    if (!confirmed) return;
-
-    try {
-      setDeletingAppId(app.id);
-      await apiClient.delete(API_ENDPOINTS.APPLICATIONS.BY_ID(app.id));
-      await loadApplications();
-      setSuccessMessage(`Application for ${name} deleted successfully.`);
-      setTimeout(() => setSuccessMessage(""), 4000);
-    } catch (err) {
-      console.error("Failed to delete application:", err);
-      alert(
-        err?.response?.data?.detail ||
-        err?.response?.data?.error ||
-        err?.message ||
-        "Failed to delete candidate application."
-      );
-    } finally {
-      setDeletingAppId(null);
-    }
+    setTimeout(() => URL.revokeObjectURL(downloadUrl), 0);
   };
 
   useEffect(() => {
@@ -645,6 +638,11 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
   const handleSchedule = async (e) => {
     e.preventDefault();
     if (!form.question_bank_id) return alert("Please select a verified question bank.");
+    const selectedBank = questionBanks.find((bank) => String(bank.id) === String(form.question_bank_id));
+    const bankTotalQuestions = Number(selectedBank?.total_questions_per_set || selectedBank?.total_questions || selectedBank?.questions_count || 0);
+    if (bankTotalQuestions && form.total_questions && Number(form.total_questions) > bankTotalQuestions) {
+      return alert(`Total questions cannot exceed the selected bank total of ${bankTotalQuestions}.`);
+    }
     
     const start = new Date(form.scheduled_at);
     const end = new Date(form.end_time);
@@ -664,7 +662,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
         question_bank_id: form.question_bank_id,
         scheduled_at: new Date(form.scheduled_at).toISOString(),
         end_time: new Date(form.end_time).toISOString(),
-        duration_minutes: Number(form.duration_minutes) || 45,
+        duration_minutes: Number(form.duration_minutes) || 10,
         pass_percentage: Number(form.pass_percentage) || 40,
         total_questions: form.total_questions ? Number(form.total_questions) : null,
         meeting_link: form.meeting_link?.trim() || null,
@@ -1172,6 +1170,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
                 onChange={(e) => setForm({ ...form, total_questions: e.target.value })}
                 placeholder="All"
                 min="1"
+                max={questionBanks.find((bank) => String(bank.id) === String(form.question_bank_id))?.total_questions_per_set || undefined}
                 style={{
                   padding: "12px",
                   borderRadius: "8px",
@@ -1242,7 +1241,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
                 style={{
                   padding: "12px 28px",
                   backgroundColor: "var(--primary-color)",
-                  color: "white",
+                  color: "var(--button-primary-text)",
                   borderRadius: "8px",
                   border: "none",
                   fontWeight: "600",
@@ -1273,7 +1272,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
                   </span>
                 )}
               </div>
-              {!isEditingSchedule && (
+              {!isEditingSchedule && !isStarted && !isEnded && (
                 <button
                   type="button"
                   onClick={handleStartEditSchedule}
@@ -1349,7 +1348,14 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
                     </label>
                     <select
                       value={editForm.question_bank_id}
-                      onChange={(e) => setEditForm((prev) => ({ ...prev, question_bank_id: e.target.value }))}
+                      onChange={(e) => {
+                        const selectedBank = questionBanks.find((bank) => String(bank.id) === String(e.target.value));
+                        setEditForm((prev) => ({
+                          ...prev,
+                          question_bank_id: e.target.value,
+                          total_questions: selectedBank?.total_questions_per_set || selectedBank?.total_questions || selectedBank?.questions_count || prev.total_questions,
+                        }));
+                      }}
                       required
                       style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-nested)", color: "var(--text-primary)" }}
                     >
@@ -1433,6 +1439,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
                       max="100"
                       placeholder="e.g. 10 (Bank default)"
                       value={editForm.total_questions}
+                      max={questionBanks.find((bank) => String(bank.id) === String(editForm.question_bank_id))?.total_questions_per_set || undefined}
                       onChange={(e) => setEditForm((prev) => ({ ...prev, total_questions: e.target.value }))}
                       style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-nested)", color: "var(--text-primary)" }}
                     />
@@ -1511,7 +1518,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
                     EXAM DURATION
                   </p>
                   <h4 style={{ margin: "6px 0 0 0", fontSize: "15px" }}>
-                    {screening.duration_minutes || form.duration_minutes || 45} Minutes
+                    {screening.duration_minutes || form.duration_minutes || 10} Minutes
                   </h4>
                 </div>
 
@@ -1649,7 +1656,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
             {/* Prominent Action Controls for Mentor / Admin */}
             <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
               {/* Early Start Button */}
-              {isScheduled && (
+              {(isScheduled || canStartExam) && (
                 <button
                   type="button"
                   onClick={handleStartExamEarly}
@@ -1668,10 +1675,10 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
                     fontSize: "14px",
                     boxShadow: "0 2px 4px rgba(22, 163, 74, 0.2)",
                   }}
-                  title="Starts the exam immediately for candidates"
+                  title={canStartExam ? "Meeting has started — authorize the cohort to begin the exam" : "Starts the exam immediately for candidates"}
                 >
                   <FiPlayCircle style={{ fontSize: "18px" }} />
-                  {busy ? "Starting..." : "Start Exam"}
+                  {busy ? "Starting..." : canStartExam ? "Start Exam (Meeting Started)" : "Start Exam"}
                 </button>
               )}
 
@@ -1749,6 +1756,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
                   <option value="FAILED">Failed Only</option>
                 </select>
                 <button
+                  type="button"
                   onClick={handleExportExcel}
                   style={{
                     display: "flex",
@@ -1764,7 +1772,14 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
                     cursor: "pointer",
                   }}
                 >
-                  <FiDownload /> Download Excel
+                  <FiDownload /> Download Results
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleExportExcel("PASSED")}
+                  style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 20px", backgroundColor: "#2563eb", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}
+                >
+                  <FiDownload /> Qualified Students
                 </button>
               </div>
 
@@ -1979,35 +1994,15 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
                     gap: "10px",
                   }}
                 >
-                  <h4 style={{ margin: 0, color: "var(--text-primary)" }}>
-                    Candidates ({applications.length})
-                  </h4>
-                  {unenrolledQualifiedCount > 0 && (
-                    <button
-                      type="button"
-                      onClick={handleEnrollAllQualified}
-                      disabled={busy}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        padding: "8px 16px",
-                        backgroundColor: "#16a34a",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        fontWeight: "600",
-                        fontSize: "13px",
-                        cursor: busy ? "not-allowed" : "pointer",
-                        boxShadow: "0 2px 4px rgba(22, 163, 74, 0.2)",
-                      }}
-                      title="Enroll all qualified candidates into this cohort"
-                    >
-                      <FiCheckCircle /> Enroll All Qualified ({unenrolledQualifiedCount})
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => setShowResults((value) => !value)}
+                    style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: 0, background: "none", color: "var(--text-primary)", fontWeight: 700, cursor: "pointer", padding: 0 }}
+                  >
+                    {showResults ? <FiChevronUp /> : <FiChevronDown />} Candidates ({applications.length})
+                  </button>
                 </div>
-                <div
+                {showResults && <div
                   style={{
                     overflowX: "auto",
                     WebkitOverflowScrolling: "touch",
@@ -2016,6 +2011,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
                     width: "100%",
                   }}
                 >
+                  {manageResults && <div style={{ padding: "14px 15px", borderBottom: "1px solid var(--border-color)", background: "var(--bg-surface)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" }}><strong>Edit Results</strong><button type="button" onClick={saveAllScreeningResults} disabled={updatingAppId === "all"} style={{ background: "var(--primary-color)", color: "#fff", border: 0, borderRadius: "6px", padding: "8px 13px", fontWeight: 700, cursor: "pointer" }}>{updatingAppId === "all" ? "Saving..." : "Save Results"}</button></div>}
                   <table
                     style={{
                       width: "100%",
@@ -2036,7 +2032,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
                         <th style={{ padding: "10px 15px" }}>Email</th>
                         <th style={{ padding: "10px 15px" }}>Application #</th>
                         <th style={{ padding: "10px 15px" }}>Result / Status</th>
-                        <th style={{ padding: "10px 15px", textAlign: "right" }}>Actions</th>
+                        {manageResults && <th style={{ padding: "10px 15px", textAlign: "right" }}>Marks</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -2044,7 +2040,8 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
                         const name = getCandidateName(app);
                         const email = getCandidateEmail(app);
                         const exam = app.screening_exam || app.exam || {};
-                        const isQual = app.status === "QUALIFIED" || exam.qualified === true;
+                        const isEnrolled = ["COHORT_ASSIGNED", "IN_PROGRESS", "TRAINING", "INTERNSHIP_ASSIGNED", "SOFT_SKILLS", "COMPLETED"].includes(app.status);
+                        const isQual = !isEnrolled && (app.status === "QUALIFIED" || exam.qualified === true);
                         const hasSubmitted = Boolean(
                           exam.submitted_at ||
                           exam.status === "EVALUATED" ||
@@ -2127,7 +2124,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
                                       }`,
                                     }}
                                   >
-                                    {isQual ? "🏆 QUALIFIED" : isAbsentOrUnsubmitted ? "❌ FAILED (Absent)" : isNotQual ? "❌ NOT QUALIFIED" : (app.status || "EXAM_PENDING")}
+                                    {isEnrolled ? "ENROLLED" : isQual ? "QUALIFIED" : isAbsentOrUnsubmitted || isNotQual ? "REJECTED" : (app.status || "EXAM_PENDING")}
                                   </span>
                                 </div>
                                 {scoreDisplay && (
@@ -2137,96 +2134,13 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync }) => {
                                 )}
                               </div>
                             </td>
-                            <td style={{ padding: "10px 15px", textAlign: "right" }}>
-                              <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px", flexWrap: "wrap" }}>
-                                {app.status === "COHORT_ASSIGNED" || ["IN_PROGRESS", "ACTIVE", "TRAINING", "INTERNSHIP", "SOFT_SKILLS", "COMPLETED"].includes(app.status) ? (
-                                  <span
-                                    style={{
-                                      padding: "4px 8px",
-                                      borderRadius: "6px",
-                                      fontSize: "12px",
-                                      fontWeight: "700",
-                                      backgroundColor: "#dcfce7",
-                                      color: "#166534",
-                                      border: "1px solid #bbf7d0",
-                                      display: "inline-flex",
-                                      alignItems: "center",
-                                      gap: "4px",
-                                    }}
-                                  >
-                                    ✓ Enrolled
-                                  </span>
-                                ) : isQual ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleUpdateCandidateStatus(app, "COHORT_ASSIGNED")}
-                                    disabled={updatingAppId === app.id || busy}
-                                    style={{
-                                      backgroundColor: "#16a34a",
-                                      color: "white",
-                                      border: "none",
-                                      padding: "4px 10px",
-                                      borderRadius: "6px",
-                                      fontSize: "12px",
-                                      fontWeight: "700",
-                                      cursor: (updatingAppId === app.id || busy) ? "not-allowed" : "pointer",
-                                    }}
-                                    title="Enroll this qualified candidate into cohort"
-                                  >
-                                    {updatingAppId === app.id ? "Enrolling..." : "Enroll"}
-                                  </button>
-                                ) : null}
-
-                                <select
-                                  value={app.status || "APPLIED"}
-                                  onChange={(e) => handleUpdateCandidateStatus(app, e.target.value)}
-                                  disabled={updatingAppId === app.id || busy}
-                                  style={{
-                                    padding: "3px 6px",
-                                    borderRadius: "6px",
-                                    fontSize: "12px",
-                                    border: "1px solid var(--border-color)",
-                                    backgroundColor: "var(--bg-input)",
-                                    color: "var(--text-primary)",
-                                    cursor: "pointer",
-                                  }}
-                                  title="Change candidate status"
-                                >
-                                  <option value="APPLIED">Applied</option>
-                                  <option value="EXAM_PENDING">Exam Pending</option>
-                                  <option value="QUALIFIED">Qualified</option>
-                                  <option value="COHORT_ASSIGNED">Cohort Assigned (Enrolled)</option>
-                                  <option value="WAITLISTED">Waitlisted</option>
-                                  <option value="SUSPENDED">Suspended</option>
-                                  <option value="REJECTED">Rejected</option>
-                                </select>
-
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteApplication(app)}
-                                  disabled={deletingAppId === app.id || busy}
-                                  style={{
-                                    backgroundColor: "rgba(239, 68, 68, 0.08)",
-                                    border: "1px solid rgba(239, 68, 68, 0.3)",
-                                    color: "#ef4444",
-                                    padding: "4px 10px",
-                                    borderRadius: "6px",
-                                    fontSize: "12px",
-                                    fontWeight: "600",
-                                    cursor: (deletingAppId === app.id || busy) ? "not-allowed" : "pointer",
-                                  }}
-                                  title="Delete student application from cohort"
-                                >
-                                  {deletingAppId === app.id ? "Deleting..." : "Delete"}
-                                </button>
-                              </div>
-                            </td>
+                            {manageResults && <td style={{ padding: "10px 15px", textAlign: "right" }}><input type="number" min="0" max={exam.total_marks || screening?.total_questions || 10} value={resultMarks[app.id] ?? exam.marks_obtained ?? ""} onChange={(e) => setResultMarks((current) => ({ ...current, [app.id]: e.target.value }))} aria-label={`Marks for ${name}`} style={{ width: "86px", padding: "7px 8px", border: "1px solid var(--border-color)", borderRadius: "6px" }} /></td>}
                           </tr>
                         );
                       })}
                     </tbody>
                   </table>
-                </div>
+                </div>}
               </div>
             )}
           </div>

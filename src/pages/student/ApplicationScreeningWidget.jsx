@@ -79,18 +79,13 @@ const ApplicationScreeningWidget = ({ application }) => {
     if (!screening.is_released && screening.admin_started_at) {
       return "ENDED";
     }
+    if (now < scheduledAt) {
+      return "SCHEDULED";
+    }
     if (screening.admin_started_at) {
       return "READY_TO_START";
     }
-    if (now >= scheduledAt) {
-      return "WAITING_FOR_ADMIN";
-    }
-    // Meet is available 15 minutes prior to scheduled start
-    const meetAvailableAt = new Date(scheduledAt.getTime() - 15 * 60000);
-    if (now >= meetAvailableAt) {
-      return "MEET_AVAILABLE";
-    }
-    return "SCHEDULED";
+    return "WAITING_FOR_ADMIN";
   };
 
   const getMeetingHref = (url) => {
@@ -181,7 +176,7 @@ const ApplicationScreeningWidget = ({ application }) => {
             {isPassed ? "Congratulations! You have passed the screening exam." : "Screening exam evaluated."}
           </h4>
           <p style={{ margin: 0, fontSize: "14px", color: isPassed ? "#15803d" : "#b91c1c" }}>
-            Score: <strong>{screening.exam?.score ?? "Completed"}</strong> / {screening.exam?.total_marks ?? 50} 
+            Score: <strong>{screening.exam?.marks_obtained ?? "Completed"}</strong> / {screening.exam?.total_marks ?? 50} 
             {screening.exam?.percentage ? ` (${screening.exam.percentage}%)` : ""}
           </p>
         </div>
@@ -221,10 +216,10 @@ const ApplicationScreeningWidget = ({ application }) => {
         {status === "SCHEDULED" && (
           <>
             <button disabled style={{ padding: "12px 20px", backgroundColor: "var(--bg-surface)", color: "var(--text-muted)", border: "1px solid var(--border-color)", borderRadius: "6px", display: "flex", alignItems: "center", gap: "8px", cursor: "not-allowed" }}>
-              <FiVideo /> Join Meet (Available in {formatCountdown(scheduledAt.getTime() - now.getTime())})
+              <FiVideo /> Join Meet available at {scheduledAt.toLocaleString()} ({formatCountdown(scheduledAt.getTime() - now.getTime())})
             </button>
             <button disabled style={{ padding: "12px 20px", backgroundColor: "var(--bg-surface)", color: "var(--text-muted)", border: "1px solid var(--border-color)", borderRadius: "6px", display: "flex", alignItems: "center", gap: "8px", cursor: "not-allowed" }}>
-              <FiClock /> Waiting for Admin to Start...
+              <FiClock /> Start Exam available at {scheduledAt.toLocaleString()}
             </button>
           </>
         )}

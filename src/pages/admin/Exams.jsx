@@ -198,11 +198,12 @@ function Exams() {
   const loadScheduledData = useCallback(async () => {
     setLoadingScheduled(true);
     try {
-      const [preScreeningsRes, moduleTestsRes, cohortsRes, coursesRes] = await Promise.all([
+      const [preScreeningsRes, moduleTestsRes, cohortsRes, coursesRes, manualExamsRes] = await Promise.all([
         apiClient.get("/api/pre-screenings/?page_size=100").catch(() => ({ data: [] })),
         apiClient.get("/api/module-tests/?page_size=50").catch(() => ({ data: [] })),
         apiClient.get("/api/cohorts/?page_size=100").catch(() => ({ data: [] })),
         apiClient.get("/api/courses/?page_size=100").catch(() => ({ data: [] })),
+        apiClient.get("/api/manual-examinations/?page_size=100").catch(() => ({ data: [] })),
       ]);
 
       const parse = (res) => {
@@ -216,6 +217,7 @@ function Exams() {
       const rawMT = parse(moduleTestsRes);
       const rawCohorts = parse(cohortsRes);
       const rawCourses = parse(coursesRes);
+      const rawManual = parse(manualExamsRes);
 
       const cohortsMap = {};
       rawCohorts.forEach((c) => {
@@ -273,7 +275,7 @@ function Exams() {
             meeting_link: ps.meeting_link || cohortMeet || null,
             is_released: Boolean(ps.is_released),
             admin_started_at: ps.admin_started_at,
-            status: ps.status || "SCHEDULED",
+            status: ps.end_time && new Date(ps.end_time) <= new Date() ? "COMPLETED" : (ps.status || "SCHEDULED"),
             total_questions: ps.total_questions || 30,
             pass_percentage: ps.pass_percentage || 40,
             candidates: [],
@@ -335,7 +337,24 @@ function Exams() {
         };
       });
 
-      const combined = [...mappedPS, ...mappedMT].sort((a, b) => {
+      const mappedManual = rawManual.map((exam) => ({
+        id: exam.id,
+        allIds: [exam.id],
+        type: "MANUAL",
+        typeLabel: "Manual Examination",
+        title: exam.title,
+        courseName: exam.course_name || "Course",
+        cohortName: exam.cohort_name || "Cohort",
+        cohortId: exam.cohort,
+        scheduled_at: exam.examination_date,
+        end_time: exam.status === "COMPLETED" ? `${exam.examination_date}T23:59:59` : null,
+        status: exam.status,
+        total_questions: exam.total_questions,
+        pass_percentage: 0,
+        candidateCount: (exam.results || []).length,
+      }));
+
+      const combined = [...mappedPS, ...mappedMT, ...mappedManual].sort((a, b) => {
         const timeA = a.scheduled_at ? new Date(a.scheduled_at).getTime() : 0;
         const timeB = b.scheduled_at ? new Date(b.scheduled_at).getTime() : 0;
         return timeB - timeA;
@@ -383,6 +402,10 @@ function Exams() {
     const upcoming = [];
     const completed = [];
     filteredScheduled.forEach((s) => {
+        if (s.type === "MANUAL") {
+          completed.push(s);
+          return;
+        }
       // It is completed if end_time has passed or it was manually ended (status !== SCHEDULED && status !== ACTIVE maybe? 
       // Safest is to check end_time since admin-end updates end_time to now.
       if (s.end_time && new Date(s.end_time) <= now) {
@@ -486,6 +509,8 @@ function Exams() {
       if (item.type === "SCREENING") {
         const ids = item.allIds?.length ? item.allIds : [item.id];
         await Promise.all(ids.map((id) => apiClient.delete(`/api/pre-screenings/${id}/`).catch(() => null)));
+      } else if (item.type === "MANUAL") {
+        await apiClient.delete(`/api/manual-examinations/${item.id}/`);
       } else {
         await apiClient.delete(`/api/module-tests/${item.id}/`);
       }
@@ -502,6 +527,10 @@ function Exams() {
   };
 
   const handleAdminStart = async (item) => {
+    if (item.type === "MANUAL") {
+      alert("Manual examinations are controlled from their results table.");
+      return;
+    }
     if (
       !window.confirm(
         `Start exam now for "${item.title}"? Candidates will be authorized to begin their assessment immediately.`
@@ -528,6 +557,10 @@ function Exams() {
   };
 
   const handleAdminEnd = async (item) => {
+    if (item.type === "MANUAL") {
+      alert("Manual examinations are controlled from their results table.");
+      return;
+    }
     if (
       !window.confirm(
         `End exam early for "${item.title}"? The assessment window will close immediately, preventing further attempts.`
@@ -575,7 +608,21 @@ function Exams() {
 
       let list = [];
 
-      if (item.type === "SCREENING") {
+      if (item.type === "MANUAL") {
+        const response = await apiClient.get(`/api/manual-examinations/${item.id}/`);
+        list = (response.data?.results || []).map((result) => ({
+          id: result.id,
+          name: result.student_name || result.application_number || "Candidate",
+          email: result.student_email || "",
+          application_number: result.application_number || "",
+          marks_obtained: result.marks_obtained,
+          total_marks: response.data.maximum_marks,
+          percentage: response.data.maximum_marks ? (Number(result.marks_obtained || 0) / Number(response.data.maximum_marks)) * 100 : 0,
+          status: result.qualified ? "PASSED" : "FAILED",
+          isPassed: result.qualified === true,
+          isFailed: result.qualified === false,
+        }));
+      } else if (item.type === "SCREENING") {
         const [appsRes, examsRes] = await Promise.all([
           item.cohortId
             ? apiClient.get("/api/applications/", { params: { cohort: item.cohortId, page_size: 500 } }).catch(() => ({ data: [] }))
@@ -1705,13 +1752,12 @@ function Exams() {
                             {(() => {
                               const nowTime = new Date();
                               const isItemEnded = item.end_time && nowTime > new Date(item.end_time);
-                              const isItemActive =
-                                !isItemEnded &&
-                                (Boolean(item.admin_started_at) ||
-                                  (item.scheduled_at && nowTime >= new Date(item.scheduled_at)));
-                              const isItemScheduled = !isItemEnded && !isItemActive;
+                              const meetingStarted = Boolean(item.scheduled_at && nowTime >= new Date(item.scheduled_at));
+                              const isItemActive = !isItemEnded && Boolean(item.admin_started_at);
+                              const isItemScheduled = !isItemEnded && !isItemActive && !meetingStarted;
+                              const canStartFromMeeting = !isItemEnded && !isItemActive && meetingStarted;
 
-                              if (isItemScheduled) {
+                              if ((isItemScheduled || canStartFromMeeting) && item.type !== "MANUAL") {
                                 return (
                                   <button
                                     type="button"
@@ -1730,13 +1776,13 @@ function Exams() {
                                       alignItems: "center",
                                       gap: "4px",
                                     }}
-                                    title="Starts the exam immediately for all candidates"
+                                    title={canStartFromMeeting ? "Meeting has started — authorize the exam to begin" : "Starts the exam immediately for all candidates"}
                                   >
-                                    <FiPlayCircle /> Start Exam
+                                    <FiPlayCircle /> {canStartFromMeeting ? "Start Exam (Started)" : "Start Exam"}
                                   </button>
                                 );
                               }
-                              if (isItemActive) {
+                              if (isItemActive && item.type !== "MANUAL") {
                                 return (
                                   <button
                                     type="button"

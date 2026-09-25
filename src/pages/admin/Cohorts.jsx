@@ -36,8 +36,8 @@ function Cohorts() {
   const handleStop = async (id) => {
     if (!window.confirm("Are you sure you want to stop applications? This cohort will no longer be visible to students.")) return;
     try {
-      await cohortService.patchCohort(id, { status: "CLOSED" }); 
-      setCohorts(prev => prev.map(c => c.id === id ? { ...c, status: "CLOSED" } : c));
+      await cohortService.patchCohort(id, { status: "ACTIVE" });
+      setCohorts(prev => prev.map(c => c.id === id ? { ...c, status: "ACTIVE" } : c));
     } catch (err) {
       alert("❌ Failed to stop applications.");
     }
@@ -51,6 +51,11 @@ function Cohorts() {
     e.preventDefault();
     const { cohort } = deleteModalState;
     if (!cohort) return;
+    const expectedPhrase = `DELETE ${cohort.code || ""} ${cohort.course_details?.code || getCourseCode(cohort.course)}`.trim();
+    if (deleteModalState.input.trim() !== expectedPhrase) {
+      alert("You have not entered the correct confirmation text.");
+      return;
+    }
 
     setIsDeleting(true);
     try {
@@ -216,6 +221,26 @@ function Cohorts() {
                   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)"
                 }}
               >
+                {cohort.pre_screening?.scheduled_at && !["CANCELLED", "FAILED"].includes(String(cohort.pre_screening.status || "").toUpperCase()) && (
+                  <span
+                    style={{
+                      alignSelf: "flex-start",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "5px 10px",
+                      borderRadius: "999px",
+                      backgroundColor: "#dcfce7",
+                      color: "#166534",
+                      border: "1px solid #86efac",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    <span aria-hidden="true" style={{ width: "7px", height: "7px", borderRadius: "50%", backgroundColor: "#16a34a" }} />
+                    Screening Scheduled
+                  </span>
+                )}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
                   <div>
                     <h3 style={{ margin: "0", fontSize: "16px", color: "var(--text-primary)", fontWeight: "700" }}>
@@ -274,7 +299,7 @@ function Cohorts() {
                         )}
                       </div>
                     )}
-                    {(cohort.status === "OPEN" || cohort.status === "ACTIVE") && (
+                    {cohort.status === "OPEN" && (
                       <button onClick={() => handleStop(cohort.id)} className={styles.stopBtn} style={{ flex: "1 1 100%" }}>Stop Applications</button>
                     )}
                   </div>
@@ -293,50 +318,51 @@ function Cohorts() {
         const isMatch = deleteModalState.input.trim() === expectedPhrase;
 
         return (
-          <div style={{
+          <div className={styles.deleteOverlay} style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
             backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 999999,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: '20px'
           }}>
-            <div className="premium-card" style={{ width: '450px', maxWidth: '100%', padding: '32px', backgroundColor: 'var(--bg-main)', position: 'relative' }}>
-              <h2 style={{ marginTop: 0, color: '#ef4444', marginBottom: '16px', fontSize: '22px' }}>Delete Cohort</h2>
+            <div className={`premium-card ${styles.deleteModal}`}>
+              <div className={styles.deleteIcon}>!</div>
+              <h2 className={styles.deleteTitle}>Delete Cohort</h2>
               
-              <div style={{ padding: '16px', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderLeft: '4px solid #ef4444', borderRadius: '4px', marginBottom: '24px' }}>
-                <p style={{ margin: 0, color: 'var(--text-primary)', fontSize: '14px', lineHeight: '1.5' }}>
+              <div className={styles.deleteWarning}>
+                <p>
                   You are about to permanently delete <strong>{cohort.name || cohort.code}</strong>.
                   This action is destructive and cannot be undone.
                 </p>
               </div>
 
               <form onSubmit={executeDelete}>
-                <div style={{ marginBottom: '24px' }}>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: 'var(--text-secondary)' }}>
+                <div className={styles.deleteField}>
+                  <label>
                     To confirm, type <strong>{expectedPhrase}</strong> below:
                   </label>
                   <input 
                     type="text" 
                     value={deleteModalState.input}
                     onChange={(e) => setDeleteModalState({ ...deleteModalState, input: e.target.value })}
-                    className="premium-input" 
+                    className={styles.deleteInput}
                     placeholder={expectedPhrase}
                     style={{ width: '100%', fontFamily: 'monospace', fontSize: '14px' }}
                     autoComplete="off"
                   />
                 </div>
                 
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                <div className={styles.deleteActions}>
                   <button 
                     type="button" 
                     onClick={() => setDeleteModalState({ isOpen: false, cohort: null, input: "" })} 
-                    className="premium-btn premium-btn-secondary"
+                    className={styles.deleteCancel}
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit" 
                     disabled={!isMatch || isDeleting} 
-                    className="premium-btn" 
+                    className={styles.deleteConfirm}
                     style={{ 
                       background: isMatch ? '#ef4444' : 'var(--bg-disabled)', 
                       color: isMatch ? '#fff' : 'var(--text-disabled)',

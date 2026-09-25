@@ -103,6 +103,40 @@
   line-height: 1.5;
 }
 
+.info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-nested);
+}
+
+.info > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info strong {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.info span {
+  overflow-wrap: anywhere;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
 .courseCard .badge {
   display: inline-block;
   padding: 4px 10px;
@@ -176,6 +210,10 @@
 
 @media (max-width: 768px) {
   .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info {
     grid-template-columns: 1fr;
   }
 }

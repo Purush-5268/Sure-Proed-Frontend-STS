@@ -4,6 +4,7 @@
   --primary-hover: #a855f7;
   --primary-dark: #7e22ce;
   --primary-light: #faf5ff;
+  --button-primary-text: #ffffff;
   --accent-color: #d946ef;
 
   /* Layered Surfaces (Light Theme) */
@@ -88,6 +89,7 @@
   --primary-hover: #e879f9;
   --primary-dark: #c026d3;
   --primary-light: #4a044e;
+  --button-primary-text: #0f172a;
   --accent-color: #00f3ff;
 
   /* Layered Surfaces (Dark Theme) */

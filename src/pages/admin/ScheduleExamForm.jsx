@@ -46,7 +46,7 @@ export default function ScheduleExamForm({ onSuccess }) {
     question_bank_id: "",
     scheduled_at: defaultStartTime,
     end_time: defaultEndTime,
-    duration_minutes: 45,
+    duration_minutes: 10,
     pass_percentage: 40,
     meeting_link: "",
     total_questions: "",
@@ -129,42 +129,8 @@ export default function ScheduleExamForm({ onSuccess }) {
     return cohorts.find((c) => String(c.id) === String(screeningForm.cohort_id));
   }, [cohorts, screeningForm.cohort_id]);
 
-  // Pre-fill previous screening values when cohort is selected
-  // Tries cohort.pre_screening first, then falls back to fetching from API
-  useEffect(() => {
-    if (!selectedScreeningCohort) return;
-
-    const applyPrefill = (ps) => {
-      if (!ps) return;
-      setScreeningForm((prev) => ({
-        ...prev,
-        question_bank_id: ps.question_bank_id || ps.question_bank || prev.question_bank_id,
-        duration_minutes: ps.duration_minutes ?? prev.duration_minutes ?? 45,
-        pass_percentage: ps.pass_percentage ?? prev.pass_percentage ?? 40,
-        total_questions: ps.total_questions !== undefined && ps.total_questions !== null ? ps.total_questions : prev.total_questions,
-        meeting_link: ps.meeting_link || selectedScreeningCohort.meeting_link || prev.meeting_link,
-      }));
-    };
-
-    const ps = selectedScreeningCohort.pre_screening;
-    if (ps) {
-      applyPrefill(ps);
-      return;
-    }
-
-    // Fallback: fetch the latest screening data from the API
-    let cancelled = false;
-    apiClient.get(`/api/pre-screenings/?cohort=${selectedScreeningCohort.id}&page_size=1`)
-      .then((res) => {
-        if (cancelled) return;
-        const list = Array.isArray(res.data) ? res.data : res.data?.results || [];
-        if (list.length > 0) {
-          applyPrefill(list[0]);
-        }
-      })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, [selectedScreeningCohort]);
+  // Keep the schedule form blank unless the admin intentionally fills it in.
+  // Previous screening data should not be auto-populated into a fresh scheduling form.
 
   // Filtered Question Banks for Screening
   const screeningQuestionBanks = useMemo(() => {
@@ -236,7 +202,7 @@ export default function ScheduleExamForm({ onSuccess }) {
         question_bank_id: screeningForm.question_bank_id,
         scheduled_at: start.toISOString(),
         end_time: end.toISOString(),
-        duration_minutes: Number(screeningForm.duration_minutes) || 45,
+        duration_minutes: Number(screeningForm.duration_minutes) || 10,
         pass_percentage: Number(screeningForm.pass_percentage) || 40,
         meeting_link: screeningForm.meeting_link?.trim() || null,
       };
@@ -439,7 +405,7 @@ export default function ScheduleExamForm({ onSuccess }) {
                         cohort_id: cId,
                         // Pre-fill from previous screening if available, otherwise reset
                         question_bank_id: ps?.question_bank_id || ps?.question_bank || "",
-                        duration_minutes: ps?.duration_minutes ?? prev.duration_minutes ?? 45,
+                        duration_minutes: ps?.duration_minutes ?? prev.duration_minutes ?? 10,
                         pass_percentage: ps?.pass_percentage ?? prev.pass_percentage ?? 40,
                         total_questions: ps?.total_questions !== undefined && ps?.total_questions !== null ? ps.total_questions : "",
                         meeting_link: ps?.meeting_link || selected?.meeting_link || prev.meeting_link || "",

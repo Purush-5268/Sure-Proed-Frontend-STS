@@ -46,7 +46,7 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
     question_bank_id: "",
     scheduled_at: defaultStartTime,
     end_time: defaultEndTime,
-    duration_minutes: 45,
+    duration_minutes: 10,
     pass_percentage: 40,
     meeting_link: "",
     total_questions: "",
@@ -198,7 +198,7 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
         question_bank_id: screeningForm.question_bank_id,
         scheduled_at: start.toISOString(),
         end_time: end.toISOString(),
-        duration_minutes: Number(screeningForm.duration_minutes) || 45,
+        duration_minutes: Number(screeningForm.duration_minutes) || 10,
         pass_percentage: Number(screeningForm.pass_percentage) || 40,
         meeting_link: screeningForm.meeting_link?.trim() || null,
       };
