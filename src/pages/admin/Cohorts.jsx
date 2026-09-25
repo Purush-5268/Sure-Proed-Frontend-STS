@@ -269,6 +269,10 @@ function Cohorts() {
                     <span>{cohort.start_date || "N/A"}</span>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column" }}>
+                    <strong style={{ color: "var(--text-primary)" }}>End Date</strong>
+                    <span>{cohort.end_date || "N/A"}</span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
                     <strong style={{ color: "var(--text-primary)" }}>App. Deadline</strong>
                     <span>{cohort.application_end_date ? new Date(cohort.application_end_date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : "N/A"}</span>
                   </div>
