@@ -429,7 +429,8 @@ function ExamInstructions() {
     : activeApplication?.scheduled_at
     ? new Date(activeApplication.scheduled_at).getTime()
     : null;
-  const isFutureSchedule = scheduledTime && currentTime < scheduledTime && !effectiveSchedule?.admin_started_at && !isNewScheduleActive;
+  // Keep the meeting locked until the scheduled start time, even if an admin opens the exam early.
+  const isFutureSchedule = scheduledTime && currentTime < scheduledTime;
 
   // Helper to format meeting URL safely
   const getMeetingUrl = (url) => {
@@ -1131,7 +1132,7 @@ function ExamInstructions() {
                     gap: "6px",
                   }}
                 >
-                  <FiCamera /> Join Meeting (Available {formatCountdown(scheduledTime, currentTime)})
+                  <FiCamera /> Join Meeting available at {formatDateTime(scheduledTime)} ({formatCountdown(scheduledTime, currentTime)})
                 </button>
                 <button
                   type="button"
@@ -1147,7 +1148,7 @@ function ExamInstructions() {
                     gap: "6px",
                   }}
                 >
-                  <FiClock /> Waiting for Admin to Start...
+                  <FiClock /> Start Exam available at {formatDateTime(scheduledTime)}
                 </button>
               </>
             ) : !effectiveSchedule?.admin_started_at ? (

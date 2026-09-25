@@ -203,7 +203,7 @@ function Students() {
 
     try {
       setDeletingAppId(appId);
-      await apiClient.delete(API_ENDPOINTS.APPLICATIONS.BY_ID(appId));
+      await apiClient.post(`/api/applications/${appId}/delete-application/`);
       setRefreshKey(k => k + 1);
     } catch (err) {
       console.error("Failed to delete application:", err);

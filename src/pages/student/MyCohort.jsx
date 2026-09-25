@@ -30,9 +30,9 @@ function MyCohort() {
     const loadCohort = async () => {
       try {
         const [profileData, appRes, coursesRes, mentorsRes] = await Promise.all([
-          cachedProfile
-            ? Promise.resolve(cachedProfile)
-            : (user?.email ? studentService.getProfile(user.email).catch(() => null) : Promise.resolve(null)),
+          user?.email
+            ? studentService.getProfile(user.email).catch(() => cachedProfile || null)
+            : Promise.resolve(cachedProfile || null),
           apiClient.get(API_ENDPOINTS.APPLICATIONS?.BASE || "/applications/").catch(() => ({ data: [] })),
           courseService.getCourses().catch(() => []),
           apiClient.get(API_ENDPOINTS.MENTORS?.BASE || "/api/volunteers/mentor-profiles/").catch(() => ({ data: [] }))

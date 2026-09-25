@@ -165,6 +165,15 @@ function ApplyCourse() {
   const [cooldownCourseMap, setCooldownCourseMap] = useState({}); // { [courseId]: true }
   const [loading, setLoading] = useState(true);
 
+  const formatDate = (value, includeTime = false) => {
+    if (!value || value === "null" || value === "undefined") return "Not available";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "Not available";
+    return date.toLocaleString("en-IN", includeTime
+      ? { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }
+      : { day: "2-digit", month: "short", year: "numeric" });
+  };
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -351,19 +360,23 @@ function ApplyCourse() {
                   <div className={styles.info}>
                     <div>
                       <strong>Course Code</strong>
-                      <span>{courseDetails.code || "N/A"}</span>
+                      <span>{courseDetails.code || cohort.course?.code || "Not available"}</span>
                     </div>
                     <div>
-                      <strong>Domain</strong>
-                      <span>{courseDetails.domain || "N/A"}</span>
+                      <strong>Cohort Code</strong>
+                      <span>{cohort.code || "Not available"}</span>
+                    </div>
+                    <div>
+                      <strong>Course</strong>
+                      <span>{courseName || "Not available"}</span>
                     </div>
                     <div>
                       <strong>Starts</strong>
-                      <span>{cohort.start_date || "TBA"}</span>
+                      <span>{formatDate(cohort.start_date)}</span>
                     </div>
                     <div>
                       <strong>Deadline</strong>
-                      <span>{cohort.application_end_date || "N/A"}</span>
+                      <span>{formatDate(cohort.application_end_date, true)}</span>
                     </div>
                   </div>
 
