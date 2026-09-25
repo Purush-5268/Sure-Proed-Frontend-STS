@@ -54,4 +54,14 @@ export const cohortService = {
     const response = await apiClient.post(API_ENDPOINTS.COHORTS.SCHEDULE_SCREENING(id), payload);
     return response.data;
   },
+
+  async startScreening(id) {
+    const response = await apiClient.post(API_ENDPOINTS.COHORTS.START_SCREENING(id));
+    return response.data;
+  },
+
+  async endScreening(id) {
+    const response = await apiClient.post(API_ENDPOINTS.COHORTS.END_SCREENING(id));
+    return response.data;
+  },
 };

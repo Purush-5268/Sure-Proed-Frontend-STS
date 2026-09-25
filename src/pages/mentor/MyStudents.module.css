@@ -79,8 +79,10 @@
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   box-shadow: var(--shadow-sm);
+  width: 100%;
 }
 
 .skeletonRow {
@@ -93,6 +95,7 @@
 
 .table {
   width: 100%;
+  min-width: 650px;
   border-collapse: collapse;
 }
 

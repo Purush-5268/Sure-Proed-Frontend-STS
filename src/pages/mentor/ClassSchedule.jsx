@@ -39,14 +39,14 @@ function ClassSchedule() {
 
         // 3. Fetch Active Sessions (Domain + Training)
         const [domainRes, trainingRes] = await Promise.allSettled([
-          fetchAllPages(API_ENDPOINTS.ATTENDANCE.BASE, { params: { conducted: "true", ...cohortParams } }),
+          fetchAllPages(API_ENDPOINTS.ATTENDANCE.BASE, { params: { conducted: "false", ...cohortParams } }),
           fetchAllPages(API_ENDPOINTS.TRAININGS.SESSIONS, { params: cohortParams })
         ]);
 
         let unifiedSessions = [];
 
         if (domainRes.status === "fulfilled") {
-          const domainActive = domainRes.value.filter(s => s.class_status !== 'COMPLETED' && s.class_status !== 'CANCELLED' && s.conducted !== true);
+          const domainActive = domainRes.value.filter(s => s.class_status !== 'COMPLETED' && s.class_status !== 'CANCELLED');
           domainActive.forEach(s => {
             unifiedSessions.push({
               id: s.id,

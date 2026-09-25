@@ -28,18 +28,19 @@ function EditStudent() {
       try {
         const response = await apiClient.get(API_ENDPOINTS.STUDENTS.BY_ID(id));
         const student = response.data || {};
-        const user = student.user || {};
+        const user = typeof student.user === "object" && student.user !== null ? student.user : {};
+        const userId = typeof student.user === "string" ? student.user : (user.id || student.user_id || null);
 
         setForm({
-          first_name: user.first_name || "",
-          last_name: user.last_name || "",
-          email: user.email || "",
-          phone_number: user.phone_number || "",
+          first_name: student.first_name || user.first_name || "",
+          last_name: student.last_name || user.last_name || "",
+          email: student.email || user.email || "",
+          phone_number: student.phone_number || user.phone_number || "",
           college: student.college || "",
           degree: student.degree || "",
           specialization: student.specialization || "",
           status: student.status || "AVAILABLE",
-          user_id: user.id || null,
+          user_id: userId,
         });
       } catch (err) {
         console.error("Failed to load student for editing:", err);
@@ -66,6 +67,10 @@ function EditStudent() {
 
     try {
       const payload = {
+        first_name: form.first_name.trim(),
+        last_name: form.last_name.trim(),
+        email: form.email.trim(),
+        phone_number: form.phone_number.trim(),
         college: form.college.trim(),
         degree: form.degree.trim(),
         specialization: form.specialization.trim(),
@@ -75,12 +80,16 @@ function EditStudent() {
       await apiClient.patch(API_ENDPOINTS.STUDENTS.BY_ID(id), payload);
 
       if (form.user_id) {
-        await apiClient.patch(API_ENDPOINTS.USERS.BY_ID(form.user_id), {
-          first_name: form.first_name.trim(),
-          last_name: form.last_name.trim(),
-          email: form.email.trim(),
-          phone_number: form.phone_number.trim() || null,
-        });
+        try {
+          await apiClient.patch(API_ENDPOINTS.USERS.BY_ID(form.user_id), {
+            first_name: form.first_name.trim(),
+            last_name: form.last_name.trim(),
+            email: form.email.trim(),
+            phone_number: form.phone_number.trim() || null,
+          });
+        } catch (uErr) {
+          console.warn("User patch fallback warning:", uErr);
+        }
       }
       navigate("/admin/students");
     } catch (err) {

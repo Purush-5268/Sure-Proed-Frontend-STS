@@ -91,10 +91,21 @@ export const isProfileComplete = (profile = {}) => {
   );
 };
 
+export const ENROLLED_STATUSES = [
+  'COHORT_ASSIGNED',
+  'IN_PROGRESS',
+  'ACTIVE',
+  'TRAINING',
+  'INTERNSHIP',
+  'INTERNSHIP_ASSIGNED',
+  'SOFT_SKILLS',
+  'PRE_TRAINING',
+  'COMPLETED'
+];
+
 export const checkCurrentEnrollment = (profile, activeApplication) => {
   if (profile?.status === "ADMIN_APPROVED") return true;
   if (profile?.authoritative_course_batch) return true;
-  const ENROLLED_STATUSES = ['COHORT_ASSIGNED', 'IN_PROGRESS', 'ACTIVE', 'TRAINING', 'INTERNSHIP', 'SOFT_SKILLS', 'PRE_TRAINING', 'COMPLETED'];
   if (activeApplication && ENROLLED_STATUSES.includes(activeApplication.status)) return true;
   return false;
 };
@@ -103,7 +114,6 @@ export const resolveStudentEnrollment = (serverProfile, applications = [], cours
   const appsArray = Array.isArray(applications) ? applications : (applications?.results || []);
   const coursesArray = Array.isArray(courses) ? courses : (courses?.results || []);
 
-  const ENROLLED_STATUSES = ['COHORT_ASSIGNED', 'IN_PROGRESS', 'ACTIVE', 'TRAINING', 'INTERNSHIP', 'SOFT_SKILLS', 'PRE_TRAINING', 'COMPLETED'];
   const activeApp = appsArray.find(a => ENROLLED_STATUSES.includes(a.status));
   
   
@@ -121,10 +131,46 @@ export const resolveStudentEnrollment = (serverProfile, applications = [], cours
   const isExistingStudent = serverProfile?.is_existing_student || serverProfile?.isExistingStudent === "yes";
 
   if (!isEnrolled) {
+    const candidateApp = appsArray.find(a => ['QUALIFIED', 'EXAM_COMPLETED', 'UNDER_REVIEW', 'SUBMITTED', 'APPLIED', 'EXAM_PENDING', 'WAITLISTED'].includes(a.status)) || appsArray[0];
+
+    let courseId = null;
+    let courseName = null;
+    let courseDomain = null;
+
+    if (candidateApp?.course?.name) {
+      courseId = candidateApp.course.id || candidateApp.course;
+      courseName = candidateApp.course.name;
+      courseDomain = candidateApp.course.domain;
+    } else if (candidateApp?.course) {
+      courseId = typeof candidateApp.course === 'object' ? candidateApp.course.id : candidateApp.course;
+    } else if (serverProfile?.course_id) {
+      courseId = serverProfile.course_id;
+    }
+
+    if (courseId || courseName) {
+      const resolvedId = typeof courseId === 'object' ? courseId.id : courseId;
+      const matched = coursesArray.find(c => 
+        (resolvedId && c.id === resolvedId) || 
+        (courseName && c.name === courseName)
+      );
+      if (matched) {
+        if (!courseName) courseName = matched.name;
+        courseDomain = matched.domain;
+      }
+    }
+
     return { 
       isEnrolled: false, 
       isExistingStudent,
-      showVerificationTab: true 
+      showVerificationTab: !candidateApp,
+      status: candidateApp?.status || (serverProfile?.status || "UNKNOWN"),
+      application: candidateApp || null,
+      courseId,
+      courseName,
+      courseDomain,
+      group: null,
+      isQualified: candidateApp?.status === 'QUALIFIED',
+      isExamCompleted: candidateApp?.status === 'EXAM_COMPLETED'
     };
   }
 

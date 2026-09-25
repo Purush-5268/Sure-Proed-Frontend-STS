@@ -11,13 +11,11 @@ import {
   fetchAuthoritativeExamContext,
 } from "../../services/examService";
 import { SureProEdLogo } from "../../components/common/SureProEdLogo";
-import JitsiExamRoom from "../../components/exams/JitsiExamRoom";
 import {
   FiClock,
   FiShield,
   FiAlertTriangle,
   FiAlertCircle,
-  FiVideo,
 } from "react-icons/fi";
 
 const ACTIVE_SESSION_KEY = "sure_active_exam_session";
@@ -101,7 +99,6 @@ function Exam() {
   const [fullscreenWarning, setFullscreenWarning] = useState(false);
   const [securityNotification, setSecurityNotification] = useState(null);
   const [submitError, setSubmitError] = useState(null);
-  const [mediaWarning, setMediaWarning] = useState(null);
 
   // Tab Switch Anti-Cheat Tracking (Exceeding 5 switches triggers auto-submit)
   const [tabSwitchCount, setTabSwitchCount] = useState(() => {
@@ -357,14 +354,6 @@ function Exam() {
     scheduleAutosaveRef.current?.(latestAnswersRef.current);
   }, []);
 
-  const handleJitsiEvent = useCallback((event) => {
-    logSecurityTelemetry(event.type, event.detail);
-    if (event.type === "JITSI_ERROR" || event.type === "JITSI_LEFT") {
-      setMediaWarning("The live proctoring room disconnected. Reconnect before continuing.");
-    } else if (event.type === "JITSI_JOINED") {
-      setMediaWarning(null);
-    }
-  }, [logSecurityTelemetry]);
 
   // Proctoring Listeners & Anti-Cheat Protection
   useEffect(() => {
@@ -723,24 +712,7 @@ function Exam() {
     }
   };
 
-  const handleSaveAndMarkForReview = () => {
-    if (activeQId) {
-      if (answers[activeQId]) {
-        setQuestionStates((prev) => ({ ...prev, [activeQId]: "ANSWERED_MARKED" }));
-      } else {
-        setQuestionStates((prev) => ({ ...prev, [activeQId]: "MARKED" }));
-      }
-    }
-
-    if (currentIndex < questions.length - 1) {
-      const nextIdx = currentIndex + 1;
-      setCurrentIndex(nextIdx);
-      const nextId = questions[nextIdx].id;
-      if (!questionStates[nextId] || questionStates[nextId] === "NOT_VISITED") {
-        setQuestionStates((prev) => ({ ...prev, [nextId]: "NOT_ANSWERED" }));
-      }
-    }
-  };
+  const handleSaveAndMarkForReview = () => handleMarkForReviewAndNext();
 
   const handleMarkForReviewAndNext = () => {
     if (activeQId) {
@@ -938,11 +910,6 @@ function Exam() {
         ))}
       </div>
 
-      <JitsiExamRoom
-        session={examSession?.proctoring}
-        mode="candidate"
-        onEvent={handleJitsiEvent}
-      />
 
       {/* ================= 1. TOP HEADER ================= */}
       <header className={styles.topNavbar}>
@@ -991,14 +958,6 @@ function Exam() {
         </div>
 
         <div className={styles.navRight}>
-          {/* Live Proctoring Webcam Feed */}
-          <div className={styles.proctorFeedCard} title="Live Automated Proctoring: Active">
-            <FiVideo />
-            <div className={styles.proctorMeta}>
-              <span className={styles.proctorLiveBadge}>JITSI</span>
-              <span className={styles.proctorSubText}>ROOM {examSession?.proctoring?.room_code || "—"}</span>
-            </div>
-          </div>
 
           {/* Candidate Profile Details */}
           <div className={styles.candidateCard}>
@@ -1034,22 +993,6 @@ function Exam() {
           </span>
           <button type="button" onClick={reEnterFullscreen}>
             Re-enter Full Screen
-          </button>
-        </div>
-      )}
-
-      {/* MEDIA DISCONNECT PROCTORING WARNING BANNER */}
-      {mediaWarning && (
-        <div className={styles.proctorNotice} style={{ background: "#fef2f2", borderColor: "#fca5a5", color: "#991b1b" }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-            <FiAlertCircle /> <strong>Proctoring Notice:</strong> {mediaWarning}
-          </span>
-          <button
-            type="button"
-            style={{ background: "#dc2626" }}
-            onClick={() => setMediaWarning(null)}
-          >
-            Dismiss
           </button>
         </div>
       )}
@@ -1153,17 +1096,30 @@ function Exam() {
                 fontSize: `${(22 * zoomLevel) / 100}px`,
                 fontWeight: 500,
                 lineHeight: 1.5,
-                marginBottom: "20px",
+                marginBottom: activeQuestion?.image ? "12px" : "20px",
               }}
               data-testid="active-question-text"
             >
               {activeQuestion?.questionText}
             </div>
 
+            {/* Question Image (Diagram / Circuit / Waveform) */}
+            {activeQuestion?.image && (
+              <div className={styles.questionImageContainer} data-testid="active-question-image">
+                <img
+                  src={activeQuestion.image}
+                  alt={`Question ${currentIndex + 1} Diagram`}
+                  className={styles.questionImage}
+                  onContextMenu={(e) => e.preventDefault()}
+                />
+              </div>
+            )}
+
             {/* MCQ Options (Rendered exactly in backend-provided order) */}
             <div className={styles.optionsContainer}>
-              {(activeQuestion?.options || []).map((opt) => {
-                const optKey = opt.key || "A";
+              {(activeQuestion?.options || []).map((opt, oIdx) => {
+                const optKey = typeof opt === "object" && opt?.key ? opt.key : String.fromCharCode(65 + oIdx);
+                const optLabel = typeof opt === "object" ? (opt.text ?? opt.label ?? "") : String(opt);
                 const isSelected = answers[activeQId] === optKey;
 
                 return (
@@ -1200,7 +1156,7 @@ function Exam() {
                         flex: 1,
                       }}
                     >
-                      {opt.text}
+                      {optLabel}
                     </div>
                   </div>
                 );
@@ -1217,13 +1173,6 @@ function Exam() {
                 onClick={handleSaveAndNext}
               >
                 Save & Next
-              </button>
-              <button
-                type="button"
-                className={styles.btnSaveReview}
-                onClick={handleSaveAndMarkForReview}
-              >
-                Save & Mark for Review
               </button>
               <button
                 type="button"

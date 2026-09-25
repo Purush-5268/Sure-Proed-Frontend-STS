@@ -14,7 +14,7 @@ function formatDateTimeLocal(date) {
   return `${y}-${m}-${d}T${h}:${min}`;
 }
 
-export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
+export default function ScheduleExamForm({ onSuccess }) {
   const [activeTab, setActiveTab] = useState("SCREENING"); // "SCREENING" | "MODULE_TEST"
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -52,7 +52,6 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
     total_questions: "",
   });
 
-  // Form State: Module Test
   const [moduleForm, setModuleForm] = useState({
     course_id: "",
     cohort_id: "",
@@ -64,12 +63,10 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
     pass_percentage: 60,
     scheduled_at: defaultStartTime,
     end_time: defaultEndTime,
-    is_released: false,
     meeting_link: "",
   });
 
   useEffect(() => {
-    if (!isOpen) return;
     let isMounted = true;
     setLoadingInitial(true);
     setError("");
@@ -120,7 +117,7 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
     return () => {
       isMounted = false;
     };
-  }, [isOpen]);
+  }, []);
 
   // Cohorts with status 'OPEN' for Screening Exam
   const openCohorts = useMemo(() => {
@@ -131,6 +128,43 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
   const selectedScreeningCohort = useMemo(() => {
     return cohorts.find((c) => String(c.id) === String(screeningForm.cohort_id));
   }, [cohorts, screeningForm.cohort_id]);
+
+  // Pre-fill previous screening values when cohort is selected
+  // Tries cohort.pre_screening first, then falls back to fetching from API
+  useEffect(() => {
+    if (!selectedScreeningCohort) return;
+
+    const applyPrefill = (ps) => {
+      if (!ps) return;
+      setScreeningForm((prev) => ({
+        ...prev,
+        question_bank_id: ps.question_bank_id || ps.question_bank || prev.question_bank_id,
+        duration_minutes: ps.duration_minutes ?? prev.duration_minutes ?? 45,
+        pass_percentage: ps.pass_percentage ?? prev.pass_percentage ?? 40,
+        total_questions: ps.total_questions !== undefined && ps.total_questions !== null ? ps.total_questions : prev.total_questions,
+        meeting_link: ps.meeting_link || selectedScreeningCohort.meeting_link || prev.meeting_link,
+      }));
+    };
+
+    const ps = selectedScreeningCohort.pre_screening;
+    if (ps) {
+      applyPrefill(ps);
+      return;
+    }
+
+    // Fallback: fetch the latest screening data from the API
+    let cancelled = false;
+    apiClient.get(`/api/pre-screenings/?cohort=${selectedScreeningCohort.id}&page_size=1`)
+      .then((res) => {
+        if (cancelled) return;
+        const list = Array.isArray(res.data) ? res.data : res.data?.results || [];
+        if (list.length > 0) {
+          applyPrefill(list[0]);
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [selectedScreeningCohort]);
 
   // Filtered Question Banks for Screening
   const screeningQuestionBanks = useMemo(() => {
@@ -152,18 +186,22 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
   // Filtered Question Banks for Module Test
   const moduleQuestionBanks = useMemo(() => {
     return questionBanks.filter((qb) => {
-      if (!moduleForm.course_id) return true;
+      const isModuleTest = qb.bank_type === "MODULE_TEST";
+      const isApproved = qb.status === "APPROVED" || !qb.status;
+      if (!moduleForm.course_id) return isModuleTest && isApproved;
       const qbCourseId = typeof qb.course === 'object' ? qb.course?.id : qb.course;
-      return String(qbCourseId) === String(moduleForm.course_id);
+      return isModuleTest && isApproved && String(qbCourseId) === String(moduleForm.course_id);
     });
   }, [questionBanks, moduleForm.course_id]);
 
   // Cohorts filtered for Module Test course
   const moduleFilteredCohorts = useMemo(() => {
-    if (!moduleForm.course_id) return cohorts;
+    if (!moduleForm.course_id) return [];
     return cohorts.filter((c) => {
       const cCourseId = typeof c.course === 'object' ? c.course?.id : c.course;
-      return String(cCourseId) === String(moduleForm.course_id);
+      const isCourseMatch = String(cCourseId) === String(moduleForm.course_id);
+      const isTraining = String(c.status).toUpperCase() === "TRAINING";
+      return isCourseMatch && isTraining;
     });
   }, [cohorts, moduleForm.course_id]);
 
@@ -214,7 +252,6 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
       const msg = res.data?.message || "Screening Examination scheduled successfully!";
       alert(`✅ ${msg}${res.data?.meeting_link ? `\nGoogle Meet: ${res.data.meeting_link}` : ""}`);
       if (onSuccess) onSuccess();
-      onClose();
     } catch (err) {
       console.error("Failed to schedule cohort screening:", err);
       const errData = err.response?.data || {};
@@ -281,7 +318,7 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
         pass_percentage: Number(moduleForm.pass_percentage) || 60,
         scheduled_at: start.toISOString(),
         end_time: end.toISOString(),
-        is_released: Boolean(moduleForm.is_released),
+        is_released: true,
         meeting_link: moduleForm.meeting_link?.trim() || null,
       };
       if (moduleForm.question_bank_id) {
@@ -291,7 +328,6 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
       await apiClient.post(API_ENDPOINTS.MODULE_TESTS.BASE, payload);
       alert("✅ Module Test scheduled and synchronized successfully!");
       if (onSuccess) onSuccess();
-      onClose();
     } catch (err) {
       console.error("Failed to schedule module test:", err);
       const errorData = err.response?.data || {};
@@ -309,22 +345,25 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
         return;
       }
 
+      const firstFieldError = typeof errorData === 'object' && Object.keys(errorData).length > 0 
+        ? `${Object.keys(errorData)[0]}: ${errorData[Object.keys(errorData)[0]]}` 
+        : null;
+
       const errDetail =
         errorData.error ||
         errorData.detail ||
         errorData.non_field_errors?.[0] ||
+        firstFieldError ||
         "Failed to schedule module test.";
-      setError(errDetail);
+      setError(String(errDetail));
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+    <div className={styles.formContainer}>
+      <div className={styles.formContent}>
         {/* Header */}
         <div className={styles.modalHeader}>
           <div className={styles.titleGroup}>
@@ -334,10 +373,14 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
             </h2>
             <p>Deploy synchronized screening assessments and cohort module tests.</p>
           </div>
-          <button className={styles.closeBtn} onClick={onClose} aria-label="Close modal">
-            ✕
-          </button>
         </div>
+
+        {loadingInitial ? (
+          <div style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary)" }}>
+            <p>Loading scheduling data...</p>
+          </div>
+        ) : (
+          <>
 
         {/* Tab Navigation */}
         <div className={styles.tabNav}>
@@ -373,9 +416,7 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
               <div className={styles.infoBanner}>
                 <FiVideo style={{ fontSize: "1.2rem", flexShrink: 0, marginTop: "2px" }} />
                 <div>
-                  <strong>Automated Synchronization:</strong> Scheduling this screening creates
-                  official Pre-Screening records for all applied candidates in this cohort, provisions a
-                  synchronized Google Meet proctoring session, and automatically dispatches portal alerts.
+                  <strong>Two-Stage Screening Session:</strong> First, candidates join the scheduled Google Meet for instructions. The actual exam timer only starts for each student when the Administrator clicks &quot;Start Exam&quot; during the session.
                 </div>
               </div>
 
@@ -392,18 +433,23 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
                     onChange={(e) => {
                       const cId = e.target.value;
                       const selected = cohorts.find((c) => String(c.id) === String(cId));
+                      const ps = selected?.pre_screening;
                       setScreeningForm((prev) => ({
                         ...prev,
                         cohort_id: cId,
-                        question_bank_id: "",
-                        meeting_link: selected?.meeting_link || prev.meeting_link || "",
+                        // Pre-fill from previous screening if available, otherwise reset
+                        question_bank_id: ps?.question_bank_id || ps?.question_bank || "",
+                        duration_minutes: ps?.duration_minutes ?? prev.duration_minutes ?? 45,
+                        pass_percentage: ps?.pass_percentage ?? prev.pass_percentage ?? 40,
+                        total_questions: ps?.total_questions !== undefined && ps?.total_questions !== null ? ps.total_questions : "",
+                        meeting_link: ps?.meeting_link || selected?.meeting_link || prev.meeting_link || "",
                       }));
                     }}
                     required
                     disabled={loadingInitial}
                   >
                     <option value="">-- Choose an open cohort --</option>
-                    {openCohorts.slice().sort((a, b) => (a.name || a.code || a.title || "").localeCompare(b.name || b.code || b.title || "")).map((c) => (
+                    {openCohorts.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name} ({c.code || "Cohort"}) — {c.course?.name || c.course_title || "Course"}
                       </option>
@@ -446,9 +492,10 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
                       const qbCourseId = typeof qb.course === 'object' ? qb.course?.id : qb.course;
                       const courseObj = courses.find((c) => String(c.id) === String(qbCourseId));
                       const courseTag = courseObj?.name || (typeof qb.course === 'object' ? qb.course?.name : "");
+                      const qCount = qb.total_questions_per_set || qb.total_questions || 0;
                       return (
                         <option key={qb.id} value={qb.id}>
-                          {qb.title}{courseTag ? ` [${courseTag}]` : ""} (Sets: {Array.isArray(qb.set_codes) ? qb.set_codes.join(", ") : "A"})
+                          {qb.title}{courseTag ? ` [${courseTag}]` : ""} (Sets: {Array.isArray(qb.set_codes) ? qb.set_codes.join(", ") : "A"}, Q: {qCount})
                         </option>
                       );
                     })}
@@ -460,10 +507,10 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
                   )}
                 </div>
 
-                {/* Scheduled Start Time */}
+                {/* Meeting Start Time */}
                 <div className={styles.formGroup}>
                   <label htmlFor="screeningStart">
-                    Scheduled Start Time <span className={styles.required}>*</span>
+                    Meeting Start Time <span className={styles.required}>*</span>
                   </label>
                   <input
                     id="screeningStart"
@@ -475,13 +522,13 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
                     }
                     required
                   />
-                  <span className={styles.helpText}>Date & time window opens for candidates.</span>
+                  <span className={styles.helpText}>Time candidates can join the Meet for instructions.</span>
                 </div>
 
-                {/* Scheduled End Time */}
+                {/* Meeting End Time */}
                 <div className={styles.formGroup}>
                   <label htmlFor="screeningEnd">
-                    Scheduled End Time <span className={styles.required}>*</span>
+                    Meeting End Time <span className={styles.required}>*</span>
                   </label>
                   <input
                     id="screeningEnd"
@@ -493,7 +540,7 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
                     }
                     required
                   />
-                  <span className={styles.helpText}>Window closure and submission cutoff.</span>
+                  <span className={styles.helpText}>Used to block out the calendar schedule.</span>
                 </div>
 
                 {/* Duration */}
@@ -579,14 +626,7 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
 
               {/* Modal Footer */}
               <div className={styles.footer}>
-                <button
-                  type="button"
-                  className={styles.cancelBtn}
-                  onClick={onClose}
-                  disabled={submitting}
-                >
-                  Cancel
-                </button>
+                {/* Cancel button removed */}
                 <button
                   type="submit"
                   className={styles.submitBtn}
@@ -632,7 +672,7 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
                     disabled={loadingInitial}
                   >
                     <option value="">-- Choose Course --</option>
-                    {courses.slice().sort((a,b) => (a.name || a.title || a.code || "").localeCompare(b.name || b.title || b.code || "")).map((crs) => (
+                    {courses.map((crs) => (
                       <option key={crs.id} value={crs.id}>
                         {crs.name || crs.title}
                       </option>
@@ -686,15 +726,21 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
                     id="moduleQb"
                     className={styles.select}
                     value={moduleForm.question_bank_id}
-                    onChange={(e) =>
-                      setModuleForm((prev) => ({ ...prev, question_bank_id: e.target.value }))
-                    }
+                    onChange={(e) => {
+                      const selectedBankId = e.target.value;
+                      const bank = moduleQuestionBanks.find(qb => String(qb.id) === String(selectedBankId));
+                      setModuleForm((prev) => ({ 
+                        ...prev, 
+                        question_bank_id: selectedBankId,
+                        total_questions: bank?.total_questions_per_set || bank?.total_questions || prev.total_questions 
+                      }));
+                    }}
                     disabled={loadingInitial}
                   >
                     <option value="">-- Automated or General Assessment --</option>
                     {moduleQuestionBanks.map((qb) => (
                       <option key={qb.id} value={qb.id}>
-                        {qb.title} ({qb.bank_type || "Question Bank"})
+                        {qb.title} ({qb.total_questions_per_set || qb.total_questions || 0} questions)
                       </option>
                     ))}
                   </select>
@@ -753,22 +799,6 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
                   />
                 </div>
 
-                {/* Meeting Link */}
-                <div className={styles.formGroup} style={{ gridColumn: "1 / -1" }}>
-                  <label htmlFor="moduleMeetingLink">Meeting Link (Optional)</label>
-                  <input
-                    id="moduleMeetingLink"
-                    type="url"
-                    placeholder="https://meet.google.com/..."
-                    className={styles.input}
-                    value={moduleForm.meeting_link || ""}
-                    onChange={(e) =>
-                      setModuleForm((prev) => ({ ...prev, meeting_link: e.target.value }))
-                    }
-                  />
-                  <span className={styles.helpText}>Synchronized video proctoring session link. Auto-generated if left blank.</span>
-                </div>
-
                 {/* Scheduled Start Time */}
                 <div className={styles.formGroup}>
                   <label htmlFor="moduleStart">Scheduled Start Time</label>
@@ -797,32 +827,29 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
                   />
                 </div>
 
-                {/* Release Gate */}
+                {/* Google Meet Link */}
                 <div className={`${styles.formGroup} ${styles.colSpan2}`}>
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      className={styles.checkbox}
-                      checked={moduleForm.is_released}
-                      onChange={(e) =>
-                        setModuleForm((prev) => ({ ...prev, is_released: e.target.checked }))
-                      }
-                    />
-                    Make test active upon creation (candidates can start when scheduled or on manual start)
+                  <label htmlFor="moduleMeetingLink">
+                    Google Meet / Proctoring Link (Optional)
                   </label>
+                  <input
+                    id="moduleMeetingLink"
+                    type="url"
+                    className={styles.input}
+                    placeholder="https://meet.google.com/abc-defg-hij"
+                    value={moduleForm.meeting_link || ""}
+                    onChange={(e) =>
+                      setModuleForm((prev) => ({ ...prev, meeting_link: e.target.value }))
+                    }
+                  />
+                  <span className={styles.helpText}>Provide a link, otherwise a Google Meet will be auto-generated.</span>
                 </div>
+
               </div>
 
               {/* Modal Footer */}
               <div className={styles.footer}>
-                <button
-                  type="button"
-                  className={styles.cancelBtn}
-                  onClick={onClose}
-                  disabled={submitting}
-                >
-                  Cancel
-                </button>
+                {/* Cancel button removed */}
                 <button
                   type="submit"
                   className={styles.submitBtn}
@@ -834,6 +861,8 @@ export default function ScheduleExamModal({ isOpen, onClose, onSuccess }) {
             </form>
           )}
         </div>
+        </>
+        )}
       </div>
     </div>
   );

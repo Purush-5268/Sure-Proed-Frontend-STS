@@ -43,9 +43,19 @@ function ExamInstructions() {
   const [activeCourseTrack, setActiveCourseTrack] = useState(null);
   const [latestSchedule, setLatestSchedule] = useState(null);
   const [latestExam, setLatestExam] = useState(null);
+  const [currentTime, setCurrentTime] = useState(Date.now());
   const [isNewScheduleActive, setIsNewScheduleActive] = useState(false);
+
+  // Live 1-second interval to update countdown timer in real-time
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isQualifiedCandidate, setIsQualifiedCandidate] = useState(false);
+  const [isFailedCandidate, setIsFailedCandidate] = useState(false);
   const [isDisqualified, setIsDisqualified] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [statistics, setStatistics] = useState({});
@@ -287,14 +297,14 @@ function ExamInstructions() {
     }
   };
 
-  // 1. Authoritative Backend State Fetcher
+  // 1. Authoritative Backend State Fetcher & Auto-Poll for Admin Start
   useEffect(() => {
     let isMounted = true;
 
-    const loadExamContext = async () => {
+    const loadExamContext = async (silent = false) => {
       try {
-        setFetchingData(true);
-        setError(null);
+        if (!silent) setFetchingData(true);
+        if (!silent) setError(null);
 
         const [authContext, studentProfile, statsRes] = await Promise.all([
           fetchAuthoritativeExamContext(),
@@ -312,6 +322,7 @@ function ExamInstructions() {
           setIsNewScheduleActive(authContext.isNewScheduleActive);
           setIsCompleted(authContext.isCompleted);
           setIsQualifiedCandidate(authContext.isQualified);
+          setIsFailedCandidate(Boolean(authContext.isFailed));
           setIsEnrolled(Boolean(authContext.isEnrolled));
 
           if (authContext.examConfig) {
@@ -334,18 +345,39 @@ function ExamInstructions() {
         }
       } catch (err) {
         console.error("[ExamInstructions] Context loading error:", err);
-        if (isMounted) {
+        if (isMounted && !silent) {
           setError("Failed to load examination context from server. Please refresh or contact support.");
         }
       } finally {
-        if (isMounted) setFetchingData(false);
+        if (isMounted && !silent) setFetchingData(false);
       }
     };
 
-    loadExamContext();
+    // Initial load
+    loadExamContext(false);
+
+    // Auto-polling interval: check every 2 seconds so when admin starts exam,
+    // the page automatically unlocks without requiring manual reload.
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        loadExamContext(true);
+      }
+    }, 2000);
+
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === "visible") {
+        loadExamContext(true);
+      }
+    };
+
+    window.addEventListener("focus", handleVisibilityOrFocus);
+    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
 
     return () => {
       isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener("focus", handleVisibilityOrFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
     };
   }, [user]);
 
@@ -379,9 +411,70 @@ function ExamInstructions() {
   };
 
   // Schedule Window check
-  const now = new Date().getTime();
-  const scheduledTime = latestSchedule?.scheduled_at ? new Date(latestSchedule.scheduled_at).getTime() : null;
-  const isFutureSchedule = scheduledTime && scheduledTime - now > 15 * 60 * 1000 && !isNewScheduleActive;
+  const cohortFallbackSchedule = activeApplication?.assigned_cohort?.default_screening_at
+    ? {
+        scheduled_at: activeApplication.assigned_cohort.default_screening_at,
+        end_time: activeApplication.assigned_cohort.screening_end_time,
+        meeting_link: null,
+      }
+    : null;
+  const effectiveSchedule =
+    latestSchedule ||
+    (activeApplication?.pre_screening && typeof activeApplication.pre_screening === "object"
+      ? activeApplication.pre_screening
+      : null) ||
+    cohortFallbackSchedule;
+  const scheduledTime = effectiveSchedule?.scheduled_at
+    ? new Date(effectiveSchedule.scheduled_at).getTime()
+    : activeApplication?.scheduled_at
+    ? new Date(activeApplication.scheduled_at).getTime()
+    : null;
+  const isFutureSchedule = scheduledTime && currentTime < scheduledTime && !effectiveSchedule?.admin_started_at && !isNewScheduleActive;
+
+  // Helper to format meeting URL safely
+  const getMeetingUrl = (url) => {
+    if (!url) return "#";
+    const trimmed = String(url).trim();
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  };
+
+  // Format dynamic countdown: XXd YYh ZZm or XXh YYm ZZs or MMm SSs
+  const formatCountdown = (targetTime, currTime) => {
+    const diff = Math.max(0, targetTime - currTime);
+    const totalSecs = Math.floor(diff / 1000);
+    const days = Math.floor(totalSecs / 86400);
+    const hrs = Math.floor((totalSecs % 86400) / 3600);
+    const mins = Math.floor((totalSecs % 3600) / 60);
+    const secs = totalSecs % 60;
+    const pad = (n) => String(n).padStart(2, "0");
+    if (days > 0) {
+      return `${days}d ${hrs}h ${pad(mins)}m`;
+    }
+    if (hrs > 0) {
+      return `${hrs}h ${pad(mins)}m ${pad(secs)}s`;
+    }
+    return `${pad(mins)}m ${pad(secs)}s`;
+  };
+
+  // No exam scheduled state: candidate has a course track but no schedule/exam yet
+  const noExamScheduled = !isCompleted && !isQualifiedCandidate && !isFailedCandidate && !isEnrolled && !isDisqualified && !effectiveSchedule && !latestExam && activeCourseTrack;
+
+  // No active application state
+  const noActiveApplication = !isCompleted && !isQualifiedCandidate && !isFailedCandidate && !isEnrolled && !activeApplication;
+
+  // Google Meet link ONLY from active screening schedule while the session is live
+  const isExamSessionOver = Boolean(
+    isCompleted ||
+    isQualifiedCandidate ||
+    isFailedCandidate ||
+    isEnrolled ||
+    isDisqualified ||
+    (effectiveSchedule?.end_time && currentTime > new Date(effectiveSchedule.end_time).getTime())
+  );
+  const meetingLink = !isExamSessionOver
+    ? (effectiveSchedule?.meeting_link || activeApplication?.pre_screening?.meeting_link || null)
+    : null;
 
   // 2. Start Exam Handler
   const handleStartExam = async () => {
@@ -395,25 +488,9 @@ function ExamInstructions() {
       return;
     }
 
-    // Strict Device Verification Check
-    let activeStream = mediaStream;
-    let isCam = cameraActive;
-    let isMic = micActive;
-
-    if (!isCam || !isMic || !activeStream) {
-      activeStream = await requestMediaPermissions();
-      if (!activeStream) return;
-      if (activeStream) {
-        isCam = activeStream.getVideoTracks().some((t) => t.readyState === "live" && t.enabled);
-        isMic = activeStream.getAudioTracks().some((t) => t.readyState === "live" && t.enabled);
-      }
-    }
-
-    if (!isCam || !isMic || !activeStream) {
-      setMediaError(
-        "Camera and Microphone Required: You cannot start the examination without turning on both your camera and microphone. Please allow access and test your devices above."
-      );
-      return;
+    // Clean up any preview media stream before launch
+    if (mediaStream) {
+      stopMediaStream();
     }
 
     setLoading(true);
@@ -533,6 +610,8 @@ function ExamInstructions() {
       </div>
     );
   }
+
+
 
   // Canonical status determination
   const examStatusDisplay = isEnrolled
@@ -695,14 +774,68 @@ function ExamInstructions() {
           )}
 
           {/* Future Schedule Banner */}
+          {/* No Active Application Banner */}
+          {noActiveApplication && (
+            <div className={`${styles.alertBanner} ${styles.warningBanner}`}>
+              <div className={styles.alertBannerHeader}>
+                <FiAlertCircle className={styles.alertIconWarning} />
+                <strong>No Active Application Found</strong>
+              </div>
+              <p className={styles.alertText}>
+                You currently do not have an active course application. Please browse available internship courses and apply first to participate in screening examinations.
+              </p>
+              <div>
+                <Link to="/student/courses" className={styles.btnBannerAction}>
+                  Browse Available Courses <FiArrowRight />
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Future Schedule Banner with Live Countdown */}
           {isFutureSchedule && !isCompleted && (
             <div className={`${styles.alertBanner} ${styles.warningBanner}`}>
               <div className={styles.alertBannerHeader}>
                 <FiClock className={styles.alertIconWarning} />
-                <strong>Assessment Scheduled for Future Window</strong>
+                <strong>Assessment Scheduled — Starts in {formatCountdown(scheduledTime, currentTime)}</strong>
               </div>
               <p className={styles.alertText}>
-                Scheduled Start Time: <strong>{formatDateTime(scheduledTime)}</strong>. The proctored examination interface will activate automatically when the scheduled window commences.
+                Meeting Start Time: <strong>{formatDateTime(scheduledTime)}</strong>. Please join the meeting on time. The Start Examination button will become available once the administrator begins the examination.
+              </p>
+            </div>
+          )}
+
+          {/* Failed / Not Qualified Banner */}
+          {isFailedCandidate && !isNewScheduleActive && !isDisqualified && !isQualifiedCandidate && (
+            <div className={`${styles.alertBanner} ${styles.dangerBanner}`}>
+              <div className={styles.alertBannerHeader}>
+                <FiAlertTriangle className={styles.alertIcon} />
+                <strong>Examination Result: Not Qualified</strong>
+              </div>
+              <p className={styles.alertText}>
+                Your screening examination score did not meet the qualifying threshold for <strong>{activeCourseTrack?.name || activeApplication?.course_name || "your applied track"}</strong>. Please contact the assessment board if you believe this is an error, or wait for a reschedule notification.
+              </p>
+              <div>
+                <button
+                  type="button"
+                  className={styles.btnBannerAction}
+                  onClick={() => navigate("/student/exam-result")}
+                >
+                  <FiFileText /> View Examination Scorecard
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* No Exam Scheduled Yet Banner */}
+          {noExamScheduled && (
+            <div className={`${styles.alertBanner} ${styles.noticeBanner}`}>
+              <div className={styles.alertBannerHeader}>
+                <FiCalendar className={styles.alertIconNotice} />
+                <strong>Examination Not Scheduled Yet</strong>
+              </div>
+              <p className={styles.alertText}>
+                Your application for <strong>{activeCourseTrack?.name || "your applied track"}</strong> has been received. The screening examination has not been scheduled yet by the assessment board. You will receive a notification when the exam window opens.
               </p>
             </div>
           )}
@@ -755,7 +888,7 @@ function ExamInstructions() {
             <div className={styles.paramCard}>
               <span className={styles.paramLabel}>Question Volume</span>
               <span className={styles.paramValue}>
-                {examConfig ? `${examConfig.total_questions || examConfig.number_of_questions} Questions` : "Loading..."}
+                {examConfig && !noExamScheduled ? `${examConfig.total_questions || examConfig.number_of_questions} Questions` : "TBD"}
               </span>
               <span className={styles.paramSubtext}>Domain Prerequisite Items</span>
             </div>
@@ -763,7 +896,7 @@ function ExamInstructions() {
             <div className={styles.paramCard}>
               <span className={styles.paramLabel}>Allotted Duration</span>
               <span className={styles.paramValue}>
-                {examConfig ? formatMinutes(examConfig.duration_minutes) : "Loading..."}
+                {examConfig && !noExamScheduled ? formatMinutes(examConfig.duration_minutes) : "TBD"}
               </span>
               <span className={styles.paramSubtext}>Synchronized Server Clock</span>
             </div>
@@ -771,7 +904,7 @@ function ExamInstructions() {
             <div className={styles.paramCard}>
               <span className={styles.paramLabel}>Qualifying Threshold</span>
               <span className={styles.paramValue}>
-                {examConfig ? `${examConfig.pass_percentage}%` : "Loading..."}
+                {examConfig && !noExamScheduled ? `${examConfig.pass_percentage}%` : "TBD"}
               </span>
               <span className={styles.paramSubtext}>Minimum Required Score</span>
             </div>
@@ -810,11 +943,19 @@ function ExamInstructions() {
 
               <div className={styles.scheduleDetailsGrid}>
                 <div>
-                  <span className={styles.schedMetaLabel}>Scheduled Window:</span>
+                  <span className={styles.schedMetaLabel}>Meeting Date:</span>
                   <strong>
                     {latestSchedule.scheduled_at
-                      ? formatDateTime(latestSchedule.scheduled_at)
+                      ? new Date(latestSchedule.scheduled_at).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
                       : "Available On-Demand"}
+                  </strong>
+                </div>
+                <div>
+                  <span className={styles.schedMetaLabel}>Meeting Time:</span>
+                  <strong>
+                    {latestSchedule.scheduled_at
+                      ? new Date(latestSchedule.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                      : ""}
                   </strong>
                 </div>
                 <div>
@@ -845,166 +986,7 @@ function ExamInstructions() {
             </div>
           )}
 
-          {/* 3. SYSTEM & DEVICE COMPATIBILITY CHECK */}
-          <div
-            className={`${styles.deviceCheckCard} ${
-              cameraActive && micActive
-                ? styles.deviceCheckCardActive
-                : mediaError
-                ? styles.deviceCheckCardError
-                : ""
-            }`}
-            data-testid="device-check-card"
-          >
-            <div className={styles.deviceCheckHeader}>
-              <div className={styles.deviceCheckTitle}>
-                <FiCamera className={styles.deviceSectionIcon} />
-                <span>System & Device Compatibility Check</span>
-              </div>
-              <button
-                type="button"
-                className={styles.btnDeviceTest}
-                onClick={() => requestMediaPermissions()}
-                disabled={checkingMedia}
-                data-testid="btn-test-devices"
-              >
-                {checkingMedia
-                  ? "Testing Devices..."
-                  : cameraActive && micActive
-                  ? "Devices Verified"
-                  : "Test Camera & Microphone"}
-              </button>
-            </div>
-
-            <div className={styles.deviceGrid}>
-              <div
-                className={`${styles.videoPreviewWrap} ${
-                  cameraActive ? styles.videoPreviewWrapActive : ""
-                }`}
-              >
-                {cameraActive ? (
-                  <>
-                    <video
-                      ref={videoPreviewRef}
-                      autoPlay
-                      playsInline
-                      muted
-                      className={styles.videoPreview}
-                      data-testid="webcam-preview-video"
-                    />
-                    <span className={styles.liveBadge}>
-                      <span className={styles.liveBadgeDot} /> LIVE WEBCAM FEED
-                    </span>
-                  </>
-                ) : (
-                  <div className={styles.videoPlaceholder}>
-                    <FiCamera className={styles.placeholderIcon} />
-                    <span className={styles.placeholderTitle}>Camera Feed Inactive</span>
-                    <span className={styles.placeholderSub}>
-                      Click &quot;Test Camera & Microphone&quot; to check your devices
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div className={styles.deviceStatusList}>
-                <div className={styles.deviceStatusItem}>
-                  <div className={styles.deviceLabel}>
-                    <FiCamera className={styles.deviceIcon} />
-                    <span>Webcam Video Feed</span>
-                  </div>
-                  <span
-                    className={`${styles.statusPill} ${
-                      cameraActive ? styles.statusPillActive : styles.statusPillInactive
-                    }`}
-                    data-testid="camera-status-pill"
-                  >
-                    {cameraActive ? (
-                      <>
-                        <FiCheck /> Detected & Active
-                      </>
-                    ) : (
-                      <>
-                        <FiX /> Disconnected
-                      </>
-                    )}
-                  </span>
-                </div>
-
-                <div className={styles.deviceStatusItem} style={{ flexDirection: "column", alignItems: "stretch", gap: "10px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div className={styles.deviceLabel}>
-                      <FiMic className={styles.deviceIcon} />
-                      <span>Microphone Audio Feed</span>
-                    </div>
-                    <span
-                      className={`${styles.statusPill} ${
-                        micActive ? styles.statusPillActive : styles.statusPillInactive
-                      }`}
-                      data-testid="mic-status-pill"
-                    >
-                      {micActive ? (
-                        <>
-                          <FiCheck /> Detected & Active
-                        </>
-                      ) : (
-                        <>
-                          <FiX /> Disconnected
-                        </>
-                      )}
-                    </span>
-                  </div>
-
-                  {micActive && (
-                    <div className={styles.audioWaveVisualizerBox}>
-                      <div className={styles.equalizerWave}>
-                        {audioFreqBands.map((height, idx) => (
-                          <span
-                            key={idx}
-                            className={styles.equalizerBar}
-                            style={{ height: `${height}%` }}
-                          />
-                        ))}
-                      </div>
-                      <div className={styles.audioMeterContainer} title="Live Audio Input Level">
-                        <div
-                          className={styles.audioMeterBar}
-                          style={{ width: `${Math.max(10, micAudioLevel)}%` }}
-                        />
-                      </div>
-                      <div className={styles.audioFeedbackRow}>
-                        <span className={styles.audioFeedbackText}>
-                          {micAudioLevel > 20 ? "Voice Input Detected" : "Microphone Active & Listening"}
-                        </span>
-                        <span className={styles.audioDbText}>{micAudioLevel}% Level</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {mediaError && (
-                  <div
-                    className={`${styles.alertBanner} ${styles.dangerBanner}`}
-                    style={{ margin: "6px 0 0 0", padding: "12px 14px", fontSize: "13px" }}
-                    data-testid="media-error-banner"
-                  >
-                    <div className={styles.alertBannerHeader}>
-                      <FiAlertTriangle className={styles.alertIcon} />
-                      <strong>Device Access Notification</strong>
-                    </div>
-                    <p className={styles.alertText}>{mediaError}</p>
-                  </div>
-                )}
-
-                <div className={styles.deviceNotice}>
-                  <FiLock className={styles.deviceNoticeIcon} />
-                  <span>
-                    <strong>Compliance Requirement:</strong> Video and audio streams must remain uninterrupted throughout the assessment for automated integrity audit.
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* 3. SYSTEM & DEVICE COMPATIBILITY CHECK - Removed per request */}
 
           {/* 4. CANDIDATE INSTRUCTIONS & EXAMINATION GUIDELINES */}
           <div className={styles.section}>
@@ -1093,6 +1075,14 @@ function ExamInstructions() {
                   Proceed to Cohort <FiArrowRight />
                 </button>
               </>
+            ) : isFailedCandidate && !isNewScheduleActive ? (
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={() => navigate("/student/exam-result")}
+              >
+                <FiFileText /> View Examination Scorecard
+              </button>
             ) : isCompleted ? (
               <button
                 type="button"
@@ -1113,35 +1103,163 @@ function ExamInstructions() {
               <Link to="/student/profile" className={styles.secondaryButton}>
                 Complete Profile Before Starting
               </Link>
-            ) : !activeCourseTrack ? (
-              <Link to="/student/apply-course" className={styles.primaryButton}>
-                Select an Assessment Track <FiArrowRight />
-              </Link>
-            ) : isFutureSchedule ? (
+            ) : (noActiveApplication || !activeCourseTrack || noExamScheduled) ? (
               <button
                 type="button"
                 className={styles.primaryButton}
                 disabled={true}
+                style={{
+                  backgroundColor: "var(--bg-surface)",
+                  color: "var(--text-muted)",
+                  border: "1px solid var(--border-color)",
+                  cursor: "not-allowed",
+                }}
               >
-                <FiClock /> Scheduled for {formatDateTime(scheduledTime)}
+                <FiCalendar /> Exam Not Scheduled Yet
               </button>
-            ) : (
-              <button
-                type="button"
-                className={styles.primaryButton}
-                onClick={handleStartExam}
-                disabled={loading || fetchingData}
-              >
-                {loading ? (
-                  <>
-                    <span className={styles.btnSpinner} /> Initializing Session...
-                  </>
+            ) : isFutureSchedule ? (
+              <>
+                <button
+                  type="button"
+                  className={styles.secondaryButton}
+                  disabled={true}
+                  style={{
+                    cursor: "not-allowed",
+                    opacity: 0.6,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <FiCamera /> Join Meeting (Available {formatCountdown(scheduledTime, currentTime)})
+                </button>
+                <button
+                  type="button"
+                  className={styles.primaryButton}
+                  disabled={true}
+                  style={{
+                    backgroundColor: "var(--bg-surface)",
+                    color: "var(--text-muted)",
+                    border: "1px solid var(--border-color)",
+                    cursor: "not-allowed",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <FiClock /> Waiting for Admin to Start...
+                </button>
+              </>
+            ) : !effectiveSchedule?.admin_started_at ? (
+              <>
+                {meetingLink ? (
+                  <a
+                    href={getMeetingUrl(meetingLink)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={styles.secondaryButton}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      textDecoration: "none",
+                      backgroundColor: "#0b57d0",
+                      color: "#ffffff",
+                      fontWeight: 600,
+                    }}
+                  >
+                    <FiCamera /> Join Google Meet
+                  </a>
                 ) : (
-                  <>
-                    Start Examination <FiArrowRight />
-                  </>
+                  <button
+                    type="button"
+                    className={styles.secondaryButton}
+                    disabled={true}
+                    style={{
+                      cursor: "not-allowed",
+                      opacity: 0.6,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <FiCamera /> Join Google Meet (Link Pending Admin)
+                  </button>
                 )}
-              </button>
+                <button
+                  type="button"
+                  className={styles.primaryButton}
+                  disabled={true}
+                  style={{
+                    backgroundColor: "rgba(245, 158, 11, 0.1)",
+                    color: "#d97706",
+                    border: "1px solid rgba(245, 158, 11, 0.3)",
+                    cursor: "not-allowed",
+                    fontWeight: 600,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <FiClock /> Waiting for Admin to Start...
+                </button>
+              </>
+            ) : !effectiveSchedule?.is_released ? (
+              <>
+                <button
+                  type="button"
+                  className={styles.primaryButton}
+                  disabled={true}
+                  style={{
+                    backgroundColor: "rgba(220, 38, 38, 0.1)",
+                    color: "#dc2626",
+                    border: "1px solid rgba(220, 38, 38, 0.3)",
+                    cursor: "not-allowed",
+                    fontWeight: 600,
+                  }}
+                >
+                  <FiAlertTriangle /> Exam Session Ended
+                </button>
+              </>
+            ) : (
+              <>
+                {meetingLink ? (
+                  <a
+                    href={getMeetingUrl(meetingLink)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={styles.secondaryButton}
+                    style={{ display: "inline-flex", alignItems: "center", gap: "6px", textDecoration: "none" }}
+                  >
+                    <FiCamera /> Join Google Meet
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.secondaryButton}
+                    disabled={true}
+                    style={{ cursor: "not-allowed", opacity: 0.6 }}
+                  >
+                    <FiCamera /> Join Google Meet
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className={styles.primaryButton}
+                  onClick={handleStartExam}
+                  disabled={loading || fetchingData}
+                >
+                  {loading ? (
+                    <>
+                      <span className={styles.btnSpinner} /> Initializing Session...
+                    </>
+                  ) : (
+                    <>
+                      Start Examination <FiArrowRight />
+                    </>
+                  )}
+                </button>
+              </>
             )}
           </div>
         </div>

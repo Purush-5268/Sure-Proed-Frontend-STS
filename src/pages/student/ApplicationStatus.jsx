@@ -98,6 +98,13 @@ function ApplicationStatus() {
           </Link>
         )}
 
+        {application?.status === "QUALIFIED" && (
+          <div style={{ marginTop: "20px", padding: "15px", backgroundColor: "#e0f2fe", color: "#0369a1", borderRadius: "8px", border: "1px solid #bae6fd" }}>
+            <h3 style={{ margin: "0 0 10px 0" }}>Qualification Successful 🎉</h3>
+            <p style={{ margin: 0 }}>You are qualified and will be assigned to a cohort by the admin at the earliest. Please check back later.</p>
+          </div>
+        )}
+
         {application?.status === "REJECTED" && (
           <div style={{ marginTop: "20px", padding: "15px", backgroundColor: "#fef2f2", color: "#991b1b", borderRadius: "8px", border: "1px solid #f87171" }}>
             <h3 style={{ margin: "0 0 10px 0" }}>Application Unsuccessful</h3>

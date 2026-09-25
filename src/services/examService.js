@@ -90,7 +90,7 @@ export const selectCurrentApplication = (applications = [], schedules = [], exam
 export const fetchAuthoritativeExamContext = async () => {
   try {
     const [applicationsResponse, currentJourneyResponse, schedulesResponse, examsResponse, coursesResponse] = await Promise.all([
-      apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE),
+      apiClient.get(API_ENDPOINTS.APPLICATIONS.BASE).catch(() => ({ data: [] })),
       apiClient.get(API_ENDPOINTS.APPLICATIONS.CURRENT_JOURNEY).catch(() => ({ data: null })),
       apiClient.get(API_ENDPOINTS.PRE_SCREENINGS.BASE).catch(() => ({ data: [] })),
       apiClient.get(API_ENDPOINTS.EXAMS.BASE).catch(() => ({ data: [] })),
@@ -145,7 +145,13 @@ export const fetchAuthoritativeExamContext = async () => {
           new Date(right.submitted_at || right.created_at || 0) -
           new Date(left.submitted_at || left.created_at || 0)
       );
-    const latestSchedule = appSchedules[0] || null;
+    const latestSchedule =
+      appSchedules[0] ||
+      (activeApp.pre_screening && typeof activeApp.pre_screening === "object"
+        ? activeApp.pre_screening
+        : activeApp.pre_screening
+        ? { id: activeApp.pre_screening, scheduled_at: activeApp.scheduled_at, meeting_link: activeApp.meeting_link }
+        : null);
     const latestExam = appExams[0] || null;
     const activeAppStatus = String(activeApp.status || "").toUpperCase();
     const isEnrolled = Boolean(
@@ -253,6 +259,8 @@ export const normalizeInternalExamQuestions = (rawQuestions = []) =>
           questionNumber: questionIndex + 1,
           questionText: text,
           question: text,
+          image: question.image || "",
+          type: question.type || (question.image ? "image" : "text"),
           options,
           marks: Number(question.marks) || 1,
           negativeMarks: Number(question.negative_marks) || 0,
@@ -423,6 +431,24 @@ export const getModuleTest = async (moduleTestId) =>
 
 export const updateExam = async (examId, payload) =>
   (await apiClient.patch(API_ENDPOINTS.EXAMS.BY_ID(examId), payload)).data;
+
+
+export const importPresetQuestionBanks = async () =>
+  (await apiClient.post("/api/question-banks/import-presets/")).data;
+
+export const uploadQuestionBankExcel = async (formData) =>
+  (await apiClient.post("/api/question-banks/upload-excel/", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  })).data;
+
+export const createManualQuestionBank = async (payload) =>
+  (await apiClient.post("/api/question-banks/create-manual/", payload)).data;
+
+export const syncQuizResult = async (payload) =>
+  (await apiClient.post("/api/exams/sync-quiz-result/", payload)).data;
+
+export const syncCohortResults = async (payload) =>
+  (await apiClient.post("/api/exams/sync-cohort-results/", payload)).data;
 
 export const examService = {
   fetchAuthoritativeExamContext,

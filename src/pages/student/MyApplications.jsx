@@ -234,9 +234,9 @@ function MyApplications() {
           /* 🟢 ACTIVE APPLICATIONS MODE 🟢 */
           activeApplications.length === 0 ? (
             <div style={{ backgroundColor: "var(--status-pending-bg, rgba(251,191,36,0.1))", border: "1px solid var(--status-pending-text, #f59e0b)", padding: "2.5rem", borderRadius: "12px", textAlign: "center" }}>
-              <h2 style={{ color: "#92400e", margin: "0 0 8px 0" }}>No Pending Exam or Active Application</h2>
+              <h2 style={{ color: "#92400e", margin: "0 0 8px 0" }}>No Active Application</h2>
               <p style={{ color: "#b45309", fontSize: "15px", marginBottom: "1.5rem" }}>
-                You currently do not have an active pending application. Browse our course catalog to apply!
+                You currently do not have an active application. Browse our course catalog to apply for an internship track!
               </p>
               <Link to="/student/apply-course" style={{ padding: "12px 24px", backgroundColor: "#2563eb", color: "white", borderRadius: "8px", textDecoration: "none", fontWeight: "bold", fontSize: "15px" }}>
                 Browse & Apply for Courses →
@@ -278,9 +278,40 @@ function MyApplications() {
                             display: "inline-block"
                           }}
                         >
-                          {isQualified ? `🏆 QUALIFIED (${formattedScoreStr})` : (isExamTaken ? `EXAM GIVEN (${formattedScoreStr})` : "📋 EXAM PENDING")}
+                          {isQualified
+                            ? `🏆 ENROLLED (${formattedScoreStr})`
+                            : isExamTaken
+                            ? `EXAM GIVEN (${formattedScoreStr})`
+                            : (activeApp.status === "APPLIED" && !activeApp.pre_screening?.scheduled_at)
+                            ? "📝 APPLIED"
+                            : "📋 PRE-SCREENING"}
                         </span>
                       </div>
+                    </div>
+
+                    <div className={styles.infoBox}>
+                      <strong>Meeting Start Time</strong>
+                      {activeApp.pre_screening?.scheduled_at ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                          <span style={{ color: "#2563eb", fontWeight: "600" }}>
+                            📅 {new Date(activeApp.pre_screening.scheduled_at).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric", year: "numeric" })} at {new Date(activeApp.pre_screening.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                          {activeApp.pre_screening?.meeting_link && (
+                            <a
+                              href={activeApp.pre_screening.meeting_link}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ color: "#059669", fontSize: "12px", fontWeight: "600", textDecoration: "underline" }}
+                            >
+                              📹 Join Google Meet
+                            </a>
+                          )}
+                        </div>
+                      ) : (
+                        <span style={{ color: "var(--text-secondary)", fontStyle: "italic" }}>
+                          ⏳ Not scheduled yet
+                        </span>
+                      )}
                     </div>
 
                     <div className={styles.infoBox}>
@@ -377,12 +408,26 @@ function MyApplications() {
                         Exam Already Given ✓
                       </button>
                     ) : (
-                      <Link
-                        to="/student/exam-instructions"
-                        className={`${styles.premiumBtn} ${styles.btnSuccess}`}
-                      >
-                        Take Screening Exam →
-                      </Link>
+                      (() => {
+                        const isScheduled = Boolean(activeApp.pre_screening?.scheduled_at || activeApp.scheduled_at || activeApp.status === "SCREENING_SCHEDULED");
+
+                        if (!isScheduled) {
+                          return (
+                            <button className={`${styles.premiumBtn} ${styles.btnDisabled}`} disabled style={{ cursor: "not-allowed", backgroundColor: "var(--bg-surface)", color: "var(--text-muted)" }}>
+                              No Exam Scheduled
+                            </button>
+                          );
+                        }
+
+                        return (
+                          <Link
+                            to="/student/exam-instructions"
+                            className={`${styles.premiumBtn} ${styles.btnSuccess}`}
+                          >
+                            Take Screening Exam →
+                          </Link>
+                        );
+                      })()
                     )}
                   </div>
                 </div>

@@ -52,6 +52,14 @@ export const API_ENDPOINTS = {
     BY_ID: (id) => `/api/courses/${id}/`,
   },
 
+  // Mentors
+  MENTORS: {
+    BASE: "/api/users/?role=MENTOR",
+    BY_ID: (id) => `/api/users/${id}/`,
+    PROFILES: "/api/mentor-profiles/",
+    PROFILE_BY_ID: (id) => `/api/mentor-profiles/${id}/`,
+  },
+
   // Applications
   APPLICATIONS: {
     BASE: "/api/applications/",
@@ -59,6 +67,7 @@ export const API_ENDPOINTS = {
     BY_ID: (id) => `/api/applications/${id}/`,
     PRESCREENING: (id) => `/api/applications/prescreening/${id}/`,
     PRESCREENING_ADMIN_START: (id) => `/api/applications/prescreening/${id}/admin-start/`,
+    PRESCREENING_ADMIN_END: (id) => `/api/applications/prescreening/${id}/admin-end/`,
     ASSIGN_COHORT: (id) => `/api/applications/${id}/assign-cohort/`,
     TRANSFER_COHORT: (id) => `/api/applications/${id}/transfer-cohort/`,
     TRANSFER_COURSE_COHORT: (id) => `/api/applications/${id}/transfer-course-cohort/`,
@@ -119,6 +128,8 @@ export const API_ENDPOINTS = {
     SET_CURRENT_MENTOR: (id) => `/api/cohorts/${id}/set-current-mentor/`,
     REVOKE_CURRENT_MENTOR: (id) => `/api/cohorts/${id}/revoke-current-mentor/`,
     SCHEDULE_SCREENING: (id) => `/api/cohorts/${id}/schedule-screening/`,
+    START_SCREENING: (id) => `/api/cohorts/${id}/start-screening/`,
+    END_SCREENING: (id) => `/api/cohorts/${id}/end-screening/`,
     // Chat endpoints
     CHAT_MESSAGES: (id) => `/api/cohorts/${id}/chat/messages/`,
     CHAT_UNREAD: (id) => `/api/cohorts/${id}/chat/unread-count/`,

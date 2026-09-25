@@ -274,6 +274,7 @@ function AppRoutes() {
             <Route path="/cohort-info/:cohortId" element={<CohortInfo />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/quiz" element={<Navigate to="/student/exam-instructions" replace />} />
             <Route path="/explore-programs" element={<ExplorePrograms />} />
           </Route>
 
@@ -300,6 +301,7 @@ function AppRoutes() {
               <Route path="cohorts" element={<MyCohort />} />
               <Route path="module-tests" element={<ModuleTests />} />
 
+              <Route path="exams" element={<Navigate to="/student/exam-instructions" replace />} />
               <Route path="exam-instructions" element={<ExamInstructions />} />
               <Route path="class-schedule" element={<ClassSchedule />} />
               <Route path="mentor-details" element={<MentorDetails />} />
@@ -453,6 +455,7 @@ function AppRoutes() {
               <Route path="tasks" element={<MentorTasks />} />
               <Route path="cohorts" element={<MyCohorts />} />
               <Route path="cohort-details" element={<MentorCohortDetails />} />
+              <Route path="cohort-details/:id" element={<MentorCohortDetails />} />
               <Route path="class-schedule" element={<MentorClassSchedule />} />
               <Route path="meeting-links" element={<MeetingLinks />} />
               <Route path="edit-meeting-link" element={<EditMeetingLink />} />

@@ -102,6 +102,9 @@ function Students() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [deletingAppId, setDeletingAppId] = useState(null);
+
   // Track previous filter values to safely reset pagination
   const prevFiltersRef = React.useRef({ selectedCourseId, selectedCohort, verificationState, showSeeded, searchQuery });
 
@@ -176,7 +179,44 @@ function Students() {
 
     fetchData();
     return () => abortController.abort();
-  }, [page, selectedCourseId, selectedCohort, verificationState, showSeeded, searchQuery]);
+  }, [page, selectedCourseId, selectedCohort, verificationState, showSeeded, searchQuery, refreshKey]);
+
+  const handleDeleteApplication = async (student) => {
+    const appId = student.application_id || student.current_application?.id;
+    if (!appId) {
+      alert("No application record found for this student to delete.");
+      return;
+    }
+    const studentName = [
+      student.first_name || student.user?.first_name,
+      student.last_name || student.user?.last_name
+    ].filter(Boolean).join(" ") || student.email || student.user?.email || "this student";
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete the application for "${studentName}"?\n\n` +
+      `• This will permanently remove their application from this cohort.\n` +
+      `• Associated pre-screening exam attempts and records will be deleted.\n` +
+      `• The student will be able to apply afresh.\n\n` +
+      `Click OK to confirm deletion.`
+    );
+    if (!confirmed) return;
+
+    try {
+      setDeletingAppId(appId);
+      await apiClient.delete(API_ENDPOINTS.APPLICATIONS.BY_ID(appId));
+      setRefreshKey(k => k + 1);
+    } catch (err) {
+      console.error("Failed to delete application:", err);
+      alert(
+        err?.response?.data?.detail ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to delete student application."
+      );
+    } finally {
+      setDeletingAppId(null);
+    }
+  };
 
   // ─── Helper: Render exam status badge from serializer data directly ──────
   const renderExamStatusBadge = (student) => {
@@ -486,13 +526,35 @@ function Students() {
                       </td>
                     )}
                     <td style={{ padding: "1.25rem 1rem" }}>
-                      <button
-                        onClick={() => navigate(`/admin/student-details/${student.id}`)}
-                        className="premium-btn"
-                        style={{ backgroundColor: "var(--bg-nested)", border: "1px solid var(--border-color)", color: "var(--text-primary)", padding: "6px 12px", height: "auto", fontSize: "13px" }}
-                      >
-                        Inspect
-                      </button>
+                      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                        <button
+                          onClick={() => navigate(`/admin/student-details/${student.id}`)}
+                          className="premium-btn"
+                          style={{ backgroundColor: "var(--bg-nested)", border: "1px solid var(--border-color)", color: "var(--text-primary)", padding: "6px 12px", height: "auto", fontSize: "13px" }}
+                        >
+                          Inspect
+                        </button>
+                        {(student.application_id || student.current_application?.id) && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteApplication(student)}
+                            disabled={deletingAppId === (student.application_id || student.current_application?.id)}
+                            className="premium-btn"
+                            title="Delete student application from cohort"
+                            style={{
+                              backgroundColor: "rgba(239, 68, 68, 0.08)",
+                              border: "1px solid rgba(239, 68, 68, 0.3)",
+                              color: "#ef4444",
+                              padding: "6px 12px",
+                              height: "auto",
+                              fontSize: "13px",
+                              cursor: deletingAppId === (student.application_id || student.current_application?.id) ? "not-allowed" : "pointer"
+                            }}
+                          >
+                            {deletingAppId === (student.application_id || student.current_application?.id) ? "Deleting..." : "Delete"}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
