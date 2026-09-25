@@ -44,7 +44,7 @@ function Applications() {
     let isMounted = true;
     const fetchCourses = async () => {
       try {
-        const response = await apiClient.get(API_ENDPOINTS.COURSES.BASE);
+        const response = await apiClient.get(API_ENDPOINTS.COURSES.BASE, { params: { limit: 1000 } });
         if (isMounted) {
           setCourses(normalizeListResponse(response.data));
         }
@@ -329,7 +329,7 @@ function Applications() {
                         <td style={{ fontFamily: "monospace", fontSize: "0.85rem", color: "var(--text-secondary)" }}>{app.application_number || "N/A"}</td>
                         <td>{renderStudentName(app)}</td>
                         <td style={{ fontSize: "0.85rem" }}>
-                          {courses.find(c => String(c.id) === String(app.course))?.name || "Unknown Course"}
+                          {app.course_title || app.course_name || courses.find(c => String(c.id) === String(app.course))?.name || "Unknown Course"}
                         </td>
                         <td>
                           <span className={`premium-badge ${app.status === 'REJECTED' ? 'premium-badge-danger' : app.status === 'COMPLETED' || app.status === 'COHORT_ASSIGNED' ? 'premium-badge-success' : 'premium-badge-warning'}`}>
