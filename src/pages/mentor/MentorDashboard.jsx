@@ -194,7 +194,7 @@ function MentorDashboard() {
             class_date: s.class_date,
             meeting_link: s.meeting_link,
             type: "DOMAIN",
-            status: s.status
+            status: s.class_status
           }))];
         }
 
@@ -273,6 +273,71 @@ function MentorDashboard() {
   const fullName = `${firstName} ${lastName}`.trim();
   const salutation = getSalutation(user?.gender);
   const welcomeName = fullName ? `${fullName}${salutation}` : (user?.email || "Mentor");
+
+  const handleEndClass = async (sessionId, type) => {
+    if (!window.confirm("Are you sure you want to end this class? This will freeze attendance and generate reports.")) return;
+    try {
+      if (type === "DOMAIN") {
+        await apiClient.patch(API_ENDPOINTS.ATTENDANCE.BY_ID(sessionId), { conducted: false, class_status: "COMPLETED" });
+      } else {
+        await apiClient.patch(API_ENDPOINTS.TRAININGS.BY_ID(sessionId), { conducted: false, class_status: "COMPLETED" });
+      }
+      alert("✅ SUCCESS\n\nSession ended. Reports are being generated in the background.");
+      // Reload dashboard data
+      setLoading(true);
+      const cohortParams = globalCohort ? { cohort: globalCohort } : {};
+      
+      const [attendanceRes, trainingsRes] = await Promise.allSettled([
+        apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { params: { status: "ACTIVE", ...cohortParams } }),
+        apiClient.get(API_ENDPOINTS.TRAININGS.SESSIONS, { params: { ...cohortParams } })
+      ]);
+      
+      let combinedSessions = [];
+      if (attendanceRes.status === "fulfilled") {
+        const data = attendanceRes.value.data;
+        const sessions = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
+        combinedSessions = [...combinedSessions, ...sessions.map(s => ({
+          id: `domain_${s.id}`,
+          realId: s.id,
+          title: s.title,
+          start_time: s.start_time,
+          end_time: s.end_time,
+          class_date: s.class_date,
+          meeting_link: s.meeting_link,
+          type: "DOMAIN",
+          status: s.class_status
+        }))];
+      }
+      if (trainingsRes.status === "fulfilled") {
+        const data = trainingsRes.value.data;
+        const sessions = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
+        combinedSessions = [...combinedSessions, ...sessions.map(s => ({
+          id: `training_${s.id}`,
+          realId: s.id,
+          title: s.title || s.topic,
+          start_time: s.start_time,
+          end_time: s.end_time,
+          class_date: s.session_date,
+          meeting_link: s.meeting_link,
+          type: "TRAINING",
+          status: s.class_status
+        }))];
+      }
+      
+      const now = new Date();
+      const activeSessions = combinedSessions.filter(cls => {
+        const classStart = new Date(`${cls.class_date}T${cls.start_time}`);
+        if (isNaN(classStart)) return false;
+        const hoursSince = (now - classStart) / (1000 * 60 * 60);
+        return hoursSince <= 24;
+      });
+      setTodaySessions(activeSessions);
+    } catch (err) {
+      alert("Failed to end session.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const stagger = {
     hidden: { opacity: 0 },
@@ -353,12 +418,23 @@ function MentorDashboard() {
                               <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#ef4444', padding: '4px 8px', background: 'rgba(239,68,68,0.1)', borderRadius: '4px' }}>Cancelled</span>
                             ) : session.status === 'COMPLETED' ? (
                               <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#10b981', padding: '4px 8px', background: 'rgba(16,185,129,0.1)', borderRadius: '4px' }}>Completed</span>
-                            ) : session.meeting_link ? (
-                              <a href={session.meeting_link} target="_blank" rel="noreferrer" className={styles.joinBtn}>
-                                Join
-                              </a>
                             ) : (
-                              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>No Link</span>
+                              <div style={{ display: 'flex', gap: '8px' }}>
+                                {session.meeting_link ? (
+                                  <a href={session.meeting_link} target="_blank" rel="noreferrer" className={styles.joinBtn}>
+                                    Join
+                                  </a>
+                                ) : (
+                                  <span style={{ fontSize: '0.8rem', color: '#64748b' }}>No Link</span>
+                                )}
+                                <button 
+                                  onClick={() => handleEndClass(session.realId, session.type)}
+                                  className={styles.joinBtn}
+                                  style={{ background: '#ef4444', color: 'white' }}
+                                >
+                                  End Class
+                                </button>
+                              </div>
                             )}
                           </motion.div>
                         ))}

@@ -23,7 +23,7 @@ const OpenCohorts = ({ cohorts: propCohorts, loading: propLoading }) => {
     const fetchCohorts = async () => {
       try {
         const data = await cohortService.getCohorts(
-          { status: 'OPEN' },
+          { status: 'OPEN', public_all: 'true' },
           { signal: abortController.signal }
         );
         const list = Array.isArray(data) ? data : data.results || [];
