@@ -23,8 +23,8 @@ function Cohorts() {
     if (!publishDate) return alert("Please select an end date for applications.");
     try {
       // Updates status to OPEN and sets the deadline
-      await cohortService.patchCohort(id, { status: "OPEN", end_date: publishDate });
-      setCohorts(prev => prev.map(c => c.id === id ? { ...c, status: "OPEN", end_date: publishDate } : c));
+      await cohortService.patchCohort(id, { status: "OPEN", application_end_date: publishDate });
+      setCohorts(prev => prev.map(c => c.id === id ? { ...c, status: "OPEN", application_end_date: publishDate } : c));
       setPublishCohortId(null);
       setPublishDate("");
       alert("✅ Cohort published successfully!");
@@ -36,8 +36,8 @@ function Cohorts() {
   const handleStop = async (id) => {
     if (!window.confirm("Are you sure you want to stop applications? This cohort will no longer be visible to students.")) return;
     try {
-      await cohortService.patchCohort(id, { status: "ACTIVE" });
-      setCohorts(prev => prev.map(c => c.id === id ? { ...c, status: "ACTIVE" } : c));
+      await cohortService.patchCohort(id, { status: "ACTIVE", application_end_date: null });
+      setCohorts(prev => prev.map(c => c.id === id ? { ...c, status: "ACTIVE", application_end_date: null } : c));
     } catch (err) {
       alert("❌ Failed to stop applications.");
     }
@@ -303,7 +303,7 @@ function Cohorts() {
                         )}
                       </div>
                     )}
-                    {cohort.status === "OPEN" && (
+                    {(cohort.status === "OPEN" || cohort.application_end_date) && (
                       <button onClick={() => handleStop(cohort.id)} className={styles.stopBtn} style={{ flex: "1 1 100%" }}>Stop Applications</button>
                     )}
                   </div>
