@@ -377,7 +377,13 @@ function ApplicationDetails() {
                 </p>
                 <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                   {application.status === "SUSPENDED" ? (
-                    <button onClick={() => handleReactivateApplication("COHORT_ASSIGNED")} className="premium-btn premium-btn-primary" disabled={submitting}>
+                    <button onClick={() => {
+                      let target = "COHORT_ASSIGNED";
+                      if (application.cohort?.status === "TRAINING") target = "TRAINING";
+                      else if (application.cohort?.status === "INTERNSHIP") target = "INTERNSHIP_ASSIGNED";
+                      else if (application.cohort?.status === "SOFT_SKILLS") target = "SOFT_SKILLS";
+                      handleReactivateApplication(target);
+                    }} className="premium-btn premium-btn-primary" disabled={submitting}>
                       Unsuspend Application
                     </button>
                   ) : (
