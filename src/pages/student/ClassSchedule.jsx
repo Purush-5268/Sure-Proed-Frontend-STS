@@ -85,7 +85,7 @@ function ClassSchedule() {
       let mins = parts[1];
       let ampm = hours >= 12 ? 'PM' : 'AM';
       hours = hours % 12;
-      hours = hours ? hours : 12; 
+      hours = hours ? hours : 12;
       return `${hours}:${mins} ${ampm}`;
     }
     return timeStr;
@@ -110,7 +110,7 @@ function ClassSchedule() {
       // Only trust backend status for Completed — NOT time alone.
       // If class_status is still SCHEDULED, admin hasn't ended it — keep it Ongoing.
       const isCompleted = (itemStatus === "COMPLETED" || itemStatus === "ENDED") ||
-                          (effectiveStatus === "COMPLETED" && itemStatus !== "SCHEDULED");
+        (effectiveStatus === "COMPLETED" && itemStatus !== "SCHEDULED");
       const isCancelled = itemStatus === "CANCELLED" || effectiveStatus === "CANCELLED";
 
       if (isCompleted) return { canJoin: false, label: "Completed" };
@@ -143,8 +143,8 @@ function ClassSchedule() {
 
   return (
     <div className="premium-page-container">
-      <PageHeader 
-        title="Class Schedule & Live Sessions" 
+      <PageHeader
+        title="Class Schedule & Live Sessions"
         description="View your internship schedule and join active secure Google Meet rooms."
       />
 
@@ -152,9 +152,9 @@ function ClassSchedule() {
         {loading ? (
           <SkeletonLoader variant="table" rows={3} />
         ) : schedule.length === 0 ? (
-          <EmptyState 
+          <EmptyState
             icon={<span style={{ fontSize: '2rem' }}>📅</span>}
-            title="No classes scheduled" 
+            title="No classes scheduled"
             description="No class schedule entries are available yet."
           />
         ) : (
@@ -214,9 +214,9 @@ function ClassSchedule() {
                         🔗 Connect
                       </a>
                     ) : status.label.includes("Ask Admin") ? (
-                      <button 
+                      <button
                         onClick={() => { setLateJoinClassId(item.id); setShowLateJoinModal(true); }}
-                        className="premium-badge premium-badge-inactive" 
+                        className="premium-badge premium-badge-inactive"
                         style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer', fontWeight: 'bold', textDecoration: 'underline' }}
                       >
                         {status.label}

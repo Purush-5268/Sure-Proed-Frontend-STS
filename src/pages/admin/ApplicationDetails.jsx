@@ -222,11 +222,12 @@ function ApplicationDetails() {
   };
 
   const handleSuspendApplication = async () => {
-    if (!window.confirm("Suspend this student's application? They will lose active cohort access but historical data is preserved.")) return;
+    const reason = window.prompt("Suspend this student's application? They will lose active cohort access but historical data is preserved.\n\nPlease enter a reason:");
+    if (reason === null) return;
 
     setSubmitting(true);
     try {
-      await apiClient.patch(API_ENDPOINTS.APPLICATIONS.BY_ID(id), { status: "SUSPENDED" });
+      await apiClient.patch(API_ENDPOINTS.APPLICATIONS.BY_ID(id), { status: "SUSPENDED", reason });
       alert("Application suspended successfully.");
       loadApplication();
     } catch (err) {
@@ -237,11 +238,12 @@ function ApplicationDetails() {
   };
 
   const handleReactivateApplication = async (newStatus) => {
-    if (!window.confirm(`Reactivate this application to ${newStatus}?`)) return;
+    const reason = window.prompt(`Reactivate this application to ${newStatus}?\n\nPlease enter a reason:`);
+    if (reason === null) return;
 
     setSubmitting(true);
     try {
-      await apiClient.patch(API_ENDPOINTS.APPLICATIONS.BY_ID(id), { status: newStatus });
+      await apiClient.patch(API_ENDPOINTS.APPLICATIONS.BY_ID(id), { status: newStatus, reason });
       alert(`Application reactivated to ${newStatus}.`);
       loadApplication();
     } catch (err) {
@@ -366,6 +368,23 @@ function ApplicationDetails() {
                   <span className={styles.value}>
                     {application.qualified === true ? <span style={{ color: "var(--success-color)" }}>Passed</span> : application.qualified === false ? <span style={{ color: "var(--danger-color)" }}>Failed</span> : "Pending"}
                   </span>
+                </div>
+              </div>
+              <div style={{ marginTop: "30px", paddingTop: "20px", borderTop: "1px solid var(--border-color)" }}>
+                <h4 style={{ marginBottom: "10px", color: "var(--text-primary)" }}>Core Application Status Management</h4>
+                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "15px" }}>
+                  Use these buttons to quickly change the core application status (e.g., if a student drops out or needs to be reinstated).
+                </p>
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                  {application.status === "SUSPENDED" ? (
+                    <button onClick={() => handleReactivateApplication("COHORT_ASSIGNED")} className="premium-btn premium-btn-primary" disabled={submitting}>
+                      Unsuspend Application
+                    </button>
+                  ) : (
+                    <button onClick={handleSuspendApplication} className="premium-btn premium-btn-danger" disabled={submitting || application.status === "DROPPED" || application.status === "CANCELLED" || application.status === "REJECTED"}>
+                      Suspend Application
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -584,23 +603,6 @@ function ApplicationDetails() {
                 </div>
               </form>
 
-              <div style={{ marginTop: "30px", paddingTop: "20px", borderTop: "1px solid var(--border-color)" }}>
-                <h4 style={{ marginBottom: "10px", color: "var(--text-primary)" }}>Core Application Status Management</h4>
-                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "15px" }}>
-                  Use these buttons to quickly change the core application status (e.g., if a student drops out or needs to be reinstated).
-                </p>
-                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                  {application.status === "SUSPENDED" ? (
-                    <button onClick={() => handleReactivateApplication("COHORT_ASSIGNED")} className="premium-btn premium-btn-primary" disabled={submitting}>
-                      Revoke Suspension
-                    </button>
-                  ) : (
-                    <button onClick={handleSuspendApplication} className="premium-btn premium-btn-danger" disabled={submitting || application.status === "DROPPED" || application.status === "CANCELLED" || application.status === "REJECTED"}>
-                      Suspend Application
-                    </button>
-                  )}
-                </div>
-              </div>
             </div>
           )}
 

@@ -222,11 +222,12 @@ function UserApplicationDetails() {
   };
 
   const handleSuspendApplication = async () => {
-    if (!window.confirm("Suspend this student's application? They will lose active cohort access but historical data is preserved.")) return;
+    const reason = window.prompt("Suspend this student's application? They will lose active cohort access but historical data is preserved.\n\nPlease enter a reason:");
+    if (reason === null) return;
 
     setSubmitting(true);
     try {
-      await apiClient.patch(API_ENDPOINTS.APPLICATIONS.BY_ID(id), { status: "SUSPENDED" });
+      await apiClient.patch(API_ENDPOINTS.APPLICATIONS.BY_ID(id), { status: "SUSPENDED", reason });
       alert("Application suspended successfully.");
       loadApplication();
     } catch (err) {
@@ -237,11 +238,12 @@ function UserApplicationDetails() {
   };
 
   const handleReactivateApplication = async (newStatus) => {
-    if (!window.confirm(`Reactivate this application to ${newStatus}?`)) return;
+    const reason = window.prompt(`Reactivate this application to ${newStatus}?\n\nPlease enter a reason:`);
+    if (reason === null) return;
 
     setSubmitting(true);
     try {
-      await apiClient.patch(API_ENDPOINTS.APPLICATIONS.BY_ID(id), { status: newStatus });
+      await apiClient.patch(API_ENDPOINTS.APPLICATIONS.BY_ID(id), { status: newStatus, reason });
       alert(`Application reactivated to ${newStatus}.`);
       loadApplication();
     } catch (err) {
@@ -343,9 +345,6 @@ function UserApplicationDetails() {
           <button className={`${styles.sidebarBtn} ${activeTab === 'update' ? styles.active : ''}`} onClick={() => setActiveTab('update')}>
             <FiShield className={styles.sidebarIcon} /> Status Override
           </button>
-          <button className={`${styles.sidebarBtn} ${activeTab === 'offerLetter' ? styles.active : ''}`} onClick={() => setActiveTab('offerLetter')}>
-            <FiFile className={styles.sidebarIcon} /> Offer Letter
-          </button>
         </div>
 
         <div className={styles.mainContent}>
@@ -366,6 +365,29 @@ function UserApplicationDetails() {
                   <span className={styles.value}>
                     {application.qualified === true ? <span style={{ color: "var(--success-color)" }}>Passed</span> : application.qualified === false ? <span style={{ color: "var(--danger-color)" }}>Failed</span> : "Pending"}
                   </span>
+                </div>
+              </div>
+              <div style={{ marginTop: "30px", paddingTop: "20px", borderTop: "1px solid var(--border-color)" }}>
+                <h4 style={{ marginBottom: "10px", color: "var(--text-primary)" }}>Core Application Status Management</h4>
+                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "15px" }}>
+                  Use these buttons to quickly change the core application status (e.g., if a student drops out or needs to be reinstated).
+                </p>
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                  {application.status === "SUSPENDED" ? (
+                    <button onClick={() => {
+                      let target = "COHORT_ASSIGNED";
+                      if (application.cohort?.status === "TRAINING") target = "TRAINING";
+                      else if (application.cohort?.status === "INTERNSHIP") target = "INTERNSHIP_ASSIGNED";
+                      else if (application.cohort?.status === "SOFT_SKILLS") target = "SOFT_SKILLS";
+                      handleReactivateApplication(target);
+                    }} className="premium-btn premium-btn-primary" disabled={submitting}>
+                      Unsuspend Application
+                    </button>
+                  ) : (
+                    <button onClick={handleSuspendApplication} className="premium-btn premium-btn-danger" disabled={submitting || application.status === "DROPPED" || application.status === "CANCELLED" || application.status === "REJECTED"}>
+                      Suspend Application
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -584,90 +606,9 @@ function UserApplicationDetails() {
                 </div>
               </form>
 
-              <div style={{ marginTop: "30px", paddingTop: "20px", borderTop: "1px solid var(--border-color)" }}>
-                <h4 style={{ marginBottom: "10px", color: "var(--text-primary)" }}>Core Application Status Management</h4>
-                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "15px" }}>
-                  Use these buttons to quickly change the core application status (e.g., if a student drops out or needs to be reinstated).
-                </p>
-                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                  {application.status === "SUSPENDED" ? (
-                    <button onClick={() => handleReactivateApplication("COHORT_ASSIGNED")} className="premium-btn premium-btn-primary" disabled={submitting}>
-                      Revoke Suspension
-                    </button>
-                  ) : (
-                    <button onClick={handleSuspendApplication} className="premium-btn premium-btn-danger" disabled={submitting || application.status === "DROPPED" || application.status === "CANCELLED" || application.status === "REJECTED"}>
-                      Suspend Application
-                    </button>
-                  )}
-                </div>
-              </div>
             </div>
           )}
 
-          {/* TAB: OFFER LETTER */}
-          {activeTab === 'offerLetter' && (
-            <div>
-              <div className={styles.contentHeader}>
-                <h2><FiFile /> Offer Letter Management</h2>
-              </div>
-              <div className={styles.grid} style={{ marginBottom: "20px" }}>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Offer Letter Status</span>
-                  <span className={styles.value}>{application.offer_letter_issued ? "Generated" : "Not Generated"}</span>
-                </div>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Student Request</span>
-                  <span className={styles.value}>{application.offer_letter_request_status || "Not Requested"}</span>
-                </div>
-                <div className={styles.gridItem}>
-                  <span className={styles.label}>Eligibility Date</span>
-                  <span className={styles.value}>
-                    {application.assigned_cohort?.start_date ? (() => {
-                      const start = new Date(application.assigned_cohort.start_date);
-                      const eligible = new Date(start);
-                      eligible.setMonth(eligible.getMonth() + 1);
-                      if (new Date() >= eligible) {
-                        return <span style={{ color: "var(--success-color)", fontWeight: "bold" }}>Eligible</span>;
-                      }
-                      return <span style={{ color: "var(--warning-color)", fontWeight: "bold" }}>Eligible after {eligible.toLocaleDateString()}</span>;
-                    })() : "N/A"}
-                  </span>
-                </div>
-              </div>
-
-              <div className={styles.actionRow} style={{ justifyContent: "flex-start", gap: "10px", flexWrap: "wrap" }}>
-                {!application.offer_letter_issued || application.offer_letter_request_status === "NOT_REQUESTED" ? (
-                  <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-primary" disabled={submitting}>
-                    Issue Offer Letter
-                  </button>
-                ) : application.offer_letter_request_status === "REVOKED" ? (
-                  <>
-                    <button onClick={handleRestoreOfferLetter} className="premium-btn premium-btn-secondary" disabled={submitting}>
-                      Restore / Reaccess
-                    </button>
-                    <button onClick={handleResetOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting}>
-                      Reset Offer Letter
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button onClick={handleGenerateOfferLetter} className="premium-btn premium-btn-secondary" disabled={submitting}>
-                      Regenerate Offer Letter
-                    </button>
-                    <button onClick={handleDownloadOfferLetter} className="premium-btn premium-btn-primary" disabled={submitting}>
-                      View / Download
-                    </button>
-                    <button onClick={handleRevokeOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting || application.offer_letter_status === 'REVOKED'}>
-                      Revoke Offer Letter
-                    </button>
-                    <button onClick={handleResetOfferLetter} className="premium-btn premium-btn-danger" disabled={submitting}>
-                      Reset Offer Letter
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

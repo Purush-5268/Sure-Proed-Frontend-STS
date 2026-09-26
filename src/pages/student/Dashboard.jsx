@@ -447,7 +447,7 @@ function Dashboard() {
           <div style={{ flex: 1 }}>
             <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', color: '#0369a1' }}>You are enrolled! Your cohort starts soon.</h4>
             <p style={{ margin: 0, color: '#075985', fontSize: '14px', lineHeight: '1.5' }}>
-              Your application is verified and you are assigned to <strong>{stats?.active_cohort?.name || profile?.current_application?.assigned_cohort?.name || "your cohort"}</strong>. 
+              Your application is verified and you are assigned to <strong>{stats?.active_cohort?.name || profile?.current_application?.assigned_cohort?.name || "your cohort"}</strong>.
               Once the start date arrives, you will automatically gain access to your learning modules, class schedules, and other resources.
             </p>
           </div>
@@ -464,7 +464,7 @@ function Dashboard() {
           <div style={{ flex: 1 }}>
             <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', color: '#065f46' }}>Congratulations! You have Qualified for Admission</h4>
             <p style={{ margin: 0, color: '#047857', fontSize: '14px', lineHeight: '1.5' }}>
-              You have successfully cleared the pre-screening criteria for <strong>{resolvedEnrollment?.courseName || profile?.current_application?.course?.name || "your selected course"}</strong>. 
+              You have successfully cleared the pre-screening criteria for <strong>{resolvedEnrollment?.courseName || profile?.current_application?.course?.name || "your selected course"}</strong>.
               Our admissions team is currently preparing the upcoming cohort batch. You will receive an official cohort assignment and onboarding schedule shortly.
             </p>
           </div>
@@ -481,7 +481,7 @@ function Dashboard() {
           <div style={{ flex: 1 }}>
             <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', color: '#92400e' }}>Assessment Completed — Evaluation in Progress</h4>
             <p style={{ margin: 0, color: '#b45309', fontSize: '14px', lineHeight: '1.5' }}>
-              Your pre-screening assessment for <strong>{resolvedEnrollment?.courseName || profile?.current_application?.course?.name || "your course"}</strong> has been received and is being processed. 
+              Your pre-screening assessment for <strong>{resolvedEnrollment?.courseName || profile?.current_application?.course?.name || "your course"}</strong> has been received and is being processed.
               Once your evaluation is published by the administration, your qualification status and cohort details will be updated here automatically.
             </p>
           </div>
@@ -926,11 +926,11 @@ function Dashboard() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
               <h3 style={{ margin: 0 }}>Announcements</h3>
               {(() => {
-                 const readIds = new Set(JSON.parse(localStorage.getItem('sp_announcements_read') || '[]'));
-                 const unreadCount = announcements.filter(a => !readIds.has(a.id || a.uuid || a.title)).length;
-                 return unreadCount > 0 ? (
-                   <span className={styles.unreadBadge} style={{ position: 'static', marginLeft: 0 }}>{unreadCount}</span>
-                 ) : null;
+                const readIds = new Set(JSON.parse(localStorage.getItem('sp_announcements_read') || '[]'));
+                const unreadCount = announcements.filter(a => !readIds.has(a.id || a.uuid || a.title)).length;
+                return unreadCount > 0 ? (
+                  <span className={styles.unreadBadge} style={{ position: 'static', marginLeft: 0 }}>{unreadCount}</span>
+                ) : null;
               })()}
             </div>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>Stay up to date with the latest platform updates.</p>
