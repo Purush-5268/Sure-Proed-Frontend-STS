@@ -1,0 +1,293 @@
+{
+  "title": "SAP MM Admission Test",
+  "clean_title": "SAP_MM_Admission_Test",
+  "course_code": "SAP-MM",
+  "exam_type": "PRESCREENING",
+  "module_topic": "SAP MM & Logistics Screening",
+  "timer": 15,
+  "total_questions": 20,
+  "image_questions_count": 0,
+  "source_original_file": "128_SAP_MM_Admission_Test.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What is the primary purpose of an ERP system?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. To design websites",
+        "B. To integrate and manage organisational business processes",
+        "C. To create social-media content",
+        "D. To replace all employees"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "SAP MM mainly deals with:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Recruitment and payroll",
+        "B. Procurement and inventory management",
+        "C. Customer advertising",
+        "D. Software programming"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Which organisational element generally represents a physical location where materials are produced, stored or managed?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Company code",
+        "B. Plant",
+        "C. Purchasing group",
+        "D. Vendor"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "A storage location is normally associated with:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. A plant",
+        "B. A customer",
+        "C. A bank",
+        "D. A purchase requisition"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Which master record contains basic information about a material used or purchased by an organisation?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Vendor master",
+        "B. Material master",
+        "C. Purchase order",
+        "D. Invoice document"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which record contains important information about a supplier?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Material master",
+        "B. Vendor or business partner master",
+        "C. Storage location",
+        "D. Goods issue document"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Which document normally initiates an internal request to purchase a material or service?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Purchase requisition",
+        "B. Goods receipt",
+        "C. Invoice",
+        "D. Credit memo"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "What is the purpose of a request for quotation?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. To receive materials into stock",
+        "B. To ask suppliers to submit prices and commercial terms",
+        "C. To make payment to a supplier",
+        "D. To issue materials from a warehouse"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "After quotations are received from different suppliers, the organisation should normally:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Delete all quotations",
+        "B. Compare the quotations",
+        "C. Issue materials from stock",
+        "D. Create a customer invoice"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Which document is issued to a selected supplier to formally order materials or services?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Purchase order",
+        "B. Goods issue",
+        "C. Reservation",
+        "D. Physical inventory document"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Goods receipt indicates that:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. A purchase request has been rejected",
+        "B. Ordered materials have been received",
+        "C. A supplier has been deleted",
+        "D. Payment has already been completed"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Three-way matching generally compares:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Purchase requisition, quotation and payment",
+        "B. Purchase order, goods receipt and supplier invoice",
+        "C. Material master, vendor master and plant",
+        "D. Invoice, credit memo and bank statement"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "Which process records materials leaving inventory for consumption or another purpose?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Goods issue",
+        "B. Goods receipt",
+        "C. Invoice verification",
+        "D. Quotation comparison"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Physical inventory is conducted mainly to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Recruit new employees",
+        "B. Compare actual stock with system-recorded stock",
+        "C. Select a new customer",
+        "D. Prepare a purchase requisition"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Moving materials from one plant or storage location to another is known as:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Invoice blocking",
+        "B. Stock transfer",
+        "C. Vendor evaluation",
+        "D. Material valuation"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "In a consignment process, materials are generally:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Owned by the customer before delivery",
+        "B. Owned by the supplier until they are consumed or withdrawn",
+        "C. Immediately treated as damaged stock",
+        "D. Purchased without any supplier"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "What is the purpose of a release or approval procedure?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. To control and authorise procurement documents",
+        "B. To create employee salaries",
+        "C. To design the SAP screen",
+        "D. To delete inventory reports"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "Vendor performance analysis may include the evaluation of:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Delivery reliability, quality and pricing",
+        "B. Employee attendance only",
+        "C. Website traffic only",
+        "D. Customer passwords"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Which is the most responsible way to use AI during the internship?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Copy AI-generated content without reading it",
+        "B. Submit AI-generated answers as one’s own work",
+        "C. Verify AI-generated information and demonstrate personal understanding",
+        "D. Share confidential project information with public AI tools"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "An AI tool generates a process explanation that appears incorrect. What should the student do?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Submit it immediately",
+        "B. Verify it, correct the errors and discuss it with the mentor",
+        "C. Hide the use of AI",
+        "D. Copy the same response into every project document"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    }
+  ]
+}

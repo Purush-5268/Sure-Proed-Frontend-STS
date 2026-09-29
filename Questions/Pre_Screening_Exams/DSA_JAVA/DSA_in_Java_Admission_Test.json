@@ -1,0 +1,363 @@
+{
+  "title": "DSA in Java Test",
+  "clean_title": "DSA_in_Java_Admission_Test",
+  "course_code": "DSA-JAVA",
+  "exam_type": "PRESCREENING",
+  "module_topic": "DSA in Java Screening",
+  "timer": 20,
+  "total_questions": 25,
+  "image_questions_count": 0,
+  "source_original_file": "041_DSA_in_Java_Test.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "Method overloading is an example of:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Runtime polymorphism",
+        "Compile-time polymorphism",
+        "Inheritance",
+        "Encapsulation"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Which type casting is done automatically in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Explicit",
+        "Narrowing",
+        "Widening",
+        "Manual"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Which method is called before an object is destroyed by Garbage Collector?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "delete()",
+        "finally()",
+        "final()",
+        "finalize()"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "An object becomes eligible for garbage collection when:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Program ends",
+        "Reference is set to null",
+        "Method completes",
+        "Variable is declared"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Which clause is executed first in SQL query processing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "SELECT",
+        "WHERE",
+        "FROM",
+        "ORDER BY"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What is decimal equivalent of binary 1010?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "8",
+        "9",
+        "10",
+        "12"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Which command is used to change file permissions",
+      "image": "",
+      "type": "text",
+      "options": [
+        "chmod",
+        "chown",
+        "Both commands can be used",
+        "ps"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "Which OS manages hardware resources?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Compiler",
+        "Kernel",
+        "Shell",
+        "BIOS"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "A user knows how to drive a car without knowing its internal engine mechanism. This best explains:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Encapsulation",
+        "Inheritance",
+        "Polymorphism",
+        "Abstraction"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Which DBMS feature ensures data accuracy and consistency?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Integrity",
+        "Redudency",
+        "Security",
+        "Backup"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "A university maintains the following database tables:\nSTUDENT: StudentID, Email, PhoneNumber, Name\nCOURSE: CourseID, CourseName\nENROLLMENT: StudentID, CourseID, Semester",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Email and PhoneNumber are candidate keys, StudentID is the primary key, and (StudentID, CourseID, Semester) is a composite primary key in ENROLLMENT",
+        "StudentID is the only candidate key in the STUDENT table and Email is a foreign key",
+        "CourseID in ENROLLMENT is a primary key and StudentID in STUDENT is a foreign key",
+        "(StudentID, CourseID) is a candidate key in STUDENT and Semester is a foreign key"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "I am a process you know well, Finding bugs where they dwell,I break down the code and track the flow, What’s the term for this? Let it show!\nGuess the riddle",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Compiler",
+        "Debugger",
+        "IDE",
+        "JVM"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "\"I am where you write, compile, and run, Errors I show, debugging fun, With tools to help your code to grow,Which\nenvironment am I? Do you know?\nGuess the riddle",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Debugger",
+        "Compiler",
+        "IDE",
+        "JVM"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "\"At Mumbai International Airport, a software system announces flights ready for boarding. The list of flights is stored in an array. \nDeveloper A uses a loop that accesses each flight using its index and updates a specific flight status to \"\"DELAYED\"\".\nDeveloper B uses another loop that reads each flight directly from the list and tries to update the same status.\n\nHowever, only one of them sees the change reflected in the final announcements.",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Developer A used for loop and Developer B used\nfor-each loop hence Developer A changes were reflected",
+        "Developer A\nused for loop and Developer B used for-each loop hence Developer B changes\nwere reflected",
+        "Developer A\nused for-each loop and Developer B used for loop hence Developer A changes\nwere reflected",
+        "None of the above"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "In a ride-sharing application, a base class Vehicle has a method calculateFare().\nClasses Car and Bike override this method with their own fare logic.\n\nA Vehicle reference points to a Car object and calls calculateFare().\nAnother developer directly creates a Vehicle object and calls the same method.\n\nWhich fare calculation will be executed for the Vehicle reference pointing to the Car object?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Vehicle’s fare logic",
+        "Compile-time error",
+        "Both fare logics execute",
+        "Car’s fare logic"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "In a banking application, the Account class has a private variable balance.\nDeveloper A updates the balance using a public method deposit().\nDeveloper B tries to modify the balance directly using account.balance = 5000.\n\nOnly one developer’s change is accepted by the system.",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The balance variable is static",
+        "The balance variable is final",
+        "The deposit() method is static",
+        "The balance variable is private and accessible only through public methods"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "In a food delivery app, an interface PaymentService defines a method processPayment().\nClasses GooglePay and Paytm implement this interface.\n\nWhy is using an interface beneficial in this scenario?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "It increases memory usage",
+        "It hides implementation and enforces a contract",
+        "It prevents method overriding",
+        "It enables object cloning"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "In a gaming application, a superclass GameCharacter has a subclass Warrior.\nA GameCharacter reference stores a Warrior object.\n\nDeveloper A accesses only superclass methods.\nDeveloper B casts the reference to Warrior and accesses special attack methods.\n\nWhich type of casting is Developer B performing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Implicit casting",
+        "Upcasting",
+        "Downcasting",
+        "Widening"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "In an ATM system, when a user withdraws money\na. The account balance is deducted.\nb. Cash is dispensed.\n\nDeveloper A ensures that both steps succeed or both fail.\nDeveloper B allows the balance to be deducted even if cash is not dispensed due to a power failure.\n\nWhich ACID property is ensured by Developer A but violated by Developer B?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Atomicity",
+        "Consistency",
+        "Isolation",
+        "Durability"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "In a smart payment system, the development team designs a common type PaymentMethod.\na. Developer A defines PaymentMethod as an interface with methods pay() and refund().\nb. Developer B defines PaymentMethod as an abstract class that includes:\n    i. an abstract method pay()\n   ii. concrete method logTransaction()\n   iii. a variable to store transaction count\n\nhe system requires:\na. Multiple payment classes to share common behavior\nb. Ability to store instance variables\nc. Flexibility to add default functionality\n\nWhich choice best justifies using an abstract class instead of an interface?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Interfaces are slower than abstract classes",
+        "Interfaces cannot be implemented by multiple classes",
+        "Abstract classes support multiple inheritance",
+        "Abstract classes can contain both abstract and concrete methods and instance variables"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "int[] arr = {1, 2, 3, 4};\n\nfor (int i = arr) {\n    i = i * 2;\n}\n\nSystem.out.println(arr[0]);",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Compile time error",
+        "2",
+        "4",
+        "1"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "class Test {\n    static int x = 10;\n\n    static void change() {\n        x = x + 5;\n    }\n\n    public static void main(String[] args) {\n        Test.change();\n        System.out.println(x);\n    }\n}",
+      "image": "",
+      "type": "text",
+      "options": [
+        "5",
+        "10",
+        "15",
+        "20"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "class A { }\nclass B extends A { }\n\npublic class Test {\n    public static void main(String[] args) {\n        A obj = new B();\n        B obj2 = (B) obj;\n        System.out.println(\"Done\");\n    }\n}",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Compile time error",
+        "Runtime error",
+        "Done",
+        "ClassCastException"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "interface A {\n    void show();\n}\n\nclass B implements A {\n    public void show() {\n        System.out.println(\"Hello\");\n    }\n}\n\npublic class Test {\n    public static void main(String[] args) {\n        A obj = new A();\n        obj.show();\n    }\n}",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Runtime error",
+        "Hello",
+        "Compile-time error",
+        "No output"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "Which SQL statement is used to add a new column email of type VARCHAR(50) to an existing table STUDENT?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "UPDATE STUDENT ADD email VARCHAR(50);",
+        "INSERT INTO STUDENT (email) VALUES (VARCHAR(50));",
+        "ALTER TABLE STUDENT ADD email VARCHAR(50);",
+        "MODIFY TABLE STUDENT ADD email VARCHAR(50);"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    }
+  ]
+}

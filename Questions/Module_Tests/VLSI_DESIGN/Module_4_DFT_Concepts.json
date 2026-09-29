@@ -1,0 +1,153 @@
+{
+  "title": "DFT Quiz",
+  "clean_title": "Module_4_DFT_Concepts",
+  "course_code": "VLSI-DESIGN",
+  "exam_type": "MODULE_TEST",
+  "module_topic": "Module 4: DFT Concepts",
+  "timer": 10,
+  "total_questions": 10,
+  "image_questions_count": 0,
+  "source_original_file": "092_DFT_Quiz.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What is the primary purpose of a scan chain in DFT?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. To increase the clock frequency of a design",
+        "B. To provide sequential controllability and observability of flip-flops",
+        "C. To reduce power consumption during normal operation",
+        "D. To eliminate combinational logic hazards"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "In scan design, what are the two operating modes of a scan flip-flop?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Read mode and Write mode",
+        "B. Normal (functional) mode and Shift (test) mode",
+        "C. Setup mode and Hold mode",
+        "D. Capture mode and Launch mode"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Which pin on a scan flip-flop selects between functional data and scan data?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. SDI (Scan Data In)",
+        "B. SDO (Scan Data Out)",
+        "C. SE (Scan Enable)",
+        "D. SCK (Scan Clock)"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "What is 'fault coverage' in the context of DFT?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. The percentage of nets covered by routing tools",
+        "B. The ratio of detected faults to total modeled faults, expressed as a percentage",
+        "C. The number of scan chains in a design",
+        "D. The area overhead introduced by scan insertion"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Which fault model assumes a net is permanently stuck at logic '0' or logic '1'?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Transition Delay Fault (TDF) model",
+        "B. Bridging Fault model",
+        "C. Stuck-At Fault (SAF) model",
+        "D. Path Delay Fault model"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What is the key advantage of using multiple scan chains instead of a single long chain?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. It eliminates the need for Automatic Test Pattern Generation (ATPG)",
+        "B. It reduces routing complexity to zero",
+        "C. It shortens test application time by loading/unloading chains in parallel",
+        "D. It removes the need for a scan enable signal"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "What does ATPG stand for and what is its role in DFT?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Automatic Timing and Power Guard — optimizes power during test",
+        "B. Automatic Test Pattern Generation — creates stimulus vectors to detect faults",
+        "C. Advanced Technology Process Guidelines — defines fabrication rules",
+        "D. Asynchronous Transfer Protocol Generator — manages test data transfer"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "During a standard stuck-at scan test, what is the correct sequence of operations for one test cycle?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Capture → Shift-in → Apply clock → Shift-out",
+        "B. Shift-in pattern → Apply functional clock (capture) → Shift-out response",
+        "C. Reset → Scan-out → Apply stimulus → Scan-in",
+        "D. Launch → Shift-in → Capture → Compare"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "What is 'scan compression' (also called EDT — Embedded Deterministic Test)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. A technique to physically compress the scan flip-flops into a smaller area",
+        "B. A method that uses on-chip decompressor/compactor logic to reduce test data volume and test time",
+        "C. A power gating scheme applied during scan shifting",
+        "D. A post-silicon debug feature for compressing waveforms"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Which DFT structure is commonly used to test embedded memories (SRAMs/ROMs) that cannot be adequately tested by scan logic alone?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Boundary Scan (JTAG)",
+        "B. Built-In Self-Test (BIST) — specifically MBIST (Memory BIST)",
+        "C. Transition Delay Fault ATPG",
+        "D. Clock Domain Crossing (CDC) checkers"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+  &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+  &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+  &rsaquo; <a href="{% url opts|admin_urlname:'change' application.pk %}">{{ application.application_number }}</a>
+  &rsaquo; Transfer Cohort
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <form method="post">
+    {% csrf_token %}
+    <div>
+      <fieldset class="module aligned">
+        <h2>Transfer Student Cohort</h2>
+
+        <div class="form-row">
+          <div>
+            <label>Application Number:</label>
+            <div class="readonly"><strong>{{ application.application_number }}</strong></div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label>Student:</label>
+            <div class="readonly"><strong>{{ application.student.user.get_full_name|default:application.student.student_code }}</strong> ({{ application.student.student_code }})</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label>Course (Current):</label>
+            <div class="readonly">{{ application.course.name }} ({{ application.course.code }})</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label>From Cohort (Current):</label>
+            <div class="readonly">
+              {% if from_cohort %}
+                <strong>{{ from_cohort.name }} ({{ from_cohort.code }})</strong>
+              {% else %}
+                <em>No cohort currently assigned</em>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label for="id_to_cohort" class="required">To Cohort (Target):</label>
+            {% if has_available_cohorts %}
+              <select name="to_cohort" id="id_to_cohort" required style="max-width: 500px; padding: 4px;">
+                <option value="">--------- Select Target Cohort ---------</option>
+
+                {% if same_course_cohorts %}
+                  <optgroup label="Cohorts of Same Course ({{ application.course.name }})">
+                    {% for cohort in same_course_cohorts %}
+                      <option value="{{ cohort.id }}">
+                        {{ cohort.name }} ({{ cohort.code }}) — [Enrolled: {{ cohort.enrolled_count }}/{{ cohort.max_students }}]
+                      </option>
+                    {% endfor %}
+                  </optgroup>
+                {% endif %}
+
+                {% if other_course_cohorts %}
+                  <optgroup label="Cohorts of Other Courses (Course will be updated)">
+                    {% for cohort in other_course_cohorts %}
+                      <option value="{{ cohort.id }}">
+                        [{{ cohort.course.code }}] {{ cohort.name }} ({{ cohort.code }}) — [Enrolled: {{ cohort.enrolled_count }}/{{ cohort.max_students }}]
+                      </option>
+                    {% endfor %}
+                  </optgroup>
+                {% endif %}
+              </select>
+              <div class="help">
+                Select a target cohort from the current course or transfer to a cohort of another course.
+              </div>
+            {% else %}
+              <div class="readonly" style="color: var(--error-fg, #ba2121);">
+                No other open or active cohorts available.
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label for="id_remarks">Remarks / Reason:</label>
+            <input type="text" name="remarks" id="id_remarks" class="vTextField" placeholder="Optional reason for cohort transfer" style="width: 100%; max-width: 500px;" />
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="submit-row" style="display: flex; align-items: center; justify-content: flex-start; gap: 15px; padding: 12px 14px; margin-top: 20px;">
+        {% if has_available_cohorts %}
+          <input type="submit" value="Confirm Cohort Transfer" class="default" style="margin: 0; height: 35px; line-height: 1; padding: 0 15px; float: none;" />
+        {% endif %}
+        <a href="{% url opts|admin_urlname:'change' application.pk %}" class="button" style="margin: 0; height: 35px; line-height: 33px; padding: 0 15px; text-decoration: none; display: inline-block; vertical-align: middle; box-sizing: border-box;">Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,293 @@
+{
+  "title": "MODULE 1 – QUIZ",
+  "clean_title": "Module_1_VLSI_Concepts",
+  "course_code": "VLSI-DESIGN",
+  "exam_type": "MODULE_TEST",
+  "module_topic": "Module 1: VLSI Concepts",
+  "timer": 10,
+  "total_questions": 20,
+  "image_questions_count": 0,
+  "source_original_file": "027_MODULE_1_–_QUIZ.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "he threshold voltage of a PMOS enhancement mode transistor is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Positive",
+        "Negative",
+        "Zero",
+        "Infinite"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "The threshold voltage of a NMOS depletion mode transistor is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Positive",
+        "Negative",
+        "Zero",
+        "Infinite"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "According to Moore’s Law, the number of transistors on a chip doubles:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Every six months",
+        "Every one year",
+        "Every eighteen months",
+        "Every five years."
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "In a MOSFET the gate terminal is made of:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Aluminium",
+        "Copper",
+        "Polysilicon",
+        "Silicon Dioxide"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "In a MOSFET the increase in drain to source current with increase in drain to source voltage in saturation region is due to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Hot Electron effect",
+        "Velocity Saturation",
+        "Channel Length Modulation",
+        "Body Effect"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "The increase in threshold voltage of a MOSFET with source to bulk voltage is known as:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "DIBL – Drain Induced Barrier Lowering",
+        "GIDL – Gate Induced Drain Leakage",
+        "Body Effect",
+        "Velocity Saturation"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "In short channel MOSFETs with reduction in channel length the threshold voltage:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Increases",
+        "Decreases",
+        "Remains constant",
+        "None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "In short channel MOSFETs the reduction in threshold voltage with drain to source voltage is known as:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Velocity Saturation",
+        "Channel Length Modulation",
+        "DIBL – Drain Induced Barrier Lowering",
+        "GIDL- Gate Induced Drain Leakage"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Weak inversion or sub-threshold conduction region of the MOSFETs finds applications in the following:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Pacemakers",
+        "Hearing Aids",
+        "Wrist watches",
+        "All the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "In a CMOS inverter the body terminal of the PMOS transistor is connected to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Ground or VSS",
+        "Power Supply or VDD",
+        "Either (a) or (b)",
+        "None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "In photolithography a negative photoresist:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Softens on exposure to UV light",
+        "Hardens or polymerizes on exposure to UV light",
+        "Is not affected by UV light",
+        "None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "EGS (Electronic Grade Silicon) used to make silicon wafers is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "98 % pure",
+        "99.99 % pure",
+        "95 % pure",
+        "90 % pure"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "In manufacture of CMOS integrated circuits to make N+ and P+ diffusions which of the following methods are used:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Diffusion",
+        "Ion Implantation",
+        "Both (a) and (b)",
+        "None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "In manufacture of integrated circuits sputtering is a technique used for:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Deposition of metals like aluminium",
+        "Deposition of polysilicon",
+        "Deposition of Silicon Dioxide",
+        "None of the above"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Which of the following methods are used to grow a layer of silicon dioxide on silicon substrate in manufacture of integrated circuits:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Dry oxidation using oxygen gas",
+        "Wet oxidation using steam",
+        "Both methods are used",
+        "None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "In manufacture of integrated circuits which of the following methods are used for etching:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Wet etching using hydrofluoric acid",
+        "Dry etching using plasma",
+        "Both (a) and (b)",
+        "None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "Which of the following methods are used for lithography in manufacturing of integrated circuits:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Ultraviolet (UV) light lithography",
+        "Ion Lithography",
+        "X-Ray Lithography",
+        "All the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "CMOS technology is more popular compared to other technologies due to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Higher Packing Density",
+        "Lower Power Consumption",
+        "Both (a) and (b)",
+        "None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "CVD (Chemical Vapour Deposition) and PVD (Physical Vapour Deposition) techniques in integrated circuit manufacturing are used for:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Oxidation",
+        "Diffusion",
+        "Etching",
+        "Deposition of thin films"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "FINFET transistors in modern integrated circuit manufacturing are used for technology nodes below:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "180 nm",
+        "65 nm",
+        "22 nm",
+        "45 nm"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    }
+  ]
+}

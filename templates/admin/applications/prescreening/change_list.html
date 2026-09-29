@@ -1,0 +1,10 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+  <li>
+    <a href="{% url 'admin:prescreening-bulk-schedule-cohort' %}" class="addlink" style="background: #2563eb; color: #ffffff; font-weight: 700; border-radius: 4px; padding: 6px 12px; margin-right: 6px; box-shadow: 0 2px 4px rgba(37,99,235,0.25); text-decoration: none;">
+      ⚡ Bulk Schedule by Course &amp; Cohort
+    </a>
+  </li>
+  {{ block.super }}
+{% endblock %}

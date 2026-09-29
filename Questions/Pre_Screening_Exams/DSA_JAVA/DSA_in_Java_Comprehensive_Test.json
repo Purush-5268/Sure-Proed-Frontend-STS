@@ -1,0 +1,713 @@
+{
+  "title": "DSA in Java Test on 24-03-2026",
+  "clean_title": "DSA_in_Java_Comprehensive_Test",
+  "course_code": "DSA-JAVA",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Comprehensive DSA in Java",
+  "timer": 60,
+  "total_questions": 50,
+  "image_questions_count": 0,
+  "source_original_file": "057_DSA_in_Java_Test_on_24-03-2026.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "You join a new development team and need to know the specific acceptance criteria, target audience, and business goals for a new dashboard feature. Which document should you ask for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Functional Requirements Document (FRD)",
+        "B. Software Requirements Specification (SRS)",
+        "C. Product Requirements Document (PRD)",
+        "D. Project Charter,"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "A startup is currently saving all customer data in flat JSON files. As concurrent users increase, they experience data locks and inconsistent reads. What core capability do they need that a flat file lacks?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. ACID properties provided by a DBMS",
+        "B. A NoSQL Document Store",
+        "C. Data Normalization",
+        "D. Polyglot Persistence,"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "An enterprise application uses a Neo4j graph database for its recommendation engine, PostgreSQL for user billing, and MongoDB for its product catalog. What architectural pattern does this represent?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Polyglot Persistence",
+        "B. Database Sharding",
+        "C. Distributed Database System",
+        "D. Microservices Data Architecture,"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "A product owner hands you a card that reads: 'As a registered user, I want to reset my password so that I can regain access if I forget it.' In Agile methodologies, what is the primary purpose of the 'so that' clause?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. To define the acceptance criteria for the testing team.",
+        "B. To identify the specific user role executing the action.",
+        "C. To specify the database actions required (e.g., UPDATE password).",
+        "D. To articulate the business value or user benefit of the feature.,"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Your team built an inventory management feature exactly to the specifications provided in an initial email. However, upon delivery, the client is frustrated because it doesn't track perishable goods via barcode, which is their main business workflow. What is the root cause?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Failure in requirement understanding",
+        "B. Poor User Story writing",
+        "C. Lack of Requirement Validation",
+        "D. Scope Creep,"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "You are assigned to update the 'Employees' table by adding a new 'DepartmentID' column. Which specific SQL command must you use to achieve this without losing existing data?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. MODIFY TABLE Employees ADD DepartmentID;",
+        "B. ALTER TABLE Employees ADD DepartmentID;",
+        "C. UPDATE TABLE Employees ADD DepartmentID;",
+        "D. CREATE COLUMN DepartmentID IN Employees;,"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "A financial application requires a complex, multi-step tax calculation to run every time an invoice is generated. To reduce network overhead and ensure execution speed, where should this logic be placed?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. In a backend API endpoint.",
+        "B. In a Stored Procedure.",
+        "C. In a CHECK constraint.",
+        "D. In a SQL View.,"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "You are designing an 'Accounts' table. You need to ensure that the 'Balance' column can never drop below zero. Which database mechanism is specifically designed to enforce this business rule?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. A UNIQUE constraint",
+        "B. A Foreign Key constraint",
+        "C. A CHECK constraint",
+        "D. A Stored Procedure,"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "In a relational database, you have a 'Students' table and a 'Courses' table. To handle the many-to-many relationship, you create an 'Enrollments' table containing 'StudentID' and 'CourseID'. What role do these two columns play in the 'Enrollments' table?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. They are Candidate Keys.",
+        "B. They are Surrogate Keys.",
+        "C. They are strictly Primary Keys.",
+        "D. They act as Foreign Keys.,"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Developer A: 'Let's just start writing the REST APIs based on the client's brief email.' Developer B: 'No, we need to interview the stakeholders and define the edge cases first.' What is the primary risk if they follow Developer A's approach?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Increased latency in database queries.",
+        "B. Inability to implement polyglot persistence.",
+        "C. Building a system that fails to meet actual business objectives.",
+        "D. Database normalization errors.,"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Product Manager: 'The engineers are arguing about whether the new application release must include social media login or if email login is sufficient.' Where should the definitive answer be found?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. The Product Requirements Document (PRD)",
+        "B. The Database Schema",
+        "C. The ER Diagram",
+        "D. The Sprint Backlog,"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Architect: 'We have a massive amount of unstructured log data, but our transactional data needs strict ACID compliance. We cannot force both into MySQL.' What is the Architect advocating for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Data Warehousing",
+        "B. Database Denormalization",
+        "C. Polyglot Persistence",
+        "D. Implementing Stored Procedures,"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "Scrum Master: 'This ticket reads: As an admin, I want to be able to ban users.' Developer: 'I can build that, but I don't know if the ban should be temporary or permanent because the story is missing the...'",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Database constraints",
+        "B. 'So that' clause",
+        "C. User Role",
+        "D. Acceptance Criteria,"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Client: 'The app works, but it takes 15 clicks to create a single invoice. Our old system took 3 clicks. We can't use this.' Developer: 'But we implemented all the features you asked for!' What type of requirement was misunderstood?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Database Constraints",
+        "B. Non-Functional Requirements (Usability/Efficiency)",
+        "C. Data Requirements",
+        "D. Functional Requirements,"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Database Admin: 'You cannot delete the customer record because they have existing orders in the Orders table.' Junior Dev: 'Why does the database care?' Admin: 'Because of the...'",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Foreign Key constraint enforcing referential integrity.",
+        "B. Stored Procedure blocking the transaction.",
+        "C. Primary Key constraint on the Orders table.",
+        "D. CHECK constraint on the Customers table.,"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Lead Developer: 'I need you to set up the initial structure for the Products entity.' Junior Dev: 'I will write the CREATE TABLE statement.' Which sub-language of SQL is the Junior Dev using?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. DCL (Data Control Language)",
+        "B. DML (Data Manipulation Language)",
+        "C. DDL (Data Definition Language)",
+        "D. TCL (Transaction Control Language),"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "DBA: 'The application is looping through 10,000 rows locally and updating them one by one, causing massive network lag.' Backend Dev: 'I can fix this by writing a single block of SQL that executes entirely on the database side called a...'",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Data Definition Command",
+        "B. Foreign Key",
+        "C. Stored Procedure",
+        "D. Database View,"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "Dev A: 'Sometimes the frontend form submits without an email address.' Dev B: 'We should enforce a rule on the database side to reject any row where the email column is missing.' What rule are they discussing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. A CHECK constraint",
+        "B. A Primary Key constraint",
+        "C. A UNIQUE constraint",
+        "D. A NOT NULL constraint,"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Designer: 'Where do I find the target user personas and the specific metrics for success for this upcoming release?' PM: 'You can find all of that context in the...'",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. System Architecture Document",
+        "B. Product Requirements Document (PRD)",
+        "C. Agile Sprint Board",
+        "D. Database Schema Diagram,"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "Project Manager: 'The engineers say they can't start because the PRD is incomplete.' Business Analyst: 'What is missing?' PM: 'We defined what the feature does, but we didn't define...'",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. The ER Diagram",
+        "B. The Stored Procedures",
+        "C. The Acceptance Criteria",
+        "D. The Polyglot Persistence strategy,"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "Engineering Manager: 'We need strict consistency for our financial ledgers, meaning a transaction must fully complete or fully fail.' Systems Engineer: 'Then we must use a database that supports...'",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Polyglot Persistence",
+        "B. ACID Properties",
+        "C. Stored Procedures",
+        "D. Foreign Keys,"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "Developer: 'I need to link these two tables, but I don't want to use an auto-incrementing ID. Can I use the user's Email address as the Primary Key in the Users table?' DBA: 'Yes, because a Primary Key can be any column that is...'",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. A Surrogate Key",
+        "B. Indexed and Non-Clustered",
+        "C. A Foreign Key in another table",
+        "D. UNIQUE and NOT NULL,"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "Client: 'Can't we just use an in-memory cache like Redis for everything? It's so fast!' Architect: 'No, because if the server restarts, we lose all user data. We need a traditional Database Management System primarily for its...'",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Polyglot Capabilities",
+        "B. Data Definition Language",
+        "C. Durability",
+        "D. Stored Procedures,"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "QA Tester: 'I'm testing the new registration flow. According to the User Story, what should happen if a user enters an invalid zip code?' Developer: 'I don't know, it wasn't specified.' This is a failure in:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Writing Stored Procedures",
+        "B. Database Constraint Definition",
+        "C. Polyglot Persistence",
+        "D. Requirement Elicitation and Edge Case Analysis"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "Dev A: 'Let's build a microservice architecture.' Dev B: 'But all our services share the exact same monolithic SQL database.' What architectural principle is Dev B highlighting as missing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Data Normalization",
+        "B. Foreign Key Constraints",
+        "C. Database-per-service / Polyglot Persistence",
+        "D. Stored Procedures,"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "Developer: 'I need to rename the user_name column to username in the production database.' Which command type must they be extremely careful with?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. DDL (ALTER)",
+        "B. DML (UPDATE)",
+        "C. TCL (COMMIT)",
+        "D. DQL (SELECT),"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "Product Owner: 'When writing this ticket, I need to define who it is for, what action they want to take, and why they want to take it.' This format is specifically designed to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Replace the need for a PRD.",
+        "B. Serve as a replacement for Acceptance Criteria.",
+        "C. Define the database schema automatically.",
+        "D. Keep the development team focused on business value rather than technical implementation.,"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "DBA: 'We have a complex monthly report that joins 15 tables. Running this query from the backend server takes 2 minutes and times out. How can we optimize this without changing the table structures?'",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Use an ALTER command.",
+        "B. Create a Stored Procedure or a Materialized View.",
+        "C. Add more Foreign Keys.",
+        "D. Implement Polyglot Persistence.,"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "If you execute an UPDATE statement without a WHERE clause, what is the result?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Every single row in the table is updated.",
+        "B. Only the first row in the table is updated.",
+        "C. The database throws a syntax error.",
+        "D. The table structure is altered.,"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "Which of the following scenarios is a direct violation of a Foreign Key constraint?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Inserting a record into a child table with a Foreign Key value that does not exist in the parent table's Primary Key column.",
+        "B. Deleting a record from a child table.",
+        "C. Inserting a record with a NULL value into a column that has a Foreign Key constraint.",
+        "D. Having two identical Foreign Key values in different rows of the child table.,"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-31",
+      "text": "Can a database table exist without a Primary Key?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. No, because a Primary Key is required to use DML commands.",
+        "B. Yes, but only if it has a Foreign Key.",
+        "C. No, the CREATE TABLE command will fail.",
+        "D. Yes, but it violates relational database best practices and prevents certain relationships.,"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-32",
+      "text": "You need to change the data type of an existing column 'PhoneNumber' from INT to VARCHAR(15). Which sequence of DDL commands is most accurate?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. UPDATE TABLE Users SET PhoneNumber = VARCHAR(15);",
+        "B. ALTER TABLE Users MODIFY COLUMN PhoneNumber VARCHAR(15);",
+        "C. CREATE TYPE VARCHAR(15) ON Users.PhoneNumber;",
+        "D. ALTER COLUMN PhoneNumber TO VARCHAR(15) IN Users;,"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-33",
+      "text": "In the context of Polyglot Persistence, why might a team choose to use a NoSQL Document Store (like MongoDB) alongside their SQL database?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. To handle unstructured data or data with rapidly changing schemas.",
+        "B. To execute complex, multi-table JOIN operations faster.",
+        "C. To write Stored Procedures in JavaScript.",
+        "D. To enforce stricter relational constraints on new data.,"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-34",
+      "text": "What is the subtle difference between a UNIQUE constraint and a PRIMARY KEY?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. UNIQUE constraints are DDL, Primary Keys are DML.",
+        "B. A Primary Key can contain NULL values, UNIQUE cannot.",
+        "C. Primary Keys automatically generate auto-incrementing numbers.",
+        "D. A table can have multiple UNIQUE constraints, but only one PRIMARY KEY."
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-35",
+      "text": "When defining requirements, what is the difference between a Functional Requirement and a Non-Functional Requirement?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Functional defines 'what' the system must do; Non-Functional defines 'how well' it must do it (e.g., performance, security).",
+        "B. Functional requirements are in the PRD; Non-Functional are in the ER Diagram.",
+        "C. Functional defines backend logic; Non-Functional defines frontend UI.",
+        "D. Functional defines user stories; Non-Functional defines database schemas."
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-36",
+      "text": "Which of the following is a composite primary key?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. A primary key that exists across multiple databases.",
+        "B. A primary key that auto-increments using a UUID.",
+        "C. A primary key combined with a foreign key constraint.",
+        "D. A primary key made up of two or more columns acting together to provide uniqueness.,"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-37",
+      "text": "Why is it generally considered bad practice to write business logic inside Stored Procedures instead of in the application backend (e.g., Java/Node.js)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Stored procedures run slower than backend code.",
+        "B. Stored procedures cannot accept input parameters.",
+        "C. It can make version control, debugging, and migrating to a different database vendor much harder.",
+        "D. Stored procedures bypass standard database constraints.,"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-38",
+      "text": "What happens if a requirement failure is discovered during the testing phase rather than the requirement gathering phase?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. The QA team can simply update the database schema to fix it.",
+        "B. It is cheaper to fix because the code is already written.",
+        "C. Polyglot persistence must be implemented to resolve the discrepancy.",
+        "D. The cost to fix it is significantly higher due to wasted development time and necessary rework.,"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-39",
+      "text": "What is the primary output of the Requirement Analysis phase?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Clear, documented, and approved requirements (like a PRD or SRS)",
+        "B. A normalized database schema",
+        "C. A deployed application",
+        "D. Compiled backend code"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-40",
+      "text": "In the acronym PRD, what does 'Product' specifically refer to?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. The software application, feature, or service being built for the end-user.",
+        "B. The database engine being used.",
+        "C. The physical hardware servers.",
+        "D. The project management methodology (e.g., Agile vs Scrum).,"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-41",
+      "text": "Which of the following best defines a Relational Database?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. A database that stores data in key-value pairs.",
+        "B. A database that only accepts data formatted in JSON.",
+        "C. A database lacking predefined schemas.",
+        "D. A database that organizes data into tables which can be linked based on data common to each.,"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-42",
+      "text": "What is the core benefit of Polyglot Persistence?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. It reduces the number of database servers required.",
+        "B. It ensures the entire application is written in Java.",
+        "C. It forces all data to be highly normalized.",
+        "D. It allows developers to use the optimal storage technology for specific types of data workloads.,"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-43",
+      "text": "What is an 'Epic' in Agile software development, as it relates to User Stories?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. A user story that has failed acceptance criteria.",
+        "B. A large body of work that can be broken down into a number of smaller user stories.",
+        "C. The final phase of requirement gathering.",
+        "D. A user story written specifically for database administrators."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-44",
+      "text": "What is the most common reason that requirements fail to be understood accurately?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Poor communication and a gap between business language and technical language.",
+        "B. Writing User Stories instead of Use Cases.",
+        "C. Using outdated database management systems.",
+        "D. Developers not knowing SQL syntax.,"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-45",
+      "text": "Which category of SQL commands does ALTER belong to?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. DQL (Data Query Language)",
+        "B. DML (Data Manipulation Language)",
+        "C. DDL (Data Definition Language)",
+        "D. TCL (Transaction Control Language),"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-46",
+      "text": "Which of the following is NOT a benefit of a Stored Procedure?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Pre-compiled execution plans for faster querying.",
+        "B. Reduced network traffic between the application and database.",
+        "C. Centralized business logic for database operations.",
+        "D. Automatic generation of Foreign Keys.,"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-47",
+      "text": "If you want to ensure that a 'Discount' column only accepts values between 0 and 100, which database constraint should you apply?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. NOT NULL",
+        "B. UNIQUE",
+        "C. DEFAULT",
+        "D. CHECK,"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-48",
+      "text": "A table 'Orders' has a 'CustomerID' column. To enforce data integrity, 'CustomerID' is made a Foreign Key. What does this mean in practice?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. The CustomerID in the Orders table must be completely unique.",
+        "B. You cannot update the Order date if the CustomerID is NULL.",
+        "C. The Orders table becomes the parent table, and the Customers table becomes the child.",
+        "D. You cannot insert an Order unless the CustomerID matches an existing Primary Key in the Customers table.   Answers for the Quiz"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-49",
+      "text": "A client requests a new e-commerce platform but their needs are vague. You organize a workshop to understand their exact business needs. Which specific sub-phase of requirement engineering does this represent?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Requirement Specification",
+        "Requirement Elicitation",
+        "Requirement Validation",
+        "Feasibility Analysis"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-50",
+      "text": "Business Analyst: 'I have finished interviewing the stakeholders. Now I need to translate their requests into actionable tickets for the development team.' The BA is currently writing:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The Database Schema",
+        "DDL Scripts",
+        "Stored Procedures",
+        "User Stories"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    }
+  ]
+}

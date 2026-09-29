@@ -1,0 +1,713 @@
+{
+  "title": "Embedded Systems & IoT Internship - Entrance Test",
+  "clean_title": "EmbeddedSystem",
+  "course_code": "EMBEDDEDSYSTEM",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Screening Assessment",
+  "timer": 45,
+  "total_questions": 50,
+  "image_questions_count": 0,
+  "source_original_file": "EmbeddedSystem.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What is an embedded system?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A general-purpose computer system",
+        "A dedicated computer system designed for specific tasks",
+        "A cloud computing system",
+        "A networking system"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "What does IoT stand for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Internet of Things",
+        "Integrated Operating Technology",
+        "Internal Operational Tools",
+        "Interconnected Object Technology"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "What is the difference between a microprocessor and a microcontroller?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Microprocessor has built-in memory, microcontroller does not",
+        "Microcontroller has built-in CPU, memory, and I/O on a single chip",
+        "Microprocessor is slower than microcontroller",
+        "There is no difference"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "What is Arduino UNO based on?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "ESP32",
+        "ATmega328P",
+        "Raspberry Pi",
+        "ARM Cortex-M"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Which software is used for simulating Arduino circuits?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "MATLAB",
+        "Tinkercad",
+        "Eclipse",
+        "Visual Studio"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What is a pin in Arduino terminology?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A memory location",
+        "An input/output connection point",
+        "A programming language",
+        "A sensor"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "What is the purpose of PWM in Arduino?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To generate analog signals using digital output",
+        "To read analog signals",
+        "To communicate with other devices",
+        "To store data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "Which communication protocol is commonly used for connecting sensors to Arduino?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "UART",
+        "I2C",
+        "SPI",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "What is a bootloader in Arduino?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A tool for debugging code",
+        "A small program that loads the main application",
+        "A programming language",
+        "A hardware component"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "What is the function of a voltage regulator in Arduino?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To convert voltage levels",
+        "To regulate the clock speed",
+        "To store data",
+        "To communicate with sensors"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "What is a real-time system?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A system that works at night",
+        "A system that responds to events within a specified time",
+        "A system that processes data offline",
+        "A system that runs on batteries"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "What is the difference between hard and soft real-time systems?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Hard real-time has strict timing deadlines, soft real-time can tolerate occasional misses",
+        "Soft real-time is more critical than hard real-time",
+        "Both are the same",
+        "Hard real-time is software-based, soft is hardware-based"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What is Von Neumann architecture?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A computer architecture with separate memory for code and data",
+        "A computer architecture with shared memory for code and data",
+        "A networking architecture",
+        "A database architecture"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "What is Harvard architecture?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A computer architecture with separate memory for code and data",
+        "A computer architecture with shared memory for code and data",
+        "A networking architecture",
+        "A database architecture"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "What is a superloop in embedded systems?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A multi-threaded execution model",
+        "A simple event loop that repeatedly executes tasks",
+        "A real-time operating system",
+        "A hardware component"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "What is the limitation of a superloop?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "It cannot handle multiple tasks efficiently",
+        "It is too complex",
+        "It requires too much memory",
+        "It cannot run on microcontrollers"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "What is a port register in Arduino?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A memory location for storing data",
+        "A register that controls the behavior of a set of pins",
+        "A programming command",
+        "A sensor"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "What is bit manipulation in programming?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Performing operations on individual bits",
+        "Performing operations on entire bytes",
+        "Performing operations on arrays",
+        "Performing operations on strings"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "What is the purpose of GPIO in embedded systems?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To control general-purpose input/output pins",
+        "To manage memory",
+        "To handle communication protocols",
+        "To control the clock speed"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "What is an interrupt in embedded systems?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A signal that stops the normal execution of the program",
+        "A signal that starts the program",
+        "A signal that saves the program state",
+        "A signal that deletes the program"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "What is a timer in microcontrollers?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A hardware component for measuring time intervals",
+        "A software function for measuring time",
+        "A tool for debugging",
+        "A communication protocol"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "What is the function of serial communication?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To transfer data bit by bit",
+        "To transfer data in parallel",
+        "To store data",
+        "To process data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "What is LCD interfacing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Connecting a Liquid Crystal Display to a microcontroller",
+        "Connecting a Light Emitting Diode to a microcontroller",
+        "Connecting a sensor to a microcontroller",
+        "Connecting a motor to a microcontroller"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "What is the purpose of the `millis()` function in Arduino?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To delay program execution",
+        "To get the number of milliseconds since the program started",
+        "To read analog inputs",
+        "To control digital outputs"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "What is ESP32?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A microcontroller with built-in Wi-Fi and Bluetooth",
+        "A sensor",
+        "A display device",
+        "A power supply"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "What is FreeRTOS?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A real-time operating system for microcontrollers",
+        "A programming language",
+        "A hardware component",
+        "A communication protocol"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "What is a task in FreeRTOS?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A block of code that runs concurrently",
+        "A variable",
+        "A function",
+        "A hardware component"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "What is context switching in an RTOS?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Saving and restoring the state of a task",
+        "Creating a new task",
+        "Deleting a task",
+        "Pausing a task"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "What is ESP-IDF?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A development framework for ESP32",
+        "A simulation tool",
+        "A database system",
+        "A programming language"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "What is Wi-Fi Station mode in ESP32?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The ESP32 acts as a client to connect to a Wi-Fi network",
+        "The ESP32 acts as an access point",
+        "The ESP32 acts as both a client and an access point",
+        "The ESP32 disables Wi-Fi"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-31",
+      "text": "What is SPIFFS in ESP32?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A file system for storing data in flash memory",
+        "A communication protocol",
+        "A debugging tool",
+        "A hardware component"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-32",
+      "text": "What is an ADC in a microcontroller?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Analog-to-Digital Converter",
+        "Automatic Data Control",
+        "Analog Digital Circuit",
+        "Application Development Controller"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-33",
+      "text": "What is a DAC in a microcontroller?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Digital-to-Analog Converter",
+        "Digital Application Control",
+        "Data Acquisition Circuit",
+        "Device Authentication Code"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-34",
+      "text": "What is RTC in microcontrollers?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Real-Time Clock",
+        "Real-Time Communication",
+        "Remote Task Control",
+        "Random Timing Controller"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-35",
+      "text": "What is the purpose of a capacitor in embedded circuits?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To store electrical energy and filter signals",
+        "To amplify signals",
+        "To convert AC to DC",
+        "To regulate voltage"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-36",
+      "text": "What is a sensor in an embedded system?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A device that detects and responds to physical inputs",
+        "A device that displays output",
+        "A device that stores data",
+        "A device that processes data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-37",
+      "text": "What is an actuator in an embedded system?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A device that converts electrical signals into physical action",
+        "A device that measures physical quantities",
+        "A device that stores data",
+        "A device that displays output"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-38",
+      "text": "What is the purpose of a voltage divider circuit?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To reduce voltage to a desired level",
+        "To increase voltage",
+        "To convert AC to DC",
+        "To filter signals"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-39",
+      "text": "What is the difference between I2C and SPI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "I2C uses two wires, SPI uses more",
+        "I2C is faster than SPI",
+        "SPI is simpler than I2C",
+        "SPI is for audio, I2C is for data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-40",
+      "text": "What is UART?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Universal Asynchronous Receiver-Transmitter",
+        "Universal Audio Receiver Transmitter",
+        "Unified Asynchronous Real-Time",
+        "Unified Audio Real-Time"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-41",
+      "text": "What is the purpose of a pull-up resistor?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To ensure a pin is at a known voltage when not driven",
+        "To increase voltage",
+        "To reduce voltage",
+        "To filter signals"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-42",
+      "text": "What is the difference between synchronous and asynchronous communication?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Synchronous uses a clock signal, asynchronous does not",
+        "Asynchronous is faster than synchronous",
+        "Synchronous is for audio, asynchronous is for data",
+        "Both are the same"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-43",
+      "text": "What is a watchdog timer?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A timer that resets the system if it hangs",
+        "A timer that measures execution time",
+        "A timer that controls PWM",
+        "A timer that manages communication"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-44",
+      "text": "What is the purpose of debugging in embedded systems?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To find and fix errors in the system",
+        "To improve performance",
+        "To add new features",
+        "To remove unused components"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-45",
+      "text": "What is a state diagram in system design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A diagram that shows the states and transitions of a system",
+        "A diagram that shows the hardware connections",
+        "A diagram that shows the power flow",
+        "A diagram that shows the code structure"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-46",
+      "text": "What is the purpose of a flowchart in programming?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To visualize the flow of a program",
+        "To debug the code",
+        "To compile the code",
+        "To store data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-47",
+      "text": "What is the difference between a general-purpose OS and an RTOS?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "RTOS is designed for real-time applications, GPOS is not",
+        "GPOS is faster than RTOS",
+        "RTOS is for embedded systems only",
+        "Both are the same"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-48",
+      "text": "What is the purpose of documentation in embedded systems?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To record the design and implementation details",
+        "To test the system",
+        "To deploy the system",
+        "To market the product"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-49",
+      "text": "What is a capstone project?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A final project that integrates all learned concepts",
+        "A beginner-level project",
+        "A theoretical assignment",
+        "A group discussion"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-50",
+      "text": "Which of the following best describes the learning philosophy of SUREProEd?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "AI-Augmented, Mentor-Validated Engineering",
+        "AI replaces human engineers",
+        "Only theoretical learning without practicals",
+        "Mentors only, no AI tools"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    }
+  ]
+}

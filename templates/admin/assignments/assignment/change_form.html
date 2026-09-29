@@ -1,0 +1,55 @@
+{% extends "admin/change_form.html" %}
+
+{% block admin_change_form_document_ready %}
+{{ block.super }}
+<script>
+(function() {
+    const cohortSelect = document.getElementById('id_cohort');
+    const moduleSelect = document.getElementById('id_module');
+    if (!cohortSelect || !moduleSelect) return;
+
+    async function updateModulesForCohort(cohortId, keepSelected = true) {
+        if (!cohortId) {
+            moduleSelect.innerHTML = '<option value="">---------</option>';
+            return;
+        }
+
+        try {
+            const resp = await fetch(`/secure-admin/assignments/assignment/cohort-modules/?cohort_id=${encodeURIComponent(cohortId)}`);
+            if (!resp.ok) return;
+            const data = await resp.json();
+            
+            const prevVal = keepSelected ? moduleSelect.value : '';
+            moduleSelect.innerHTML = '<option value="">---------</option>';
+
+            let matchFound = false;
+            if (data.modules && data.modules.length > 0) {
+                data.modules.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.textContent = m.title;
+                    if (opt.value === prevVal) {
+                        opt.selected = true;
+                        matchFound = true;
+                    }
+                    moduleSelect.appendChild(opt);
+                });
+            }
+            if (!matchFound && keepSelected && prevVal) {
+                moduleSelect.value = '';
+            }
+        } catch (e) {
+            console.error('Error fetching cohort modules:', e);
+        }
+    }
+
+    cohortSelect.addEventListener('change', function() {
+        updateModulesForCohort(this.value, false);
+    });
+
+    if (cohortSelect.value) {
+        updateModulesForCohort(cohortSelect.value, true);
+    }
+})();
+</script>
+{% endblock %}

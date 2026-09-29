@@ -1,0 +1,223 @@
+{
+  "title": "Cloud and Devops",
+  "clean_title": "Cloud_and_DevOps_Screening_Test",
+  "course_code": "CLOUD-DEVOPS",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Cloud & Linux Screening",
+  "timer": 10,
+  "total_questions": 15,
+  "image_questions_count": 0,
+  "source_original_file": "037_Cloud_and_Devops.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What is Linux?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "An application software",
+        "An operating system",
+        "A programming language",
+        "A database"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Which of the following is the core of Linux?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Shell",
+        "Terminal",
+        "Kernel",
+        "GUI"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Which command is used to display the current directory?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "cd",
+        "pwd",
+        "ls",
+        "dir"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which symbol represents the root directory in Linux?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "\\",
+        "~",
+        "/",
+        "#"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Which command is used to list files and directories?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "list",
+        "show",
+        "ls",
+        "view"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which user has complete access in Linux?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Guest",
+        "Admin",
+        "Root",
+        "User"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "What is the default shell in most Linux distributions?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "zsh",
+        "bash",
+        "sh",
+        "fish"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "Which command is used to change directories?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "move",
+        "pwd",
+        "ls",
+        "cd"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Hidden files in Linux start with which character?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "#",
+        "@",
+        "$",
+        "."
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Which command is used to display the manual of a command?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "info",
+        "help",
+        "man",
+        "doc"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Which permission allows a file to be executed?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "r",
+        "w",
+        "x",
+        "e"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Which of the following is a Linux distribution?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Oracle",
+        "Ubuntu",
+        "MySQL",
+        "Windows"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What does the mkdir command do?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Delete a directory",
+        "Create a directory",
+        "Rename a directory",
+        "List directories"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which command is used to remove a file?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "del",
+        "erase",
+        "rm",
+        "remove"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "What does CLI stand for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Computer Linux Interface",
+        "Command Line Interface",
+        "Common Linux Input",
+        "Control Line Interface"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    }
+  ]
+}

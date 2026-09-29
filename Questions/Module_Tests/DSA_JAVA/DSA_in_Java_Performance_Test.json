@@ -1,0 +1,139 @@
+{
+  "title": "DSA in Java Performance Test",
+  "clean_title": "DSA_in_Java_Performance_Test",
+  "course_code": "DSA-JAVA",
+  "exam_type": "MODULE_TEST",
+  "module_topic": "Module Test: DSA Practical",
+  "timer": 30,
+  "total_questions": 9,
+  "image_questions_count": 0,
+  "source_original_file": "019_DSA_in_Java_Performance_Test.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "Following is a recursive Fibonacci implementation:\npublic int fib(int n) {\n    if(n <= 1) return n;\n    return fib(n-1) + fib(n-2);\n}\nWhen called with `fib(6)`, approximately how many function calls are made?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "13 calls",
+        "25 calls",
+        "32 calls",
+        "64 calls"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Amazon's e-commerce platform needs to store: payment records (ACID guaranteed), shopping cart (fast lookup by product ID), real-time order updates, and customer relationship data. Which storage solution would be INCORRECT for this scenario?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Use RDBMS for payments",
+        "Use Key-Value pair (Redis) for shopping cart",
+        "Use Document database (MongoDB) for order tracking",
+        "Use RDBMS for all modules equally"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Scenario: Two functions implement N-to-1 printing using recursion:\n- Function A: Simple recursion that prints immediately on each call\n- Function B: Recursion with backtracking that prints after returning from recursive call\n\nWhich statement about space complexity is TRUE?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Function A uses less stack space than Function B",
+        "Function B uses less stack space than Function A",
+        "Both use identical stack space due to same recursion depth",
+        "Function A uses O(n²) space while Function B uses O(n) space"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Given code that tracks game moves and their frequencies:\nMap<Integer, Integer> moves = new HashMap<>();\nAfter adding moves [2, 3, 2, 4, 3, 2, 5, 4] and iterating through the map, you find insertion order is NOT preserved. The interviewer asks why insertion order matters for some use cases.\n\nWhich alternative would preserve insertion order?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Use TreeMap instead",
+        "Use LinkedHashMap instead",
+        "Sort the HashMap keys",
+        "Use an ArrayList alongside HashMap"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Scenario:The \"Best Time to Buy Stock\" problem can be solved with:\n- Brute Force: O(n²) time, O(1) space\n- Two-Pointer: O(n) time, O(1) space\n\nA developer chooses brute force for an array of 10,000 stock prices. What is the consequence?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "More memory usage but faster execution",
+        "Approximately 100 million operations vs 10,000 operations",
+        "Better code readability",
+        "Two-pointer approach will fail on large inputs"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Scenario: The code finds all combinations of numbers that sum to target. What happens if we remove the backtracking line `addComb.remove(addComb.size()-1)`?\n\n```\npublic void takeCombination(int index, int[] arr, int target, \n        List<List<Integer>> comb, List<Integer> addComb) {\n    if(index == arr.length) {\n        if(target == 0)\n            comb.add(new ArrayList<>(addComb)); // Important: new ArrayList!\n        return;\n    }\n    \n    if(arr[index] <= target) {\n        addComb.add(arr[index]);\n        takeCombination(index, arr, target - arr[index], comb, addComb);\n        addComb.remove(addComb.size()-1); // Remove this line - what happens?\n    }\n    \n    takeCombination(index + 1, arr, target, comb, addComb);\n}\n```",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The code runs faster with fewer operations",
+        "Results become incorrect - combinations get duplicated and mixed",
+        "Only affects the final result, not intermediate steps",
+        "The ArrayList reference prevents proper combinations"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Scenario: Given array `[5, 5, 5, 5]`, what will the following code output?\n\n``\nint max1 = Integer.MIN_VALUE;\nint max2 = Integer.MIN_VALUE;\n\nfor(int i = 0; i < arr.length; i++) {\n    if(arr[i] > max1) {\n        max2 = max1;\n        max1 = arr[i];\n    } else if(arr[i] > max2) {\n        max2 = arr[i];\n    }\n}\nSystem.out.println(\"Max: \" + max1 + \", SecondMax: \" + max2);\n```",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Max: 5, SecondMax: -2147483648",
+        "Max: 5, SecondMax: 5",
+        "Max: 5, SecondMax: Integer.MIN_VALUE",
+        "Compilation error"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "Scenario:Given the assignment problem where you must:\n1. Count frequency of each move in a list\n2. Calculate average frequency\n3. Remove moves below average\n4. Return remaining moves sorted by frequency (desc) then value (asc)\n\nFor input `[2, 3, 2, 4, 3, 2, 5, 4]`, which step has the HIGHEST time complexity?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Frequency counting using HashMap.put() - O(n)",
+        "Calculating average - O(m) where m is unique moves",
+        "Filtering moves below average - O(m)",
+        "Sorting filtered results - O(m log m)"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Scenario: The following code builds an undirected graph:\n\npublic void addEdge(int node1, int node2) {\n    tree.putIfAbsent(node1, new ArrayList<>());\n    tree.putIfAbsent(node2, new ArrayList<>());\n    tree.get(node1).add(node2);\n    tree.get(node2).add(node1);\n}\n```\n\nWhen called with `addEdge(1, 1)` (adding edge from node to itself), what will be the structure?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Node 1 will have empty adjacency list",
+        "Node 1 will appear twice in the map",
+        "Node 1 will have itself in its adjacency list: [1]",
+        "This will cause a NullPointerException"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    }
+  ]
+}

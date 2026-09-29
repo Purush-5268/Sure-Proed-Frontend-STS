@@ -1,0 +1,713 @@
+{
+  "title": "English",
+  "clean_title": "Aptitude_and_English_Screening_Test",
+  "course_code": "CIVIL-INDUSTRIAL",
+  "exam_type": "PRESCREENING",
+  "module_topic": "General Aptitude & English",
+  "timer": 20,
+  "total_questions": 50,
+  "image_questions_count": 0,
+  "source_original_file": "038_English.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "Identify the error in the sentence: 'Each of the boys have finished their homework.'",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Each",
+        "B. boys",
+        "C. have",
+        "D. homework"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Choose the correct form: 'Had he worked harder, he _____ succeeded.'",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. would have",
+        "B. had",
+        "C. would",
+        "D. has"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "What does the idiom 'burning the midnight oil' mean?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Sleeping early",
+        "B. Working late into the night",
+        "C. Burning candles",
+        "D. Relaxing"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which sentence is punctuated correctly?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. He bought apples bananas oranges and grapes.",
+        "B. He bought apples, bananas, oranges and grapes.",
+        "C. He bought apples, bananas, oranges, and grapes.",
+        "D. He bought, apples, bananas, oranges and grapes."
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Choose the word that best fits the sentence: 'She was ______ by his rude remarks.'",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. elated",
+        "B. amazed",
+        "C. mortified",
+        "D. excited"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which of the following is an example of an oxymoron?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Bitter sweet",
+        "B. Very tall",
+        "C. Extremely good",
+        "D. Absolutely certain"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Choose the correct passive form: 'They will finish the project by next week.'",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. The project is being finished by next week.",
+        "B. The project will be finished by next week.",
+        "C. The project will finish next week.",
+        "D. The project will have been finishing by next week."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "Select the correct spelling:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Accommodate",
+        "B. Acommodate",
+        "C. Accomodate",
+        "D. Acommadate"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "What part of speech is the word 'quickly' in the sentence: 'She ran quickly'?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Noun",
+        "B. Adjective",
+        "C. Verb",
+        "D. Adverb"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "What is the meaning of the phrase 'at the drop of a hat'?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. After thinking carefully",
+        "B. Immediately, without hesitation",
+        "C. When it is convenient",
+        "D. Rarely"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "What is the determinant of the matrix [[2, 3], [1, 4]]?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 5",
+        "B. 8",
+        "C. 7",
+        "D. 2"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "If a vector has components (3, 4), what is its magnitude?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 5",
+        "B. 7",
+        "C. 1",
+        "D. 12"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What is the derivative of sin(x)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. cos(x)",
+        "B. -cos(x)",
+        "C. -sin(x)",
+        "D. tan(x)"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "What is the probability of getting a 3 when rolling a fair die?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 1/3",
+        "B. 1/6",
+        "C. 1/2",
+        "D. 1/5"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Which of the following is a continuous random variable?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Number of heads in 10 coin flips",
+        "B. Number of students",
+        "C. Weight of a person",
+        "D. Number of apples"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "What is the integral of x dx?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. x",
+        "B. x^2/2",
+        "C. x^2",
+        "D. 2x"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "If two events A and B are independent, then P(A and B) = ?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. P(A) + P(B)",
+        "B. P(A) * P(B)",
+        "C. P(A) - P(B)",
+        "D. P(A)/P(B)"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "The eigenvalues of a matrix are solutions of which equation?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Characteristic equation",
+        "B. Quadratic equation",
+        "C. Differential equation",
+        "D. Integral equation"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Find the mean of 2, 4, 6, 8.",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 5",
+        "B. 6",
+        "C. 4",
+        "D. 7"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "What is the limit of (1 + 1/n)^n as n approaches infinity?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 0",
+        "B. e",
+        "C. 1",
+        "D. infinity"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "Which keyword is used to create a function in Python?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. function",
+        "B. def",
+        "C. fun",
+        "D. define"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "What is the output of: print(type([]))?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. <class 'list'>",
+        "B. <class 'dict'>",
+        "C. <class 'set'>",
+        "D. <class 'tuple'>"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "How do you insert COMMENTS in Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. /* comment */",
+        "B. # comment",
+        "C. // comment",
+        "D. <!-- comment -->"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "Which of these is the correct syntax to create a dictionary?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. d = {}",
+        "B. d = []",
+        "C. d = ()",
+        "D. d = <>"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "Which method is used to add an element at the end of a list?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. append()",
+        "B. add()",
+        "C. insert()",
+        "D. extend()"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "What is the output of: bool(0)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. True",
+        "B. False",
+        "C. 0",
+        "D. 1"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "Which of the following is NOT a valid Python data type?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. list",
+        "B. tuple",
+        "C. array",
+        "D. dictionary"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "How do you start a for loop in Python?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. for x to y:",
+        "B. for x in y:",
+        "C. foreach x in y:",
+        "D. loop x in y:"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "What is the output of: 3**2?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 6",
+        "B. 9",
+        "C. 8",
+        "D. 12"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "Which of the following is used to define a block of code in Python?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Curly braces {}",
+        "B. Indentation",
+        "C. Parentheses ()",
+        "D. Square brackets []"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-31",
+      "text": "What will be the output of: len('Python')?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 5",
+        "B. 6",
+        "C. 7",
+        "D. Error"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-32",
+      "text": "What is the correct way to create a set in Python?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. set = {}",
+        "B. set = []",
+        "C. set = ()",
+        "D. set = set()"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-33",
+      "text": "What does the 'break' keyword do in a loop?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Skips to the next iteration",
+        "B. Ends the loop",
+        "C. Repeats the loop",
+        "D. nan"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-34",
+      "text": "Which of these statements is used to handle exceptions in Python?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. try-except",
+        "B. do-catch",
+        "C. exception-catch",
+        "D. handle-except"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-35",
+      "text": "What is the output of: print('5' + '5')?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 10",
+        "B. 55",
+        "C. Error",
+        "D. 5+5"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-36",
+      "text": "Which SQL statement is used to extract data from a database?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. GET",
+        "B. SELECT",
+        "C. EXTRACT",
+        "D. OPEN"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-37",
+      "text": "Which SQL keyword is used to sort the result-set?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. SORT BY",
+        "B. ORDER",
+        "C. ORDER BY",
+        "D. SORT"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-38",
+      "text": "What does the SQL COUNT() function do?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Counts rows",
+        "B. Counts columns",
+        "C. Adds values",
+        "D. Returns sum"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-39",
+      "text": "Which clause is used to filter the result set?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. WHERE",
+        "B. HAVING",
+        "C. GROUP BY",
+        "D. ORDER BY"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-40",
+      "text": "Which operator is used for pattern matching in SQL?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. EQUALS",
+        "B. IN",
+        "C. LIKE",
+        "D. MATCH"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-41",
+      "text": "What is a primary key?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. A field that uniquely identifies each row",
+        "B. A field that links two tables",
+        "C. A field with duplicates",
+        "D. nan"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-42",
+      "text": "Which SQL statement is used to update data in a database?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. MODIFY",
+        "B. UPDATE",
+        "C. SET",
+        "D. CHANGE"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-43",
+      "text": "Which command is used to remove a table from the database?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. REMOVE TABLE",
+        "B. DELETE TABLE",
+        "C. DROP TABLE",
+        "D. ERASE TABLE"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-44",
+      "text": "What does GROUP BY do?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Sorts rows",
+        "B. Groups rows sharing the same values",
+        "C. Deletes rows",
+        "D. Filters rows"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-45",
+      "text": "Which constraint ensures that all values in a column are different?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. DEFAULT",
+        "B. FOREIGN KEY",
+        "C. UNIQUE",
+        "D. PRIMARY KEY"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-46",
+      "text": "Which symbol is used before a formula in Excel?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. \"=\"",
+        "B. +",
+        "C. @",
+        "D. #"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-47",
+      "text": "Which function is used to find the largest value?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. MIN()",
+        "B. MAX()",
+        "C. LARGEST()",
+        "D. BIG()"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-48",
+      "text": "Which function counts the number of numeric entries?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. COUNT()",
+        "B. COUNTA()",
+        "C. COUNTIF()",
+        "D. SUM()"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-49",
+      "text": "What is the shortcut for saving a workbook?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Ctrl + S",
+        "B. Ctrl + P",
+        "C. Ctrl + A",
+        "D. Ctrl + C"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-50",
+      "text": "What is the file extension of an Excel workbook?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. .xls",
+        "B. .xlsx",
+        "C. .docx",
+        "D. .csv"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    }
+  ]
+}

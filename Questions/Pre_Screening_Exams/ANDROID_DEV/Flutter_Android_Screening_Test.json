@@ -1,0 +1,293 @@
+{
+  "title": "Flutter Test Paper – Beginner to Advanced",
+  "clean_title": "Flutter_Android_Screening_Test",
+  "course_code": "ANDROID-DEV",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Mobile App Development Screening",
+  "timer": 10,
+  "total_questions": 20,
+  "image_questions_count": 0,
+  "source_original_file": "020_Flutter_Test_Paper_–_Beginner_to_Advanced.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "Flutter is primarily used for:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Backend development",
+        "Cross-platform app development",
+        "Data Science",
+        "Game development"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Flutter apps are written in:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Java",
+        "Kotlin",
+        "Dart",
+        "Swift"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "The entry point of every Flutter app is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "startApp()",
+        "runApp()",
+        "initApp()",
+        "mainApp()"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which widget does not change its state?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "StatefulWidget",
+        "StatelessWidget",
+        "DynamicWidget",
+        "ReactiveWidget"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Hot reload helps developers to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Restart the app",
+        "Debug only",
+        "View UI changes instantly",
+        "Rebuild APK"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which command is used to create a new Flutter project?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "flutter build",
+        "flutter run",
+        "flutter create",
+        "flutter init"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "In Dart, “final” keyword means:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Variable can change later",
+        "Variable cannot be reassigned",
+        "Static variable",
+        "None"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "Which layout arranges widgets vertically?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Row",
+        "Column",
+        "Stack",
+        "Gridview"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which widget allows scrolling in one direction?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "ListView",
+        "Container",
+        "Column",
+        "TextField"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "TextField uses which controller to manage input?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "StreamController",
+        "TextEditingController",
+        "InputController",
+        "TextController"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "What is used to navigate to another screen?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Route.pop()",
+        "Navigator.push()",
+        "Router.open()",
+        "None"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Which package is used for HTTP requests?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "dart:io",
+        "http",
+        "network",
+        "api_handler"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "setState() is used to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Create widgets",
+        "Update UI",
+        "Call API",
+        "Navigate"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which is not a local storage option?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "SQLite",
+        "Shared Preferences",
+        "Firestore",
+        "Hive"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Firebase Authentication supports:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Email/Password",
+        "Google Sign-in",
+        "Both a & b",
+        "None"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Which command generates a release APK?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "flutter build apk --release",
+        "flutter create release",
+        "flutter run release",
+        "flutter release apk"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "Which widget is used to make layouts responsive?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Container",
+        "LayoutBuilder",
+        "Stack",
+        "Padding"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "For async operations, Dart uses:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Threads",
+        "Futures",
+        "Sockets",
+        "Tasks"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Which state management uses Observables and Controllers?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Bloc",
+        "GetX",
+        "Provider",
+        "MVC"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "Flutter Web apps use:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "HTML Canvas",
+        "Native Views",
+        "WebAssembly",
+        "React core"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    }
+  ]
+}

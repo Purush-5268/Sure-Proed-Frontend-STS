@@ -1,0 +1,293 @@
+{
+  "title": "PCB Designing Admission test",
+  "clean_title": "PCB_Designing_Admission_Test",
+  "course_code": "PCB-DESIGN",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Circuit Design & PCB Screening",
+  "timer": 10,
+  "total_questions": 20,
+  "image_questions_count": 0,
+  "source_original_file": "018_PCB_Designing_Admission_test.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What is the primary purpose of a Printed Circuit Board (PCB)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To store electrical energy",
+        "To provide mechanical support and electrical connections for components",
+        "To amplify signals in a circuit",
+        "To shield the circuit from external noise"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Which material is most commonly used as the substrate for a PCB?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Aluminium",
+        "FR-4 (Fiberglass-Reinforced Epoxy)",
+        "Copper",
+        "Polythelene"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "What are the conductive pathways on a PCB called?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Vias",
+        "Pads",
+        "Traces",
+        "Silkscreen"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which software is widely used for PCB design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "AutoCAD",
+        "Ki CAD",
+        "Adobe Illustrator",
+        "Microsoft Visio"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "What is the function of a solder mask on a PCB?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To increase trace conductivity",
+        "To protect copper traces from oxidation and prevent solder bridges",
+        "To mark component placement",
+        "To act as a heat sink"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What does DRC stand for in PCB design software?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Design Rule Check",
+        "Direct Routing Control",
+        "Dynamic Resistance Calibration",
+        "Digital Resource Compiler"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Which component typically uses through-hole technology?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Large electrolytic capacitor",
+        "Surface-mount resistor",
+        "Chip-scale package IC",
+        "SMD LED"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "What is the purpose of a via in a PCB?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To mount components",
+        "To connect different layers electrically",
+        "To outline the PCB shape",
+        "To apply solder mask"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "What is the first step in the PCB design process?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Schematic capture",
+        "PCB fabrication",
+        "Component placement",
+        "Solder mask application"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "What does a ground plane in a PCB help achieve?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Reduces electromagnetic interference",
+        "Increases signal strength",
+        "Enhances thermal conductivity",
+        "Simplifies component placement"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Which type of PCB has conductive traces on both sides?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Single layer PCB",
+        "Double Layer PCB",
+        "Flexible PCB",
+        "Multi layer PCB"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "What is the role of the silkscreen layer on a PCB?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To conduct electricity",
+        "To provide labels and markings for components",
+        "To protect the board from heat",
+        "To connect multiple layers"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "Why is trace width important in PCB design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "It determines the board’s color",
+        "It affects current-carrying capacity and resistance",
+        "It controls the board’s thickness",
+        "It defines the component size"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which of the following is a common PCB fabrication process?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Etching",
+        "Painting",
+        "Moulding",
+        "Casting"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "What is the purpose of a pad in PCB design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To connect traces between layers",
+        "To provide a surface for soldering components",
+        "To act as a heat sink",
+        "To outline the board’s edges"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Which file format is commonly used to send PCB designs to manufacturers?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Gerber",
+        "JPEG",
+        "PDF",
+        "PNG"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "What is the main advantage of surface-mount technology (SMT) over through-hole technology?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Stronger mechanical connections",
+        "Larger component size",
+        "Smaller PCB size and automated assembly",
+        "Lower cost of components"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "What does a multi-layer PCB offer compared to a single-layer PCB?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Lower manufacturing cost",
+        "Increased complexity and circuit density",
+        "Simpler design process",
+        "Reduced signal integrity"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Which tool is used to check for errors in PCB layout before manufacturing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Oscilloscope",
+        "Design Rule Check (DRC)",
+        "Multimeter",
+        "Signal Generator"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "What is the purpose of thermal relief pads in PCB design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To increase signal speed",
+        "To facilitate soldering by managing heat dissipation",
+        "To reduce the board’s weight",
+        "To enhance trace conductivity"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    }
+  ]
+}

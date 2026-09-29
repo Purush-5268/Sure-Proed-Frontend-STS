@@ -1,0 +1,713 @@
+{
+  "title": "Generative AI Internship: A Comprehensive 6-Month Journey - Entrance Test",
+  "clean_title": "GenAI",
+  "course_code": "GENAI",
+  "exam_type": "PRESCREENING",
+  "module_topic": "AI & ML Prerequisite Screening",
+  "timer": 45,
+  "total_questions": 50,
+  "image_questions_count": 0,
+  "source_original_file": "GenAI.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What does AI stand for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Automated Intelligence",
+        "Artificial Intelligence",
+        "Advanced Integration",
+        "Automated Integration"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Which of the following is a Python library commonly used for data manipulation?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "NumPy",
+        "Pandas",
+        "Matplotlib",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "What is the primary difference between AI, ML, and DL?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "They are all the same",
+        "DL is a subset of ML, which is a subset of AI",
+        "ML is a subset of DL, which is a subset of AI",
+        "AI is a subset of ML"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which of the following is a generative AI model?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Linear Regression",
+        "GAN (Generative Adversarial Network)",
+        "K-Means Clustering",
+        "Decision Tree"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "What is the purpose of data preprocessing in machine learning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To make data unreadable",
+        "To clean and prepare data for analysis",
+        "To delete all data",
+        "To encrypt data"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which Python library is used for data visualization?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "NumPy",
+        "Pandas",
+        "Matplotlib",
+        "Scikit-learn"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "What is a Transformer model?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A type of regression model",
+        "A neural network architecture for sequence processing",
+        "A clustering algorithm",
+        "A data preprocessing technique"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "What is the role of attention mechanism in Transformers?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To focus on irrelevant parts of input",
+        "To weigh the importance of different parts of input",
+        "To ignore all input",
+        "To randomize input"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which of the following is a large language model (LLM)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "GPT",
+        "BERT",
+        "Both GPT and BERT",
+        "Neither GPT nor BERT"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "What is prompt engineering?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The process of writing code",
+        "The process of designing effective prompts for AI models",
+        "The process of training models",
+        "The process of deploying models"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Which of the following is NOT a generative AI application?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Text generation",
+        "Image generation",
+        "Data sorting",
+        "Video synthesis"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "What is a GAN (Generative Adversarial Network)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A model with a single neural network",
+        "A model with two competing neural networks",
+        "A type of regression model",
+        "A clustering algorithm"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What is supervised learning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Learning without labeled data",
+        "Learning with labeled data",
+        "Learning with no data",
+        "Learning with unlabeled data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which of the following is an unsupervised learning technique?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Regression",
+        "Classification",
+        "Clustering",
+        "All of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "What is tokenization in NLP?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The process of converting text into tokens or words",
+        "The process of encrypting text",
+        "The process of deleting text",
+        "The process of sorting text"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Which of the following is a text embedding technique?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Word2Vec",
+        "GloVe",
+        "Both Word2Vec and GloVe",
+        "Neither Word2Vec nor GloVe"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "What is the purpose of fine-tuning in transfer learning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To train a model from scratch",
+        "To adapt a pre-trained model to a specific task",
+        "To delete a model",
+        "To randomize model weights"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "Which of the following is a computer vision technique?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Style transfer",
+        "Text summarization",
+        "Sentiment analysis",
+        "Tokenization"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "What is bias in AI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Systematic error in model predictions",
+        "Random error in model predictions",
+        "Perfect model predictions",
+        "No error in model predictions"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "Which of the following is an ethical concern in generative AI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Bias and fairness",
+        "Privacy concerns",
+        "Explainability",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "What is a VAE (Variational Autoencoder)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A type of generative model",
+        "A type of regression model",
+        "A type of clustering algorithm",
+        "A data preprocessing technique"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "Which of the following is used for text summarization?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "BERT",
+        "GPT",
+        "Both BERT and GPT",
+        "Neither BERT nor GPT"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "What is the purpose of lemmatization in NLP?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To reduce words to their base form",
+        "To increase word count",
+        "To encrypt text",
+        "To delete text"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "Which of the following is a real-world application of AI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Agriculture",
+        "Healthcare",
+        "Entertainment",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "What is the role of a discriminator in a GAN?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To generate fake data",
+        "To distinguish between real and fake data",
+        "To train the generator",
+        "To delete data"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "Which of the following is a type of machine learning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Supervised learning",
+        "Unsupervised learning",
+        "Reinforcement learning",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "What is TF-IDF used for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Feature extraction in text data",
+        "Image compression",
+        "Data encryption",
+        "Video processing"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "Which of the following is a transformer-based model?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "BERT",
+        "GPT",
+        "Both BERT and GPT",
+        "Neither BERT nor GPT"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "What is explainability in AI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The ability to explain how a model makes decisions",
+        "The ability to hide model decisions",
+        "The ability to randomize model decisions",
+        "The ability to delete model decisions"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "Which of the following is a generative AI application in healthcare?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Drug discovery",
+        "Medical image generation",
+        "Personalized treatment plans",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-31",
+      "text": "What is the purpose of PCA (Principal Component Analysis)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To reduce dimensionality of data",
+        "To increase dimensionality of data",
+        "To encrypt data",
+        "To delete data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-32",
+      "text": "Which of the following is a challenge in generative AI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Mode collapse in GANs",
+        "High computational cost",
+        "Ethical concerns",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-33",
+      "text": "What is the role of the generator in a GAN?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To distinguish between real and fake data",
+        "To generate fake data that looks real",
+        "To train the discriminator",
+        "To delete data"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-34",
+      "text": "Which of the following is a type of deep learning model?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Neural Network",
+        "Decision Tree",
+        "Linear Regression",
+        "K-Means"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-35",
+      "text": "What is sentiment analysis used for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To determine the emotional tone of text",
+        "To compress images",
+        "To encrypt data",
+        "To generate videos"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-36",
+      "text": "Which of the following is a prompt engineering technique?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Zero-shot prompting",
+        "Few-shot prompting",
+        "Chain-of-thought prompting",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-37",
+      "text": "What is the purpose of style transfer in computer vision?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To change the style of an image",
+        "To change the content of an image",
+        "To delete an image",
+        "To encrypt an image"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-38",
+      "text": "Which of the following is a responsibility in responsible AI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Ensuring fairness",
+        "Ensuring transparency",
+        "Ensuring privacy",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-39",
+      "text": "What is the difference between BERT and GPT?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "BERT is bidirectional, GPT is unidirectional",
+        "BERT is unidirectional, GPT is bidirectional",
+        "Both are bidirectional",
+        "Both are unidirectional"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-40",
+      "text": "Which of the following is a future trend in generative AI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Multimodal models",
+        "Improved efficiency",
+        "Ethical AI frameworks",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-41",
+      "text": "What is the purpose of a chatbot in business?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To automate customer service",
+        "To create art",
+        "To generate music",
+        "To design websites"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-42",
+      "text": "Which of the following is a type of generative model?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "GAN",
+        "VAE",
+        "Diffusion Model",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-43",
+      "text": "What is the role of self-attention in Transformers?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To focus on relevant parts of input",
+        "To ignore all input",
+        "To randomize input",
+        "To delete input"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-44",
+      "text": "Which of the following is a use case of AI in education?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Personalized learning",
+        "Automated grading",
+        "Content generation",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-45",
+      "text": "What is the purpose of cross-validation in machine learning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To evaluate model performance",
+        "To increase model complexity",
+        "To delete data",
+        "To encrypt data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-46",
+      "text": "Which of the following is a limitation of generative AI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Hallucinations in generated content",
+        "High computational cost",
+        "Ethical concerns",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-47",
+      "text": "What is the purpose of fine-tuning GPT for custom applications?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To adapt the model to a specific domain",
+        "To delete the model",
+        "To randomize model weights",
+        "To train from scratch"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-48",
+      "text": "Which of the following is a technique for video synthesis?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "GAN-based video generation",
+        "Style transfer",
+        "Both GAN-based and style transfer",
+        "Neither GAN-based nor style transfer"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-49",
+      "text": "What is the purpose of addressing bias in AI models?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To ensure fair and equitable outcomes",
+        "To increase model accuracy",
+        "To reduce model complexity",
+        "To delete data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-50",
+      "text": "Which of the following best describes the future of generative AI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Increased integration into daily life",
+        "New ethical frameworks",
+        "More advanced multimodal capabilities",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    }
+  ]
+}

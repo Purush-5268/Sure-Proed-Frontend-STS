@@ -1,0 +1,293 @@
+{
+  "title": "DFT Quiz by Abhishek sir",
+  "clean_title": "Module_4_DFT_Advanced",
+  "course_code": "VLSI-DESIGN",
+  "exam_type": "MODULE_TEST",
+  "module_topic": "Module 4: DFT Advanced",
+  "timer": 20,
+  "total_questions": 20,
+  "image_questions_count": 0,
+  "source_original_file": "106_DFT_Quiz_by_Abhishek_sir.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What is the primary reason for incorporating Design for Testability (DFT) features into a VLSI chip design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. To automatically correct software bugs when the operating system boots.",
+        "B. To improve the controllability and observability of internal nodes, making it easier to detect manufacturing defects.",
+        "C. To reduce the physical layout area and packaging costs of the silicon die.",
+        "D. To increase the maximum operating frequency of the functional logic."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Which fault model assumes that a physical manufacturing defect causes a logic gate's input or output to remain permanently tied to a logic low state?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Stuck-At-1 (SA1)",
+        "B. Bridging Fault",
+        "C. Transition Delay Fault",
+        "D. Stuck-At-0 (SA0)"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "In a standard MUX-based scan flip-flop, what signal directly determines whether the cell operates in its normal functional mode or its test shift mode?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Scan Data Out (SO)",
+        "B. Global Reset",
+        "C. Scan Enable (SE)",
+        "D. Scan Data In (SI)"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "During the 'Shift' phase of scan testing, how are the test patterns loaded into a design's internal flip-flops?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. In parallel, directly from all functional input pins simultaneously.",
+        "B. By executing a built-in firmware routine stored in the chip's ROM block.",
+        "C. Serially, where data moves through the chained flip-flops bit-by-bit on each active clock edge.",
+        "D. Via a dedicated wireless diagnostic interface built into the packaging."
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "What is the primary purpose of the 'Capture' phase in a standard scan test cycle?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. To clear all internal registers back to an unknown 'X' state.",
+        "B. To stream the next test vector out to the external Automatic Test Equipment (ATE).",
+        "C. To allow the combinational logic's response to the loaded stimulus to be latched into the destination flip-flops.",
+        "D. To measure the total static power dissipation of the clock tree network."
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which of the following lines represents a mandatory interface pin required by the standard IEEE 1149.1 Boundary Scan (JTAG) architecture?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. CLK_OUT",
+        "B. BIST_ON",
+        "C. SE (Scan Enable)",
+        "D. TMS (Test Mode Select)"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "How many stable states can the IEEE 1149.1 TAP Controller state machine stay in when the TMS signal is held constantly at a logic '1'?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. It will eventually land and remain locked in the 'Test-Logic-Reset' state.",
+        "B. It will cause an electrical short circuit inside the instruction register.",
+        "C. It will navigate continuously through all 16 states in a loop.",
+        "D. It will freeze immediately in the 'Shift-DR' state."
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "In a Full-Scan design, if a circuit contains 3 scan chains and the longest chain contains 150 flip-flops, how many clock cycles are needed to fully shift in a single test vector?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 50 cycles",
+        "B. 3 cycles",
+        "C. 150 cycles",
+        "D. 450 cycles"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "What type of circuits are standard memory testing frameworks like Memory BIST (MBIST) specifically optimized to evaluate?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Analog-to-Digital converters exclusively",
+        "B. Asynchronous combinational decoder trees",
+        "C. External PCB signal trace connections",
+        "D. Embedded arrays like SRAMs, DRAMs, and ROMs"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Which software tool uses algebraic and structural algorithms to automatically generate digital test patterns for manufacturing defect screens?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. LEF (Library Exchange Format) Parser",
+        "B. ATPG (Automated Test Pattern Generation)",
+        "C. P&R (Place and Route) Engine",
+        "D. STA (Static Timing Analysis)"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "What is the function of the 'BYPASS' instruction in the IEEE 1149.1 boundary scan standard?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. It completely disconnects power from the IC to protect it from overcurrent.",
+        "B. It routes test data through a single-bit register to shorten the scan path to other chips on the board.",
+        "C. It duplicates the scan chains to run twice as fast.",
+        "D. It forces all core combinational logic nodes to an inverse state."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Which defect scenario is a basic 'Transition Delay Fault' model intended to capture?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. An incorrect logic gate optimization performed by the synthesis engine.",
+        "B. A net that switches its logic state successfully, but takes longer than the allowed clock period to complete the transition.",
+        "C. A leakage current spike in the substrate during static conditions.",
+        "D. A permanent short circuit between a signal line and the VDD rail."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What design rule constraint must be met to ensure a flip-flop can be safely included in a standard scan chain?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. It must be constructed using exclusively low-threshold voltage transistors.",
+        "B. Its output must connect directly to an external chip pin without driving other internal gates.",
+        "C. Its clock pin must be directly controllable from an external test clock source during the shift phase.",
+        "D. It must bypass all connected combinational logic networks entirely during functional mode."
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "What is the role of a 'Compactor' block in an advanced scan compression architecture?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. To check for setup and hold timing violations inside the clock tree.",
+        "B. To combine the outputs of many internal scan chains into a few external channels for the ATE to read.",
+        "C. To store failing memory bit cell coordinates inside an internal volatile array.",
+        "D. To step down high incoming supply voltages to safe levels."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Which JTAG instruction is used to apply test patterns to external board-level interconnects between different integrated circuits?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. BYPASS",
+        "B. EXTEST",
+        "C. SAMPLE",
+        "D. INTEST"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "What does an ATPG tool do during its 'Fault Simulation' routine?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. It measures the physical thickness of the chip's oxide layer.",
+        "B. It repairs broken physical connections within the logic gates.",
+        "C. It evaluates how many targeted faults are detected by a given set of test patterns.",
+        "D. It shifts data into the MBIST controller via the serial JTAG interface."
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "What structural issue can arise if two scan flip-flops in the same chain are placed far apart, and the clock signal arrives at the second flip-flop significantly later than the first?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Setup time violation during functional mode",
+        "B. Hold time violation during the scan shift phase",
+        "C. The chip permanently enters a low-power sleep state.",
+        "D. The MBIST address generator stops sequencing."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "Why are standard 'March Tests' used instead of random data patterns to verify embedded memory structures?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. They use structured, linear combinations of reads and writes designed to isolate memory-specific defects like coupling or address decoder faults efficiently.",
+        "B. They are designed to verify analog operational amplifiers exclusively.",
+        "C. They reduce the total silicon area overhead of the memory wrapper to zero.",
+        "D. March tests run without requiring a clock signal."
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "In DFT terminology, what does 'Test Overhead' refer to?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. The additional silicon area, pins, and timing delays introduced by adding test structures into a design.",
+        "B. The time spent by field engineers manually debugging system software errors.",
+        "C. The maximum voltage limit supported by the chip's IO pads.",
+        "D. The cost of renting the physical building where the production testers operate."
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "Which of the following metrics is computed by dividing the number of manufacturing faults detected by a test program by the total number of testable faults defined in the design netlist?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Fault Coverage",
+        "B. Clock Skew Margin",
+        "C. Yield Loss Parameter",
+        "D. Power Efficiency Ratio"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    }
+  ]
+}

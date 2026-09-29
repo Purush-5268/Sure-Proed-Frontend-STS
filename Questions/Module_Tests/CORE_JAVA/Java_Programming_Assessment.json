@@ -1,0 +1,293 @@
+{
+  "title": "Java Programming Assessment",
+  "clean_title": "Java_Programming_Assessment",
+  "course_code": "CORE-JAVA",
+  "exam_type": "MODULE_TEST",
+  "module_topic": "Module Test: Java OOP & Logic",
+  "timer": 10,
+  "total_questions": 20,
+  "image_questions_count": 0,
+  "source_original_file": "111_Java_Programming_Assessment.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "Which of the following is the correct entry point signature for a Java application?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. void main(String args[])",
+        "B. public static void main(String[] args)",
+        "C. public void main(String args)",
+        "D. static public main(String[] args)"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "What is the default value of a boolean instance variable in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. true",
+        "B. false",
+        "C. 0",
+        "D. null"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Which data type is used to store a single 16-bit Unicode character in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. String",
+        "B. char",
+        "C. byte",
+        "D. Character[]"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "What will be the output of the following code?\nint x = 5;\nint y = x++ + ++x;\nSystem.out.println(y);",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 10",
+        "B. 11",
+        "C. 12",
+        "D. 13"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Which keyword is used to prevent a class from being inherited?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. static",
+        "B. final",
+        "C. private",
+        "D. abstract"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which operator is used to compare two values for equality in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. =",
+        "B. ==",
+        "C. equals()",
+        "D. ==="
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "What is the size of an int in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 16 bits",
+        "B. 32 bits",
+        "C. 64 bits",
+        "D. Platform dependent"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "Which loop is guaranteed to execute its body at least once?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. for",
+        "B. while",
+        "C. do-while",
+        "D. for-each"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which of these is NOT a valid access modifier in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. public",
+        "B. private",
+        "C. protected",
+        "D. internal"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "In Java, arrays are:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Value types stored on the stack",
+        "B. Objects stored on the heap",
+        "C. Not allowed to hold objects",
+        "D. Fixed to primitive types only"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Which keyword allows a class to use fields and methods of another class through inheritance?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. implements",
+        "B. extends",
+        "C. inherits",
+        "D. super"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "What is method overloading?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Redefining a parent class method in a subclass with the same signature",
+        "B. Defining multiple methods in the same class with the same name but different parameters",
+        "C. Calling a method recursively",
+        "D. Declaring a method as final"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What is method overriding?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Having two methods with the same name in one class",
+        "B. Giving a subclass method the same name, parameters, and return type as one in its superclass",
+        "C. Overloading constructors",
+        "D. Using multiple return types for one method"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which keyword is used to refer to the current class's superclass in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. this",
+        "B. super",
+        "C. base",
+        "D. parent"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Which OOP principle refers to hiding internal implementation details and exposing only necessary functionality?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Inheritance",
+        "B. Polymorphism",
+        "C. Encapsulation",
+        "D. Abstraction"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Which of the following correctly describes an abstract class in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. It cannot have any methods with a body",
+        "B. It cannot be instantiated directly and may contain both abstract and concrete methods",
+        "C. It must implement all methods from an interface",
+        "D. It cannot be extended by other classes"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "What is the main difference between an interface and an abstract class (pre-Java 8 default methods aside)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Interfaces can have constructors, abstract classes cannot",
+        "B. A class can implement multiple interfaces but extend only one class",
+        "C. Abstract classes cannot have fields",
+        "D. Interfaces can be instantiated directly"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "Which keyword makes a variable or method belong to the class rather than to instances of it?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. final",
+        "B. static",
+        "C. const",
+        "D. public"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "What happens when a Java program throws an exception that is not caught anywhere?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. It is silently ignored",
+        "B. The program terminates and prints a stack trace",
+        "C. It is automatically converted to a warning",
+        "D. The JVM restarts the program"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "Which of these best demonstrates runtime polymorphism in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Two methods in the same class with different parameter lists",
+        "B. A subclass overriding a superclass method, invoked through a superclass reference",
+        "C. Declaring a variable as final",
+        "D. Using a static method in a utility class"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    }
+  ]
+}

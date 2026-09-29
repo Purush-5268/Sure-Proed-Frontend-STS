@@ -1,0 +1,625 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+  .bulk-schedule-container {
+    max-width: 900px;
+    margin: 20px 0;
+    background: var(--body-bg, #fff);
+    border: 1px solid var(--hairline-color, #e5e7eb);
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+  .form-section {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--hairline-color, #e5e7eb);
+  }
+  .form-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .form-section-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--body-fg, #1e293b);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 768px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .form-field.full-width {
+    grid-column: 1 / -1;
+  }
+  .form-field label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--body-fg, #334155);
+    margin-bottom: 2px;
+  }
+  .form-field select,
+  select#id_cohort,
+  select#id_question_bank,
+  select#id_paper_set {
+    display: block !important;
+    width: 100% !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    line-height: 24px !important;
+    padding: 8px 36px 8px 12px !important;
+    font-size: 0.95rem !important;
+    font-family: inherit !important;
+    border: 1px solid var(--hairline-color, #475569) !important;
+    border-radius: 6px !important;
+    background-color: var(--darkened-bg, #1e293b) !important;
+    color: var(--body-fg, #f8fafc) !important;
+    box-sizing: border-box !important;
+    cursor: pointer !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 16px 16px !important;
+  }
+  .form-field select:focus,
+  select#id_cohort:focus,
+  select#id_question_bank:focus,
+  select#id_paper_set:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+  }
+  .form-field select option,
+  select#id_cohort option,
+  select#id_question_bank option,
+  select#id_paper_set option {
+    padding: 10px 12px !important;
+    background-color: var(--darkened-bg, #1e293b) !important;
+    color: var(--body-fg, #f8fafc) !important;
+    font-size: 0.95rem !important;
+  }
+  .form-field input[type="text"],
+  .form-field input[type="datetime-local"],
+  .form-field input[type="url"] {
+    display: block !important;
+    width: 100% !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    line-height: 24px !important;
+    padding: 8px 12px !important;
+    border: 1px solid var(--hairline-color, #475569) !important;
+    border-radius: 6px !important;
+    font-size: 0.95rem !important;
+    font-family: inherit !important;
+    background-color: var(--darkened-bg, #1e293b) !important;
+    color: var(--body-fg, #f8fafc) !important;
+    box-sizing: border-box !important;
+  }
+  .form-field input:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+  }
+  .course-display-badge {
+    margin-top: 10px;
+    padding: 10px 16px;
+    background: var(--darkened-bg, #1e293b);
+    border: 1px solid var(--hairline-color, #334155);
+    border-left: 4px solid #3b82f6;
+    border-radius: 6px;
+    font-size: 0.93rem;
+    color: var(--body-fg, #e2e8f0);
+  }
+  .override-guardrail-box {
+    margin-top: 10px;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 6px;
+    padding: 12px 16px;
+  }
+  .status-checkboxes {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 8px 0;
+  }
+  .status-checkboxes label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .counter-box {
+    background: rgba(22, 163, 74, 0.12);
+    border: 1px solid rgba(22, 163, 74, 0.3);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+  }
+  .counter-box.warning {
+    background: rgba(202, 138, 4, 0.12);
+    border-color: rgba(202, 138, 4, 0.3);
+  }
+  .counter-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #22c55e;
+  }
+  .counter-box.warning .counter-text {
+    color: #facc15;
+  }
+  .counter-badge {
+    font-size: 1.25rem;
+    font-weight: 800;
+    background: #16a34a;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 9999px;
+  }
+  .counter-box.warning .counter-badge {
+    background: #ca8a04;
+  }
+  .toggle-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .toggle-field input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  .action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .btn-submit {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 24px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(37,99,235,0.25);
+    transition: background 0.15s;
+  }
+  .btn-submit:hover {
+    background: #1d4ed8;
+  }
+  .btn-submit:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+  }
+  .btn-cancel {
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .btn-cancel:hover {
+    color: #334155;
+    text-decoration: underline;
+  }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+  &rsaquo; <a href="{% url 'admin:app_list' app_label='applications' %}">Admissions &amp; Applications</a>
+  &rsaquo; <a href="{% url 'admin:applications_prescreening_changelist' %}">Screening Exam Schedules</a>
+  &rsaquo; ⚡ Bulk Schedule by Course &amp; Cohort
+</div>
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <h1 style="margin-bottom: 6px;">⚡ Bulk Schedule Screening Exams (Course &amp; Cohort Wide)</h1>
+  <p style="margin-bottom: 20px; color: var(--body-quiet-color, #64748b); font-size: 0.95rem;">
+    Schedule unified or mass pre-screening examination slots for candidates across a specific Course or Cohort. Eligible applications will be transitioned to <code>Exam Pending</code> and notified automatically.
+  </p>
+
+  <form method="post" id="bulk-schedule-form" class="bulk-schedule-container" onsubmit="return confirmSchedule();">
+    {% csrf_token %}
+
+    <!-- 1. Scope Selection -->
+    <div class="form-section">
+      <div class="form-section-title">
+        <span>1. Target Candidate Scope</span>
+      </div>
+      <div class="form-grid">
+        <div class="form-field full-width">
+          <label for="id_cohort">Select Cohort: <span style="color:red">*</span></label>
+          <select name="cohort" id="id_cohort" required>
+            <option value="">-- Choose Cohort --</option>
+            {% for co in cohorts %}
+              <option value="{{ co.id }}" data-course-id="{{ co.course_id }}" data-course-name="{{ co.course.name }}" data-course-code="{{ co.course.code }}" data-meeting-link="{{ co.meeting_link|default:'' }}" {% if selected_cohort_id == co.id|stringformat:"s" %}selected{% endif %}>
+                [{{ co.code }}] {{ co.name }} &bull; Course: {{ co.course.name }}
+              </option>
+            {% endfor %}
+          </select>
+          <input type="hidden" name="course" id="id_course" value="{{ selected_course_id }}">
+          <div id="course_display_container" class="course-display-badge" style="display:none;">
+            📚 <strong style="color: var(--body-fg, #f8fafc);">Associated Course:</strong> <span id="course_name_display" style="font-weight: 700; color: #38bdf8; margin-left: 4px;"></span>
+          </div>
+        </div>
+
+        <div class="form-field full-width">
+          <label>Target Application Statuses:</label>
+          <div class="status-checkboxes">
+            <label>
+              <input type="checkbox" name="statuses" value="APPLIED" checked class="status-cb" id="cb_status_applied">
+              <span>Applied (New Applicants)</span>
+            </label>
+            <label>
+              <input type="checkbox" name="statuses" value="EXAM_PENDING" class="status-cb" id="cb_status_pending">
+              <span>Exam Pending (Needs Reschedule / Slot Change)</span>
+            </label>
+            <label>
+              <input type="checkbox" name="statuses" value="RESCHEDULED" class="status-cb" id="cb_status_rescheduled">
+              <span>Rescheduled</span>
+            </label>
+          </div>
+
+          <!-- Schedule Override Guardrail -->
+          <div class="override-guardrail-box">
+            <label class="toggle-field" style="margin: 0; align-items: flex-start;">
+              <input type="checkbox" name="override_existing_schedules" id="id_override_existing" value="1" style="margin-top: 3px;">
+              <div>
+                <strong style="color: #f59e0b;">⚠️ Override Existing Exam Schedules (Include Candidates in Exam Pending)</strong>
+                <div style="font-size: 0.85rem; color: var(--body-fg, #cbd5e1); font-weight: normal; margin-top: 2px;">
+                  By default, candidates who already have an active exam slot are <strong>protected and excluded</strong> to prevent accidental overrides. Check this box only if you need to force-reschedule an entire cohort.
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Candidate Counter Pill -->
+    <div id="counter-box" class="counter-box">
+      <div class="counter-text" id="counter-text">
+        🔍 Select a course above to calculate eligible candidates...
+      </div>
+      <div class="counter-badge" id="counter-badge">0</div>
+    </div>
+
+    <!-- 2. Exam Parameters -->
+    <div class="form-section">
+      <div class="form-section-title">
+        <span>2. Examination Parameters</span>
+      </div>
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="id_scheduled_at">Exam Start Date &amp; Time: <span style="color:red">*</span></label>
+          <input type="datetime-local" name="scheduled_at" id="id_scheduled_at" required value="{{ initial_scheduled_at }}">
+        </div>
+
+        <div class="form-field">
+          <label for="id_end_time">Exam End Date &amp; Time: <span style="color:red">*</span></label>
+          <input type="datetime-local" name="end_time" id="id_end_time" required value="{{ initial_end_time }}">
+        </div>
+
+        <div class="form-field">
+          <label for="id_question_bank">Question Bank (Optional):</label>
+          <select name="question_bank" id="id_question_bank">
+            <option value="">-- Select Question Bank --</option>
+            {% for qb in question_banks %}
+              <option value="{{ qb.id }}" data-course-id="{{ qb.course_id }}" data-sets="{{ qb.set_codes|join:',' }}">
+                {{ qb.title }} [{{ qb.status }}]
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="id_paper_set">Paper Set:</label>
+          <select name="paper_set" id="id_paper_set">
+            <option value="A">Paper A</option>
+            <option value="B">Paper B</option>
+            <option value="C">Paper C</option>
+            <option value="D">Paper D</option>
+          </select>
+        </div>
+
+        <div class="form-field full-width">
+          <label for="id_meeting_link">Virtual Meeting / Screening Link (Google Meet / Zoom):</label>
+          <input type="url" name="meeting_link" id="id_meeting_link" placeholder="https://meet.google.com/xxx-xxxx-xxx">
+          <div id="meeting-link-hint" style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">
+            💡 All candidates in this cohort will share this single Google Meet link. If left blank, it will automatically use the Cohort's master link or create a Google Meet session with student emails restricted as attendees.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Execution Options -->
+    <div class="form-section">
+      <div class="form-section-title">
+        <span>3. Dispatch &amp; Gate Controls</span>
+      </div>
+      <div class="form-grid">
+        <div class="form-field full-width">
+          <label class="toggle-field">
+            <input type="checkbox" name="is_released" id="id_is_released" value="1" checked>
+            <div>
+              <strong>🚀 Release Gate Immediately</strong>
+              <div style="font-size: 0.85rem; color: #64748b; font-weight: normal;">
+                Unlocks the examination gate so candidates can take the test as soon as the scheduled time arrives.
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <div class="form-field full-width">
+          <label class="toggle-field">
+            <input type="checkbox" name="notify_candidates" id="id_notify_candidates" value="1" checked>
+            <div>
+              <strong>🔔 Notify Candidates</strong>
+              <div style="font-size: 0.85rem; color: #64748b; font-weight: normal;">
+                Sends instant email &amp; in-app notification to all scheduled candidates with their examination date and meeting details.
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button type="submit" class="btn-submit" id="btn-submit">
+        ⚡ Bulk Schedule Exam
+      </button>
+      <a href="{% url 'admin:applications_prescreening_changelist' %}" class="btn-cancel">
+        Cancel &amp; Return
+      </a>
+    </div>
+  </form>
+</div>
+
+<script>
+(function() {
+  const courseInput = document.getElementById('id_course');
+  const cohortSelect = document.getElementById('id_cohort');
+  const courseDisplayContainer = document.getElementById('course_display_container');
+  const courseNameDisplay = document.getElementById('course_name_display');
+  const qbSelect = document.getElementById('id_question_bank');
+  const paperSetSelect = document.getElementById('id_paper_set');
+  const statusCheckboxes = document.querySelectorAll('.status-cb');
+  const counterBox = document.getElementById('counter-box');
+  const counterText = document.getElementById('counter-text');
+  const counterBadge = document.getElementById('counter-badge');
+  const submitBtn = document.getElementById('btn-submit');
+  const startInput = document.getElementById('id_scheduled_at');
+  const endInput = document.getElementById('id_end_time');
+  const meetingInput = document.getElementById('id_meeting_link');
+  const meetingHint = document.getElementById('meeting-link-hint');
+  const overrideCb = document.getElementById('id_override_existing');
+  const pendingStatusCb = document.getElementById('cb_status_pending');
+
+  const allQbOptions = Array.from(qbSelect.options).slice(1);
+
+  function onCohortChanged() {
+    const selectedOpt = cohortSelect.options[cohortSelect.selectedIndex];
+    if (!selectedOpt || !selectedOpt.value) {
+      courseInput.value = '';
+      if (courseDisplayContainer) courseDisplayContainer.style.display = 'none';
+      qbSelect.innerHTML = '<option value="">-- Select Question Bank --</option>';
+      updatePaperSets();
+      if (meetingInput.dataset.autofilled === 'true') {
+        meetingInput.value = '';
+        delete meetingInput.dataset.autofilled;
+      }
+      fetchCandidateCount();
+      return;
+    }
+
+    const courseId = selectedOpt.getAttribute('data-course-id') || '';
+    const courseName = selectedOpt.getAttribute('data-course-name') || '';
+    const courseCode = selectedOpt.getAttribute('data-course-code') || '';
+    const cohortLink = selectedOpt.getAttribute('data-meeting-link') || '';
+
+    courseInput.value = courseId;
+    if (courseDisplayContainer && courseNameDisplay) {
+      courseNameDisplay.textContent = courseCode ? `[${courseCode}] ${courseName}` : courseName;
+      courseDisplayContainer.style.display = 'block';
+    }
+
+    // Filter Question Banks for the cohort's course
+    qbSelect.innerHTML = '<option value="">-- Select Question Bank --</option>';
+    allQbOptions.forEach(opt => {
+      if (!courseId || opt.getAttribute('data-course-id') === courseId) {
+        qbSelect.appendChild(opt.cloneNode(true));
+      }
+    });
+    updatePaperSets();
+
+    if (cohortLink) {
+      meetingInput.value = cohortLink;
+      meetingInput.dataset.autofilled = 'true';
+      if (meetingHint) {
+        meetingHint.innerHTML = "⚡ <strong>Auto-filled from Cohort's master Google Meet link.</strong> All scheduled candidates will share this single link.";
+        meetingHint.style.color = "#16a34a";
+      }
+    } else if (meetingInput.dataset.autofilled === 'true') {
+      meetingInput.value = '';
+      delete meetingInput.dataset.autofilled;
+      if (meetingHint) {
+        meetingHint.innerHTML = "💡 All candidates in this cohort will share this single Google Meet link. If left blank, it will automatically use the Cohort's master link or create a Google Meet session with student emails restricted as attendees.";
+        meetingHint.style.color = "#64748b";
+      }
+    }
+    fetchCandidateCount();
+  }
+
+  function updatePaperSets() {
+    const selectedQb = qbSelect.options[qbSelect.selectedIndex];
+    const sets = selectedQb && selectedQb.getAttribute('data-sets') ? selectedQb.getAttribute('data-sets').split(',') : ['A', 'B', 'C', 'D'];
+    paperSetSelect.innerHTML = '';
+    sets.filter(Boolean).forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.trim();
+      opt.textContent = `Paper ${s.trim()}`;
+      paperSetSelect.appendChild(opt);
+    });
+    if (paperSetSelect.options.length === 0) {
+      ['A', 'B', 'C', 'D'].forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = `Paper ${s}`;
+        paperSetSelect.appendChild(opt);
+      });
+    }
+  }
+
+  let countAbortController = null;
+  let currentMatchingCount = 0;
+
+  async function fetchCandidateCount() {
+    const cohortId = cohortSelect.value;
+    const courseId = courseInput.value;
+    if (!cohortId) {
+      counterBox.className = 'counter-box warning';
+      counterText.textContent = '🔍 Please select a Cohort above to calculate eligible candidates.';
+      counterBadge.textContent = '0';
+      currentMatchingCount = 0;
+      return;
+    }
+
+    let selectedStatuses = Array.from(statusCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
+    const isOverride = overrideCb && overrideCb.checked ? '1' : '0';
+
+    if (selectedStatuses.length === 0) {
+      const appliedCb = document.getElementById('cb_status_applied');
+      if (appliedCb) appliedCb.checked = true;
+      selectedStatuses = ['APPLIED'];
+    }
+
+    if (countAbortController) {
+      countAbortController.abort();
+    }
+    countAbortController = new AbortController();
+
+    counterText.textContent = 'Calculating eligible candidates...';
+
+    try {
+      const url = `{% url 'admin:prescreening-bulk-schedule-count' %}?course_id=${encodeURIComponent(courseId)}&cohort_id=${encodeURIComponent(cohortId)}&statuses=${encodeURIComponent(selectedStatuses.join(','))}&override_existing=${isOverride}`;
+      const resp = await fetch(url, { signal: countAbortController.signal });
+      if (!resp.ok) throw new Error('Network response failed');
+      const data = await resp.json();
+
+      currentMatchingCount = data.count || 0;
+      counterBadge.textContent = currentMatchingCount;
+
+      if (currentMatchingCount > 0) {
+        counterBox.className = 'counter-box';
+        const overrideNotice = isOverride === '1' ? ' <span style="color:#f59e0b;">(Includes override scope)</span>' : ' <span style="color:#22c55e;">(Protected mode: already-scheduled excluded)</span>';
+        counterText.innerHTML = `🎯 <strong>${currentMatchingCount} candidate(s)</strong> in this cohort match criteria and will be scheduled.${overrideNotice}`;
+      } else {
+        counterBox.className = 'counter-box warning';
+        counterText.textContent = 'ℹ️ No active candidates found matching this cohort/status criteria.';
+      }
+    } catch (e) {
+      if (e.name !== 'AbortError') {
+        counterText.textContent = 'Unable to fetch real-time candidate count.';
+      }
+    }
+  }
+
+  cohortSelect.addEventListener('change', onCohortChanged);
+  qbSelect.addEventListener('change', updatePaperSets);
+
+  statusCheckboxes.forEach(cb => {
+    cb.addEventListener('change', function() {
+      const anyChecked = Array.from(statusCheckboxes).some(c => c.checked);
+      if (!anyChecked) {
+        this.checked = true;
+      }
+      fetchCandidateCount();
+    });
+  });
+
+  if (overrideCb) {
+    overrideCb.addEventListener('change', function() {
+      if (this.checked && pendingStatusCb && !pendingStatusCb.checked) {
+        pendingStatusCb.checked = true;
+      }
+      fetchCandidateCount();
+    });
+  }
+
+  // Auto-set End Time to Start Time + 2 hours if start time is changed and end time is empty
+  startInput.addEventListener('change', function() {
+    if (this.value && !endInput.value) {
+      const d = new Date(this.value);
+      d.setHours(d.getHours() + 2);
+      const iso = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      endInput.value = iso;
+    }
+  });
+
+  window.confirmSchedule = function() {
+    if (!cohortSelect.value) {
+      alert('Please select a target cohort.');
+      return false;
+    }
+    if (!startInput.value || !endInput.value) {
+      alert('Please select both Exam Start and End Date & Time.');
+      return false;
+    }
+    if (new Date(endInput.value) <= new Date(startInput.value)) {
+      alert('Exam End Time must be later than Exam Start Time.');
+      return false;
+    }
+    if (currentMatchingCount === 0) {
+      return confirm('0 candidates currently match this filter. Proceed anyway?');
+    }
+    const overrideWarning = (overrideCb && overrideCb.checked)
+      ? '\n\n⚠️ CAUTION: Override mode is ON. Any candidate already scheduled will have their existing slot overwritten.'
+      : '\n\n🔒 Safe Mode: Candidates already scheduled are protected and excluded.';
+    return confirm(`Are you sure you want to schedule pre-screening exams for ${currentMatchingCount} candidate(s)?${overrideWarning}`);
+  };
+
+  // Initial setup: load count and details
+  if (cohortSelect.value) {
+    onCohortChanged();
+  } else {
+    fetchCandidateCount();
+  }
+})();
+</script>
+{% endblock %}

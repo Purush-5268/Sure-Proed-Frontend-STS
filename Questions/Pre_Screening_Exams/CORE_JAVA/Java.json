@@ -1,0 +1,713 @@
+{
+  "title": "6-Month Internship in Java (Basic Applications) - Entrance Test",
+  "clean_title": "Java",
+  "course_code": "JAVA",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Screening Assessment",
+  "timer": 45,
+  "total_questions": 50,
+  "image_questions_count": 0,
+  "source_original_file": "Java.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "Who is credited with creating the Java programming language?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Bill Gates",
+        "James Gosling",
+        "Dennis Ritchie",
+        "Bjarne Stroustrup"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Which IDE (Integrated Development Environment) is commonly used for Java development?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Visual Studio",
+        "PyCharm",
+        "Eclipse",
+        "Code::Blocks"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "What is the correct extension of a Java source file?",
+      "image": "",
+      "type": "text",
+      "options": [
+        ".class",
+        ".java",
+        ".jav",
+        ".txt"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which of the following is a primitive data type in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "String",
+        "Integer",
+        "Double",
+        "int"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Which statement is used to make a decision in Java based on a boolean condition?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "switch",
+        "for",
+        "if",
+        "while"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What is the default value of an uninitialized int variable in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "null",
+        "0",
+        "Undefined",
+        "Garbage value"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Which of the following is used to perform a block of code repeatedly as long as a condition is true?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "if statement",
+        "switch statement",
+        "while loop",
+        "do statement"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "What is the entry point for a standard standalone Java application?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "public void main(String[] args)",
+        "public static void main(String[] args)",
+        "static void main(String[] args)",
+        "public int main(String[] args)"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which operator is used to concatenate Strings in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "+",
+        "&",
+        ".",
+        "|"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "What is the size of a char data type in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "8 bits",
+        "16 bits",
+        "32 bits",
+        "64 bits"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Which keyword is used to define a constant variable in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "const",
+        "static",
+        "final",
+        "constant"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "What is the primary purpose of a method in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To store data",
+        "To encapsulate a block of code that performs a specific task",
+        "To define a new data type",
+        "To handle exceptions"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What is the output of the following code snippet? System.out.println(10 / 3);",
+      "image": "",
+      "type": "text",
+      "options": [
+        "3.33",
+        "3",
+        "3.0",
+        "An error"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which of the following is the correct way to declare an array of 5 integers?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "int arr[5];",
+        "int arr[] = new int[5];",
+        "int[5] arr;",
+        "int arr = new int[5];"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "What is an object in OOP?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A blueprint for creating classes",
+        "An instance of a class",
+        "A static variable",
+        "A method definition"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "What is the difference between StringBuilder and StringBuffer?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "StringBuilder is mutable, StringBuffer is immutable.",
+        "StringBuilder is not thread-safe, StringBuffer is thread-safe.",
+        "StringBuilder is thread-safe, StringBuffer is not.",
+        "There is no difference."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "Which of the following is NOT a valid access modifier in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "public",
+        "private",
+        "protected",
+        "friendly"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "What is the concept of 'Immutability' in relation to Strings?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The string object can be changed after creation.",
+        "The string object cannot be changed after creation.",
+        "The string object is always stored in stack memory.",
+        "The string object is always thread-safe."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Which method is used to compare the content of two String objects (case-sensitive)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "==",
+        "equals()",
+        "compareTo()",
+        "equalsIgnoreCase()"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "What is the purpose of the 'String Pool' concept?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To increase the speed of string concatenation.",
+        "To store all strings in the heap memory.",
+        "To store and reuse literal strings to save memory.",
+        "To make strings mutable."
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "Which of the following represents the OOP concept where a child class inherits properties from a parent class?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Polymorphism",
+        "Abstraction",
+        "Encapsulation",
+        "Inheritance"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "What is the purpose of Generics in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To enable compile-time type checking.",
+        "To perform runtime type checking.",
+        "To create immutable classes.",
+        "To handle exceptions."
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "Which exception is thrown when a thread is waiting and is interrupted?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "InterruptedException",
+        "NullPointerException",
+        "ArithmeticException",
+        "ArrayIndexOutOfBoundsException"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "What is the main difference between ArrayList and LinkedList?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "ArrayList is a legacy class, LinkedList is new.",
+        "ArrayList allows duplicates, LinkedList does not.",
+        "ArrayList is faster for insertion/deletion, LinkedList is faster for random access.",
+        "ArrayList is faster for random access, LinkedList is faster for insertion/deletion."
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "Which collection type does NOT allow duplicate elements?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "ArrayList",
+        "HashSet",
+        "LinkedList",
+        "HashMap"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "What is the difference between a Set and a Map?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Set stores key-value pairs, Map stores only values.",
+        "Set stores unique elements, Map stores key-value pairs.",
+        "Map stores unique elements, Set stores key-value pairs.",
+        "Both store elements in a sorted order."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "What is the purpose of a PreparedStatement in JDBC?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To execute simple SQL statements.",
+        "To execute parameterized SQL queries, preventing SQL injection.",
+        "To manage database connections.",
+        "To call stored procedures."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "What is the primary difference between throw and throws in exception handling?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "throw is used for checked exceptions, throws for unchecked.",
+        "throw is used to explicitly throw an exception, throws is used in a method signature to declare the exception that the method may throw.",
+        "throws is used to throw an exception, throw is used to declare it.",
+        "There is no difference; they are synonyms."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "What is the output of System.out.println(10 + 20 + 'Java')?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "'1020Java'",
+        "'30Java'",
+        "'Java30'",
+        "Compilation Error"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "Which of the following is NOT a type of polymorphism in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Compile-time polymorphism (Method Overloading)",
+        "Run-time polymorphism (Method Overriding)",
+        "Dynamic polymorphism",
+        "Static polymorphism (Constructor Overloading)"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-31",
+      "text": "What is the role of the finally block in exception handling?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "It is used to catch an exception.",
+        "It is used to throw an exception.",
+        "It executes code regardless of whether an exception is thrown or caught.",
+        "It is used to declare the exceptions a method can throw."
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-32",
+      "text": "What is the purpose of the synchronized keyword in multi-threading?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To create a new thread.",
+        "To stop a thread.",
+        "To ensure that only one thread can access a block of code or method at a time.",
+        "To prioritize a thread."
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-33",
+      "text": "Which of the following is a legacy class in Java Collections?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "ArrayList",
+        "HashSet",
+        "Vector",
+        "LinkedList"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-34",
+      "text": "What is the difference between an Array and an ArrayList?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Array can store only primitive types, ArrayList can store only objects.",
+        "Array has a fixed size, ArrayList can dynamically grow/shrink.",
+        "ArrayList has a fixed size, Array can dynamically grow/shrink.",
+        "There is no difference."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-35",
+      "text": "What is the purpose of the try-with-resources statement?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To create a new thread.",
+        "To automatically close resources (like file streams, database connections) that implement AutoCloseable.",
+        "To handle multiple exceptions in a single catch block.",
+        "To explicitly throw a checked exception."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-36",
+      "text": "If a class has a private constructor, what is the best way to create an instance of this class?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Using the new keyword.",
+        "Using a public static factory method.",
+        "Using reflection.",
+        "It is impossible to create an instance."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-37",
+      "text": "What is the output of this code snippet? String s1 = 'Hello'; String s2 = new String('Hello'); System.out.println(s1 == s2); System.out.println(s1.equals(s2));",
+      "image": "",
+      "type": "text",
+      "options": [
+        "true, true",
+        "false, true",
+        "true, false",
+        "false, false"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-38",
+      "text": "Describe the difference between HashMap and Hashtable in Java. (Select all that apply)",
+      "image": "",
+      "type": "text",
+      "options": [
+        "HashMap is not synchronized, Hashtable is synchronized.",
+        "Hashtable allows null keys and values, HashMap does not.",
+        "HashMap allows null keys and values, Hashtable does not.",
+        "Hashtable is newer than HashMap."
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-39",
+      "text": "What is the purpose of the transient keyword in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To make a variable behave as a constant.",
+        "To prevent a variable from being serialized.",
+        "To indicate that a method is not thread-safe.",
+        "To allow a variable to be accessed from a different thread."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-40",
+      "text": "In Java, what is a 'deadlock' in the context of multi-threading?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A situation where a thread is waiting for an object lock that is held by another thread, which is waiting for a lock held by the first thread.",
+        "A thread that has completed its execution.",
+        "An exception thrown when a thread is interrupted.",
+        "A state where a thread is waiting for user input."
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-41",
+      "text": "Write a Java expression to find the maximum value in an integer array arr without using a loop.",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Math.max(arr)",
+        "Arrays.max(arr)",
+        "Collections.max(Arrays.asList(arr))",
+        "It is not possible without a loop or a stream."
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-42",
+      "text": "What is the difference between checked and unchecked exceptions in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Checked exceptions are caught at runtime, unchecked at compile-time.",
+        "Checked exceptions must be handled (try-catch or throws) at compile-time, unchecked exceptions do not have to be handled.",
+        "Unchecked exceptions are subclasses of Exception, checked exceptions are subclasses of RuntimeException.",
+        "There is no difference."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-43",
+      "text": "Given the following class, how can you call the display method? public class MyClass { public void display() { System.out.println('Hello'); } public static void main(String[] args) { // Call display() here? } }",
+      "image": "",
+      "type": "text",
+      "options": [
+        "display();",
+        "MyClass.display();",
+        "MyClass obj = new MyClass(); obj.display();",
+        "new MyClass().display();"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-44",
+      "text": "Which of the following statements about Abstract classes and Interfaces is true?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "An interface can have instance variables.",
+        "An abstract class can have instance variables and constructors.",
+        "A class can inherit from multiple abstract classes.",
+        "An interface can have concrete methods in Java 7."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-45",
+      "text": "What is the time complexity of searching for an element in a HashSet?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "O(n)",
+        "O(log n)",
+        "O(n log n)",
+        "O(1) on average"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-46",
+      "text": "What is the purpose of the volatile keyword in multi-threading?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To create a new thread.",
+        "To ensure that changes to a variable are visible to all threads immediately.",
+        "To make a variable immutable.",
+        "To synchronize a block of code."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-47",
+      "text": "What is the output of this code? try { System.out.println('A'); throw new RuntimeException('B'); } catch (Exception e) { System.out.println('C'); } finally { System.out.println('D'); }",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A C D",
+        "A B C D",
+        "A D C",
+        "A C"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-48",
+      "text": "What is the primary difference between Callable and Runnable interfaces?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Runnable returns a value, Callable does not.",
+        "Callable can throw checked exceptions and returns a value, Runnable cannot.",
+        "Runnable can throw checked exceptions, Callable cannot.",
+        "There is no difference."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-49",
+      "text": "Which of the following is the correct order of execution in a JDBC program?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Driver Manager -> Connection -> Statement -> ResultSet",
+        "Connection -> Driver Manager -> Statement -> ResultSet",
+        "Statement -> Connection -> ResultSet -> Driver Manager",
+        "ResultSet -> Statement -> Connection -> Driver Manager"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-50",
+      "text": "What is the output of the following program? public class Test { public static void main(String[] args) { Integer a = 100; Integer b = 100; Integer c = 200; Integer d = 200; System.out.println(a == b); System.out.println(c == d); } }",
+      "image": "",
+      "type": "text",
+      "options": [
+        "true, true",
+        "false, false",
+        "true, false",
+        "false, true"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    }
+  ]
+}

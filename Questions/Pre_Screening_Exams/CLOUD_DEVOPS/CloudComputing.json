@@ -1,0 +1,713 @@
+{
+  "title": "Cloud Computing & DevOps Applications Internship - Entrance Test",
+  "clean_title": "CloudComputing",
+  "course_code": "CLOUDCOMPUTING",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Screening Assessment",
+  "timer": 45,
+  "total_questions": 50,
+  "image_questions_count": 0,
+  "source_original_file": "CloudComputing.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What does IaaS stand for in cloud computing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Infrastructure as a Service",
+        "Internet as a Service",
+        "Integration as a Service",
+        "Infrastructure as a Solution"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Which cloud deployment model is available to the general public?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Private Cloud",
+        "Public Cloud",
+        "Hybrid Cloud",
+        "Community Cloud"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Which of the following is NOT a major cloud service provider?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Amazon Web Services (AWS)",
+        "Microsoft Azure",
+        "Google Cloud Platform",
+        "Oracle Database"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "What is the primary purpose of version control systems like Git?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To deploy applications",
+        "To track changes in source code",
+        "To monitor cloud resources",
+        "To create virtual machines"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "What is DevOps primarily focused on?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Only development",
+        "Only operations",
+        "Collaboration between development and operations",
+        "Database management"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which AWS service is used for object storage?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Amazon EC2",
+        "Amazon S3",
+        "Amazon RDS",
+        "Amazon VPC"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "What is the purpose of CI/CD in DevOps?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To create virtual machines",
+        "To automate building, testing, and deployment",
+        "To manage databases",
+        "To design user interfaces"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "Which tool is commonly used for containerization?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Jenkins",
+        "Docker",
+        "Terraform",
+        "Git"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "What is the function of Amazon VPC?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To store objects",
+        "To create virtual private networks",
+        "To manage databases",
+        "To monitor applications"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Which AWS service is used for DNS management?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Amazon S3",
+        "Amazon Route 53",
+        "Amazon EC2",
+        "Amazon RDS"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "What does SaaS stand for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Software as a Service",
+        "System as a Service",
+        "Security as a Service",
+        "Storage as a Service"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Which cloud deployment model combines public and private clouds?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Public Cloud",
+        "Private Cloud",
+        "Hybrid Cloud",
+        "Community Cloud"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What is the primary benefit of cloud computing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Fixed costs",
+        "On-demand scalability",
+        "Limited accessibility",
+        "Hardware dependency"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which AWS service provides relational database management?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Amazon DynamoDB",
+        "Amazon RDS",
+        "Amazon S3",
+        "Amazon Lambda"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "What is the role of Identity and Access Management (IAM) in AWS?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To manage storage",
+        "To control access to AWS resources",
+        "To monitor applications",
+        "To deploy applications"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Which tool is used for Infrastructure as Code (IaC)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Docker",
+        "Jenkins",
+        "Terraform",
+        "Git"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "What is the purpose of Amazon CloudWatch?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To store objects",
+        "To monitor AWS resources and applications",
+        "To create virtual networks",
+        "To manage databases"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "Which AWS service is used for NoSQL database?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Amazon RDS",
+        "Amazon DynamoDB",
+        "Amazon S3",
+        "Amazon Redshift"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "What is the function of an Elastic Load Balancer (ELB) in AWS?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To store data",
+        "To distribute incoming traffic across multiple targets",
+        "To manage databases",
+        "To monitor applications"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "Which of the following is a container orchestration platform?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Docker",
+        "Kubernetes",
+        "Jenkins",
+        "Terraform"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "What is the purpose of Amazon ECR?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To run containers",
+        "To store and manage Docker container images",
+        "To orchestrate containers",
+        "To monitor containers"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "Which AWS service is used for serverless computing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Amazon EC2",
+        "AWS Lambda",
+        "Amazon S3",
+        "Amazon RDS"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "What is the primary advantage of using containers?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "They are slower than virtual machines",
+        "They provide lightweight and consistent environments",
+        "They require more resources",
+        "They are difficult to deploy"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "Which of the following is a DevOps principle?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Manual deployment",
+        "Infrastructure as Code",
+        "Monolithic architecture",
+        "Waterfall methodology"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "What is the purpose of AWS CloudTrail?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To monitor application performance",
+        "To log API calls and user activity",
+        "To store objects",
+        "To manage databases"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "Which AWS service provides managed Kubernetes?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Amazon ECS",
+        "Amazon EKS",
+        "AWS Fargate",
+        "Amazon ECR"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "What is the purpose of a Security Group in AWS?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To store passwords",
+        "To act as a virtual firewall for instances",
+        "To manage user permissions",
+        "To monitor network traffic"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "Which of the following is a CI/CD tool?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Docker",
+        "Jenkins",
+        "Terraform",
+        "Kubernetes"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "What is the purpose of AWS Auto Scaling?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To manually adjust resources",
+        "To automatically adjust capacity based on demand",
+        "To create backups",
+        "To manage security"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "Which of the following is a security best practice in cloud computing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Using default passwords",
+        "Enabling multi-factor authentication",
+        "Granting full access to all users",
+        "Disabling logging"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-31",
+      "text": "What is the role of a NAT Gateway in AWS?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To allow private subnets to access the internet",
+        "To block all internet traffic",
+        "To manage DNS records",
+        "To store data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-32",
+      "text": "Which of the following is a benefit of Infrastructure as Code (IaC)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Manual infrastructure management",
+        "Consistent and repeatable deployments",
+        "Increased human error",
+        "Slower provisioning"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-33",
+      "text": "What is the difference between ECS and EKS?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "ECS is for Docker, EKS is for Kubernetes",
+        "ECS is for Kubernetes, EKS is for Docker",
+        "Both are the same",
+        "ECS is for batch processing, EKS is for web applications"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-34",
+      "text": "Which AWS service is used for content delivery?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Amazon S3",
+        "Amazon CloudFront",
+        "Amazon Route 53",
+        "Amazon VPC"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-35",
+      "text": "What is the purpose of VPC Peering?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To connect two VPCs",
+        "To connect to the internet",
+        "To store data",
+        "To monitor resources"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-36",
+      "text": "Which of the following is a DevOps security practice?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "SAST (Static Application Security Testing)",
+        "Manual code review only",
+        "Ignoring security vulnerabilities",
+        "Deploying without testing"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-37",
+      "text": "What is the purpose of AWS Config?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To manage application configuration",
+        "To evaluate and audit AWS resource configurations",
+        "To deploy applications",
+        "To monitor network traffic"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-38",
+      "text": "Which of the following is a benefit of using GitLab CI/CD?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Manual deployment only",
+        "Integrated CI/CD pipelines",
+        "No version control",
+        "Limited scalability"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-39",
+      "text": "What is the purpose of AWS WAF?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To monitor applications",
+        "To protect web applications from common web exploits",
+        "To manage DNS records",
+        "To store data"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-40",
+      "text": "Which of the following is a container orchestration feature?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Manual scaling",
+        "Auto-healing",
+        "Single-node deployment",
+        "Limited resource management"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-41",
+      "text": "What is the purpose of AWS Fargate?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To manage Kubernetes clusters",
+        "To run containers without managing servers",
+        "To store container images",
+        "To monitor container performance"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-42",
+      "text": "Which of the following is a cloud security compliance framework?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "PCI DSS",
+        "HTTP",
+        "FTP",
+        "SMTP"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-43",
+      "text": "What is the difference between Security Groups and Network ACLs?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Security Groups are stateless, NACLs are stateful",
+        "Security Groups are stateful, NACLs are stateless",
+        "Both are stateful",
+        "Both are stateless"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-44",
+      "text": "Which of the following is a benefit of using EBS in AWS?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Object storage",
+        "Block-level storage volumes for EC2 instances",
+        "Serverless storage",
+        "Content delivery"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-45",
+      "text": "What is the purpose of AWS Shield?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To protect against DDoS attacks",
+        "To manage access control",
+        "To monitor applications",
+        "To store data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-46",
+      "text": "Which of the following is a GitLab DevOps feature?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Manual deployment",
+        "Integrated CI/CD pipelines",
+        "Limited repository access",
+        "No automated testing"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-47",
+      "text": "What is the purpose of Route 53 Traffic Policies?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To store routing data",
+        "To define how Route 53 responds to DNS queries",
+        "To monitor network traffic",
+        "To manage security groups"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-48",
+      "text": "Which of the following is a security scanning type in DevOps?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "SAST (Static Application Security Testing)",
+        "HTTP scanning",
+        "DNS scanning",
+        "Network scanning"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-49",
+      "text": "What is the purpose of AWS Transit Gateway?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To connect multiple VPCs and on-premises networks",
+        "To store network logs",
+        "To monitor network traffic",
+        "To manage DNS records"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-50",
+      "text": "Which of the following best describes DevSecOps?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Integrating security into the DevOps lifecycle",
+        "Separating security from development",
+        "Security is not a concern in DevOps",
+        "Only operations handle security"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    }
+  ]
+}

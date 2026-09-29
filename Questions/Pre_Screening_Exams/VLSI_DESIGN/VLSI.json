@@ -1,0 +1,713 @@
+{
+  "title": "Integrated VLSI Designing Internship - Entrance Test",
+  "clean_title": "VLSI",
+  "course_code": "VLSI",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Screening Assessment",
+  "timer": 45,
+  "total_questions": 50,
+  "image_questions_count": 0,
+  "source_original_file": "VLSI.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What does VLSI stand for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Very Large Scale Integration",
+        "Very Large System Integration",
+        "Vertical Large Scale Integration",
+        "Virtual Large Scale Integration"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Which of the following is a type of MOSFET?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "NMOS",
+        "PMOS",
+        "CMOS",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "What is the primary function of a transistor in VLSI design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To store data",
+        "To amplify or switch electronic signals",
+        "To display images",
+        "To connect networks"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which hardware description language is commonly used for RTL design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "C++",
+        "Java",
+        "Verilog",
+        "Python"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "What does CDC stand for in VLSI design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Clock Domain Crossing",
+        "Circuit Design Control",
+        "Central Data Controller",
+        "Core Design Check"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What is the purpose of linting in RTL design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To check coding style and detect potential errors",
+        "To compile the code",
+        "To simulate the design",
+        "To synthesize the design"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Which language is used for writing constraints in synthesis?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Verilog",
+        "VHDL",
+        "TCL",
+        "C++"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "What does SV stand for in verification?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "System Verilog",
+        "Standard Verification",
+        "System Validation",
+        "Static Verification"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "What is the role of a testbench in verification?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To test the design",
+        "To synthesize the design",
+        "To layout the design",
+        "To fabricate the chip"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Which of the following is a verification methodology?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "UVM",
+        "OVM",
+        "VMM",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "What is the purpose of synthesis in VLSI design flow?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To convert RTL code to gate-level netlist",
+        "To simulate the design",
+        "To test the design",
+        "To fabricate the chip"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "What does DFT stand for in VLSI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Design for Testability",
+        "Data Flow Testing",
+        "Digital Frequency Test",
+        "Dynamic Fault Testing"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What is LEC in VLSI design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Logic Equivalence Check",
+        "Layout Extraction Check",
+        "Logic Error Correction",
+        "Low Energy Consumption"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which of the following is a type of physical synthesis?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Place and Route",
+        "Logic Synthesis",
+        "Behavioral Synthesis",
+        "All of the above"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "What is STA in physical design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Static Timing Analysis",
+        "System Timing Analysis",
+        "Signal Timing Adjustment",
+        "Synchronous Timing Analysis"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "What does PAR stand for in VLSI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Place and Route",
+        "Performance Analysis Report",
+        "Physical Area Reduction",
+        "Process Automation Routine"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "What is PV in physical design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Physical Verification",
+        "Process Validation",
+        "Performance Verification",
+        "Post-silicon Validation"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "Which of the following is a reliability issue in analog layout?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Electromigration",
+        "IR Drop",
+        "Crosstalk",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "What is the purpose of matching techniques in analog layout?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To improve circuit performance",
+        "To reduce area",
+        "To increase power consumption",
+        "To simplify design"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "Which matching technique is commonly used in analog layout?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Interdigitization",
+        "Common Centroid Layout",
+        "Both Interdigitization and Common Centroid",
+        "Neither Interdigitization nor Common Centroid"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "What is the effect of electromigration in ICs?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Metal migration causing open circuits",
+        "Increased resistance",
+        "Reduced performance",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "What is IR drop in VLSI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Voltage drop due to resistance in power distribution",
+        "Current drop due to inductance",
+        "Frequency drop due to capacitance",
+        "Temperature drop due to cooling"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "What is crosstalk in VLSI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Unwanted signal interference between adjacent lines",
+        "Cross-domain clocking",
+        "Cross-sectional area measurement",
+        "Cross-platform compatibility"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "What is latchup in CMOS technology?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A parasitic thyristor action causing high current",
+        "A latch circuit malfunction",
+        "A clock synchronization issue",
+        "A power saving mode"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "What is ESD in semiconductor devices?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Electrostatic Discharge",
+        "Electronic Signal Detection",
+        "Embedded System Design",
+        "Energy Storage Device"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "What is antenna effect in VLSI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Charge accumulation on a wire during fabrication",
+        "Signal transmission to external devices",
+        "Interference from radio waves",
+        "Power loss due to radiation"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "Which of the following is used for MOS transistor modeling?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "BSIM",
+        "SPICE",
+        "Both BSIM and SPICE",
+        "Neither BSIM nor SPICE"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "What is the purpose of process simulation in VLSI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To predict fabrication outcomes",
+        "To test the design",
+        "To synthesize the design",
+        "To layout the design"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "What is yield in semiconductor manufacturing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The percentage of functional chips per wafer",
+        "The total number of chips produced",
+        "The speed of production",
+        "The cost of production"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "Which EDA tool is commonly used for device modeling?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Cadence",
+        "Synopsys",
+        "Mentor Graphics",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-31",
+      "text": "What is RTL in VLSI design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Register Transfer Level",
+        "Random Test Logic",
+        "Real-time Logic",
+        "Reduced Timing Logic"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-32",
+      "text": "Which of the following is a front-end design step?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "RTL Design",
+        "Physical Design",
+        "Fabrication",
+        "Packaging"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-33",
+      "text": "Which of the following is a back-end design step?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "RTL Design",
+        "Synthesis",
+        "Physical Design",
+        "Verification"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-34",
+      "text": "What is the purpose of floorplanning in physical design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To arrange blocks on the chip",
+        "To test the design",
+        "To synthesize the design",
+        "To verify the design"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-35",
+      "text": "Which of the following is a clock tree synthesis objective?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To minimize clock skew",
+        "To maximize clock speed",
+        "To reduce power consumption",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-36",
+      "text": "What is the purpose of DRC (Design Rule Check)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To verify layout meets manufacturing rules",
+        "To check design functionality",
+        "To test the design",
+        "To synthesize the design"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-37",
+      "text": "Which of the following is a type of scan cell in DFT?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Muxed-D Scan Cell",
+        "Clocked Scan Cell",
+        "LSSD Scan Cell",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-38",
+      "text": "What is the purpose of JTAG in VLSI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "For testing and debugging",
+        "For synthesis",
+        "For fabrication",
+        "For packaging"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-39",
+      "text": "What is the difference between synchronous and asynchronous reset?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Synchronous reset is clock-dependent, asynchronous is not",
+        "Asynchronous reset is clock-dependent, synchronous is not",
+        "Both are clock-dependent",
+        "Both are clock-independent"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-40",
+      "text": "Which of the following is a power reduction technique in VLSI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Clock gating",
+        "Power gating",
+        "Voltage scaling",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-41",
+      "text": "What is the purpose of LVS (Layout vs Schematic)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To verify layout matches the schematic",
+        "To check design rules",
+        "To test functionality",
+        "To simulate the design"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-42",
+      "text": "Which of the following is a parasitic extraction tool?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "StarRC",
+        "Calibre",
+        "Design Compiler",
+        "VCS"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-43",
+      "text": "What is the purpose of boundary scan in DFT?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To test interconnections between chips",
+        "To test the internal logic",
+        "To test memory arrays",
+        "To test analog circuits"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-44",
+      "text": "Which of the following is a type of memory in VLSI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "SRAM",
+        "DRAM",
+        "Flash",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-45",
+      "text": "What is the purpose of a phase-locked loop (PLL) in VLSI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To generate a stable clock frequency",
+        "To amplify signals",
+        "To reduce noise",
+        "To store data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-46",
+      "text": "Which of the following is a type of VLSI design methodology?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Full-custom",
+        "Semi-custom",
+        "Standard cell",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-47",
+      "text": "What is the purpose of floorplanning in physical design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To optimize chip area and performance",
+        "To test the design",
+        "To synthesize the design",
+        "To verify the design"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-48",
+      "text": "Which of the following is a factor affecting yield in semiconductor manufacturing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Defects in fabrication",
+        "Design complexity",
+        "Process variations",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-49",
+      "text": "What is the role of EDA tools in VLSI design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To automate design tasks",
+        "To test chips",
+        "To fabricate chips",
+        "To package chips"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-50",
+      "text": "Which of the following best describes a complete VLSI design flow?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Specification -> RTL Design -> Verification -> Synthesis -> Physical Design -> Fabrication -> Testing",
+        "Fabrication -> Testing -> Packaging -> Design",
+        "Design -> Fabrication -> Testing -> Packaging",
+        "Specification -> Fabrication -> Testing -> Packaging"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    }
+  ]
+}

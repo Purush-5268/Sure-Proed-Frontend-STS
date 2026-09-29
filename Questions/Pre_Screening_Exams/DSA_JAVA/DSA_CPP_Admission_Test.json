@@ -1,0 +1,293 @@
+{
+  "title": "DSA C++ Admission Test",
+  "clean_title": "DSA_CPP_Admission_Test",
+  "course_code": "DSA-JAVA",
+  "exam_type": "PRESCREENING",
+  "module_topic": "DSA in C++ Screening",
+  "timer": 10,
+  "total_questions": 20,
+  "image_questions_count": 0,
+  "source_original_file": "023_DSA_C++_Admission_Test.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "Which of the following statements is true about C++?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "C++ is a purely procedural language",
+        "C++ supports both procedural and object-oriented programming",
+        "C++ does not support functions",
+        "C++ can only be used for web applications"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "What is the output of this code?\nint a = 10;\ncout << ++a;",
+      "image": "",
+      "type": "text",
+      "options": [
+        "9",
+        "10",
+        "11",
+        "Error"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Which data type is best suited for storing a character?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "char",
+        "string",
+        "int",
+        "bool"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "What will be the output?\nfloat x = 5/2;\ncout << x;",
+      "image": "",
+      "type": "text",
+      "options": [
+        "2",
+        "2.5",
+        "2.0",
+        "Error"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "The result of true && false is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "true",
+        "false",
+        "1",
+        "0"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which operator is used to get the remainder of a division?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "/",
+        "//",
+        "%",
+        "mod"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Which of the following correctly declares an array of 5 integers?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "int arr(5);",
+        "int arr[5];",
+        "int arr = [5];",
+        "int arr{5};"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "What will the following code output?\nint x = 3;\nif (x == 3)\n   cout << \"Equal\";\nelse\n   cout << \"Not Equal\";",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Equal",
+        "Not Equal",
+        "Compilation Error",
+        "None"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which statement correctly checks if a variable a is even?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "if (a / 2 == 0)",
+        "if (a % 2 == 0)",
+        "if (a == 2)",
+        "if (a % 2 = 0)"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "What is the output?\nint i = 0;\nwhile (i < 3)\n   cout << i++;",
+      "image": "",
+      "type": "text",
+      "options": [
+        "012",
+        "123",
+        "01",
+        "Infinte loop"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "What will be the output of the following?\nfor(int i = 1; i <= 5; i += 2)\n   cout << i;",
+      "image": "",
+      "type": "text",
+      "options": [
+        "12345",
+        "135",
+        "12",
+        "24"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Which statement about do-while loop is true?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "It may never execute",
+        "It checks the condition before running",
+        "It executes at least once",
+        "It cannot contain break statement"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "Which of these function declarations is correct?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "function add(int, int);",
+        "int add(int a, int b);",
+        "int add(a, b);",
+        "function add();"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "What is printed by this code?\nint add(int a, int b = 5) {\n  return a + b;\n}\nint main() {\n  cout << add(10);\n}",
+      "image": "",
+      "type": "text",
+      "options": [
+        "5",
+        "10",
+        "15",
+        "Error"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "What does the return statement do?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Exits the program",
+        "Returns control to the calling function",
+        "Prints output",
+        "Declares a variable"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "What is the output?\nint x = 5;\nx += 3;\ncout << x;",
+      "image": "",
+      "type": "text",
+      "options": [
+        "8",
+        "53",
+        "35",
+        "Error"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "Which of these is a bitwise operator?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "| |",
+        "&&",
+        "&",
+        "and"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "What will be the output?\nfor(int i = 1; i < 4; i++) {\n  if(i == 2) continue;\n  cout << i;\n}",
+      "image": "",
+      "type": "text",
+      "options": [
+        "123",
+        "12",
+        "13",
+        "23"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Which function call is recursive?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "sum(10, 20);",
+        "main();",
+        "sum(sum(a,b), c);",
+        "sum(a,b);"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "What will be the output of the following code?\nint main() {\n    while (true) {\n        cout << \"Hello World\";\n    }\n    return 0;\n}",
+      "image": "",
+      "type": "text",
+      "options": [
+        "\"Hello World\" printed once",
+        "\"Hello World\" printed 10 times",
+        "\"Hello World\" printed infinitely",
+        "Compilation error"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    }
+  ]
+}

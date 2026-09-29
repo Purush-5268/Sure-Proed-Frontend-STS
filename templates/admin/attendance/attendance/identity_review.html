@@ -1,0 +1,75 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .identity-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .identity-table th, .identity-table td { border: 1px solid var(--border-color); padding: 10px; text-align: left; }
+    .identity-table th { background-color: var(--darkened-bg); font-weight: bold; }
+    .submit-row { margin-top: 20px; padding: 15px; background: var(--darkened-bg); text-align: right; border-radius: 4px; }
+    .evidence-badge { display: inline-block; padding: 3px 8px; font-size: 11px; font-weight: bold; background-color: #e0f2f1; color: #00695c; border-radius: 10px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>Historical Identity Review: {{ original.title }}</h1>
+    <p>Please manually resolve the Google Meet participants below to their official StudentProfile. Strict 1:1 mapping is enforced.</p>
+    
+    {% if messages %}
+    <ul class="messagelist">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <table class="identity-table">
+            <thead>
+                <tr>
+                    <th>Google Participant Name</th>
+                    <th>Google Email</th>
+                    <th>Deterministic Suggestion Evidence</th>
+                    <th>Resolve to Student</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in unresolved %}
+                <tr>
+                    <td><strong>{{ item.participant.name }}</strong></td>
+                    <td>{{ item.participant.email|default:"N/A" }}</td>
+                    <td>
+                        {% if item.evidence %}
+                        <span class="evidence-badge">{{ item.evidence }}</span>
+                        {% else %}
+                        <em>No strong deterministic match</em>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <select name="mapping_{{ item.b64_name }}" style="width: 100%;">
+                            <option value="">-- Leave Unresolved --</option>
+                            {% for sid, profile in roster %}
+                            <option value="{{ sid }}" {% if item.best_candidate == sid %}selected{% endif %}>
+                                {{ profile.user.get_full_name }} ({{ profile.student_code }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No unresolved participants found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="submit-row">
+            <input type="submit" value="Save Resolutions & View Preview" class="default" name="_save">
+        </div>
+    </form>
+</div>
+{% endblock %}

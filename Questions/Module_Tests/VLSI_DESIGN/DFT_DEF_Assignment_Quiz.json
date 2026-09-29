@@ -1,0 +1,153 @@
+{
+  "title": "DEF Assignment Quiz for G1-26 by Sri. Abhishek",
+  "clean_title": "DFT_DEF_Assignment_Quiz",
+  "course_code": "VLSI-DESIGN",
+  "exam_type": "MODULE_TEST",
+  "module_topic": "Module 4: DFT/DEF Assignment",
+  "timer": 10,
+  "total_questions": 10,
+  "image_questions_count": 0,
+  "source_original_file": "099_DEF_Assignment_Quiz_for_G1-26_by_Sri._Abhishek.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "The main reason to have design for Test?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To have formal verification",
+        "To have Logic Equivalence Check",
+        "To minimize the power",
+        "To detect the manufacturing faults"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "For a 5 input NAND gate, what pattern to be applied to detect “Stuck at 1” fault at output",
+      "image": "",
+      "type": "text",
+      "options": [
+        "10110",
+        "00110",
+        "00000",
+        "11111"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Which are the two main types of faults in Scam design ?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Transient & Uniform faults",
+        "Combinational & Sequential faults",
+        "Scan faults & MBIST faults",
+        "Stuck at & Transition faults"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "To detect Stuck @ 0 fault, we have applied 10460 patterns with Scan clock having frequency 2MHz, there are 400 Scan flip flops in Serial manner. What is the Test time?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "2 Sec",
+        "3 Sec",
+        "4 Sec",
+        "1 Sec"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "In last Question, if No. of patterns to detect Transistion fault is 1244 & all other Parameters are same & functional freq is 100MHz, what is the test time ?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "148 ms",
+        "500 ms",
+        "1.2 ns",
+        "250 ns"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Why we need CODEC in DFT design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To increase number of faults",
+        "To increase area over lead",
+        "To reduce Test time",
+        "To Compress test vectors applied from ATE"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "BIST works on which type of frequency?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Scan frequency",
+        "Functional frequency [At speed]",
+        "ICG frequency",
+        "D. Ultra high frequency"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "What is OCC?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Offline Coaching Centre",
+        "Offchip Clock Centre",
+        "Onchip Clock Controller",
+        "None"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which technique is used to reduce number of Scan chains ?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "EDT",
+        "CODEC",
+        "BOTH",
+        "NONE"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "In Below options, which are part of BIST Architecture ?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Test Pattern Generator",
+        "SRAM based Register",
+        "Multiplexes",
+        "BISR -> Built in Self Repair"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    }
+  ]
+}

@@ -1,0 +1,713 @@
+{
+  "title": "AI & ML Internship - Industry-Focussed, AI-Augmented & Mentor-Led - Entrance Test",
+  "clean_title": "AI&ML",
+  "course_code": "AI&ML",
+  "exam_type": "PRESCREENING",
+  "module_topic": "AI & ML Prerequisite Screening",
+  "timer": 45,
+  "total_questions": 50,
+  "image_questions_count": 0,
+  "source_original_file": "AI&ML.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What does AI stand for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Automated Intelligence",
+        "Artificial Intelligence",
+        "Advanced Integration",
+        "Automated Integration"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "What does ML stand for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Machine Learning",
+        "Model Language",
+        "Multiple Logic",
+        "Memory Learning"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Which Python library is commonly used for data manipulation?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "NumPy",
+        "Pandas",
+        "Matplotlib",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "What is the purpose of Exploratory Data Analysis (EDA)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To clean data",
+        "To understand patterns and insights in data",
+        "To train models",
+        "To deploy models"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "What is feature engineering?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Creating new features from existing data",
+        "Deleting irrelevant features",
+        "Training models",
+        "Deploying models"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What is supervised learning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Learning with labeled data",
+        "Learning with unlabeled data",
+        "Learning without data",
+        "Learning with partial data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "What is unsupervised learning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Learning with labeled data",
+        "Learning with unlabeled data",
+        "Learning without data",
+        "Learning with partial data"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "Which of the following is a regression algorithm?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Linear Regression",
+        "K-Means Clustering",
+        "Decision Tree",
+        "All of the above"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which of the following is a classification algorithm?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Logistic Regression",
+        "K-Nearest Neighbors",
+        "Support Vector Machine",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "What is clustering in machine learning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Grouping similar data points",
+        "Predicting continuous values",
+        "Predicting categories",
+        "Reducing data dimensions"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Which of the following is a clustering algorithm?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "K-Means",
+        "K-Nearest Neighbors",
+        "Linear Regression",
+        "Logistic Regression"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "What is the purpose of hyperparameter optimization?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To find the best model parameters",
+        "To clean data",
+        "To reduce features",
+        "To increase data size"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What is overfitting in machine learning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Model performs well on training data but poorly on new data",
+        "Model performs poorly on training data",
+        "Model performs well on all data",
+        "Model is too simple"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "What is underfitting in machine learning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Model performs poorly on training data",
+        "Model performs well on training data but poorly on new data",
+        "Model performs well on all data",
+        "Model is too complex"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "What is cross-validation?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A technique to evaluate model performance",
+        "A technique to clean data",
+        "A technique to reduce features",
+        "A technique to increase data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Which of the following is a neural network architecture?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "CNN (Convolutional Neural Network)",
+        "RNN (Recurrent Neural Network)",
+        "ANN (Artificial Neural Network)",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "What is a CNN used for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Image recognition",
+        "Text classification",
+        "Time series forecasting",
+        "All of the above"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "What is transfer learning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Using a pre-trained model for a new task",
+        "Training a model from scratch",
+        "Deploying a model",
+        "Cleaning data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "What is the purpose of data augmentation?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To increase the size of training data",
+        "To reduce the size of training data",
+        "To clean data",
+        "To deploy models"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "What is NLP?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Natural Language Processing",
+        "Neural Language Programming",
+        "Non-Linear Programming",
+        "Network Language Protocol"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "What is tokenization in NLP?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Splitting text into tokens",
+        "Converting text to numbers",
+        "Cleaning text",
+        "Deploying text models"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "What is a transformer model?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A neural network architecture for sequence processing",
+        "A type of regression model",
+        "A clustering algorithm",
+        "A data preprocessing technique"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "Which of the following is a transformer-based model?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "BERT",
+        "GPT",
+        "Both BERT and GPT",
+        "Neither BERT nor GPT"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "What is the purpose of word embeddings?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To represent words as vectors",
+        "To clean text",
+        "To classify text",
+        "To generate text"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "What is object detection in computer vision?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Identifying and locating objects in images",
+        "Classifying images",
+        "Generating images",
+        "Segmenting images"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "What is time series forecasting?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Predicting future values based on past data",
+        "Classifying time series data",
+        "Clustering time series data",
+        "Cleaning time series data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "Which of the following is a time series forecasting method?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "ARIMA",
+        "LSTM",
+        "Both ARIMA and LSTM",
+        "Neither ARIMA nor LSTM"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "What is the purpose of model deployment?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To make the model available for use",
+        "To train the model",
+        "To clean data",
+        "To evaluate the model"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "What is MLOps?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Machine Learning Operations",
+        "Model Learning Operations",
+        "Multi-Level Operations",
+        "Machine Logic Operations"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "Which of the following is an evaluation metric for classification?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Accuracy",
+        "Precision",
+        "Recall",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-31",
+      "text": "What is the difference between accuracy and precision?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Accuracy is overall correctness, precision is correctness of positive predictions",
+        "Precision is overall correctness, accuracy is correctness of positive predictions",
+        "Both are the same",
+        "Neither is relevant"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-32",
+      "text": "What is an API in the context of ML deployment?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A way to serve model predictions",
+        "A data cleaning technique",
+        "A feature engineering method",
+        "A model training approach"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-33",
+      "text": "What is Flask used for in ML deployment?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To create web applications for model serving",
+        "To train models",
+        "To clean data",
+        "To evaluate models"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-34",
+      "text": "What is the purpose of regularization?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To prevent overfitting",
+        "To increase model complexity",
+        "To clean data",
+        "To reduce data size"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-35",
+      "text": "Which of the following is a regularization technique?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "L1 Regularization",
+        "L2 Regularization",
+        "Dropout",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-36",
+      "text": "What is the role of a loss function in machine learning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To measure how well the model performs",
+        "To clean data",
+        "To reduce features",
+        "To augment data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-37",
+      "text": "Which of the following is a loss function?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Mean Squared Error",
+        "Cross-Entropy",
+        "Both Mean Squared Error and Cross-Entropy",
+        "Neither Mean Squared Error nor Cross-Entropy"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-38",
+      "text": "What is the purpose of gradient descent?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To optimize model parameters",
+        "To clean data",
+        "To augment data",
+        "To evaluate models"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-39",
+      "text": "What is the difference between batch and stochastic gradient descent?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Batch uses all data, stochastic uses one sample at a time",
+        "Stochastic uses all data, batch uses one sample at a time",
+        "Both are the same",
+        "Neither is used in practice"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-40",
+      "text": "What is a confusion matrix?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A table used to evaluate classification performance",
+        "A data cleaning technique",
+        "A feature engineering method",
+        "A model training approach"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-41",
+      "text": "What is the purpose of a learning curve?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To diagnose model performance",
+        "To clean data",
+        "To augment data",
+        "To deploy models"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-42",
+      "text": "What is the role of the mentor in this program?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To validate technical depth and correctness",
+        "To write code for students",
+        "To teach theory only",
+        "To conduct exams only"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-43",
+      "text": "How are AI tools used in this program?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "As engineering assistants for problem-solving",
+        "As code generators",
+        "To replace mentors",
+        "To write all solutions"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-44",
+      "text": "What is a capstone project?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "An end-to-end project demonstrating professional competency",
+        "A beginner-level assignment",
+        "A theoretical exam",
+        "A group discussion"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-45",
+      "text": "What is the purpose of model evaluation metrics?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To measure model performance",
+        "To clean data",
+        "To augment data",
+        "To deploy models"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-46",
+      "text": "Which of the following is a business metric for recommendation systems?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Click-Through Rate",
+        "Conversion Rate",
+        "Both Click-Through Rate and Conversion Rate",
+        "Neither Click-Through Rate nor Conversion Rate"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-47",
+      "text": "What is the difference between classification and regression?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Classification predicts categories, regression predicts continuous values",
+        "Regression predicts categories, classification predicts continuous values",
+        "Both are the same",
+        "Neither is used in practice"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-48",
+      "text": "What is the purpose of feature importance analysis?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To understand which features are most influential",
+        "To clean data",
+        "To augment data",
+        "To deploy models"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-49",
+      "text": "What is model versioning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Tracking different versions of models",
+        "Deleting old models",
+        "Training new models",
+        "Cleaning data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-50",
+      "text": "Which of the following best describes the program philosophy?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Case-driven, AI-augmented, mentor-validated",
+        "Theory-heavy and lecture-based",
+        "AI-replaces human learning",
+        "No mentor involvement"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    }
+  ]
+}

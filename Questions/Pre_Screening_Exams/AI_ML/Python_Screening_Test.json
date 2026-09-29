@@ -1,0 +1,643 @@
+{
+  "title": "Python Screening Test",
+  "clean_title": "Python_Screening_Test",
+  "course_code": "AI-ML",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Python Programming Screening",
+  "timer": 25,
+  "total_questions": 45,
+  "image_questions_count": 0,
+  "source_original_file": "026_Python_Screening_Test.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "x = \"Hello\"\ny = \"World\"\nz = x + y\nprint(z)\n\nWhat is the output?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "HelloWorld",
+        "error",
+        "Hello World",
+        "Hello"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "a) x = y = z = \"Orange\"\nb) x, y, z = \"Orange\"\nc) x, y, z = \"Orange\", \"Banana\", \"Cherry\"\nd) None of the above\n\nWhich of the following will throw an error?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "D",
+        "A",
+        "C",
+        "B"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "x = True\ny = False\nz = False\nif not x or y:\n     print(1)\nelif not x or not y and z:\n     print(2)\nelif not x or y or not y and x:\n     print(3)\nelse:\n     print(4)\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "3",
+        "2",
+        "1",
+        "error"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "x = [1, 2, 3]\ny = x\ny.append(4)\nprint(x)",
+      "image": "",
+      "type": "text",
+      "options": [
+        "None",
+        "[1,2,3]",
+        "[1,2,3,4]",
+        "TypeError"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "x = (1, 2, 3)\nprint(type(x))\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "None",
+        "<class 'list'>",
+        "<class 'tuple'>",
+        "<class 'set'>"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "x = {1: \"one\", 2: \"two\"} \nprint (x[1])\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "one",
+        "two",
+        "o",
+        "1"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "x = True + False\nprint(x)\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "1",
+        "True",
+        "error",
+        "False"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "X = \"123\"\nprint (int (x) + 1 )\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "none",
+        "1231",
+        "124",
+        "typeerror"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "x = \"Hello\"\nprint(list(x))\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "None",
+        "[\"H\",\"e\",\"l\",\"l\",\"o\"]",
+        "[\"Hello\"]",
+        "Error"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "x = 123\nprint(bool(x))\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "None",
+        "False",
+        "True",
+        "123"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "x = \"123\"\ny = \"456\"\nprint(int(x + y))\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "579",
+        "12345",
+        "None",
+        "123456"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "x = 10\ny = 20\nprint(x == y)\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "True",
+        "None",
+        "Error",
+        "False"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "X = True\ny = False\nprint(x and y)\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "None",
+        "True",
+        "False",
+        "Error"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "x = 10\nwhile x >5:\n     x -=1\nprint(x)\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "5",
+        "1",
+        "4",
+        "3"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "x = [1, 2, 3, 4, 5]\nfor i in x:\n     if i == 3:\n          break\n     print(i, end=\" \")\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "1 2",
+        "None",
+        "1 2 3",
+        "Error"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "x = [1, 2, 3, 4, 5]\nfor i in x:\n      if i == 3:\n          continue\n     print(i, end=\" \")\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "none",
+        "1 2 4 5",
+        "1 2",
+        "error"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "x = [1, 2, \"3\", \"4\", \"5\"]\nfor i in x:\n      if type(i) == int:\n             continue\n      print(i, end=\" \")\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "“1” “2” “3” “4” “5”",
+        "None",
+        "“3” “4” “5”",
+        "“1” “2” “3”"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "x = [1, 2, 3]\ny = [i**2 for i in x]\nprint(y)\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "[1,2,3]",
+        "error",
+        "[1,4,9]",
+        "none"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "x = [i for i in range(10)]\ny = [i for i in x if i%2==0]\nprint(y)\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "[0,2,4,6,8]",
+        "[0,1,2,3,4,5,6,7,8,9]",
+        "none",
+        "[0,1,2,3,4]"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "x = \"Hello\"\nprint(x.strip())\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "hello",
+        "Hello",
+        "None",
+        "Error"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "x = \"Hello\"\nprint (x[- 1])\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "none",
+        "H",
+        "l",
+        "o"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "x = {1: \"one\", 2: \"two\", 3: \"three\"}\nprint(len(x))\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "1",
+        "11",
+        "3",
+        "6"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "x = [1, 2, 3]\ny = x.pop()\nprint(y)\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "error"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "x = {1, 2, 3}\ny = list(x)\nprint(y)\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "[1,2,3]",
+        "{1,2,3}",
+        "None",
+        "error"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "def greet(name):\n     return \"Hello, + name\nprint(greet(\"World\"))\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "None",
+        "Hello",
+        "Hello, World",
+        "Helloworld"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "def add(x, y = 2) :\n     return x + y\nprint(add(1, 3))\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "4",
+        "3",
+        "5",
+        "error"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "def add(x, y = 2 ) :\n     return x + y\nprint(add(1))\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "none",
+        "error",
+        "3",
+        "2"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "x = 1 lambda a: a + 10\nprint (x(5))\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "none",
+        "15",
+        "5",
+        "10"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "fun = lambda x: x*fun(x-1) if x>1 else 1\nWhat would be the output?\nIf we call fun(4)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "24",
+        "12",
+        "26",
+        "20"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "anagram =  lambda x,y: sorted(x) == sorted(y) \n\nWhat would you be the output if we call anagram(help, phel)",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Error",
+        "True",
+        "None of the above",
+        "False"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-31",
+      "text": "anagram =  lambda x,y: sorted(x) == sorted(y)\n\nWhat would you be the output if we call anagram('help', 'phel')",
+      "image": "",
+      "type": "text",
+      "options": [
+        "False",
+        "True",
+        "Error",
+        "None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-32",
+      "text": "class Test:\n     def __init__(self):\n         self.x x = 1\nt1 = Test()\nt2 = Test()\nt1. x = 2\nprint(t2.x)\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "1",
+        "2",
+        "4",
+        "6"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-33",
+      "text": "class Test:\n     def __init__(self, x):\n          self. x = x\nt = Test(10)\nprint(t._x)\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "error",
+        "none",
+        "Test",
+        "10"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-34",
+      "text": "class Parent:\n     def func(self):\n          print(\"This is parent function\")\nclass Child(Parent):\n     pass\nc = Child()\nc.func()\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "pass",
+        "none",
+        "This is child function",
+        "This is parent function"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-35",
+      "text": "class Parent:\n     def func(self):\n          print(\"This is parent function\")\nclass Child(Parent):\n     def func(self):\n          super().func()\n          print(\"This is child function\")\nc = Child()\nc.func()\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "This is parent function This is child function",
+        "none",
+        "This is child function This is parent function",
+        "error"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-36",
+      "text": "class Parent:\n     def func(self):\n          print(\"This is parent function\")\nclass Child(Parent):\n     def func(self):\n          print(\"This is child function\")\nc = Child()\nc.func()\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "This is child function",
+        "This is parent function",
+        "none",
+        "error"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-37",
+      "text": "What function is used to open a file in Python?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "open",
+        "file_open",
+        "f_open",
+        "fopen"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-38",
+      "text": "How do you create a new directory in Python?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "os.mkdir()",
+        "os.create_directory()",
+        "os.new_directory()",
+        "os.make_directory()"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-39",
+      "text": "try:\n     x = 1 / 0\nexcept ZeroDivisionError:\n     x = 0\nfinally:\n     x = 1\nprint(x)\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Infinity",
+        "error",
+        "0",
+        "1"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-40",
+      "text": "try:\n     x = 1 / 0\nexcept ValueError:\n     x = 0\nprint(x)\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Error",
+        "None",
+        "0",
+        "1"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-41",
+      "text": "try:\n     x = 1 / 0\nexcept  ZeroDivisionError:\n     x = 0\nprint(x)\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Error",
+        "None",
+        "0",
+        "1"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-42",
+      "text": "What keyword is used to raise exceptions in Python?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "throw",
+        "raise",
+        "catch",
+        "try"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-43",
+      "text": "What keyword is used to handle exceptions in Python?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "handle",
+        "try",
+        "except",
+        "catch"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-44",
+      "text": "What mode is used to open a file for reading in Python?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "x",
+        "r",
+        "w",
+        "a"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-45",
+      "text": "x = \"Hello\"\nprint (x[1:4])\n\nWhat is the output of the following Python code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "ello",
+        "ell",
+        "olle",
+        "error"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    }
+  ]
+}

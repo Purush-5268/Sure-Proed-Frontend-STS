@@ -1,0 +1,713 @@
+{
+  "title": "Software Testing & Tools Internship - Entrance Test",
+  "clean_title": "SoftwareTesting",
+  "course_code": "SOFTWARETESTING",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Screening Assessment",
+  "timer": 45,
+  "total_questions": 50,
+  "image_questions_count": 0,
+  "source_original_file": "SoftwareTesting.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What is software testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The process of evaluating software to find bugs",
+        "The process of developing software",
+        "The process of designing software",
+        "The process of deploying software"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "What is manual testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Testing performed by tools",
+        "Testing performed by testers without using tools",
+        "Testing performed by developers",
+        "Testing performed by end-users"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "What is automation testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Testing performed manually",
+        "Testing performed using tools and scripts",
+        "Testing performed by users",
+        "Testing performed during development"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which of the following is a model of SDLC?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Waterfall Model",
+        "Spiral Model",
+        "Agile Model",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "What is Agile methodology?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A sequential development approach",
+        "An iterative and incremental development approach",
+        "A testing approach",
+        "A deployment approach"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What is white box testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Testing without knowledge of internal code",
+        "Testing with knowledge of internal code",
+        "Testing performed by end-users",
+        "Testing performed during deployment"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "What is black box testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Testing with knowledge of internal code",
+        "Testing without knowledge of internal code",
+        "Testing performed by developers",
+        "Testing performed during synthesis"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "Which of the following is a type of functional testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Integration Testing",
+        "System Testing",
+        "User Acceptance Testing",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "What is regression testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Testing new features only",
+        "Re-testing existing features after changes",
+        "Testing the system as a whole",
+        "Testing individual units"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "What is smoke testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "In-depth testing of all features",
+        "Basic testing to ensure critical features work",
+        "Testing performed by end-users",
+        "Testing performed during deployment"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "What is the difference between smoke testing and sanity testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Smoke testing is deep testing, sanity testing is shallow",
+        "Smoke testing is shallow, sanity testing is deeper but narrow",
+        "Both are the same",
+        "Smoke testing is for new builds, sanity testing is for bug fixes"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "What is API testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Testing the graphical user interface",
+        "Testing the application programming interface",
+        "Testing the database",
+        "Testing the network"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What is a bug/defect in software testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A feature of the software",
+        "A flaw in the software that causes incorrect results",
+        "A new requirement",
+        "A user suggestion"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "What is a test case?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A document with test conditions and expected results",
+        "A tool for testing",
+        "A programming language",
+        "A database"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "What is a test scenario?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Detailed step-by-step instructions",
+        "A high-level description of what to test",
+        "A testing tool",
+        "A programming language"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Which of the following is a core Java concept?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Variables",
+        "Methods",
+        "Arrays",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "What is a variable in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A constant value",
+        "A container for storing data",
+        "A function",
+        "A class"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "Which of the following is a data type in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "int",
+        "String",
+        "double",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "What is a method in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A variable",
+        "A block of code that performs a specific task",
+        "A class",
+        "A package"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "What is a String in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A primitive data type",
+        "An object that represents a sequence of characters",
+        "A number",
+        "A boolean value"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "What is an array in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A collection of similar data types",
+        "A variable",
+        "A method",
+        "A class"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "Which of the following is an OOP concept?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Inheritance",
+        "Polymorphism",
+        "Encapsulation",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "What is a collection in Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A framework for storing and manipulating groups of objects",
+        "A single object",
+        "A primitive data type",
+        "A method"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "What is Selenium?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A manual testing tool",
+        "An automated testing tool for web applications",
+        "A database tool",
+        "A programming language"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "Which of the following is a Selenium suite?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Selenium WebDriver",
+        "Selenium IDE",
+        "Selenium Grid",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "What is Selenium WebDriver?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A tool for recording tests",
+        "A tool for executing tests across multiple browsers",
+        "A tool for creating test reports",
+        "A tool for managing test cases"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "Which of the following is a limitation of Selenium?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "It cannot test mobile applications",
+        "It cannot test desktop applications",
+        "It cannot test image-based verification",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "What is a browser command in Selenium?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A command to interact with the browser",
+        "A command to interact with the webpage",
+        "A command to interact with the database",
+        "A command to interact with the server"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "What is a navigation command in Selenium?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A command to navigate between pages",
+        "A command to click a button",
+        "A command to type text",
+        "A command to scroll the page"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "What are web element commands in Selenium?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Commands to interact with web elements",
+        "Commands to interact with the browser",
+        "Commands to interact with the database",
+        "Commands to interact with the server"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-31",
+      "text": "What is JavaScript Executor in Selenium?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A tool to execute JavaScript code in the browser",
+        "A tool to execute Java code",
+        "A tool to execute database queries",
+        "A tool to execute API requests"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-32",
+      "text": "What is a CSS Selector in Selenium?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A method to locate web elements using CSS",
+        "A method to locate web elements using ID",
+        "A method to locate web elements using class name",
+        "A method to locate web elements using tag name"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-33",
+      "text": "What is TestNG?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A testing framework for Java",
+        "A programming language",
+        "A testing tool for APIs",
+        "A database tool"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-34",
+      "text": "What is the purpose of TestNG annotations?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To configure test execution",
+        "To write test cases",
+        "To create test reports",
+        "To manage test data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-35",
+      "text": "What is a test framework?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A set of guidelines and tools for testing",
+        "A programming language",
+        "A database",
+        "A web browser"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-36",
+      "text": "Which of the following is a test framework in Selenium?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "TestNG",
+        "JUnit",
+        "Both TestNG and JUnit",
+        "Neither TestNG nor JUnit"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-37",
+      "text": "What is Postman used for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "API testing",
+        "UI testing",
+        "Database testing",
+        "Performance testing"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-38",
+      "text": "What is the importance of automation testing from an industry perspective?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "It saves time and reduces human error",
+        "It allows for repeated test execution",
+        "It increases test coverage",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-39",
+      "text": "What is verification in software testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Checking if the software meets requirements",
+        "Checking if the software works as expected",
+        "Checking if the software is secure",
+        "Checking if the software performs well"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-40",
+      "text": "What is validation in software testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Checking if the software meets user needs",
+        "Checking if the software meets specifications",
+        "Checking if the software is secure",
+        "Checking if the software performs well"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-41",
+      "text": "What is the purpose of bug/defect reporting?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To document and track defects",
+        "To ignore defects",
+        "To fix defects without documentation",
+        "To hide defects"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-42",
+      "text": "What is the software testing lifecycle?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The stages involved in testing software",
+        "The stages involved in developing software",
+        "The stages involved in deploying software",
+        "The stages involved in maintaining software"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-43",
+      "text": "What is the difference between functional and non-functional testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Functional testing checks features, non-functional checks performance",
+        "Functional testing checks performance, non-functional checks features",
+        "Both test features",
+        "Both test performance"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-44",
+      "text": "Which of the following is a non-functional testing type?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Performance Testing",
+        "Security Testing",
+        "Usability Testing",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-45",
+      "text": "What is integration testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Testing individual components",
+        "Testing the interaction between components",
+        "Testing the entire system",
+        "Testing user acceptance"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-46",
+      "text": "What is system testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Testing individual components",
+        "Testing the interaction between components",
+        "Testing the entire system as a whole",
+        "Testing user acceptance"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-47",
+      "text": "What is user acceptance testing (UAT)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Testing by developers",
+        "Testing by the end-users",
+        "Testing by testers",
+        "Testing by management"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-48",
+      "text": "What is the difference between verification and validation in V-Model?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Verification is left side, validation is right side",
+        "Verification is testing, validation is development",
+        "Verification and validation are the same",
+        "Verification is manual, validation is automated"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-49",
+      "text": "Which of the following is a testing framework for web applications?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Selenium",
+        "JUnit",
+        "TestNG",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-50",
+      "text": "Which of the following best describes a complete software testing process?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Test Planning -> Test Design -> Test Execution -> Test Reporting -> Test Closure",
+        "Test Design -> Test Planning -> Test Execution -> Test Closure -> Test Reporting",
+        "Test Execution -> Test Planning -> Test Design -> Test Reporting -> Test Closure",
+        "Test Closure -> Test Reporting -> Test Planning -> Test Design -> Test Execution"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    }
+  ]
+}

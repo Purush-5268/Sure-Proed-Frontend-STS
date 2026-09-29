@@ -1,0 +1,15 @@
+{% extends "admin/change_form.html" %}
+
+{% block object-tools-items %}
+{{ block.super }}
+{% if original and original.pk %}
+  <li>
+    <form method="post" action="{% url 'admin:application-prepare-screening-bank' original.pk %}" style="display:inline">
+      {% csrf_token %}
+      <button type="submit" class="button" title="Prepare/reuse AI screening bank for this application's course.">
+        Prepare/reuse AI screening bank
+      </button>
+    </form>
+  </li>
+{% endif %}
+{% endblock %}

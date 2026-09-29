@@ -1,0 +1,240 @@
+{% extends "admin/change_form.html" %}
+
+{% block object-tools-items %}
+{{ block.super }}
+{% if original and original.status == "APPROVED" and original.sets_data %}
+  <li>
+    <form method="post" action="{% url 'admin:question-bank-copy-to-course-cohorts' original.pk %}" style="display:inline" onsubmit="return window.confirm('Share these stored papers with eligible cohorts in the same course? Existing course/cohort/module banks will be reused.');">
+      {% csrf_token %}
+      <button type="submit" class="button" title="Pre-screening is already course-wide. Module papers are copied only into missing same-course cohort scopes.">
+        Share with course cohorts
+      </button>
+    </form>
+  </li>
+  {% if original.lifecycle_status == "OPEN" and original.is_active %}
+  <li>
+    <form method="post" action="{% url 'admin:question-bank-close' original.pk %}" style="display:inline">
+      {% csrf_token %}
+      <button type="submit" class="button">Close Question Bank</button>
+    </form>
+  </li>
+  {% else %}
+  <li>
+    <form method="post" action="{% url 'admin:question-bank-publish-verified' original.pk %}" style="display:inline">
+      {% csrf_token %}
+      <button type="submit" class="button" title="Validates every stored paper and closes competing banks in the same scope.">
+        Publish verified papers
+      </button>
+    </form>
+  </li>
+  {% endif %}
+{% endif %}
+{% if original and original.status == "FAILED" %}
+  <li>
+    <form method="post" action="{% url 'admin:question-bank-delete-failed-unused' original.pk %}" style="display:inline" onsubmit="return window.confirm('Delete this failed unused Question Bank? Candidate attempt history will never be deleted.');">
+      {% csrf_token %}
+      <button type="submit" class="button">Delete failed unused bank</button>
+    </form>
+  </li>
+{% endif %}
+{% endblock %}
+
+{% block submit_buttons_bottom %}
+{{ block.super }}
+<div class="submit-row">
+    <input type="submit" value="Save and generate AI papers once" name="_generate_ai"
+           title="Creates one generation job for the selected course/cohort/module scope and reuses an existing bank when present.">
+</div>
+{% endblock %}
+
+{% block admin_change_form_document_ready %}
+{{ block.super }}
+<script>
+(function($) {
+    'use strict';
+
+    function initQuestionBankAdmin() {
+        const $bankType = $('#id_bank_type');
+        const $course = $('#id_course');
+        const $cohort = $('#id_cohort');
+        const $module = $('#id_module');
+        const $title = $('#id_title');
+        const $moduleRow = $('.field-module, .form-row.field-module');
+        const $cohortRow = $('.field-cohort, .form-row.field-cohort');
+        const $aiGenerated = $('#id_is_ai_generated');
+        const $manualRows = $('.field-manual_set_a, .field-manual_set_b, .field-manual_set_c, .field-manual_set_d');
+
+        function installManualSetControls() {
+            ['a', 'b', 'c', 'd'].forEach(function(code) {
+                const $textarea = $(`#id_manual_set_${code}`);
+                if (!$textarea.length || $textarea.data('template-control')) return;
+                $textarea.data('template-control', true);
+                const $button = $('<button type="button" class="button" style="margin:8px 0 4px;">Create question templates</button>');
+                $button.on('click', function() {
+                    if ($textarea.val().trim() && !window.confirm('Replace the current Paper ' + code.toUpperCase() + ' questions?')) return;
+                    const count = Math.max(1, parseInt($('#id_total_questions_per_set').val(), 10) || 1);
+                    const questions = Array.from({length: count}, function(_, index) {
+                        return {
+                            question: `Enter Paper ${code.toUpperCase()} question ${index + 1}`,
+                            options: ['Option A', 'Option B', 'Option C', 'Option D'],
+                            correct: 'A'
+                        };
+                    });
+                    $textarea.val(JSON.stringify(questions, null, 2)).trigger('change');
+                });
+                $textarea.before($button);
+            });
+        }
+
+        function updateManualSetVisibility() {
+            const manualMode = !$aiGenerated.is(':checked');
+            $manualRows.toggle(manualMode);
+            $('.manual-set-notice').remove();
+            const message = manualMode
+                ? 'Manual mode: enter Paper A and optionally B/C/D. Use “Create question templates” to avoid writing the JSON structure yourself.'
+                : 'AI mode: manual paper inputs are hidden. Generated sets will be stored by the AI pipeline.';
+            const color = manualMode ? '#854d0e' : '#075985';
+            const background = manualMode ? '#fef9c3' : '#e0f2fe';
+            $aiGenerated.closest('.form-row').after(
+                `<div class="manual-set-notice" style="margin:8px 0;padding:10px 12px;border-radius:5px;background:${background};color:${color};font-weight:600;">${message}</div>`
+            );
+        }
+
+        $('input[name="_generate_ai"]').on('click', function() {
+            $aiGenerated.prop('checked', true);
+            updateManualSetVisibility();
+        });
+
+        // Store original options for cohort and module
+        if (!$cohort.data('all-options')) {
+            const cohortOpts = [];
+            $cohort.find('option').each(function() {
+                cohortOpts.push({
+                    value: $(this).val(),
+                    text: $(this).text(),
+                    courseId: $(this).attr('data-course-id') || '',
+                    status: $(this).attr('data-status') || '',
+                    selected: $(this).is(':selected')
+                });
+            });
+            $cohort.data('all-options', cohortOpts);
+        }
+
+        if (!$module.data('all-options')) {
+            const moduleOpts = [];
+            $module.find('option').each(function() {
+                moduleOpts.push({
+                    value: $(this).val(),
+                    text: $(this).text(),
+                    courseId: $(this).attr('data-course-id') || '',
+                    moduleNum: $(this).attr('data-module-num') || '',
+                    selected: $(this).is(':selected')
+                });
+            });
+            $module.data('all-options', moduleOpts);
+        }
+
+        function updateUI(isInitial) {
+            const bankType = $bankType.val();
+            const courseId = $course.val();
+            const courseText = $course.find('option:selected').text().trim();
+            const courseCode = courseText.startsWith('[') ? courseText.split(']')[0].replace('[', '').trim() : '';
+
+            const allCohorts = $cohort.data('all-options') || [];
+            const allModules = $module.data('all-options') || [];
+
+            const currentCohortVal = $cohort.val();
+            const currentModuleVal = $module.val();
+
+            if (bankType === 'PRESCREENING') {
+                // Pre-Screening: Module is not applicable
+                $moduleRow.hide();
+                $module.val('');
+
+                // Cohort: Filter to OPEN cohorts for selected course
+                $cohort.empty();
+                $cohort.append('<option value="">--------- (Optional: Open Enrollment Cohorts) ---------</option>');
+                allCohorts.forEach(function(opt) {
+                    if (!opt.value) return;
+                    const matchesCourse = !courseId || opt.courseId === courseId;
+                    const isOpen = opt.status === 'OPEN' || opt.status === 'DRAFT';
+                    if (matchesCourse && isOpen) {
+                        const isSel = opt.value === currentCohortVal;
+                        $cohort.append(`<option value="${opt.value}" ${isSel ? 'selected' : ''}>${opt.text} [OPEN]</option>`);
+                    }
+                });
+
+                // Auto-suggest title if blank or initial
+                if ((!$title.val() || $title.data('auto-generated')) && courseCode) {
+                    $title.val(`[${courseCode}] Pre-Screening Assessment Paper (Prerequisites)`);
+                    $title.data('auto-generated', true);
+                }
+            } else if (bankType === 'MODULE_TEST') {
+                // Module Test: Module & Cohort are strictly required
+                $moduleRow.show();
+
+                // Cohort: Filter to ACTIVE / TRAINING cohorts for selected course
+                $cohort.empty();
+                $cohort.append('<option value="">--------- (Required: Active/Training Cohorts) ---------</option>');
+                allCohorts.forEach(function(opt) {
+                    if (!opt.value) return;
+                    const matchesCourse = !courseId || opt.courseId === courseId;
+                    const isActiveOrTraining = ['ACTIVE', 'TRAINING', 'INTERNSHIP', 'SOFT_SKILLS'].includes(opt.status);
+                    if (matchesCourse && isActiveOrTraining) {
+                        const isSel = opt.value === currentCohortVal;
+                        $cohort.append(`<option value="${opt.value}" ${isSel ? 'selected' : ''}>${opt.text} [ACTIVE]</option>`);
+                    }
+                });
+
+                // Module: Filter to modules belonging to selected course
+                $module.empty();
+                $module.append('<option value="">--------- (Select Course Module) ---------</option>');
+                allModules.forEach(function(opt) {
+                    if (!opt.value) return;
+                    const matchesCourse = !courseId || opt.courseId === courseId;
+                    if (matchesCourse) {
+                        const isSel = opt.value === currentModuleVal;
+                        $module.append(`<option value="${opt.value}" ${isSel ? 'selected' : ''}>${opt.text}</option>`);
+                    }
+                });
+
+                // Auto-suggest title if blank or auto-generated
+                const moduleText = $module.find('option:selected').text().trim();
+                if ((!$title.val() || $title.data('auto-generated')) && courseCode) {
+                    if (moduleText && moduleText.indexOf('---') === -1) {
+                        $title.val(`[${courseCode}] ${moduleText} Test Paper`);
+                    } else {
+                        $title.val(`[${courseCode}] Module Test Paper`);
+                    }
+                    $title.data('auto-generated', true);
+                }
+            }
+        }
+
+        // Attach event listeners
+        $bankType.on('change', function() { updateUI(false); });
+        $course.on('change', function() { updateUI(false); });
+        $module.on('change', function() {
+            const courseText = $course.find('option:selected').text().trim();
+            const courseCode = courseText.startsWith('[') ? courseText.split(']')[0].replace('[', '').trim() : '';
+            const moduleText = $module.find('option:selected').text().trim();
+            if (courseCode && moduleText && moduleText.indexOf('---') === -1) {
+                $title.val(`[${courseCode}] ${moduleText} Test Paper`);
+                $title.data('auto-generated', true);
+            }
+        });
+        $title.on('input', function() {
+            $title.data('auto-generated', false);
+        });
+        $aiGenerated.on('change', updateManualSetVisibility);
+
+        // Initialize on page load
+        installManualSetControls();
+        updateUI(true);
+        updateManualSetVisibility();
+    }
+
+    $(document).ready(initQuestionBankAdmin);
+})(django.jQuery || jQuery);
+</script>
+{% endblock %}

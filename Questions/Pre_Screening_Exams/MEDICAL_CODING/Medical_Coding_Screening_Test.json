@@ -1,0 +1,293 @@
+{
+  "title": "Med coding",
+  "clean_title": "Medical_Coding_Screening_Test",
+  "course_code": "MEDICAL-CODING",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Medical Coding & Terminology Screening",
+  "timer": 10,
+  "total_questions": 20,
+  "image_questions_count": 0,
+  "source_original_file": "007_Med_coding.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What is the primary purpose of medical coding?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) To determine patient eligibility",
+        "b) To obtain reimbursement for healthcare services",
+        "c) To establish a medical diagnosis",
+        "d) To generate patient reports"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "The organ responsible for producing insulin is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) Liver",
+        "b) Stomach",
+        "c) Pancreas",
+        "d) Kidney"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "The largest bone in human body is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) Femur",
+        "b) Tibia",
+        "c) Fibula",
+        "d) Humerus"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which is the type of connective tissue?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) Muscle tissue",
+        "b) Epithelial tissue",
+        "c) Nervous tissue",
+        "d) Bone tissue"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "The thoracic cavity houses:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) Kidneys",
+        "b) Heart and lungs",
+        "c) Stomach and intestines",
+        "d) Brain and spinal cord"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What connects bone to muscle?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) Ligaments",
+        "b) Cartilage",
+        "c) Tendons",
+        "d) Bones"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "The pituitary gland is located:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) At the base of the brain",
+        "b) In the abdominal cavity",
+        "c) In the thoracic cavity",
+        "d) In the pelvis"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "Taste bud which is present on the lateral sides of human tongue:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) Bitter",
+        "b) Salty",
+        "c) Sour",
+        "d) Sweet"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which of the following is the balancing organ in humans?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) Eardrum",
+        "b) Vestibular region",
+        "c) Cochlea",
+        "d) Organ of corti"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Which cell in the pancreas make insulin?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) Epithelial cells",
+        "b) Hepatic cells",
+        "c) Germ cells",
+        "d) Islet cells"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Which of the following is a characteristic of inpatient carre?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) Patients receive care and then return home the same day.",
+        "b) Patients are formally admitted to a hospital for more than 24 hours.",
+        "c) Care is primarily provided in the patient's home setting.",
+        "d) The focus is on preventative care."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Which of the following is an example of an outpatient service?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) Surgery requiring an overnight hospital stay.",
+        "b) A physical therapy session in a clinic.",
+        "c) Intravenous fluids administered in the hospital for several days.",
+        "d) A newborn receiving ongoing care in a neonatal intensive care unit."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What is the main goal of home healthcare?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) To provide emergency medical services.",
+        "b) To provide ongoing care and support in the patient's home.",
+        "c) To perform complex surgeries.",
+        "d) To diagnose and treat infectious diseases."
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which prefix indicates \"fast\"?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "(a) Brady-",
+        "(b) Tachy-",
+        "(c) Hyper-",
+        "(d) Hypo-"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Which suffix indicates \"inflammation of\"?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) -oma",
+        "(b) -itis",
+        "(c) -osis",
+        "(d) -ectomy"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Which suffix indicates \"surgical removal\"?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "(a) -plasty",
+        "(b) -otomy",
+        "(c) -ectomy",
+        "(d) -ostomy"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "Which suffix indicates \"abnormal condition\"?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "(a) -itis",
+        "(b) -oma",
+        "(c) -osis",
+        "(d) -pathy"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "Which suffix indicates \"surgical repair\"?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "(a) -otomy",
+        "(b) -plasty",
+        "(c) -ostomy",
+        "(d) -ectomy"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "What does the prefix \"neo-\" mean?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "(a) Old",
+        "(b) New",
+        "(c) Small",
+        "(d) Large"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "In a SOAP note, what does the \"S\" stand for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a. Summary",
+        "b. Systems",
+        "c. Subjective",
+        "d. Situation"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    }
+  ]
+}

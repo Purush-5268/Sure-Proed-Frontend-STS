@@ -1,0 +1,1261 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block content %}
+<style>
+  /* Global Dashboard Styling (Screen Mode) */
+  .user-report-wrapper {
+    background-color: #0b0e14;
+    color: #e2e8f0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+  }
+  .report-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #1e2638;
+    margin-bottom: 24px;
+  }
+  .report-top-bar h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-export-pdf {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-export-pdf:hover {
+    background: linear-gradient(135deg, #0369a1, #075985);
+    transform: translateY(-1px);
+  }
+
+  /* 2-Column Grid Layout */
+  .report-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 1024px) {
+    .report-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Cards */
+  .report-card {
+    background: #121721;
+    border: 1px solid #1e2638;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .report-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #38bdf8;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #1e2638;
+    padding-bottom: 8px;
+  }
+  .report-card-title span.plus {
+    color: #38bdf8;
+    font-weight: 900;
+    margin-right: 6px;
+  }
+
+  /* Left Sidebar Profile */
+  .profile-sidebar-card {
+    text-align: center;
+  }
+  .avatar-container {
+    width: 110px;
+    height: 110px;
+    margin: 0 auto 16px auto;
+  }
+  .avatar-img {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #38bdf8;
+    box-shadow: 0 4px 20px rgba(56, 189, 248, 0.25);
+  }
+  .avatar-placeholder {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: #1e293b;
+    color: #38bdf8;
+    font-size: 42px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #38bdf8;
+    margin: 0 auto;
+  }
+  .status-pill {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+  .status-pill.active {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+  }
+  .status-pill.inactive {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  .user-display-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 12px 0 4px 0;
+  }
+  .user-display-email {
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 0 0 16px 0;
+    word-break: break-all;
+  }
+
+  .meta-list {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .meta-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .meta-icon {
+    font-size: 16px;
+    color: #38bdf8;
+    width: 20px;
+    text-align: center;
+  }
+  .meta-content label {
+    display: block;
+    font-size: 10px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+  .meta-content span {
+    font-size: 13px;
+    font-weight: 600;
+    color: #cbd5e1;
+  }
+
+  .sidebar-box {
+    text-align: left;
+    background: #0f172a;
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid #1e293b;
+    margin-top: 14px;
+  }
+  .sidebar-box-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .btn-quick-action {
+    background: #1e293b;
+    color: #e2e8f0;
+    border: 1px solid #334155;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .btn-quick-action:hover {
+    background: #334155;
+    color: #38bdf8;
+  }
+  .btn-quick-action.btn-danger {
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+  .btn-quick-action.btn-danger:hover {
+    background: rgba(239, 68, 68, 0.2);
+  }
+
+  /* Info Grids */
+  .info-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 20px;
+  }
+  @media (max-width: 640px) {
+    .info-grid-2 {
+      grid-template-columns: 1fr;
+    }
+  }
+  .info-field label {
+    display: block;
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .info-field p {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #f1f5f9;
+  }
+
+  /* Metric summary cards */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+  }
+  .metric-box {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+    transition: transform 0.2s ease;
+  }
+  .metric-box:hover {
+    transform: translateY(-2px);
+    border-color: #38bdf8;
+  }
+  .metric-circle-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px auto;
+    font-size: 16px;
+  }
+  .metric-circle-icon.blue { background: rgba(14, 165, 233, 0.2); color: #38bdf8; }
+  .metric-circle-icon.green { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+  .metric-circle-icon.purple { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+  .metric-circle-icon.orange { background: rgba(249, 115, 22, 0.2); color: #fb923c; }
+
+  .metric-value {
+    font-size: 16px;
+    font-weight: 800;
+    color: #f8fafc;
+  }
+  .metric-label {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 4px;
+  }
+
+  /* Tables */
+  .report-table-wrapper {
+    overflow-x: auto;
+    margin-top: 8px;
+  }
+  table.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  table.report-table th {
+    background: #0f172a;
+    color: #94a3b8;
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #1e293b;
+  }
+  table.report-table td {
+    padding: 10px 12px;
+    color: #e2e8f0;
+    border-bottom: 1px solid #1e2638;
+  }
+  table.report-table tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  /* Document Cards Grid */
+  .docs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+  }
+  .doc-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  .doc-card:hover {
+    border-color: #38bdf8;
+    transform: translateY(-2px);
+  }
+  .doc-icon {
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+  .doc-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 2px;
+  }
+  .doc-sub {
+    font-size: 10px;
+    color: #64748b;
+  }
+
+  /* Badges */
+  .badge-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge-tag.badge-success { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+  .badge-tag.badge-info { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+  .badge-tag.badge-warning { background: rgba(234, 179, 8, 0.2); color: #facc15; }
+  .badge-tag.badge-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+  .badge-tag.badge-secondary { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
+
+  /* Admin Edit Form Collapsible Panel */
+  #admin-edit-panel {
+    display: none;
+    margin-top: 24px;
+    background: #121721;
+    border: 2px solid #38bdf8;
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  /* -------------------------------------------------------------
+     EXECUTIVE RESUME / OFFICIAL APPLICATION PRINT STYLES (PDF EXPORT)
+     ------------------------------------------------------------- */
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 12mm 15mm;
+    }
+    body, html {
+      background: #ffffff !important;
+      color: #111827 !important;
+      font-size: 11pt !important;
+      font-family: "Segoe UI", Arial, sans-serif !important;
+    }
+    #header, .breadcrumbs, .btn-export-pdf, .action-buttons, #admin-edit-panel, .report-top-bar a, .sidebar-box:last-child {
+      display: none !important;
+    }
+    .user-report-wrapper {
+      background: #ffffff !important;
+      color: #111827 !important;
+      padding: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .report-top-bar {
+      border-bottom: 2px solid #0284c7 !important;
+      margin-bottom: 15px !important;
+      padding-bottom: 10px !important;
+      text-align: center !important;
+      display: block !important;
+    }
+    .report-top-bar h2 {
+      color: #0369a1 !important;
+      font-size: 18pt !important;
+      text-transform: uppercase !important;
+      letter-spacing: 1px !important;
+      justify-content: center !important;
+    }
+    .report-top-bar::after {
+      content: "SURE TRUST — OFFICIAL APPLICANT DOSSIER & RESUME REPORT";
+      display: block;
+      font-size: 9pt;
+      color: #6b7280;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .report-grid {
+      display: block !important;
+    }
+    .profile-sidebar-card {
+      border: 1px solid #d1d5db !important;
+      background: #f9fafb !important;
+      color: #111827 !important;
+      padding: 15px !important;
+      margin-bottom: 15px !important;
+      page-break-inside: avoid !important;
+    }
+    .avatar-img {
+      border: 2px solid #0369a1 !important;
+      width: 90px !important;
+      height: 90px !important;
+    }
+    .avatar-placeholder {
+      background: #e0f2fe !important;
+      color: #0369a1 !important;
+      border: 2px solid #0369a1 !important;
+      width: 90px !important;
+      height: 90px !important;
+      font-size: 32px !important;
+    }
+    .user-display-name {
+      color: #111827 !important;
+      font-size: 16pt !important;
+    }
+    .user-display-email {
+      color: #4b5563 !important;
+    }
+    .report-card {
+      border: 1px solid #e5e7eb !important;
+      background: #ffffff !important;
+      color: #111827 !important;
+      padding: 12px 16px !important;
+      margin-bottom: 14px !important;
+      page-break-inside: avoid !important;
+      border-radius: 4px !important;
+    }
+    .report-card-title {
+      color: #0369a1 !important;
+      border-bottom: 1.5px solid #0369a1 !important;
+      font-size: 11pt !important;
+      padding-bottom: 4px !important;
+      margin-bottom: 10px !important;
+    }
+    .info-field label, .meta-content label, .sidebar-box-title {
+      color: #4b5563 !important;
+      font-size: 8pt !important;
+      font-weight: 700 !important;
+    }
+    .info-field p, .meta-content span, .sidebar-box div {
+      color: #111827 !important;
+      font-size: 10pt !important;
+      font-weight: 600 !important;
+    }
+    .metric-box, .doc-card, .sidebar-box {
+      border: 1px solid #d1d5db !important;
+      background: #f9fafb !important;
+      color: #111827 !important;
+    }
+    .metric-value {
+      color: #0369a1 !important;
+      font-size: 13pt !important;
+    }
+    .metric-label, .doc-sub {
+      color: #4b5563 !important;
+    }
+    .doc-name {
+      color: #111827 !important;
+    }
+    table.report-table {
+      border: 1px solid #d1d5db !important;
+    }
+    table.report-table th {
+      background: #f3f4f6 !important;
+      color: #1f2937 !important;
+      border: 1px solid #d1d5db !important;
+      font-weight: 700 !important;
+    }
+    table.report-table td {
+      border: 1px solid #e5e7eb !important;
+      color: #111827 !important;
+    }
+    .badge-tag {
+      border: 1px solid #9ca3af !important;
+      color: #111827 !important;
+      background: #f3f4f6 !important;
+    }
+    .status-pill.active {
+      background: #dcfce7 !important;
+      color: #166534 !important;
+      border: 1px solid #86efac !important;
+    }
+  }
+</style>
+
+<div class="user-report-wrapper">
+  <!-- Top Bar -->
+  <div class="report-top-bar">
+    <h2>
+      <a href="{% url 'admin:accounts_usersearch_changelist' %}" style="color: #94a3b8; text-decoration: none;">←</a>
+      User Application & Executive Dossier
+    </h2>
+    <button class="btn-export-pdf" onclick="window.print()">📄 Export Official Application (PDF)</button>
+  </div>
+
+  <!-- 2-Column Dashboard Grid -->
+  <div class="report-grid">
+    <!-- Left Sidebar Column -->
+    <div class="sidebar-column">
+      <div class="report-card profile-sidebar-card">
+        <div class="avatar-container">
+          {% if profile_photo_url %}
+            <img src="{{ profile_photo_url }}" class="avatar-img" alt="Profile Avatar" />
+          {% else %}
+            <div class="avatar-placeholder">{{ report_initial }}</div>
+          {% endif %}
+        </div>
+
+        <h3 class="user-display-name">{{ report_full_name }}</h3>
+        <p class="user-display-email">{{ report_user.email }}</p>
+
+        <span class="status-pill {% if report_user.is_active %}active{% else %}inactive{% endif %}">
+          {% if report_user.is_active %}● Active Member{% else %}○ Inactive{% endif %}
+        </span>
+
+        <hr style="border-color: #1e2638; margin: 16px 0;" />
+
+        <div class="meta-list">
+          <div class="meta-item">
+            <span class="meta-icon">🆔</span>
+            <div class="meta-content">
+              <label>Registration ID</label>
+              <span>{{ registration_id }}</span>
+            </div>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">📅</span>
+            <div class="meta-content">
+              <label>Registration Date</label>
+              <span>{{ report_user.date_joined|date:"d M Y" }}</span>
+            </div>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">👤</span>
+            <div class="meta-content">
+              <label>Role</label>
+              <span>{{ report_user.get_role_display }}</span>
+            </div>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">⚧️</span>
+            <div class="meta-content">
+              <label>Gender</label>
+              <span>{{ report_user.get_gender_display|default:"Not specified" }}</span>
+            </div>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">📞</span>
+            <div class="meta-content">
+              <label>Phone Number</label>
+              <span>{{ report_user.phone_number|default:"N/A" }}</span>
+            </div>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">🎂</span>
+            <div class="meta-content">
+              <label>Date of Birth</label>
+              <span>{{ report_user.date_of_birth|date:"d M Y"|default:"N/A" }}</span>
+            </div>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">🔐</span>
+            <div class="meta-content">
+              <label>Account Verified</label>
+              <span>{% if report_user.is_email_verified %}✅ Verified{% else %}❌ Unverified{% endif %}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-box">
+          <div class="sidebar-box-title">📍 Address & Location</div>
+          <div style="font-size: 13px; color: #e2e8f0;">{{ user_address }}</div>
+        </div>
+
+        {% if student_profile.skills %}
+        <div class="sidebar-box">
+          <div class="sidebar-box-title">🛠️ Skills & Domains</div>
+          <div style="font-size: 12px; color: #38bdf8;">{{ student_profile.skills }}</div>
+        </div>
+        {% endif %}
+
+        <div class="sidebar-box">
+          <div class="sidebar-box-title">⚡ Admin Quick Actions</div>
+          <div class="action-buttons">
+            <button type="button" class="btn-quick-action" onclick="toggleAdminEditForm()">✏️ Edit Fields</button>
+            <a href="{% url 'admin:password_change' %}" class="btn-quick-action">🔑 Password Reset</a>
+            {% if has_delete_permission and report_user.role != 'STUDENT' %}
+              <a href="delete/" class="btn-quick-action btn-danger">🗑️ Delete Account</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Main Column -->
+    <div class="main-column">
+      <!-- 1. Account & Security Overview -->
+      <div class="report-card">
+        <h4 class="report-card-title"><span><span class="plus">+</span> 1. Account & Identity Overview</span></h4>
+        <div class="info-grid-2">
+          <div class="info-field">
+            <label>Primary Email</label>
+            <p>{{ report_user.email }}</p>
+          </div>
+          <div class="info-field">
+            <label>Status & Role</label>
+            <p>
+              {% if report_user.is_active %}<span class="badge-tag badge-success">Active</span>{% else %}<span class="badge-tag badge-danger">Disabled</span>{% endif %}
+              <span class="badge-tag badge-info">{{ report_user.get_role_display }}</span>
+            </p>
+          </div>
+          <div class="info-field">
+            <label>Gender</label>
+            <p>{{ report_user.get_gender_display|default:"Not specified" }}</p>
+          </div>
+          <div class="info-field">
+            <label>Mapped Notification Email</label>
+            <p>{{ report_user.mapped_email|default:"None (Primary used)" }}</p>
+          </div>
+          <div class="info-field">
+            <label>Last Login</label>
+            <p>{{ report_user.last_login|date:"d M Y, h:i A"|default:"Never logged in" }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Academic / Professional Profile Details -->
+      <div class="report-card">
+        <h4 class="report-card-title"><span><span class="plus">+</span> 2. Profile & Background Details</span></h4>
+        {% if report_user.role == 'STUDENT' %}
+          <div class="info-grid-2">
+            <div class="info-field">
+              <label>College / University</label>
+              <p>{{ student_profile.college|default:"N/A" }}</p>
+            </div>
+            <div class="info-field">
+              <label>Degree & Specialization</label>
+              <p>{{ student_profile.degree|default:"N/A" }} — {{ student_profile.specialization|default:"N/A" }}</p>
+            </div>
+            <div class="info-field">
+              <label>Assigned Program & Cohort</label>
+              <p style="color: #38bdf8;">{{ student_course_name }} ({{ student_cohort_code }})</p>
+            </div>
+            <div class="info-field">
+              <label>Education Level & Graduation</label>
+              <p>{{ student_profile.get_education_level_display }} ({{ student_profile.graduation_year|default:"N/A" }})</p>
+            </div>
+            <div class="info-field">
+              <label>Assigned Mentor(s)</label>
+              <p style="color: #4ade80;">{{ mentor_names }}</p>
+            </div>
+            <div class="info-field">
+              <label>Assigned Volunteer(s)</label>
+              <p style="color: #facc15;">{{ volunteer_names }}</p>
+            </div>
+            <div class="info-field">
+              <label>Official Student Status</label>
+              <p>
+                {% if student_profile.is_official_student %}
+                  <span class="badge-tag badge-success">Official Student</span>
+                {% else %}
+                  <span class="badge-tag badge-secondary">Pending Verification</span>
+                {% endif %}
+              </p>
+            </div>
+            <div class="info-field">
+              <label>Student ID Issued Date</label>
+              <p>{{ student_profile.identity_issued_at|date:"d M Y"|default:"Not Issued" }}</p>
+            </div>
+          </div>
+
+        {% elif report_user.role == 'MENTOR' %}
+          <div class="info-grid-2">
+            <div class="info-field">
+              <label>Designation & Organization</label>
+              <p>{{ mentor_profile.designation|default:"N/A" }} at {{ mentor_profile.company_name|default:"N/A" }}</p>
+            </div>
+            <div class="info-field">
+              <label>Expertise & Domains</label>
+              <p>{{ mentor_profile.expertise|default:"N/A" }}</p>
+            </div>
+            <div class="info-field">
+              <label>Experience</label>
+              <p>{{ mentor_profile.years_of_experience|default:"N/A" }} years</p>
+            </div>
+            <div class="info-field">
+              <label>Total Students Taught</label>
+              <p style="color: #4ade80; font-size: 15px; font-weight: bold;">{{ total_students_count }} Students</p>
+            </div>
+          </div>
+
+        {% elif report_user.role == 'VOLUNTEER' or report_user.role == 'TRUSTEE' %}
+          <div class="info-grid-2">
+            <div class="info-field">
+              <label>Organization & Occupation</label>
+              <p>{{ volunteer_profile.organization_name|default:"N/A" }} — {{ volunteer_profile.occupation|default:"N/A" }}</p>
+            </div>
+            <div class="info-field">
+              <label>Skills & Areas of Support</label>
+              <p>{{ volunteer_profile.skills|default:"N/A" }}</p>
+            </div>
+            <div class="info-field">
+              <label>Total Students Supported</label>
+              <p style="color: #4ade80; font-size: 15px; font-weight: bold;">{{ total_students_count }} Students</p>
+            </div>
+            <div class="info-field">
+              <label>Availability</label>
+              <p>{{ volunteer_profile.availability_notes|default:"N/A" }}</p>
+            </div>
+          </div>
+
+        {% elif report_user.role == 'COMPANY' %}
+          <div class="info-grid-2">
+            <div class="info-field">
+              <label>Company Name & Industry</label>
+              <p>{{ company_profile.name }} ({{ company_profile.industry|default:"N/A" }})</p>
+            </div>
+            <div class="info-field">
+              <label>Shortlisted Candidates</label>
+              <p style="color: #facc15; font-size: 15px; font-weight: bold;">{{ company_shortlisted_students|length }} student(s)</p>
+            </div>
+            <div class="info-field">
+              <label>Location & Website</label>
+              <p>{{ company_profile.location|default:"N/A" }} — {{ company_profile.website|default:"N/A" }}</p>
+            </div>
+            <div class="info-field">
+              <label>Corporate Verification</label>
+              <p>{% if company_profile.is_verified %}<span class="badge-tag badge-success">Verified Partner</span>{% else %}<span class="badge-tag badge-danger">Unverified</span>{% endif %}</p>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- 3. Admissions & Applications Journey -->
+      {% if applications_list %}
+      <div class="report-card">
+        <h4 class="report-card-title"><span><span class="plus">+</span> 3. Admissions & Course Applications</span> <span>{{ applications_list|length }} Record(s)</span></h4>
+        <div class="report-table-wrapper">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>App #</th>
+                <th>Course</th>
+                <th>Assigned Cohort</th>
+                <th>Status</th>
+                <th>Applied Date</th>
+                <th>Verification</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for app in applications_list %}
+              <tr>
+                <td><b>{{ app.application_number }}</b></td>
+                <td>{{ app.course.name }}</td>
+                <td><span class="badge-tag badge-info">{{ app.assigned_cohort.code|default:"Unassigned" }}</span></td>
+                <td><span class="badge-tag badge-success">{{ app.get_status_display }}</span></td>
+                <td>{{ app.applied_at|date:"d M Y" }}</td>
+                <td>{{ app.get_role_verification_status_display }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 4. Screening Schedules, Interviews & Exams -->
+      {% if prescreening_schedules or candidate_interviews or prescreening_exams %}
+      <div class="report-card">
+        <h4 class="report-card-title"><span><span class="plus">+</span> 4. Screening, Interviews & Entrance Evaluations</span></h4>
+        <div class="report-table-wrapper">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Scheduled Date / Time</th>
+                <th>Examiner / Proctor</th>
+                <th>Score / Result</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ps in prescreening_schedules %}
+              <tr>
+                <td><b>Pre-Screening</b></td>
+                <td>{{ ps.scheduled_date|date:"d M Y" }} {{ ps.scheduled_time|default:"" }}</td>
+                <td>{{ ps.examiner.get_full_name|default:ps.examiner.email|default:"N/A" }}</td>
+                <td>Score: {{ ps.score|default:"Pending" }}</td>
+                <td><span class="badge-tag badge-info">{{ ps.get_status_display }}</span></td>
+              </tr>
+              {% endfor %}
+              {% for iv in candidate_interviews %}
+              <tr>
+                <td><b>Interview</b></td>
+                <td>{{ iv.scheduled_date|date:"d M Y" }} {{ iv.scheduled_time|default:"" }}</td>
+                <td>{{ iv.interviewer.get_full_name|default:iv.interviewer.email|default:"N/A" }}</td>
+                <td>Qualified: {{ iv.qualified|yesno:"Yes,No,Pending" }}</td>
+                <td><span class="badge-tag badge-info">{{ iv.get_status_display }}</span></td>
+              </tr>
+              {% endfor %}
+              {% for ex in prescreening_exams %}
+              <tr>
+                <td><b>Exam Result</b></td>
+                <td>{{ ex.submitted_at|date:"d M Y, h:i A"|default:"Not Submitted" }}</td>
+                <td>{{ ex.proctor_name|default:"Automated" }}</td>
+                <td><b>{{ ex.marks_obtained|default:"0" }} / {{ ex.total_marks }} ({{ ex.percentage|default:"0" }}%)</b></td>
+                <td>{% if ex.qualified %}<span class="badge-tag badge-success">Passed</span>{% else %}<span class="badge-tag badge-danger">Failed</span>{% endif %}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 5. Academic & Cohort Management (Mentor / Volunteer / Student) -->
+      {% if academic_cohorts %}
+      <div class="report-card">
+        <h4 class="report-card-title"><span><span class="plus">+</span> 5. Assigned Academic Cohorts</span> <span>{{ academic_cohorts|length }} Cohort(s)</span></h4>
+        <div class="report-table-wrapper">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Course</th>
+                <th>Status</th>
+                <th>Duration</th>
+                <th>Students Enrolled</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in academic_cohorts %}
+              <tr>
+                <td><b>{{ c.code }}</b></td>
+                <td>{{ c.name }}</td>
+                <td>{{ c.course.name }}</td>
+                <td><span class="badge-tag badge-info">{{ c.get_status_display }}</span></td>
+                <td>{{ c.start_date|date:"d M Y" }} → {{ c.end_date|date:"d M Y" }}</td>
+                <td><b>{{ c.applications.count }} / {{ c.max_students }}</b></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 6. Attendance & Class Management -->
+      {% if attendance_records_list or attendance_summaries_list or absence_warnings_list %}
+      <div class="report-card">
+        <h4 class="report-card-title"><span><span class="plus">+</span> 6. Attendance & Class Activity</span> <span>Rate: {{ attendance_percentage }}%</span></h4>
+        <div class="metrics-grid" style="margin-bottom: 12px;">
+          <div class="metric-box">
+            <div class="metric-circle-icon orange">🏫</div>
+            <div class="metric-value">{{ attendance_percentage }}%</div>
+            <div class="metric-label">Attendance Rate</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-circle-icon blue">📅</div>
+            <div class="metric-value">{{ attendance_records_list|length }}</div>
+            <div class="metric-label">Recent Classes Logged</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-circle-icon purple">⚠️</div>
+            <div class="metric-value">{{ absence_warnings_list|length }}</div>
+            <div class="metric-label">Absence Warnings</div>
+          </div>
+        </div>
+        {% if attendance_records_list %}
+        <div class="report-table-wrapper">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Class Date</th>
+                <th>Type</th>
+                <th>Attendance Status</th>
+                <th>Time Joined</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for att in attendance_records_list %}
+              <tr>
+                <td><b>{{ att.class_date|date:"d M Y" }}</b></td>
+                <td>{{ att.get_class_type_display }}</td>
+                <td>
+                  {% if att.status == 'PRESENT' %}
+                    <span class="badge-tag badge-success">Present</span>
+                  {% elif att.status == 'ABSENT' %}
+                    <span class="badge-tag badge-danger">Absent</span>
+                  {% else %}
+                    <span class="badge-tag badge-warning">{{ att.status }}</span>
+                  {% endif %}
+                </td>
+                <td>{{ att.time_of_attendance|default:"N/A" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <!-- 7. Assignments & Capstone Projects Submissions -->
+      {% if assignment_submissions_list or capstone_submissions_list %}
+      <div class="report-card">
+        <h4 class="report-card-title"><span><span class="plus">+</span> 7. Assignments & Capstones Portfolio</span></h4>
+        <div class="report-table-wrapper">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Item / Project Title</th>
+                <th>Category</th>
+                <th>Submitted At</th>
+                <th>Score / Grade</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for asub in assignment_submissions_list %}
+              <tr>
+                <td><b>{{ asub.assignment.title }}</b></td>
+                <td>Assignment</td>
+                <td>{{ asub.submitted_at|date:"d M Y, h:i A" }}</td>
+                <td>{{ asub.marks_obtained|default:"-" }} / {{ asub.assignment.total_marks|default:"-" }}</td>
+                <td><span class="badge-tag badge-info">{{ asub.get_status_display }}</span></td>
+              </tr>
+              {% endfor %}
+              {% for csub in capstone_submissions_list %}
+              <tr>
+                <td><b>{{ csub.project.title }}</b></td>
+                <td>Capstone Project</td>
+                <td>{{ csub.submitted_at|date:"d M Y, h:i A" }}</td>
+                <td>Score: {{ csub.score|default:"Pending" }}</td>
+                <td><span class="badge-tag badge-success">{{ csub.get_status_display }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 8. Assessments & Module Tests -->
+      {% if module_test_submissions_list %}
+      <div class="report-card">
+        <h4 class="report-card-title"><span><span class="plus">+</span> 8. Assessments & Module Test Scorecard</span></h4>
+        <div class="report-table-wrapper">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Test Title</th>
+                <th>Marks Obtained</th>
+                <th>Total Marks</th>
+                <th>Percentage</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for mt in module_test_submissions_list %}
+              <tr>
+                <td><b>{{ mt.test.title }}</b></td>
+                <td>{{ mt.marks_obtained|default:"0" }}</td>
+                <td>{{ mt.total_marks }}</td>
+                <td><b>{{ mt.percentage|default:"0" }}%</b></td>
+                <td>
+                  {% if mt.qualified %}
+                    <span class="badge-tag badge-success">Passed</span>
+                  {% else %}
+                    <span class="badge-tag badge-danger">Failed</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 9. Volunteer Management (Tasks & Help Requests) -->
+      {% if volunteer_tasks_list or volunteer_help_requests_list %}
+      <div class="report-card">
+        <h4 class="report-card-title"><span><span class="plus">+</span> 9. Volunteer Tasks & Help Requests</span></h4>
+        <div class="report-table-wrapper">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Title / Request</th>
+                <th>Cohort</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Due Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for task in volunteer_tasks_list %}
+              <tr>
+                <td><b>{{ task.title }}</b></td>
+                <td>{{ task.cohort.code|default:"N/A" }}</td>
+                <td>{{ task.get_priority_display }}</td>
+                <td><span class="badge-tag badge-info">{{ task.get_status_display }}</span></td>
+                <td>{{ task.due_date|date:"d M Y"|default:"No deadline" }}</td>
+              </tr>
+              {% endfor %}
+              {% for hr in volunteer_help_requests_list %}
+              <tr>
+                <td><b>{{ hr.subject }}</b></td>
+                <td>{{ hr.cohort.code|default:"N/A" }}</td>
+                <td>-</td>
+                <td><span class="badge-tag badge-warning">{{ hr.get_status_display }}</span></td>
+                <td>{{ hr.created_at|date:"d M Y" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 10. Placements & Company Postings / Shortlists -->
+      {% if company_job_postings or company_job_references or company_shortlisted_students %}
+      <div class="report-card">
+        <h4 class="report-card-title"><span><span class="plus">+</span> 10. Placements, Job Postings & Openings</span></h4>
+        <div class="report-table-wrapper">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Title / Role</th>
+                <th>Location / Cohort</th>
+                <th>Type / Salary</th>
+                <th>Status / Applicants</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for jp in company_job_postings %}
+              <tr>
+                <td><b>{{ jp.title }}</b></td>
+                <td>{{ jp.location|default:"N/A" }}</td>
+                <td>{{ jp.salary_range|default:"N/A" }}</td>
+                <td><span class="badge-tag badge-info">{{ jp.get_status_display }} ({{ jp.applicants.count }} apps)</span></td>
+              </tr>
+              {% endfor %}
+              {% for jr in company_job_references %}
+              <tr>
+                <td><b>{{ jr.title }}</b></td>
+                <td>{{ jr.cohort.code }}</td>
+                <td>{{ jr.get_employment_type_display }}</td>
+                <td>{% if jr.is_active %}<span class="badge-tag badge-success">Active</span>{% else %}<span class="badge-tag badge-danger">Closed</span>{% endif %}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 11. Certificates & Honors -->
+      {% if certificates_list %}
+      <div class="report-card">
+        <h4 class="report-card-title"><span><span class="plus">+</span> 11. Issued Certificates & Honors</span> <span>{{ certificates_list|length }} Issued</span></h4>
+        <div class="report-table-wrapper">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Certificate #</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Issued Date</th>
+                <th>Verification Code</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cert in certificates_list %}
+              <tr>
+                <td><b>{{ cert.certificate_number }}</b></td>
+                <td>{{ cert.title|default:"Completion Certificate" }}</td>
+                <td><span class="badge-tag badge-info">{{ cert.get_certificate_type_display }}</span></td>
+                <td>{{ cert.issued_at|date:"d M Y" }}</td>
+                <td><code>{{ cert.verification_code }}</code></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 12. Support Requests, Notes & Feedback -->
+      <div class="report-card">
+        <h4 class="report-card-title"><span><span class="plus">+</span> 12. Communication, Support Tickets & Feedback</span></h4>
+        <div class="report-table-wrapper">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Reference #</th>
+                <th>Category</th>
+                <th>Subject / Details</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for req in user_support_requests %}
+              <tr>
+                <td><b>{{ req.request_number }}</b></td>
+                <td>{{ req.get_category_display }}</td>
+                <td>{{ req.subject }}</td>
+                <td><span class="badge-tag badge-warning">{{ req.get_status_display }}</span></td>
+                <td>{{ req.created_at|date:"d M Y" }}</td>
+              </tr>
+              {% endfor %}
+              {% for fb in feedbacks_list %}
+              <tr>
+                <td><b>Feedback</b></td>
+                <td>{{ fb.get_feedback_type_display }}</td>
+                <td>Rating: {{ fb.rating }}/5 — {{ fb.comments|default:"No comment" }}</td>
+                <td><span class="badge-tag badge-success">Recorded</span></td>
+                <td>{{ fb.created_at|date:"d M Y" }}</td>
+              </tr>
+              {% endfor %}
+              {% for pm in permission_messages %}
+              <tr>
+                <td><b>Absence Note</b></td>
+                <td>Leave Apology</td>
+                <td>{{ pm.message }}</td>
+                <td>{% if pm.is_read %}<span class="badge-tag badge-success">Read</span>{% else %}<span class="badge-tag badge-warning">Unread</span>{% endif %}</td>
+                <td>{{ pm.created_at|date:"d M Y" }}</td>
+              </tr>
+              {% endfor %}
+              {% if not user_support_requests and not feedbacks_list and not permission_messages %}
+              <tr><td colspan="5" style="text-align: center; color: #64748b;">No communication records found for this user.</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 13. Documents & Social Portfolios -->
+      <div class="report-card">
+        <h4 class="report-card-title"><span><span class="plus">+</span> 13. Digital Profiles & Credentials</span></h4>
+        <div class="docs-grid">
+          {% if student_profile.linkedin_url or mentor_profile.linkedin_url or volunteer_profile.linkedin_url %}
+            <a href="{{ student_profile.linkedin_url|default:mentor_profile.linkedin_url|default:volunteer_profile.linkedin_url }}" target="_blank" class="doc-card">
+              <div class="doc-icon">🔗</div>
+              <div class="doc-name">LinkedIn Profile</div>
+              <div class="doc-sub">Verified Link</div>
+            </a>
+          {% endif %}
+          {% if student_profile.github_url %}
+            <a href="{{ student_profile.github_url }}" target="_blank" class="doc-card">
+              <div class="doc-icon">🐙</div>
+              <div class="doc-name">GitHub Portfolio</div>
+              <div class="doc-sub">{{ student_profile.github_username|default:"Connected" }}</div>
+            </a>
+          {% endif %}
+          {% if student_profile.portfolio_url %}
+            <a href="{{ student_profile.portfolio_url }}" target="_blank" class="doc-card">
+              <div class="doc-icon">🌐</div>
+              <div class="doc-name">Personal Website</div>
+              <div class="doc-sub">Portfolio</div>
+            </a>
+          {% endif %}
+          {% if student_profile.resume %}
+            {% if student_resume_exists %}
+              <a href="{% url 'admin:studentprofile-resume-download' student_profile.pk %}" target="_blank" class="doc-card">
+                <div class="doc-icon">📄</div>
+                <div class="doc-name">Curriculum Vitae</div>
+                <div class="doc-sub">Download Resume</div>
+              </a>
+            {% else %}
+              <div class="doc-card" style="opacity: 0.6; cursor: not-allowed;" title="Referenced in database but file is missing from disk storage">
+                <div class="doc-icon">⚠️</div>
+                <div class="doc-name">Curriculum Vitae</div>
+                <div class="doc-sub" style="color: #f87171;">File Missing from Disk</div>
+              </div>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Expandable Admin Field Editor Panel -->
+      <div id="admin-edit-panel">
+        <h3 style="color: #38bdf8; margin-top: 0;">⚙️ Django Admin Account Field Editor</h3>
+        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Use this panel to modify database fields directly.</p>
+        <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}{% if form_url %}action="{{ form_url }}" {% endif %}method="post" id="{{ opts.model_name }}_form" novalidate>
+          {% csrf_token %}
+          {% block field_sets %}
+            {% for fieldset in adminform %}
+              {% include "admin/includes/fieldset.html" %}
+            {% endfor %}
+          {% endblock %}
+
+          {% block submit_buttons_bottom %}
+            {% submit_row %}
+          {% endblock %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleAdminEditForm() {
+    var panel = document.getElementById("admin-edit-panel");
+    if (panel.style.display === "none" || panel.style.display === "") {
+      panel.style.display = "block";
+      panel.scrollIntoView({ behavior: "smooth" });
+    } else {
+      panel.style.display = "none";
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,713 @@
+{
+  "title": "Android Application Development Internship - Entrance Test",
+  "clean_title": "Android",
+  "course_code": "ANDROID",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Screening Assessment",
+  "timer": 45,
+  "total_questions": 50,
+  "image_questions_count": 0,
+  "source_original_file": "Android.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What is Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A mobile operating system",
+        "A programming language",
+        "A database system",
+        "A web browser"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Which programming language is primarily used for Android development in this program?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Java",
+        "Kotlin",
+        "Python",
+        "C++"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Which IDE is used for Android development?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Eclipse",
+        "Visual Studio",
+        "Android Studio",
+        "IntelliJ IDEA"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "What is an Activity in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A single screen with a user interface",
+        "A background service",
+        "A database table",
+        "A network connection"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "What is a Fragment in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A reusable portion of an Activity's UI",
+        "A complete screen",
+        "A database record",
+        "A network request"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What is the purpose of an Intent in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To navigate between screens",
+        "To store data",
+        "To connect to the internet",
+        "To play audio"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "What is Material Design?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A design language by Google",
+        "A programming language",
+        "A database system",
+        "A testing framework"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "What is Git used for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Version control",
+        "Database management",
+        "UI design",
+        "Network communication"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "What is GitHub?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A platform for hosting and collaborating on code",
+        "A programming language",
+        "A database system",
+        "A testing tool"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "What is SharedPreferences in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A way to store key-value pairs",
+        "A database system",
+        "A network library",
+        "A UI component"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "What is SQLite in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A lightweight relational database",
+        "A programming language",
+        "A UI framework",
+        "A network protocol"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "What is Room Database in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "An abstraction layer over SQLite",
+        "A new database system",
+        "A UI library",
+        "A network library"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What does CRUD stand for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Create, Read, Update, Delete",
+        "Copy, Run, Update, Delete",
+        "Create, Render, Update, Display",
+        "Copy, Read, Update, Display"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "What is MVVM architecture?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Model-View-ViewModel",
+        "Model-View-View",
+        "Model-View-View-Model",
+        "Model-View-View-Model"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "What is a ViewModel in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A class that stores UI-related data",
+        "A UI component",
+        "A database table",
+        "A network request"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "What is a Repository pattern?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A way to manage data sources",
+        "A UI design pattern",
+        "A testing pattern",
+        "A network pattern"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "What is REST API?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "An architectural style for web services",
+        "A programming language",
+        "A database system",
+        "A UI framework"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "What is JSON?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A lightweight data interchange format",
+        "A programming language",
+        "A database system",
+        "A UI framework"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "What is Retrofit in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A type-safe HTTP client",
+        "A database system",
+        "A UI framework",
+        "A testing tool"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "What is Firebase?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A mobile and web application development platform",
+        "A programming language",
+        "A UI framework",
+        "A testing tool"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "What is Firebase Authentication?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A service for authenticating users",
+        "A database service",
+        "A storage service",
+        "A hosting service"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "What is Cloud Storage in Firebase?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A service for storing files",
+        "A database service",
+        "An authentication service",
+        "A hosting service"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "What is a runtime permission in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A permission requested at runtime",
+        "A permission requested at install time",
+        "A permission for system apps only",
+        "A permission for developers only"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "What is a Coroutine in Kotlin?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A concurrency design pattern",
+        "A UI component",
+        "A database table",
+        "A network request"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "What is WorkManager in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A library for managing background work",
+        "A UI component",
+        "A database system",
+        "A network library"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "What is a Notification in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A message displayed outside the app",
+        "A database record",
+        "A network request",
+        "A UI component"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "What is the purpose of unit testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To test individual components of code",
+        "To test the entire application",
+        "To test the user interface",
+        "To test network connections"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "What is UI testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Testing the user interface",
+        "Testing the database",
+        "Testing the network",
+        "Testing the backend"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "What is dark mode in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A UI theme with dark background",
+        "A night mode for apps",
+        "A power-saving mode",
+        "A network protocol"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "What is localization in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Adapting the app for different languages and regions",
+        "Adapting the app for different devices",
+        "Adapting the app for different networks",
+        "Adapting the app for different databases"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-31",
+      "text": "What is speech-to-text in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Converting speech into text",
+        "Converting text into speech",
+        "A database system",
+        "A UI component"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-32",
+      "text": "What is text-to-speech in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Converting text into speech",
+        "Converting speech into text",
+        "A database system",
+        "A UI component"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-33",
+      "text": "What is a chatbot in mobile applications?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "An AI-powered conversational agent",
+        "A database system",
+        "A network protocol",
+        "A UI component"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-34",
+      "text": "What is Agile development?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "An iterative approach to software development",
+        "A traditional approach to development",
+        "A testing approach",
+        "A deployment approach"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-35",
+      "text": "What is a user story in Agile?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A description of a feature from the user's perspective",
+        "A technical specification",
+        "A database schema",
+        "A UI design"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-36",
+      "text": "What is a wireframe?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A low-fidelity design of the app",
+        "A high-fidelity design",
+        "A database schema",
+        "A network diagram"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-37",
+      "text": "What is application signing in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Digitally signing the app for distribution",
+        "Installing the app",
+        "Testing the app",
+        "Debugging the app"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-38",
+      "text": "What is the purpose of app deployment?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To make the app available to users",
+        "To test the app",
+        "To develop the app",
+        "To design the app"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-39",
+      "text": "What is the Android application lifecycle?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The states an activity goes through",
+        "The states an app goes through",
+        "The states a database goes through",
+        "The states a network goes through"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-40",
+      "text": "What is the purpose of application architecture?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To structure the app for maintainability",
+        "To design the UI",
+        "To test the app",
+        "To deploy the app"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-41",
+      "text": "What is a responsive layout in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A layout that adapts to screen sizes",
+        "A layout that is fixed",
+        "A layout that is only for phones",
+        "A layout that is only for tablets"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-42",
+      "text": "What is accessibility in mobile apps?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Making apps usable for people with disabilities",
+        "Making apps fast",
+        "Making apps secure",
+        "Making apps beautiful"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-43",
+      "text": "What is input validation?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Checking user input for correctness and security",
+        "Storing user input",
+        "Displaying user input",
+        "Deleting user input"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-44",
+      "text": "What is application security?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Protecting the app from threats",
+        "Designing the app UI",
+        "Testing the app",
+        "Deploying the app"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-45",
+      "text": "What is performance optimization in Android?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Improving app speed and efficiency",
+        "Improving app design",
+        "Improving app security",
+        "Improving app deployment"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-46",
+      "text": "What is the purpose of code review in development?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To improve code quality",
+        "To deploy code",
+        "To test code",
+        "To design code"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-47",
+      "text": "What is a capstone project?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A final comprehensive project",
+        "A beginner-level project",
+        "A theoretical assignment",
+        "A group discussion"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-48",
+      "text": "What is the role of a mentor in this program?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To guide and validate learning",
+        "To do the work for students",
+        "To teach theory only",
+        "To conduct exams only"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-49",
+      "text": "How are AI tools used in this program?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "As assistants for coding support and debugging",
+        "To generate complete solutions without understanding",
+        "To replace mentors",
+        "To write all code"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-50",
+      "text": "Which of the following best describes the internship structure?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Project-based, mentor-guided, and AI-integrated",
+        "Theory-heavy and lecture-based",
+        "Self-paced without guidance",
+        "Only lectures without projects"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    }
+  ]
+}

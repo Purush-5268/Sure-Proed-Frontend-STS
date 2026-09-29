@@ -1,0 +1,433 @@
+{
+  "title": "G15 AutoCAD Admission Test",
+  "clean_title": "AutoCAD_Admission_Test",
+  "course_code": "CAD-MECHANICAL",
+  "exam_type": "PRESCREENING",
+  "module_topic": "AutoCAD & Engineering Drawing Screening",
+  "timer": 15,
+  "total_questions": 30,
+  "image_questions_count": 1,
+  "source_original_file": "050_G15_AutoCAD_Admission_Test.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "First-angle projection is commonly used in:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. US & Canada",
+        "B. Europe & Asia",
+        "C. Germany & India",
+        "D. None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "A √2 aspect ratio appears in which paper series?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. ANSI",
+        "B. ISO A",
+        "C. JIS",
+        "D. ARCH"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Sheet size A1 in mm is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 420x594",
+        "B. 594x841",
+        "C. 841x1189",
+        "D. 297x420"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Continuous thick line is used to show:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Hidden edges",
+        "B. Visible outlines",
+        "C. Centerlines",
+        "D. Dimensions"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "A chain line with thick ends denotes:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Centerlines",
+        "B. Hidden detail",
+        "C. Cutting-plane",
+        "D. Phantom lines"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which software is primarily for structural analysis?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Autocad",
+        "B. ANSYS",
+        "C. SolidWorks",
+        "D. CATIA"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Hidden lines represent:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Features not seen in current view",
+        "B. Center of circles",
+        "C. Cutting plane",
+        "D. Section fill"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "Which line is freehand zigzag?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Phantom",
+        "B. Center",
+        "C. Break line",
+        "D. Leader"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Dimensional arrowheads go at:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Line's midpoint",
+        "B. Both ends of dimension line",
+        "C. Extension line only",
+        "D. Never used"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "A0 paper area equals:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 0.5 m²",
+        "B. 1 m²",
+        "C. 2 m²",
+        "D. 841x1189 mm²"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Phantom lines indicate:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Breaks",
+        "B. Hidden detail",
+        "C. Alternate positions",
+        "D. Centerlines"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "In ASME Y14.2, visible lines must be:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Thin continuous",
+        "B. Thick continuous",
+        "C. Chain",
+        "D. Dashed"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "CAD tool for BIM is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. CATIA",
+        "B. Revit",
+        "C. ANSYS",
+        "D. AutoCAD LT"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "ANSI D sheet measures:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 11x17 in",
+        "B. 22x34 in",
+        "C. 17x22 in",
+        "D. 8.5x11 in"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Tricky: A3 folded from A1 results in?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. One-eighth of A1",
+        "B. One-quarter of A1",
+        "C. One-half of A1",
+        "D. Same size"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Centrelines are drawn as:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Dotted",
+        "B. Long-short dashed",
+        "C. Chain",
+        "D. Freehand"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "CAD software focused on parametric solids:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. AutoCAD",
+        "B. SolidWorks",
+        "C. ANSYS",
+        "D. Revit"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "Continuous thin line NOT used for:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Dimensioning",
+        "B. Projection",
+        "C. Visible outlines",
+        "D. Hatchie"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Cutting-plane arrows indicate:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Hidden edges",
+        "B. Next drawing sheet",
+        "C. Viewing direction",
+        "D. Limit of scale"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "ISO B-series is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Geometric mean between A sizes",
+        "B. Double A-series",
+        "C. Envelopes",
+        "D. US metric"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "Leader lines ideally drawn at:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 90°",
+        "B. ~45°",
+        "C. Freehand",
+        "D. Always straight"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "CAE includes:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Drafting",
+        "B. 3D modelling",
+        "C. Simulation & analysis",
+        "D. CNC programming"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "Tricky: On an engineering drawing, phantom line weight is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Lightest",
+        "B. Thinnest centerline",
+        "C. Heavier than hidden line",
+        "D. Thickest"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "A2 sheet = half of A1 => dimensions:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 594x420 mm",
+        "B. 420x297 mm",
+        "C. 420x594 mm",
+        "D. 297x210 mm"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "CAM software goal:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Structural design",
+        "B. Animation",
+        "C. Automated manufacturing",
+        "D. Simulation"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "Section lines (hatching) angle convention:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 0°",
+        "B. 90°",
+        "C. 45°",
+        "D. 60°"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "Cutting-plane line pattern:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Thick chain long-short-short",
+        "B. Thin dashed",
+        "C. Zigzag",
+        "D. Phantom"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "Tricky: ISO C series is used for:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Envelopes for A-series sheets",
+        "B. Books",
+        "C. Posters",
+        "D. Wide format drawings"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "ANSI E sheet equals:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 22x34 in",
+        "B. 34x44 in",
+        "C. 11x17 in",
+        "D. 9x12 in"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "",
+      "image": "data:image/png;base64,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",
+      "type": "image",
+      "options": [
+        "A. Drawing, Dimensioning, Estimation",
+        "B. Design, Manufacture, Analysis",
+        "C. Copy, Amend, Evaluate",
+        "D. Code, Assemble, Export"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    }
+  ]
+}

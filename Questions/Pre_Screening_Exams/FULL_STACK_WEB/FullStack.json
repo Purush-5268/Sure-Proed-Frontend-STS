@@ -1,0 +1,713 @@
+{
+  "title": "Full Stack Development Internship - Industry-Focussed, AI-Augmented & Mentor-Led - Entrance Test",
+  "clean_title": "FullStack",
+  "course_code": "FULLSTACK",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Screening Assessment",
+  "timer": 45,
+  "total_questions": 50,
+  "image_questions_count": 0,
+  "source_original_file": "FullStack.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What does HTML stand for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Hyper Text Markup Language",
+        "High Tech Modern Language",
+        "Hyper Transfer Markup Language",
+        "High Text Machine Language"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Which CSS layout model is used to create one-dimensional layouts?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "CSS Grid",
+        "Flexbox",
+        "CSS Float",
+        "CSS Table"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Which JavaScript method is used to fetch data from an API?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "getData()",
+        "fetch()",
+        "request()",
+        "callAPI()"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "What is the primary purpose of Node.js?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To build mobile applications",
+        "To run JavaScript on the server-side",
+        "To style web pages",
+        "To manage databases"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Which command is used to initialize a new Node.js project?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "npm start",
+        "npm init",
+        "node init",
+        "npm install"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What is JSX in React?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A JavaScript XML syntax extension",
+        "A JavaScript framework",
+        "A database query language",
+        "A CSS preprocessor"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Which React hook is used to manage state in a functional component?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "useEffect",
+        "useState",
+        "useContext",
+        "useReducer"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "What is MongoDB?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A relational database",
+        "A NoSQL document database",
+        "A JavaScript library",
+        "A web framework"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which package is used to define schemas and models in MongoDB with Node.js?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "mongodb-client",
+        "mongoose",
+        "mongodb-schema",
+        "node-mongo"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "What does REST stand for in REST API?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Representational State Transfer",
+        "Remote Service Transfer",
+        "Relational State Transport",
+        "Representational Service Technology"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Which HTTP method is used to retrieve data from a server?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "POST",
+        "PUT",
+        "GET",
+        "DELETE"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "What is the purpose of the .env file in a Node.js project?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To store HTML templates",
+        "To store environment variables",
+        "To define CSS styles",
+        "To configure React components"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "Which tool is used for API testing and documentation?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Postman",
+        "VS Code",
+        "GitHub",
+        "MongoDB Compass"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "What is the purpose of middleware in Express.js?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To render HTML pages",
+        "To handle requests before they reach routes",
+        "To connect to the database",
+        "To define React components"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Which CSS framework is commonly used with React for styling?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Bootstrap",
+        "jQuery",
+        "Angular",
+        "Vue.js"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "What is the purpose of the package.json file?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To store HTML code",
+        "To manage project dependencies and scripts",
+        "To define CSS styles",
+        "To configure the database"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "Which React hook is used to perform side effects like data fetching?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "useState",
+        "useEffect",
+        "useContext",
+        "useMemo"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "What is the difference between props and state in React?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Props are mutable, state is immutable",
+        "Props are passed from parent, state is managed within the component",
+        "Props are used for styling, state for logic",
+        "There is no difference"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Which MongoDB method is used to find documents in a collection?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "db.collection.get()",
+        "db.collection.find()",
+        "db.collection.search()",
+        "db.collection.retrieve()"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "What is the purpose of the 'keys' attribute in React when rendering lists?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To style list items",
+        "To uniquely identify elements for efficient updates",
+        "To sort the list",
+        "To filter the list"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "Which Git command is used to save changes to the local repository?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "git push",
+        "git commit",
+        "git add",
+        "git pull"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "What is the purpose of CORS in backend development?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To enable cross-origin resource sharing",
+        "To compress data",
+        "To encrypt API responses",
+        "To manage database connections"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "Which tool is used for visualizing the React component tree?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "React DevTools",
+        "Chrome DevTools",
+        "Postman",
+        "MongoDB Compass"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "What is the purpose of Mongoose in MongoDB development?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To provide a GUI for MongoDB",
+        "To define schemas and models with validation",
+        "To create API documentation",
+        "To manage React components"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "Which React Router hook is used to access the current location object?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "useHistory",
+        "useLocation",
+        "useParams",
+        "useRouteMatch"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "What is the difference between PUT and PATCH HTTP methods?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "PUT creates a resource, PATCH updates it",
+        "PUT replaces the entire resource, PATCH updates partially",
+        "PUT is for reading, PATCH for writing",
+        "There is no difference"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "Which of the following is NOT a valid HTTP status code?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "200 OK",
+        "404 Not Found",
+        "500 Internal Server Error",
+        "300 Redirect Permanently"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "What is the purpose of the 'populate' method in Mongoose?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To delete documents",
+        "To replace references with actual documents",
+        "To create new collections",
+        "To sort query results"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "Which AI tool is recommended for React component architecture and UI patterns?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "ChatGPT",
+        "Perplexity",
+        "Claude",
+        "Gemini"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "What is the purpose of the `useEffect` dependency array?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To define component props",
+        "To control when the effect runs",
+        "To style the component",
+        "To handle errors"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-31",
+      "text": "Which MongoDB operator is used for logical 'AND' conditions?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "$or",
+        "$and",
+        "$nor",
+        "$not"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-32",
+      "text": "What is the recommended architecture pattern for Node.js/Express applications?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "MVC (Model-View-Controller)",
+        "MVP (Model-View-Presenter)",
+        "MVVM (Model-View-ViewModel)",
+        "Singleton"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-33",
+      "text": "Which of the following is a MongoDB aggregation pipeline stage?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "$match",
+        "$where",
+        "$find",
+        "$get"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-34",
+      "text": "What is the purpose of the `express.json()` middleware?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To parse JSON request bodies",
+        "To serve static files",
+        "To handle errors",
+        "To log requests"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-35",
+      "text": "Which React pattern is used to share data between components without passing props down manually?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Props drilling",
+        "Context API",
+        "Render props",
+        "HOC (Higher Order Components)"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-36",
+      "text": "What is the time complexity of indexing in MongoDB?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "O(1)",
+        "O(log n)",
+        "O(n)",
+        "O(n log n)"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-37",
+      "text": "Which of the following is a design pattern for React applications?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Container-Component Pattern",
+        "Singleton Pattern",
+        "Factory Pattern",
+        "Observer Pattern"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-38",
+      "text": "What is the purpose of the `npm audit` command?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To check for outdated packages",
+        "To scan for security vulnerabilities",
+        "To optimize bundle size",
+        "To install packages"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-39",
+      "text": "Which approach is best for handling errors in Express.js applications?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Using try-catch blocks in every route",
+        "Creating a global error handling middleware",
+        "Ignoring errors",
+        "Using window.onerror"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-40",
+      "text": "What is the primary advantage of using React over vanilla JavaScript?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Better performance",
+        "Reusable components and declarative UI",
+        "Native mobile support",
+        "Built-in database"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-41",
+      "text": "Which MongoDB feature is used to improve query performance?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Indexes",
+        "Collections",
+        "Documents",
+        "Views"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-42",
+      "text": "What is the difference between client-side and server-side rendering in React?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "CSR renders on the server, SSR on the client",
+        "CSR renders on the client, SSR on the server",
+        "CSR is slower, SSR is faster",
+        "Both are the same"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-43",
+      "text": "Which tool is recommended for converting Figma designs to React components?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Builder.io Visual Copilot",
+        "Postman",
+        "MongoDB Compass",
+        "VS Code"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-44",
+      "text": "What is the purpose of the `useMemo` hook in React?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To memoize expensive computations",
+        "To create refs",
+        "To manage state",
+        "To fetch data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-45",
+      "text": "Which authentication mechanism is commonly used in full stack applications?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "JWT (JSON Web Tokens)",
+        "OAuth 1.0",
+        "Basic Authentication only",
+        "Cookie-based authentication only"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-46",
+      "text": "What is the primary advantage of using MongoDB's aggregation framework?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Simple query execution",
+        "Advanced data processing and transformation",
+        "Faster read operations",
+        "Automatic schema validation"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-47",
+      "text": "Which strategy is recommended for optimizing React application performance?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Lazy loading components",
+        "Using inline styles",
+        "Avoiding hooks",
+        "Using class components only"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-48",
+      "text": "What is the purpose of the `express.Router()` function?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To create modular route handlers",
+        "To connect to the database",
+        "To render views",
+        "To parse cookies"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-49",
+      "text": "Which of the following is a best practice for designing REST API endpoints?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Use verbs in URLs (e.g., /getUsers)",
+        "Use nouns in URLs (e.g., /users)",
+        "Use GET for all operations",
+        "Use query parameters for all filters"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-50",
+      "text": "How would you implement a many-to-many relationship in MongoDB using Mongoose?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Using embedded arrays",
+        "Using reference arrays with populate",
+        "Using a junction collection",
+        "Using embedded documents"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    }
+  ]
+}

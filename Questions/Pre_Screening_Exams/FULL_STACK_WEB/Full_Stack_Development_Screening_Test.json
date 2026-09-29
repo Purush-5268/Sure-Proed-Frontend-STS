@@ -1,0 +1,433 @@
+{
+  "title": "Full Stack Development",
+  "clean_title": "Full_Stack_Development_Screening_Test",
+  "course_code": "FULL-STACK-WEB",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Web Basics & Programming Screening",
+  "timer": 15,
+  "total_questions": 30,
+  "image_questions_count": 0,
+  "source_original_file": "001_Full_Stack_Development.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What is HTML?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "HTML describes the structure of a webpage",
+        "HTML is the standard markup language mainly used to create web pages",
+        "HTML consists of a set of elements that helps the browser how to view the content",
+        "All of the mentioned"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Who is the father of HTML?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Tim Berners-Lee",
+        "Rasmus Lerdorf",
+        "Brendan Eich",
+        "Sergey Brin"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "HTML stands for __________",
+      "image": "",
+      "type": "text",
+      "options": [
+        "HyperText Machine Language",
+        "HyperText Markup Language",
+        "HyperText Marking Language",
+        "None"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "What is the correct syntax of doctype in HTML5?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "</doctype html>",
+        "<doctype html>",
+        "<doctype html!>",
+        "<!doctype html>"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Which of the following is used to read an HTML page and render it?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Web server",
+        "Web network",
+        "Web browser",
+        "None"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which of the following tag is used for inserting the largest heading in HTML?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "h1",
+        "h2",
+        "h3",
+        "h4"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "What is DOM in HTML?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Language dependent application programming",
+        "Hierarchy of objects in ASP.NET",
+        "Application programming interface",
+        "Convention for representing and interacting with objects in html documents"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "In which part of the HTML metadata is contained?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "title tag",
+        "body tag",
+        "head tag",
+        "html tag"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which element is used to get highlighted text in HTML5?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<highlight>",
+        "<mark>",
+        "<u>",
+        "<b>"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Which of the following is not a HTML5 tag?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<track>",
+        "<video>",
+        "<slider>",
+        "<source>"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "How do we write comments in HTML?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "</…….>",
+        "<.......................>",
+        "<!……>",
+        "<…….!>"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Which of the following elements in HTML5 defines video or movie content?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<video>",
+        "<movie>",
+        "<audio>",
+        "<media>"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "Which HTML tag is used to convert the plain text into italic format?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<b>",
+        "<color>",
+        "<font>",
+        "<i>"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which element is used for or styling HTML5 layout?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "CSS",
+        "JQuery",
+        "PHP",
+        "JavaScript"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Which HTML tag is used to insert an image?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<img alt=”htmllogo.jpg” />",
+        "<img link=”htmllogo.jpg” />",
+        "<img src=\"htmllogo.jpg\" alt=\"logo\" />",
+        "<img url=”htmllogo.jpg” />"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Which character is used to represent when a tag is closed in HTML?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "#",
+        "!",
+        "/",
+        "\\"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "In HTML, which attribute is used to create a link that opens in a new window tab?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "src=”_blank”",
+        "alt=”_blank”",
+        "target=”_blank”",
+        "target=”_self”"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "Which of the following HTML tag is used to create an unordered list?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<ol>",
+        "<ul/>",
+        "<li>",
+        "<ll>"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Which tag is used to create a dropdown in HTML Form?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<input>",
+        "<select>",
+        "<text>",
+        "<textarea>"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "Which tag is used to create a numbered list in HTML?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<ol>",
+        "<li>",
+        "<ul>",
+        "<ll>"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "What is the correct syntax to output \"Hello World\" in JavaScript?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "print(\"Hello World\")",
+        "put(\"Hello World\")",
+        "console.log(\"Hello World\")",
+        "printf(\"Hello World\")"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "Inside which HTML element do we put the JavaScript?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<js>",
+        "<script>",
+        "<code>",
+        "<javascript>"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "How do you create a function in JavaScript?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "function:myFunc()",
+        "function = myFunc()",
+        "function myFunc()",
+        "create function myFunc()"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "Which operator is used to assign a value to a variable?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "=",
+        "==",
+        "===",
+        ":="
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "Which of the following is NOT a JavaScript data type?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "String",
+        "Number",
+        "Boolean",
+        "Character"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "What is the result of 2 + \"2\" in JavaScript?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "4",
+        "22",
+        "NaN",
+        "undefined"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "Which keyword declares a constant in JavaScript?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "let",
+        "var",
+        "const",
+        "constant"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "What will console.log(1 + \"1\" - 1) output?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "1",
+        "10",
+        "11",
+        "12"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "What will be the result of typeof NaN?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "NaN",
+        "number",
+        "undefined",
+        "object"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "Which is the correct way to comment a single line in JavaScript?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<!-- comment -->",
+        "## comment",
+        "// comment",
+        "**comment"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    }
+  ]
+}

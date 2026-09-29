@@ -1,0 +1,178 @@
+{
+  "info": {
+    "name": "Sure ProEd Platform API",
+    "description": "Postman collection for the Sure ProEd MVP backend API. Set base_url to http://localhost:8000 and token after login.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth - Obtain Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@suretrust.local\",\n  \"password\": \"Admin@123\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/token/"
+      }
+    },
+    {
+      "name": "Auth - Refresh Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refresh\": \"paste-refresh-token-here\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/token/refresh/"
+      }
+    },
+    {
+      "name": "Swagger Schema",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/schema/"
+      }
+    },
+    {
+      "name": "Swagger UI",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/docs/"
+      }
+    },
+    {
+      "name": "Users - List",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/users/"
+      }
+    },
+    {
+      "name": "Students - List",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/students/"
+      }
+    },
+    {
+      "name": "Courses - List",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/courses/"
+      }
+    },
+    {
+      "name": "Cohorts - List",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/cohorts/"
+      }
+    },
+    {
+      "name": "Applications - List",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/applications/"
+      }
+    },
+    {
+      "name": "Questions - List",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/questions/"
+      }
+    },
+    {
+      "name": "Exams - List",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/exams/"
+      }
+    },
+    {
+      "name": "Attendance - List",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/attendance/"
+      }
+    },
+    {
+      "name": "Assignments - List",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/assignments/"
+      }
+    },
+    {
+      "name": "Submissions - List",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/submissions/"
+      }
+    },
+    {
+      "name": "Certificates - List",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/certificates/"
+      }
+    },
+    {
+      "name": "Companies - List",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/companies/"
+      }
+    },
+    {
+      "name": "Courses - Create Example",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"CRS-MANUAL-001\",\n  \"name\": \"Manual API Test Course\",\n  \"domain\": \"Software\",\n  \"subject\": \"Django REST Framework\",\n  \"description\": \"Created from Postman\",\n  \"curriculum\": [{\"module\": 1, \"title\": \"API Basics\", \"topics\": [\"CRUD\"]}],\n  \"duration_weeks\": 4,\n  \"difficulty\": \"BEGINNER\",\n  \"minimum_attendance_percentage\": \"75.00\",\n  \"minimum_assignment_percentage\": \"60.00\",\n  \"status\": \"PUBLISHED\",\n  \"created_by\": \"replace-with-user-id\"\n}"
+        },
+        "url": "{{base_url}}/api/courses/"
+      }
+    }
+  ]
+}

@@ -1,0 +1,293 @@
+{
+  "title": "Module 1 - Integrated VLSI",
+  "clean_title": "Module_1_Integrated_VLSI",
+  "course_code": "VLSI-DESIGN",
+  "exam_type": "MODULE_TEST",
+  "module_topic": "Module 1: Introduction to VLSI",
+  "timer": 10,
+  "total_questions": 20,
+  "image_questions_count": 0,
+  "source_original_file": "013_Module_1_-_Integrated_VLSI.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "The threshold voltage of a PMOS enhancement mode transistor is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "POSITIVE",
+        "NEGATIVE",
+        "ZERO",
+        "INFINITE"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "The increase in drain current of a MOSFET in saturation region with increase in drain to source voltage is due to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Drain induced barrier lowering (DIBL)",
+        "Body Effect",
+        "Channel Length Modulation",
+        "Velocity Saturation"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "In sub-threshold or weak inversion region of a MOSFET, the drain current:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Increases linearly with increase in gate to source voltage",
+        "Increases quadratically with increase in gate to source voltage",
+        "Increases exponentially with increase in gate to source voltage",
+        "Remains constant with increase in gate to source voltage"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "The increase in threshold voltage of a MOSFET with source to bulk voltage is commonly known as:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Pinch Off",
+        "Velocity Saturation",
+        "Body Effect",
+        "Channel Length Modulation"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Several low power applications like hearing aids, pacemakers, wrist watches and other battery-operated devices use which of the following regions of MOSFET operation:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Saturation Region",
+        "Linear Region",
+        "Sub-threshold or weak inversion region",
+        "None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "In deep sub-micron technologies with reduction in channel length threshold voltage:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Remains constant",
+        "Decreases",
+        "Increases",
+        "None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "In constant field scaling as we move from one technology node to a lower technology node:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Power Supply VDD scales down",
+        "Power Supply VDD increases",
+        "Power Supply VDD remains constant",
+        "None of the above"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "CMOS technology is more popular compared to Bipolar and other technologies for making integrated circuits due to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Lower power consumption",
+        "Higher packing density",
+        "Both (a) and (b)",
+        "None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Gallium Arsenide technology is used mostly for making:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Very low power integrated circuits",
+        "Very high frequency integrated circuits",
+        "Both (a) and (b)",
+        "None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "The power consumption of a CMOS inverter:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Increases linearly with supply voltage VDD",
+        "Decreases with increase in supply voltage VDD",
+        "Increases with square of the supply voltage VDD",
+        "None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "In sub-micron CMOS technologies, the decrease in threshold voltage with increase in drain to source voltage is commonly known as:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Channel Length Modulation",
+        "Velocity Saturation",
+        "DIBL – Drain Induced Barrier Lowering",
+        "GIDL – Gate Induced Drain Leakage"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "In CMOS technology, power consumption depends on:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Power Supply VDD",
+        "Frequency of operation",
+        "Load Capacitance",
+        "All the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "Metallic Grade Silicon (MGS) used for making silicon wafers is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "95% pure",
+        "98% pure",
+        "90% pure",
+        "99.99% pure"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "According to Moore’s Law in VLSI, the number of transistors on a chip:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Doubles every six months",
+        "Doubles every five years",
+        "Doubles every 18 months",
+        "Remains constant over time"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "In CMOS process to make P+ or N+ diffusion for source and drain regions of a MOSFET which of the following methods is used:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Diffusion",
+        "Ion Implantation",
+        "Both Diffusion and Ion Implantation",
+        "None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "In lithography a negative photoresist:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Softens on exposure to UV light",
+        "Hardens on exposure to UV light",
+        "UV light has no effect on the photoresist",
+        "None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "In CMOS process to manufacture integrated circuits, which of the following methods can be used for lithography:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Ultraviolet (UV) Light Lithography",
+        "X-Ray Lithography",
+        "Ion Lithography",
+        "All the above methods are used"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "In CMOS process technology while manufacturing integrated circuits which of the following metals are commonly used to make interconnections:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Aluminium",
+        "Copper",
+        "Both Aluminium and Copper",
+        "None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "In a FINFET transistor the channel is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Surrounded by the gate on four sides",
+        "Surrounded by the gate on three sides",
+        "Gate is on two sides of the channel",
+        "None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "In CMOS process Silicon Dioxide (SiO2) layer can be grown over silicon by:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Dry oxidation using oxygen gas",
+        "Wet oxidation using steam / water vapour",
+        "Both techniques are used",
+        "None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    }
+  ]
+}

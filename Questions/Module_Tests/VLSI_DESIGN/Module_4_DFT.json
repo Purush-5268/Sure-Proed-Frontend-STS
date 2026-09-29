@@ -1,0 +1,153 @@
+{
+  "title": "Module 4 - DFT",
+  "clean_title": "Module_4_DFT",
+  "course_code": "VLSI-DESIGN",
+  "exam_type": "MODULE_TEST",
+  "module_topic": "Module 4: Design for Testability",
+  "timer": 5,
+  "total_questions": 10,
+  "image_questions_count": 0,
+  "source_original_file": "011_Module_4_-_DFT.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "Which of the following best describes the primary objective of scan chains in DFT?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To reduce power consumption during normal operation",
+        "To enable easy debugging of logic circuits",
+        "To enhance fault coverage by improving controllability and observability",
+        "To optimize clock domain crossings"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "In an ATPG process, which fault model provides the highest correlation with actual silicon failures?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Stuck-at fault model",
+        "Transition delay fault model",
+        "Bridging fault model",
+        "Cell-aware fault model"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "What is the main disadvantage of using a full scan design in DFT?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Increased power consumption during functional operation",
+        "Poor fault coverage compared to functional testing",
+        "Increased area overhead due to additional latches",
+        "Inability to detect path delay faults"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which ATPG algorithm is commonly used for stuck-at fault testing and is known for its efficiency?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "PODEM",
+        "D Algorithm",
+        "FAN Algorithm",
+        "Random Pattern Testing"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "During ATPG, why is X-handling (unknown values) a major challenge in scan-based testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "X-values cannot propagate through combinational logic",
+        "ATPG algorithms treat X-values as don’t-care, reducing test quality",
+        "X-values prevent accurate fault simulation and test pattern generation",
+        "X-values increase the power consumption of test patterns"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which of the following is true about Built-In Self-Test (BIST) in DFT?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "It requires an external ATPG tool for test pattern generation",
+        "It uses a Linear Feedback Shift Register (LFSR) for test pattern generation",
+        "It completely eliminates the need for scan chains",
+        "It reduces the area overhead compared to external test solutions"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Why is launch-off-capture (LOC) preferred over launch-off-shift (LOS) in at-speed testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "LOC provides better timing closure compared to LOS",
+        "LOC reduces the number of test patterns required for delay fault testing",
+        "LOC prevents excessive power consumption during at-speed testing",
+        "LOC eliminates hold-time violations in the design"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "What is the primary function of the Test Access Port (TAP) in IEEE 1149.1 (JTAG)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To provide access to internal nodes of the chip for debugging",
+        "To facilitate wafer-level testing only",
+        "To allow direct modification of functional logic states during operation",
+        "To reduce scan chain depth in large designs"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "In an MBIST (Memory Built-In Self-Test) architecture, which technique is commonly used for fault\ndetection?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "March algorithms",
+        "PODEM algorithm",
+        "Stuck-at fault model",
+        "Bridging fault detection"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "What is the primary advantage of using compression-based ATPG techniques like X-Compact?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Reduced test power consumption",
+        "Minimized dependence on scan chains",
+        "Significant reduction in test data volume and test application time",
+        "Improved defect tolerance compared to traditional ATPG"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    }
+  ]
+}

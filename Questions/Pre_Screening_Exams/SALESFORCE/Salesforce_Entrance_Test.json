@@ -1,0 +1,293 @@
+{
+  "title": "Salesforce Entrance Test",
+  "clean_title": "Salesforce_Entrance_Test",
+  "course_code": "SALESFORCE",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Salesforce CRM Screening",
+  "timer": 10,
+  "total_questions": 20,
+  "image_questions_count": 0,
+  "source_original_file": "022_Salesforce_Entrance_Test.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "Which of the following best describes Salesforce?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A programming language",
+        "A CRM platform for managing customer relationships",
+        "A database management tool",
+        "An ERP system"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "What is the maximum number of master-detail relationships allowed per object?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "Unlimited"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": ". In Salesforce, a “lookup relationship” is used to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Delete related records automatically",
+        "Link two objects loosely",
+        "Enforce cascade delete",
+        "Create roll-up summaries"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which of the following tools can replace Workflow Rules and Process Builder going\nforward?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Apex",
+        "Flow",
+        "Lightning App Builder",
+        "SOQL"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "What are governor limits in Salesforce?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Limits on data storage",
+        "Limits on API usage only",
+        "Runtime limits enforced by Salesforce to ensure shared resources",
+        "Limits on custom objects per org"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which SOQL statement is valid?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "SELECT name FROM Account WHERE industry = ‘Banking’;",
+        "FIND name FROM Account WHERE industry = ‘Banking’;",
+        "SELECT * FROM Account;",
+        "SELECT Account.name FROM Account;"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Which feature controls record-level access in Salesforce?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Profiles",
+        "Page Layouts",
+        "OWD (Organization-Wide Defaults)",
+        "Validation Rules"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "A Roll-Up Summary field can be created on:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Lookup relationships",
+        "Master-detail relationships",
+        "Any relationship type",
+        "Standard objects only"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which of the following is true about Apex triggers?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Can only run after insert",
+        "Are executed automatically when DML events occur",
+        "Require manual execution",
+        "Cannot access related records"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Which automation tool allows complex logic with loops and decisions?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Validation Rules",
+        "Flow Builder",
+        "Workflow Rules",
+        "Approval Process"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "What is the purpose of AppExchange?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To manage data imports",
+        "To install third-party apps and components",
+        "To monitor user login history",
+        "To debug Apex code"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Which of these cannot be included in a change set?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Apex Classes",
+        "Custom Objects",
+        "Profiles",
+        "Data records"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What does a “before insert” trigger do?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Runs before data is committed to the database",
+        "Runs after record creation",
+        "Runs only after approval",
+        "Deletes the record"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which field type cannot be a controlling field in a dependent picklist?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Checkbox",
+        "Picklist",
+        "Formula",
+        "Text"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Which Salesforce feature can be used to ensure certain conditions are met before a\nrecord is saved?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Validation Rule",
+        "Process Builder",
+        "Flow",
+        "Workflow"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "What is the default data access level in OWD if no sharing rule is defined?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Public Read/Write",
+        "Private",
+        "Controlled by Parent",
+        "Read Only"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "In Salesforce, what is the purpose of “Profiles”?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To define field dependencies",
+        "To control object-level and field-level permissions",
+        "To manage data visibility only",
+        "To store user data"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "Which of the following statements about sandbox is correct?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "It is used for production deployment",
+        "It is a copy of your production environment for testing and development",
+        "It is used for live user data entry",
+        "It has no metadata"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Which of these is not a standard Salesforce object?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Account",
+        "Lead",
+        "Invoice",
+        "Opportunity"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "What is the correct order of execution for automation?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Validation Rules → Workflow Rules → Triggers",
+        "Triggers → Validation Rules → Workflow Rules",
+        "Validation Rules → Triggers → Workflow Rules",
+        "Workflow Rules → Triggers → Validation Rules"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    }
+  ]
+}

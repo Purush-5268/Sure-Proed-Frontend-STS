@@ -1,0 +1,433 @@
+{
+  "title": "Gen AI",
+  "clean_title": "Generative_AI_Screening_Test",
+  "course_code": "GEN-AI",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Generative AI Screening",
+  "timer": 15,
+  "total_questions": 30,
+  "image_questions_count": 0,
+  "source_original_file": "015_Gen_AI.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What is the output of the following code? print([i**2 for i in range(3)])",
+      "image": "",
+      "type": "text",
+      "options": [
+        "[1, 2, 3]",
+        "[0, 1, 4]",
+        "[1, 4, 9]",
+        "[0, 1, 2]"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Which library is primarily used for data manipulation in Python?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "NumPy",
+        "TensorFlow",
+        "Pandas",
+        "Matplotlib"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "What does df.dropna() do in pandas?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Drops duplicate values",
+        "Removes rows with missing values",
+        "Removes null columns",
+        "Normalizes the data"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which of the following is used for data visualization?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Seaborn",
+        "Scikit-learn",
+        "Pygame",
+        "Scapy"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "What is the output of the following code? \"AI\" * 3",
+      "image": "",
+      "type": "text",
+      "options": [
+        "AI AI AI",
+        "Error",
+        "AIAIAI",
+        "AI3"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which function is used to get the first 5 rows of a DataFrame?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "df.bottom()",
+        "df.head()",
+        "df.top()",
+        "df.start()"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "What will this code return? len(set([1, 2, 2, 3]))",
+      "image": "",
+      "type": "text",
+      "options": [
+        "4",
+        "3",
+        "2",
+        "Error"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "What is the output of this code? import numpy as np a = np.array([1, 2, 3]) print(a * 2)",
+      "image": "",
+      "type": "text",
+      "options": [
+        "[2, 4, 6]",
+        "Error",
+        "[1, 2, 3, 1, 2, 3]",
+        "[1, 4, 9]"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which of the following best defines supervised learning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The model learns without labels",
+        "The model learns by reinforcement",
+        "The model learns using labeled data",
+        "The model generates new data"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Which model is commonly used for regression tasks?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Decision Tree",
+        "Logistic Regression",
+        "Linear Regression",
+        "K-Means"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "PCA is used for:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Regression",
+        "Classification",
+        "Clustering",
+        "Dimensionality Reduction"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "What kind of data is suitable for clustering algorithms?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Structured Labeled",
+        "Structured Unlabeled",
+        "Unstructured with Labels",
+        "Time-Series"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "Which library is commonly used for machine learning in Python?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Matplotlib",
+        "NumPy",
+        "Scikit-learn",
+        "OpenCV"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which of the following is NOT an evaluation metric for classification?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Precision",
+        "Recall",
+        "Mean Squared Error",
+        "F1 Score"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Which algorithm is best suited for finding hidden groups in customer data?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Linear Regression",
+        "Logistic Regression",
+        "K-Means Clustering",
+        "Decision Tree"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Overfitting in ML models means:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The model performs well on new data",
+        "The model has too little training",
+        "The model memorizes training data but performs poorly on unseen data",
+        "The model underestimates relationships"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "Which of the following is an ensemble learning technique?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Naive Bayes",
+        "Random Forest",
+        "Logistic Regression",
+        "SVM"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "What does the train-test split technique do?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Splits the dataset into batches",
+        "Combines features and labels",
+        "Divides data into training and validation sets",
+        "None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "What does the Generator do in a GAN architecture?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Classifies input data",
+        "Generates fake samples",
+        "Minimizes reconstruction loss",
+        "Computes gradients"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "Which part of the Transformer model allows it to focus on relevant parts of the input sequence?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "RNN",
+        "Positional Encoding",
+        "Self-Attention",
+        "Convolutional Layers"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "Which of the following models is most commonly used in image generation tasks?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "CNN",
+        "GAN",
+        "BERT",
+        "SVM"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "Which of the following statements is true about Transformers?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "They are slower than RNNs",
+        "They don't work on text",
+        "They use self-attention for context understanding",
+        "They can’t be trained on GPUs"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "Which model is best known for enabling text generation tasks?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "CNN",
+        "GPT",
+        "LSTM",
+        "VAE"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "Which of the following is NOT a generative model?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "GAN",
+        "VAE",
+        "GPT",
+        "SVM"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "Which technique is used for converting text into numerical form in NLP?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Tokenization",
+        "TF-IDF",
+        "Segmentation",
+        "Augmentation"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "Which embedding model generates context-sensitive embeddings?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Word2Vec",
+        "GloVe",
+        "BERT",
+        "TF-IDF"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "Which of the following is NOT a component of NLP pipelines?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Tokenization",
+        "Lemmatization",
+        "Convolution",
+        "Stop-word removal"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "What would likely result from poor prompt engineering in LLMs?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Fast results",
+        "Low-cost generation",
+        "Irrelevant or incorrect output",
+        "Accurate factual answers"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "Which of the following is a real-world application of Generative AI?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Image classification",
+        "Predicting housing prices",
+        "Generating social media captions",
+        "Spam filtering"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "What is the main purpose of prompt engineering in LLMs?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To reduce latency",
+        "To train the model faster",
+        "To guide model outputs effectively",
+        "To build data pipelines"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    }
+  ]
+}

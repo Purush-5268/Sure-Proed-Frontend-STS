@@ -1,0 +1,98 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .identity-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .identity-table th, .identity-table td { border: 1px solid var(--border-color); padding: 10px; text-align: left; }
+    .identity-table th { background-color: var(--darkened-bg); font-weight: bold; }
+    .submit-row { margin-top: 20px; padding: 15px; background: var(--darkened-bg); text-align: right; border-radius: 4px; }
+    .summary-stats { display: flex; gap: 20px; margin-bottom: 20px; }
+    .stat-box { padding: 15px; background: var(--darkened-bg); border-radius: 4px; flex: 1; }
+    .stat-number { font-size: 24px; font-weight: bold; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>Reconciliation Preview: {{ original.title }}</h1>
+    <p>Review the calculated attendance outcomes before explicitly applying disciplinary actions.</p>
+    
+    {% if messages %}
+    <ul class="messagelist">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    
+    <div class="summary-stats">
+        <div class="stat-box">
+            <div>Actual Meet Start</div>
+            <div class="stat-number">{{ actual_start|date:"H:i:s" }}</div>
+        </div>
+        <div class="stat-box">
+            <div>Actual Meet End</div>
+            <div class="stat-number">{{ actual_end|date:"H:i:s" }}</div>
+        </div>
+        <div class="stat-box">
+            <div>Actual Duration</div>
+            <div class="stat-number">{{ actual_duration }}s</div>
+        </div>
+    </div>
+    
+    <h2>Attendance Projections</h2>
+    <table class="identity-table">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Participant Identity</th>
+                <th>Attendance Duration</th>
+                <th>Attendance %</th>
+                <th>Projected Outcome</th>
+                <th>Naming Compliance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sid, data in report.expected_students.items %}
+            <tr>
+                <td>{{ data.name }} ({{ data.email }})</td>
+                <td>
+                    {% if data.participants %}
+                        {% for p in data.participants %}
+                            {{ p.name }}<br>
+                        {% endfor %}
+                    {% else %}
+                        <em>Unmatched / Absent</em>
+                    {% endif %}
+                </td>
+                <td>{{ data.attended_seconds }}s</td>
+                <td>{{ data.percentage }}%</td>
+                <td>
+                    {% if data.percentage >= original.cohort.course.attendance_threshold %}
+                        <span style="color: green; font-weight: bold;">PRESENT</span>
+                    {% else %}
+                        <span style="color: red; font-weight: bold;">SUSPENSION/WARNING</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if data.naming_compliance == 'NAME_CHANGE_REQUIRED' %}
+                        <span style="color: orange; font-weight: bold;">NAME CHANGE REQUIRED</span>
+                    {% else %}
+                        <span style="color: green;">COMPLIANT</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="submit-row">
+            <input type="submit" value="Approve & Apply Discipline" class="default" name="_save" style="background: red;">
+        </div>
+    </form>
+</div>
+{% endblock %}

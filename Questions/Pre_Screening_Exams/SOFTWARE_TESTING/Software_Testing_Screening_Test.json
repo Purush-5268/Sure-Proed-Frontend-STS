@@ -1,0 +1,153 @@
+{
+  "title": "Software Testing & Tools",
+  "clean_title": "Software_Testing_Screening_Test",
+  "course_code": "SOFTWARE-TESTING",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Manual & Automation Testing Screening",
+  "timer": 5,
+  "total_questions": 10,
+  "image_questions_count": 0,
+  "source_original_file": "009_Software_Testing_&_Tools.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "When a software breaks what message comes up on screen?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Error",
+        "Warning",
+        "Try again",
+        "Black screen"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "When a software breaks and above message is displayed, what options sometimes come up?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Send report to developer",
+        "Send report to government",
+        "Send report to Yourself",
+        "Store report locally"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "When a software is developed who is responsible for quality?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "All options",
+        "Developer",
+        "Tester",
+        "Publishing company"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Indian Testing board offers what ?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Test certificate",
+        "Test recognition",
+        "Test verification",
+        "None of the above"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "5. If good quality software is developed yet it has vulnerability in it's information security processes, is it good to publish this software?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Yes",
+        "No",
+        "Discard the software altogether",
+        "None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What should be done to rectify the above situation?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Scrapping and then redevelopment",
+        "User acceptance testing",
+        "Information Security audit",
+        "None of the above."
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "When Two distinct software interact, what type of testing is involved?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Workflow approval",
+        "System Integration Testing",
+        "Unit Test",
+        "Automated Test"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "Why does testing guarantee minimisation not absence of defects?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Testing is useless",
+        "Defects come in the end because of the faults of the user.",
+        "We don't know",
+        "Some defects will always creep in despite good amount of testing"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "In automation testing, repetitive tasks are segmented and analysed, and then run in a continuous flow very quickly. What does this help with?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "We can run many more test cases in a short duration",
+        "We can be lazy",
+        "We can let computer do all the work",
+        "We can ensure all test coverage"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "In order to track defects what melds with project management?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Defects resolution",
+        "Defects Tracking",
+        "Defects management",
+        "All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    }
+  ]
+}

@@ -1,0 +1,223 @@
+{
+  "title": "JAVA",
+  "clean_title": "Java_Applications_Screening_Test",
+  "course_code": "CORE-JAVA",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Java Programming Screening",
+  "timer": 7,
+  "total_questions": 15,
+  "image_questions_count": 0,
+  "source_original_file": "016_JAVA.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "If you type java MyClass after compiling with javac MyClass.java, what exactly happens?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "JVM directly executes .java file line by line",
+        "JVM loads .class file, verifies bytecode, and executes using JIT/Interpreter",
+        "The java command recompiles .java file to .class before execution",
+        "The command simply prints bytecode stored inside .class file"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Bytecode in Java is created at which stage?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "At runtime, by JVM after interpreting the .java file",
+        "During compilation of .java file into .class file by javac",
+        "While saving .java file in editor",
+        "When .class file is loaded into memory by JVM"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "The compiled Java bytecode stored in .class file is actually:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Binary machine-readable instructions (not source-readable)",
+        "Unicode formatted instructions for JVM",
+        "ASCII character sequences for portability",
+        "Encrypted Java instructions"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which of the following is a wrong feature attributed to Java?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Java is platform independent due to JVM",
+        "Java is 100% Object-Oriented (even primitive data types are objects)",
+        "Java provides automatic memory management via Garbage Collector",
+        "Java supports multithreading as a built-in feature"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "In the expression int x = (5 > 10) ? 20 : 30;, what happens internally?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "JVM evaluates both 20 and 30 before choosing",
+        "Only the selected expression (30) is evaluated",
+        "Compiler replaces ternary with if-else during compilation",
+        "It throws compile-time error since ternary doesn’t support integers"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What will the following print?\nint i = 5;\nSystem.out.println(i++ + ++i);",
+      "image": "",
+      "type": "text",
+      "options": [
+        "11",
+        "12",
+        "10",
+        "Undefined Behaviour"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Java is called platform independent because:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Bytecode can run on any OS without JVM",
+        "JVM converts bytecode into native machine code for that OS",
+        "Source code is directly understood by all platforms",
+        "Compiled bytecode is same as machine-level assembly"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "What will be the output of the following program?\npublic class SwapNumbers {\npublic static void main(String[] args) {\nint a = 5, b = 5;\na = a * b;\nb = a / b;\na = a / b;\nSystem.out.println(\"a = \" + a + \", b = \" + b);\n}\n}",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a = 5, b = 5",
+        "a = 0, b = 0",
+        "Error: Division by zero occurred",
+        "a = 25, b = 1"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "What will be the output of the following program?\npublic class EvenOddCheck {\npublic static void main(String[] args) {\nint num = 4;\nif ((num & 1) == 0) {\nSystem.out.println(\"Even\");\n} else {\nSystem.out.println(\"Odd\");\n}\n}\n}",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Even",
+        "Odd",
+        "Compile-time error",
+        "Runtime error"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "What happens if a local variable inside a method has the same name as an instance variable?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Compiler throws an error",
+        "Local variable shadows the instance variable within that method",
+        "Both values are merged",
+        "JVM throws runtime error"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Which assignment is invalid?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "float f = 20.5f;",
+        "double d = 10;",
+        "int i = 3.14;",
+        "char c = 65;"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Which keyword cannot be used with a local variable?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "final",
+        "static",
+        "volatile",
+        "synchronized"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What is the output?\nint x = 0;\nif (x != 0 && 10/x > 1) System.out.println(\"True\");\nelse System.out.println(\"False\");",
+      "image": "",
+      "type": "text",
+      "options": [
+        "True",
+        "False",
+        "Runtime error (Divide by zero)",
+        "Undefined"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "JVM itself is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Platform independent like bytecode",
+        "Platform dependent because it’s written separately for each OS",
+        "Written in Java, so it’s portable everywhere",
+        "Independent & dependent both"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Which of the following is TRUE about Java’s history?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Java was initially named “Oak,” developed at Sun Microsystems by James Gosling in 1991",
+        "It was first intended for digital consumer devices like set-top boxes",
+        "The first public version (Java 1.0) was released in 1995",
+        "All the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    }
+  ]
+}

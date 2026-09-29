@@ -1,0 +1,363 @@
+{
+  "title": "Cyber Security",
+  "clean_title": "Cyber_Security_Screening_Test",
+  "course_code": "CYBER-SECURITY",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Networking & Security Screening",
+  "timer": 12,
+  "total_questions": 25,
+  "image_questions_count": 0,
+  "source_original_file": "003_Cyber_Security.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "Which of the following security principles is primarily violated if data integrity is compromised but confidentiality and availability are intact?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Availability",
+        "Confidentiality",
+        "Integrity",
+        "Authentication"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "In the CIA triad, which security property ensures that information is accessible to authorized users when needed and is most vulnerable to Denial of Service (DoS) attacks?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Confidentiality",
+        "Integrity",
+        "Availability",
+        "Accountability"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Which cryptographic property directly supports data integrity by allowing verification that data has not been altered?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Symmetric encryption",
+        "Digital signatures",
+        "Hash functions",
+        "Asymmetric encryption"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which of the following scenarios represents a breach of confidentiality?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Unauthorized modification of database records",
+        "An attacker deletes critical files, making them unavailable",
+        "An attacker reads sensitive information without permission",
+        "Data backup failure causes loss of data availability"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Which type of attack targets the ‘availability’ aspect of the CIA triad by flooding the target system with excessive requests?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Man-in-the-Middle (MitM) attack",
+        "SQL Injection",
+        "Denial of Service (DoS)",
+        "Phishing"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which of the following would best compromise the availability of an organization's data?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Exposure of encryption keys",
+        "Unauthorized reading of sensitive emails",
+        "Ransomware encrypting critical files",
+        "Social engineering attack stealing credentials"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Which of the following best describes the primary ethical distinction between white hat and gray hat hackers?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Gray hats always operate under legal contracts",
+        "B) White hats exploit zero-days for monetary gain",
+        "C) White hats operate with prior authorization; gray hats do not",
+        "D) Gray hats never report discovered vulnerabilities"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "Which hacker type is most likely to submit vulnerability findings to a company’s public bug bounty program?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Black Hat",
+        "B) Script Kiddie",
+        "C) White Hat",
+        "D) Gray Hat"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "A hacker bypasses authentication on a public-facing server and reports the vulnerability to the organization, requesting a reward. The organization has no responsible disclosure policy. This hacker is best categorized as:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Gray Hat",
+        "B) Black Hat",
+        "C) White Hat",
+        "D) Red Team"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Which of the following actions is LEAST likely to be performed by a black hat hacker?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Sell stolen credentials on dark web forums",
+        "B) Perform penetration testing under a signed NDA",
+        "C) Deploy ransomware to extort payment",
+        "D) Use phishing to gain unauthorized access"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Which scenario most closely represents gray hat behavior?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Reporting a bug via a company’s official disclosure program",
+        "B) Selling a zero-day exploit to a cybercrime syndicate",
+        "C) Launching a DDoS attack to protest censorship",
+        "D) Gaining unauthorized access to a system and later informing the owner"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Which factor is most critical in legally distinguishing ethical hacking from cybercrime?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Use of open-source tools",
+        "B) Explicit prior authorization",
+        "C) Intent to report vulnerabilities",
+        "D) Level of technical skill"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "Which of the following scenarios represents a blend of both passive and active reconnaissance?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Monitoring a company's job postings for tech stack info",
+        "B) Using Shodan to identify IoT devices and confirming responses via Telnet",
+        "C) Running an Nmap SYN scan on all subnets",
+        "D) Searching for default credentials in leaked credential dumps"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which tactic is typically used to ensure access remains available even after a reboot or patch is applied?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Packet sniffing",
+        "B) Uploading a reverse shell",
+        "C) Creating a startup registry key for a RAT",
+        "D) Running a SYN flood on a service"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Which of the following best describes a key operational difference between Reconnaissance and Scanning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Reconnaissance uses only automated tools; scanning does not",
+        "B) Scanning involves interaction with the target system, while reconnaissance may not",
+        "C) Reconnaissance requires credentials; scanning does not",
+        "D) Scanning is completely stealthy; reconnaissance is always detected"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Which of the following is a primary objective of banner grabbing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Exploit SMB shares",
+        "B) Identify OS and service versions",
+        "C) Modify web server configurations",
+        "D) Create persistence"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "Which scanning type involves the use of ICMP Echo Requests and no TCP communication?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Connect scan",
+        "B) SYN scan",
+        "C) UDP scan",
+        "D) Ping sweep"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "After gaining shell access to a Linux system via a misconfigured cron job, what’s the next logical step in this phase?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Establish persistence",
+        "B) Delete logs",
+        "C) Privilege escalation",
+        "D) Lateral movement"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "In Black Box Testing, which of the following best mimics a real-world external attack scenario?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Access to API documentation and credentials",
+        "B) Use of fuzzing against known components",
+        "C) Injection testing using debug logs",
+        "D) Reconnaissance without target intel"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "Gray Box Testing allows testers to focus on which key area?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Attacks on unknown services",
+        "B) Insider threat emulation",
+        "C) UI-based attacks only",
+        "D) Privilege escalation across trust zones"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "Which statement is TRUE regarding White Box Testing in penetration testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) It is blind and mirrors an unprivileged user",
+        "B) It cannot identify race conditions",
+        "C) It focuses only on network penetration",
+        "D) It involves complete transparency and internal access"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "Which of the following is most often omitted in Black Box Testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Threat Modeling",
+        "B) Service Enumeration",
+        "C) Initial Reconnaissance",
+        "D) Source Code Review"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "In which testing model is the tester likely unaware of IP ranges, software stacks, and authentication methods?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Red Team",
+        "B) Black Box",
+        "C) Gray Box",
+        "D) Blue Team"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "Which vulnerability type is best discovered through manual code inspection in White Box testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Unpatched SSL libraries",
+        "B) Stored XSS",
+        "C) Buffer overflow",
+        "D) Insecure Direct Object References (IDOR)"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "What is the PRIMARY goal of the exploitation phase in a pentest?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Crash the target",
+        "B) Generate security reports",
+        "C) Bypass security controls",
+        "D) Verify real-world impact of vulnerabilities"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    }
+  ]
+}

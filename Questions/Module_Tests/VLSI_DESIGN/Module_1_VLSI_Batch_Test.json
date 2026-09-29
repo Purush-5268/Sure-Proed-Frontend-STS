@@ -1,0 +1,293 @@
+{
+  "title": "Module 1 Quiz for G2-26 VLSI Batch",
+  "clean_title": "Module_1_VLSI_Batch_Test",
+  "course_code": "VLSI-DESIGN",
+  "exam_type": "MODULE_TEST",
+  "module_topic": "Module 1: VLSI Design Overview",
+  "timer": 15,
+  "total_questions": 20,
+  "image_questions_count": 0,
+  "source_original_file": "095_Module_1_Quiz_for_G2-26_VLSI_Batch.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "An n-channel MOSFET enters saturation region when:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "VGS < VT",
+        "VDS < VGS − VT",
+        "VDS ≥ VGS − VT",
+        "VDS = 0"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "During pinch-off in NMOS:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Entire channel disappears",
+        "Channel near drain becomes very thin",
+        "Source gets disconnected",
+        "Gate oxide breaks"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "An NMOS transistor passes:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Strong ‘1’ and strong ‘0’",
+        "Weak ‘1’ and strong ‘0’",
+        "Weak ‘1’ and weak ‘0’",
+        "Strong ‘1’ and weak ‘0’"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "In CMOS inverter, maximum current flows when:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Input = 0",
+        "Input = VDD",
+        "Input is near switching threshold (VDD/2)",
+        "Both transistors OFF"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "The current flowing directly from VDD to GND during CMOS switching is called:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Leakage current",
+        "Drift current",
+        "Crowbar current",
+        "Avalanche current"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "If PMOS threshold voltage magnitude becomes much larger than NMOS threshold voltage, the CMOS inverter switching threshold shifts toward:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Left",
+        "Right",
+        "No shift",
+        "Ground"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "In transmission gate:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Only NMOS passes signal",
+        "Only PMOS passes signal",
+        "NMOS and PMOS together pass strong ‘0’ and strong ‘1’",
+        "Output always inverted"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "In CMOS inverter, both NMOS and PMOS are ON mainly during:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Logic HIGH region",
+        "Logic LOW region",
+        "Transition region",
+        "Cutoff region"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Bulk potential of NMOS is generally kept lower than source potential to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Increase gate current",
+        "Keep source-body junction reverse biased",
+        "Reduce oxide thickness",
+        "Increase avalanche breakdown"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "In MOSFET transfer characteristics, drain current starts increasing rapidly after:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "VDS = 0",
+        "VGS > VT",
+        "Oxide breakdown",
+        "Avalanche breakdown"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Cox mainly represents:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Drain capacitance",
+        "Oxide capacitance per unit area",
+        "Junction capacitance",
+        "Wire capacitance"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Which MOSFET parameter mainly improves drain current capability?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Higher oxide thickness",
+        "Higher electron mobility (μn)",
+        "Larger threshold voltage",
+        "Lower VDS"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "During ion implantation, channeling effect causes:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Shallow junction formation",
+        "Oxide growth",
+        "Deep penetration of dopants",
+        "Reduced conductivity"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "STI isolation replaced LOCOS mainly because LOCOS suffered from:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Oxide thickness variation",
+        "Bird’s beak effect",
+        "Velocity saturation",
+        "Low precision"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Annealing after implantation is mainly used to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Smoothen the surface",
+        "Repair crystal damage and activate dopants",
+        "Etch oxide",
+        "Remove photoresist"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "In dry etching compared to wet etching:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Etching is isotropic",
+        "Better anisotropic profile control is obtained",
+        "Etch selectivity becomes zero",
+        "Silicon cannot be etched"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "Silicidation is mainly performed to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Increase oxide thickness",
+        "Reduce contact resistance",
+        "Grow epitaxial layer",
+        "Remove silicon"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "An NMOS transistor has:\nμnCox(W/L)=2 mA/V²\nVGS=3V, VT=1V\nAssuming saturation operation, drain current is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "2mA",
+        "4mA",
+        "6mA",
+        "8mA"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Three PMOS transistors are connected in series. Drain of first PMOS connected to source of second PMOS. Drain of second PMOS connected to source of third PMOS.\nAll gate voltages are 1.8V.\nSource of first PMOS is also 1.8V.\nVoltage at drain/source node of third PMOS will be:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "1.8V",
+        "0V",
+        "Floating",
+        "Thresold voltage"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "In a CMOS inverter, PMOS is replaced by NMOS and NMOS is replaced by PMOS.\nGiven VDD=3.3V and VTN=0.8V.\nInitially output load capacitance voltage is 0V.\nFinal output voltage for logic HIGH at output becomes approximately:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "3.3V",
+        "0V",
+        "2.5V",
+        "1.65V"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    }
+  ]
+}

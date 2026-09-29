@@ -1,0 +1,433 @@
+{
+  "title": "HTML & CSS",
+  "clean_title": "HTML_and_CSS_Core",
+  "course_code": "FULL-STACK-WEB",
+  "exam_type": "MODULE_TEST",
+  "module_topic": "Module 1: HTML & CSS Core",
+  "timer": 15,
+  "total_questions": 30,
+  "image_questions_count": 0,
+  "source_original_file": "008_HTML_&_CSS.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "You are designing a website layout using CSS. You want to ensure that the container of a section takes up 50% of the screen width, regardless of the user's screen size. Which of the following is the correct CSS property to achieve this?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) width: 50px;",
+        "B) width: 50%;",
+        "C) max-width: 50%;",
+        "D) min-width: 50%;"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "7. What is the default value of align-items in a flex container?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) flex-start",
+        "B) stretch",
+        "C) center",
+        "D) baseline"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "In CSS, how would you center a block-level element horizontally within its parent container?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) margin: auto;",
+        "B) text-align: center;",
+        "C) position: center;",
+        "D) align: middle;"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which of the following CSS properties will remove the default bullet points from an unordered list?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) list-style: none;",
+        "B) display: block;",
+        "C) text-decoration: none;",
+        "D) remove-bullets: true;"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "9. Which property helps control spacing between items in a row?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) align-items",
+        "C) justify-content",
+        "B) row-gap",
+        "D) flex-grow"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "How do you add a comment in CSS?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) // This is a comment",
+        "B) <!-- This is a comment -->",
+        "C) /* This is a comment */",
+        "D) # This is a comment"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "What is the correct syntax for including an external CSS file in an HTML document?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) <link rel=\"stylesheet\" href=\"style.css\">",
+        "B) <css href=\"style.css\">",
+        "C) <style src=\"style.css\">",
+        "D) <stylesheet link=\"style.css\">"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "How do you create a grid with 3 equal columns?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) grid-template-columns: 1px 1px 1px;",
+        "B) grid-template-columns: auto auto auto;",
+        "D) grid-template-columns: repeat(3);",
+        "D) grid-template-columns: 1fr 1fr 1fr;"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which CSS property is used to control the space between lines of text?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) line-height",
+        "B) text-indent",
+        "C) font-spacing",
+        "D) letter-spacing"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "What HTML attribute is used to define inline JavaScript?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) onclick",
+        "B) onload",
+        "C) script",
+        "D) href"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Which of the following is NOT a valid HTML tag?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) <em>",
+        "B) <strong>",
+        "C) <break>",
+        "D) <br>"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "What is the default display value of an HTML <div> element?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) inline",
+        "B) block",
+        "C) inline-block",
+        "D) flex"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "How can you include a comment in HTML?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) <!-- This is a comment -->",
+        "B) // This is a comment",
+        "C) /* This is a comment */",
+        "D) # This is a comment"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which CSS property is used to create space between the content of an element and its border?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) padding",
+        "B) margin",
+        "C) border-spacing",
+        "D) spacing"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "What is the result of the following CSS: p { color: blue; }?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) It sets the background color of all paragraphs to blue.",
+        "B) It sets the font color of all paragraphs to blue.",
+        "C) It sets the border color of all paragraphs to blue.",
+        "D) It changes the link color in paragraphs to blue."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "In CSS, what does opacity: 0.5; do to an element?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) It makes the element completely transparent.",
+        "B) It makes the element 50% opaque.",
+        "C) It makes the element 50% wider.",
+        "It removes the element from the document flow."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "In CSS, what does float: left; do to an element?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) It centers the element horizontally.",
+        "B) It moves the element to the left of its container and allows text to wrap around it.",
+        "C) It hides the element.",
+        "D) It aligns the element to the top left corner of the page."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "Which CSS rule will select all elements with the class \"header\"?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) #header {}",
+        "B) .header {}",
+        "C) header {}",
+        "D) *header {}"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Which HTML attribute is used to define the path of an image file in the <img> tag?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) href",
+        "B) src",
+        "C) alt",
+        "D) link"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "In CSS, what does the z-index property control?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) The transparency of an element",
+        "B) The horizontal position of an element",
+        "C) The stacking order of elements",
+        "D) The width of an element"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "Which of the following values of the position property will position an element relative to its nearest positioned ancestor?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) absolute",
+        "B) relative",
+        "C) fixed",
+        "D) static"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "What is the correct syntax for creating a table in HTML?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) <table><tr><td>Data</td></tr></table>",
+        "B) <table><row><data>Data</data></row></table>",
+        "C) <table><tr><th>Data</th></tr></table>",
+        "D) <table><tr><td><td>Data</td></tr></table>"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "In CSS, how would you select all <p> elements inside a <div>?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) p div {}",
+        "B) div p {}",
+        "C) .div p {}",
+        "D) div + p {}"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "Which of the following is a valid HTML5 semantic element?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) <span>",
+        "B) <article>",
+        "C) <div>",
+        "D) <section>"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "Which property in CSS is used to define the space between a border and the surrounding elements?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) padding",
+        "B) border-spacing",
+        "C) margin",
+        "D) border-width"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "What is the correct way to reference an external JavaScript file in an HTML document?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) <script src=\"script.js\"></script>",
+        "B) <js href=\"script.js\"></js>",
+        "C) <script link=\"script.js\"></script>",
+        "D) <link rel=\"javascript\" href=\"script.js\">"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "What does the CSS box-shadow property do?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) Adds a shadow inside the border of an element.",
+        "B) Adds a shadow outside the border of an element.",
+        "C) Increases the width of the border.",
+        "D) Controls the visibility of the element."
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "What CSS property allows an element to expand in proportion to its sibling elements in a flex container?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) flex-grow",
+        "B) flex-wrap",
+        "C) align-content",
+        "D) justify-content"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "Which attribute is used in the <a> tag to specify the destination URL of a link?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) target",
+        "B) href",
+        "C) rel",
+        "D) src"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "Which of the following properties is used to create rounded corners in CSS?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A) border-radius",
+        "B) border-corner",
+        "C) corner-radius",
+        "D) border-style"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    }
+  ]
+}

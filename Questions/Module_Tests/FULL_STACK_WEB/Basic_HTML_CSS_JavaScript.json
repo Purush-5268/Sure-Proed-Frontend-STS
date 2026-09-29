@@ -1,0 +1,433 @@
+{
+  "title": "Basic HTML, CSS & JavaScript",
+  "clean_title": "Basic_HTML_CSS_JavaScript",
+  "course_code": "FULL-STACK-WEB",
+  "exam_type": "MODULE_TEST",
+  "module_topic": "Module 1: Web Fundamentals",
+  "timer": 15,
+  "total_questions": 30,
+  "image_questions_count": 0,
+  "source_original_file": "010_Basic_HTML,_CSS_&_JavaScript.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "Which HTML tag is used to mark up emphasized text?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<strong>",
+        "<em>",
+        "<mark>",
+        "<en>"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "What does the alt attribute in the <img> tag specify?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Alternative image format",
+        "Image alignment",
+        "Alternative text when image cannot load",
+        "Image cross alignment"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Which of these is a valid HTML5 semantic element?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<section>",
+        "<container>",
+        "<block>",
+        "<stop>"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "What is the correct way to create a checkbox in HTML?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<checkbox>",
+        "<input type=\"check\">",
+        "<input type=\"box\">",
+        "<input type=\"checkbox\">"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Which tag is used to embed another HTML page inside the current page?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<embed>",
+        "<iframe>",
+        "<frame>",
+        "<eframe>"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What does the <meta charset=\"UTF-8\"> tag do?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Defines page’s title",
+        "Sets character encoding",
+        "Declares browser compatibility",
+        "Defines page's headline"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Which HTML attribute is used to open a link in a new tab?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "target=\"_self\"",
+        "target=\"_blank\"",
+        "window=\"_new\"",
+        "target=\"_new\""
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "In HTML5, which input type is valid for selecting a date?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<input type=\"calendar\">",
+        "<input type=\"date\">",
+        "<input type=\"datetimeonly\">",
+        "<input type=\"dateonly\">"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which is the correct HTML for inserting a line break?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<break>",
+        "<lb>",
+        "<br>",
+        "<lr>"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Which HTML tag is self-closing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<p>",
+        "<img>",
+        "<div>",
+        "<r>"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Which property changes the text color in CSS?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "color",
+        "text-style",
+        "font-color",
+        "font-style"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "How do you select all <p> elements inside a <div>?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "p div {}",
+        "div p {}",
+        "div + p {}",
+        "p + div {}"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "Which CSS unit is relative to the size of the parent element’s font?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "em",
+        "px",
+        "%",
+        "&"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which property makes the background image stay fixed during scroll?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "background-position: fixed;",
+        "background-attachment: fixed;",
+        "position: fixed;",
+        "attachment: fixed;"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Which CSS rule overrides all other rules regardless of specificity?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "!important",
+        "override",
+        "max-priority",
+        "min-priority"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Which selector targets an element with the class name “btn”?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "#btn",
+        "btn",
+        ".btn",
+        "<btn>"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "Which value of position places an element relative to the browser window?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "absolute",
+        "fixed",
+        "relative",
+        "accurate"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "Which property controls the size of text?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "text-size",
+        "font-size",
+        "size",
+        "text-font"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "What does z-index control?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Text indentation",
+        "Zoom level",
+        "Layer stacking order",
+        "Text spacing"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "In margin: 10px 20px;, what does 20px represent?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Left and right",
+        "Top and bottom",
+        "Only bottom",
+        "Only top"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "Which HTML element is used to display a scalar measurement within a known range?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "<progress>",
+        "<meter>",
+        "<range>",
+        "<scale>"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "In CSS, which property is NOT inherited by default?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) color",
+        "b) font-size",
+        "c) margin",
+        "d) font-family"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "What does the expression typeof NaN return in JavaScript?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) \"undefined\"",
+        "b) \"NaN\"",
+        "c) \"number\"",
+        "d) \"object\""
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "Which HTML5 tag is used to embed external interactive content or applications, often from\nanother source?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) <frame>",
+        "b) <object>",
+        "c) <embed>",
+        "d) <iframe>"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "In CSS, what does the property z-index control?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) Transparency",
+        "b) Stacking order of elements",
+        "c) Element size",
+        "d) Text alignment"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "What will be the result of this code?\nconsole.log(0.1 + 0.2 === 0.3);",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) true",
+        "b) false",
+        "c) undefined",
+        "d) NaN"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "Which HTML attribute is used to specify an image for a <canvas> fallback content?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) src",
+        "b) poster",
+        "c) alt",
+        "d) No attribute, just place inside <canvas>"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "Which CSS property allows text to wrap onto the next line if it’s too long?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) word-wrap",
+        "b) text-align",
+        "c) overflow",
+        "d) white-space"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "What does document.querySelectorAll('p.highlight') return?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) A single element",
+        "b) A NodeList of all <p> elements with class highlight",
+        "c) An HTMLCollection",
+        "d) Undefined"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "Which is the correct way to define a CSS custom property (variable)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "a) var-color: red;",
+        "b) --color: red;",
+        "c) $color: red;",
+        "d) color-var: red;"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    }
+  ]
+}

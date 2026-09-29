@@ -1,0 +1,293 @@
+{
+  "title": "G3-2026 – Module 1",
+  "clean_title": "Module_1_VLSI_Basics",
+  "course_code": "VLSI-DESIGN",
+  "exam_type": "MODULE_TEST",
+  "module_topic": "Module 1: VLSI Basics",
+  "timer": 10,
+  "total_questions": 20,
+  "image_questions_count": 0,
+  "source_original_file": "141_G3-2026_–_Module_1.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "The threshold voltage of a NMOS depletion mode MOSFET is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Positive",
+        "B. Negative",
+        "C. Zero",
+        "D. None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "The threshold voltage of PMOS enhancement mode MOSFET is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Negative",
+        "B. Positive",
+        "C. Zero",
+        "D. None of the above"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "The increase in drain current of a MOSFET with increase in drain to source voltage in saturation region is due to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Body Effect",
+        "B. Velocity Saturation",
+        "C. Channel Length Modulation",
+        "D. Hot Electrons"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "The increase in threshold voltage of a MOSFET with increase in source to bulk voltage is called:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Velocity Saturation",
+        "B. Body Effect",
+        "C. Channel Length Modulation",
+        "D. Pinch Off"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "In subthreshold or weak inversion region of a MOSFET the drain to source current:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Increases linearly with increase in gate to source voltage",
+        "B. Decreases with increase in gate to source voltage",
+        "C. Increases exponentially with increase in gate to source voltage",
+        "D. Remains constant with increase in gate to source voltage"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Very low power applications like wrist watches, hearing aids and pacemakers utilize which region of operation of a MOSFET:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Cut Off",
+        "B. Linear",
+        "C. Saturation",
+        "D. Weak Inversion or Subthreshold Region"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "In low geometry technology nodes with reduction in transistor length (L) the threshold voltage of a MOSFET:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Increases",
+        "B. Decreases",
+        "C. Remains constant",
+        "D. None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "In low geometry technology nodes the reduction in threshold voltage of a MOSFET with increase in drain to source voltage is called:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Hot Electron Effect",
+        "B. Pinch Off",
+        "C. DIBL – Drain Induced Barrier Lowering",
+        "D. GIDL – Gate Induced Drain Leakage"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "In a FINFET transistor the gate surrounds the channel between source and drain regions on:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Two sides",
+        "B. Four sides",
+        "C. Three sides",
+        "D. None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "FINFET transistors are used in semiconductor industry instead of planar CMOS MOSFETs for technology nodes below:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 90 nm",
+        "B. 65 nm",
+        "C. 16 nm",
+        "D. None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "CMOS technology is most commonly used in place of Bipolar and other technologies in integrated circuits due to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Higher Packing Density",
+        "B. Lower Power Consumption",
+        "C. Both (a) and (b)",
+        "D. None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "As per Moore’s Law the number of transistors on an integrated circuit:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Doubles every six months",
+        "B. Doubles every one year",
+        "C. Doubles every eighteen months",
+        "D. Doubles every five years"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "Which of the following methods is commonly used in semiconductor industry to make silicon ingots from a seed of pure silicon:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Lithography",
+        "B. Etching",
+        "C. Czochralsky Technique",
+        "D. Diffusion"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which of the following methods are used to grow a layer of silicon dioxide over a layer of silicon:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Dry oxidation using oxygen gas",
+        "B. Wet oxidation using steam",
+        "C. Both (a) and (b)",
+        "D. None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Which of the following methods are used for lithography in fabrication of integrated circuits:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. UV light lithography",
+        "B. XRAY lithography",
+        "C. Ion lithography",
+        "D. All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Which of the following methods are used to make N-type and P-type diffusion regions of MOSFETs in fabrication of integrated circuits:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Diffusion",
+        "B. Ion Implantation",
+        "C. Both (a) and (b)",
+        "D. None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "Which of the following methods are used for etching in fabrication of integrated circuits:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Wet etching using Hydrofluoric Acid",
+        "B. Dry etching using plasma",
+        "C. Both (a) and (b)",
+        "D. None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "Sputtering is a technique used in fabrication of integrated circuits to deposit a layer of:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Metal",
+        "B. Polysilicon",
+        "C. Silicon Dioxide",
+        "D. None of the above"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "CVD (Chemical Vapour Deposition) is a technique used in fabrication of integrated circuits to deposit a layer of:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Metal",
+        "B. Polysilicon",
+        "C. Silicon Dioxide",
+        "D. None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "Which of the following metals are commonly used in manufacture of integrated circuits to make wires and interconnections:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Aluminium",
+        "B. Copper",
+        "C. Both aluminium and copper",
+        "D. None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    }
+  ]
+}

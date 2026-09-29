@@ -1,0 +1,164 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+  &rsaquo; <a href="{% url 'admin:app_list' app_label='exams' %}">Exams</a>
+  &rsaquo; Start Test Hub
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <div class="module">
+    <table>
+      <caption><span class="section">Assessment overview</span></caption>
+      <thead><tr><th>Published courses</th><th>Pending pre-screening</th><th>Active cohorts</th><th>Live windows</th></tr></thead>
+      <tbody><tr><td>{{ total_courses }}</td><td>{{ pending_screening_count }}</td><td>{{ active_cohorts_count }}</td><td>{{ live_sessions_count }}</td></tr></tbody>
+    </table>
+  </div>
+
+  <ul class="object-tools">
+    <li><a href="{% url 'admin:question_bank_questionbank_changelist' %}">Question banks and AI review</a></li>
+    <li><a{% if section == 'prescreening' %} class="viewsitelink"{% endif %} href="?section=prescreening">Pre-screening launcher</a></li>
+    <li><a{% if section == 'module' %} class="viewsitelink"{% endif %} href="?section=module">Module test launcher</a></li>
+    <li><a{% if section == 'monitor' %} class="viewsitelink"{% endif %} href="?section=monitor">Live window monitor</a></li>
+  </ul>
+  <br class="clear">
+
+  {% if section == 'prescreening' %}
+  <div class="module">
+    <h2>Course pre-screening launcher</h2>
+    <form method="get">
+      <input type="hidden" name="section" value="prescreening">
+      <fieldset class="module aligned">
+        <div class="form-row"><div>
+          <label class="required" for="course_id">Target course:</label>
+          <select name="course_id" id="course_id" onchange="this.form.submit()">
+            <option value="">Select a published course</option>
+            {% for course in courses %}<option value="{{ course.id }}"{% if selected_course_id == course.id|stringformat:'s' %} selected{% endif %}>{{ course }} — {{ course.pending_count }} pending</option>{% endfor %}
+          </select>
+          <div class="help">The overview total and each course count use the same eligible application statuses.</div>
+        </div></div>
+      </fieldset>
+    </form>
+  </div>
+
+  {% if selected_course %}
+  {% if not question_banks %}
+  <div class="module">
+    <h2>Question Bank required before bulk start</h2>
+    {% if approved_course_bank %}
+      <p>Choose how to prepare this course. Opening the Hub alone never starts AI generation.</p>
+      <p><strong>Existing approved bank:</strong> {{ approved_course_bank.title }} — {{ approved_course_bank.total_sets }} stored paper set{{ approved_course_bank.total_sets|pluralize }}.</p>
+      <form method="post" action="{% url 'admin:exams_starttest_generate_bank' %}" style="display:inline-block;margin-right:8px;">
+        {% csrf_token %}<input type="hidden" name="course_id" value="{{ selected_course.id }}"><input type="hidden" name="bank_action" value="reuse">
+        <button type="submit" class="button default">Reuse existing Question Bank</button>
+      </form>
+      {% if active_generation_bank %}
+        <a class="button" href="{% url 'admin:question_bank_questionbank_change' active_generation_bank.pk %}">Continue current AI generation</a>
+      {% else %}
+        <form method="post" action="{% url 'admin:exams_starttest_generate_bank' %}">
+          {% csrf_token %}<input type="hidden" name="course_id" value="{{ selected_course.id }}"><input type="hidden" name="bank_action" value="generate">
+          <button type="submit" class="button" onclick="return window.confirm('Generate new AI papers instead of reusing the approved bank?');">Generate new AI Question Bank</button>
+        </form>
+      {% endif %}
+      <p class="help">Reuse opens the stored bank for review and publication. Choosing AI is explicit and never creates a second job while one is already running.</p>
+    {% elif active_generation_bank %}
+      <p><strong>AI preparation is already running:</strong> {{ active_generation_bank.title }} — {{ active_generation_bank.get_status_display }}.</p>
+      <p><a class="button" href="{% url 'admin:question_bank_questionbank_change' active_generation_bank.pk %}">View generation status</a></p>
+    {% else %}
+      <p class="help">No reusable approved pre-screening bank exists for this course.</p>
+      <form method="post" action="{% url 'admin:exams_starttest_generate_bank' %}">
+        {% csrf_token %}<input type="hidden" name="course_id" value="{{ selected_course.id }}"><input type="hidden" name="bank_action" value="generate">
+        <div class="submit-row"><input type="submit" class="default" value="Generate new AI Question Bank"></div>
+      </form>
+    {% endif %}
+  </div>
+  {% endif %}
+  <form method="post" action="{% url 'admin:exams_starttest_bulk_prescreening' %}">
+    {% csrf_token %}<input type="hidden" name="course_id" value="{{ selected_course.id }}">
+    <fieldset class="module aligned">
+      <h2>Schedule {{ selected_course.name }} pre-screening</h2>
+      <div class="form-row"><div><label class="required" for="question_bank_id">Question bank:</label>
+        <select required name="question_bank_id" id="question_bank_id"><option value="">Select an approved open bank</option>{% for bank in question_banks %}<option value="{{ bank.id }}"{% if selected_question_bank_id == bank.id|stringformat:'s' %} selected{% endif %}>{{ bank.title }} ({{ bank.total_questions_per_set }} questions/set)</option>{% endfor %}</select>
+        {% if not question_banks %}<div class="help">No approved open pre-screening bank is available for this course.</div>{% endif %}
+      </div></div>
+      <div class="form-row"><div><label for="paper_set">Paper set:</label><select name="paper_set" id="paper_set"><option value="AUTO">Automatic (first available set)</option>{% for code in question_banks.0.set_codes %}<option value="{{ code }}">Set {{ code }}</option>{% endfor %}</select></div></div>
+      <div class="form-row"><div><label class="required" for="scheduled_at">Window starts:</label><input required type="datetime-local" name="scheduled_at" id="scheduled_at" value="{{ default_start_time }}"></div></div>
+      <div class="form-row"><div><label class="required" for="end_time">Window ends:</label><input required type="datetime-local" name="end_time" id="end_time" value="{{ default_end_time }}"></div></div>
+      <div class="form-row"><div><label for="is_released">Authorize/start exam:</label><input type="checkbox" name="is_released" id="is_released" value="1" checked><div class="help">Checked: this bulk action releases the exam and records the administrator start approval. Students can still start only inside the configured time window.</div></div></div>
+    </fieldset>
+    <div class="module results">
+      <table id="result_list">
+        <thead><tr><th><input type="checkbox" id="select_all" checked></th><th>Application</th><th>Candidate</th><th>Student code</th><th>Status</th><th>Current exam gate</th></tr></thead>
+        <tbody>{% for application in applicants %}<tr class="{% cycle 'row1' 'row2' %}">
+          <td><input type="checkbox" class="applicant" name="application_ids" value="{{ application.id }}" checked></td>
+          <th>{{ application.application_number }}</th><td>{{ application.student.user.get_full_name|default:application.student.user.email }}</td><td>{{ application.student.student_code }}</td><td>{{ application.get_status_display }}</td>
+          <td>{% if application.pre_screening.is_released and application.pre_screening.admin_started_at %}Started{% elif application.pre_screening.is_released %}Released — awaiting admin start{% elif application.pre_screening %}Locked{% else %}Not scheduled{% endif %}</td>
+        </tr>{% empty %}<tr><td colspan="6">No eligible applicants for this course.</td></tr>{% endfor %}</tbody>
+      </table>
+    </div>
+    {% if applicants %}
+      <div class="submit-row">
+        {% if question_banks %}
+          <input type="submit" class="default" value="Bulk schedule/start selected applicants">
+        {% else %}
+          <input type="submit" value="Bulk start unavailable — publish Question Bank first" disabled title="Prepare, review, and publish an approved Question Bank for this course first.">
+        {% endif %}
+      </div>
+    {% endif %}
+  </form>
+  {% else %}<p class="help">Select a course to see its eligible applicants and question banks.</p>{% endif %}
+
+  {% elif section == 'module' %}
+  <div class="module">
+    <h2>Cohort module test launcher</h2>
+    <form method="get">
+      <input type="hidden" name="section" value="module">
+      <fieldset class="module aligned">
+        <div class="form-row"><div><label class="required" for="mt_course_id">Course:</label><select name="mt_course_id" id="mt_course_id" onchange="this.form.submit()"><option value="">Select a published course</option>{% for course in courses %}<option value="{{ course.id }}"{% if selected_mt_course_id == course.id|stringformat:'s' %} selected{% endif %}>{{ course }}</option>{% endfor %}</select></div></div>
+        <div class="form-row"><div><label class="required" for="mt_cohort_id">Cohort:</label><select name="mt_cohort_id" id="mt_cohort_id" onchange="this.form.submit()"{% if not selected_mt_course %} disabled{% endif %}><option value="">Select a cohort for this course</option>{% for cohort in cohorts %}<option value="{{ cohort.id }}"{% if selected_mt_cohort_id == cohort.id|stringformat:'s' %} selected{% endif %}>{{ cohort }}</option>{% endfor %}</select><div class="help">Only active cohorts related to the selected course are shown.</div></div></div>
+        <div class="form-row"><div><label class="required" for="mt_module_id">Module:</label><select name="mt_module_id" id="mt_module_id" onchange="this.form.submit()"{% if not selected_mt_course %} disabled{% endif %}><option value="">Select a module for this course</option>{% for module in modules %}<option value="{{ module.id }}"{% if selected_mt_module_id == module.id|stringformat:'s' %} selected{% endif %}>Module {{ module.module_number }}: {{ module.title }}</option>{% endfor %}</select></div></div>
+      </fieldset>
+    </form>
+  </div>
+  {% if selected_mt_course and selected_mt_cohort and selected_mt_module %}
+  <form method="post" action="{% url 'admin:exams_starttest_bulk_moduletest' %}">
+    {% csrf_token %}<input type="hidden" name="course_id" value="{{ selected_mt_course.id }}"><input type="hidden" name="cohort_id" value="{{ selected_mt_cohort.id }}"><input type="hidden" name="module_id" value="{{ selected_mt_module.id }}">
+    <fieldset class="module aligned">
+      <h2>Schedule module test</h2>
+      <div class="form-row"><div><label class="required" for="title">Title:</label><input class="vTextField" required name="title" id="title" value="{{ selected_mt_cohort.code }} - Module {{ selected_mt_module.module_number }} Test"></div></div>
+      <div class="form-row"><div><label class="required" for="mt_question_bank">Question bank:</label><select required name="question_bank_id" id="mt_question_bank"><option value="">Select a matching approved bank</option>{% for bank in mt_question_banks %}<option value="{{ bank.id }}">{{ bank.title }} ({{ bank.total_questions_per_set }} questions/set)</option>{% endfor %}</select>{% if not mt_question_banks %}<div class="help">No approved open bank matches this course, cohort, and module.</div>{% endif %}</div></div>
+      <div class="form-row"><div><label class="required" for="mt_start">Window starts:</label><input required type="datetime-local" name="scheduled_at" id="mt_start" value="{{ default_start_time }}"></div></div>
+      <div class="form-row"><div><label class="required" for="mt_end">Window ends:</label><input required type="datetime-local" name="end_time" id="mt_end" value="{{ default_end_time }}"></div></div>
+      <div class="form-row"><div><label for="duration_minutes">Duration:</label><input type="number" min="5" name="duration_minutes" id="duration_minutes" value="30"> minutes</div></div>
+      <div class="form-row"><div><label for="pass_percentage">Pass percentage:</label><input type="number" min="1" max="100" name="pass_percentage" id="pass_percentage" value="60">%</div></div>
+      <div class="form-row"><div><label for="mt_release">Release gate:</label><input type="checkbox" name="is_released" id="mt_release" value="1" checked></div></div>
+      <div class="form-row"><div><label>Google Meet:</label><p class="readonly">Created automatically for this exact course, cohort, module, and window. Repeating the same schedule reuses the existing test and meeting instead of creating duplicates.</p></div></div>
+    </fieldset>
+    <div class="module results"><table id="result_list"><thead><tr><th>Student code</th><th>Candidate</th><th>Email</th><th>Enrollment status</th></tr></thead><tbody>{% for application in cohort_students %}<tr class="{% cycle 'row1' 'row2' %}"><th>{{ application.student.student_code }}</th><td>{{ application.student.user.get_full_name|default:application.student.user.email }}</td><td>{{ application.student.user.email }}</td><td>{{ application.get_status_display }}</td></tr>{% empty %}<tr><td colspan="4">No actively enrolled students in this cohort.</td></tr>{% endfor %}</tbody></table></div>
+    {% if mt_question_banks %}<div class="submit-row"><input type="submit" class="default" value="Create and schedule module test"></div>{% endif %}
+  </form>
+  {% else %}<p class="help">Choose a course, one of its cohorts, and one of its modules.</p>{% endif %}
+
+  {% else %}
+  <div class="module results">
+    <table id="result_list"><caption><span class="section">Live module tests</span></caption><thead><tr><th>Test</th><th>Course</th><th>Cohort</th><th>Window</th><th>Google Meet</th><th>Actions</th></tr></thead><tbody>
+      {% for test in active_module_tests %}<tr class="{% cycle 'row1' 'row2' %}"><th>{{ test.title }}</th><td>{{ test.course.code }}</td><td>{{ test.cohort.code|default:'All cohorts' }}</td><td>{{ test.scheduled_at|date:'SHORT_DATETIME_FORMAT' }} – {{ test.end_time|date:'SHORT_DATETIME_FORMAT' }}</td><td>{% if test.meeting_link %}<a href="{{ test.meeting_link }}" target="_blank" rel="noopener">Open Google Meet</a>{% else %}Not generated{% endif %}</td><td><form method="post" action="{% url 'admin:exams_starttest_extend_window' %}" style="display:inline">{% csrf_token %}<input type="hidden" name="assessment_type" value="moduletest"><input type="hidden" name="item_id" value="{{ test.id }}"><input type="hidden" name="extend_minutes" value="15"><button class="button">Extend 15 minutes</button></form> <form method="post" action="{% url 'admin:exams_starttest_close_window' %}" style="display:inline">{% csrf_token %}<input type="hidden" name="assessment_type" value="moduletest"><input type="hidden" name="item_id" value="{{ test.id }}"><button class="button">Close</button></form></td></tr>{% empty %}<tr><td colspan="6">No live module-test windows.</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+  <div class="module results">
+    <table id="result_list"><caption><span class="section">Live pre-screening windows</span></caption><thead><tr><th>Application</th><th>Candidate</th><th>Course</th><th>Window</th><th>Actions</th></tr></thead><tbody>
+      {% for screening in active_prescreenings %}<tr class="{% cycle 'row1' 'row2' %}"><th>{{ screening.application.application_number }}</th><td>{{ screening.application.student.user.get_full_name|default:screening.application.student.user.email }}</td><td>{{ screening.application.course.code }}</td><td>{{ screening.scheduled_at|date:'SHORT_DATETIME_FORMAT' }} – {{ screening.end_time|date:'SHORT_DATETIME_FORMAT' }}</td><td><form method="post" action="{% url 'admin:exams_starttest_extend_window' %}" style="display:inline">{% csrf_token %}<input type="hidden" name="assessment_type" value="prescreening"><input type="hidden" name="item_id" value="{{ screening.id }}"><input type="hidden" name="extend_minutes" value="15"><button class="button">Extend 15 minutes</button></form> <form method="post" action="{% url 'admin:exams_starttest_close_window' %}" style="display:inline">{% csrf_token %}<input type="hidden" name="assessment_type" value="prescreening"><input type="hidden" name="item_id" value="{{ screening.id }}"><button class="button">Close</button></form></td></tr>{% empty %}<tr><td colspan="5">No live pre-screening windows.</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<script>const selectAll=document.getElementById('select_all');if(selectAll){selectAll.addEventListener('change',function(){document.querySelectorAll('.applicant').forEach(function(box){box.checked=selectAll.checked;});});}</script>
+{% endblock %}

@@ -1,0 +1,363 @@
+{
+  "title": "Module 6 Quiz for G3 - G4 VLSI",
+  "clean_title": "Module_6_AMS_Assessment",
+  "course_code": "VLSI-DESIGN",
+  "exam_type": "MODULE_TEST",
+  "module_topic": "Module 6: AMS Assessment",
+  "timer": 20,
+  "total_questions": 25,
+  "image_questions_count": 0,
+  "source_original_file": "062_Module_6_Quiz_for_G3_-_G4_VLSI.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "The threshold voltage of a PMOS enhancement mode MOSFET is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Positive",
+        "B. Negative",
+        "C. Zero",
+        "D. Infinite"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "The threshold voltage of a NMOS depletion mode MOSFET is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Positive",
+        "B. Negative",
+        "C. Zero",
+        "D. Infinite"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "The increase in drain current of a MOSFET in the saturation region with drain to source voltage is due to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Velocity Saturation",
+        "B. Body Effect",
+        "C. Channel Length Modulation",
+        "D. DIBL (Drain Induced Barrier Lowering)"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "The increase in threshold voltage of a MOSFET with source to bulk voltage is called:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Velocity Saturation",
+        "B. Pinch Off",
+        "C. Body Effect",
+        "D. Channel Length Modulation"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "The subthreshold or weak inversion region of a MOSFET is frequently used in which of the following applications:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Pacemakers",
+        "B. Hearing Aids",
+        "C. Wrist Watches",
+        "D. All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "In lithography a negative photoresist:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Softens on exposure to UV Light",
+        "B. Hardens / Polymerizes on exposure to UV Light",
+        "C. There is no impact on the photoresist on exposure to UV Light",
+        "D. None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "EGS (Electronic Grade Silicon) used in manufacture of silicon ingots and wafers is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 98 % pure",
+        "B. 99 % pure",
+        "C. 99.99 % pure",
+        "D. None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "While manufacturing MOSFET transistors the drain and source regions of the transistors can be formed using:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Diffusion",
+        "B. Ion Implantation",
+        "C. Both Diffusion and Ion Implantation",
+        "D. None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "In manufacturing MOSFET transistors sputtering is technique deployed for:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Deposition of polysilicon gates",
+        "B. Deposition of metal layers",
+        "C. Formation of source / drain regions of the MOSFETs",
+        "D. None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Which of the following techniques are used for lithography in manufacture of MOSFET transistors:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. UV Light",
+        "B. Ions",
+        "C. XRAYs",
+        "D. All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "The gain of a MOSFET depends upon:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Transconductance Gm",
+        "B. Output Impedence Rds.",
+        "C. Both transconductance and output impedence",
+        "D. None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Which of the following circuits is used for generation of a precise reference voltage:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Comparator",
+        "B. Differential Amplifier",
+        "C. Bandgap Reference",
+        "D. Phase Locked Loops (PLL)"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "Which of the following are applications of PLLs:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Clock Generation",
+        "B. Frequency Synthesis and Frequency Division",
+        "C. Skew and Jitter reduction",
+        "D. All of the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which of the following is true for a flash ADC:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. It is very fast and has high speed",
+        "B. It is very expensive as it has a large number of comparators",
+        "C. Both (a) and (b) are true",
+        "D. None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Which of the following circuits utilize hysteresis to reduce noise and jitter and produce clean outputs:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Comparator",
+        "B. Schmitt Trigger",
+        "C. Both (a) and (b)",
+        "D. None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "A two stage CMOS OPAMP is made by:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. A differential amplifier followed by a single stage amplifier",
+        "B. A common source amplifier followed by a common gate amplifier",
+        "C. A common source amplifier followed by a common drain amplifier",
+        "D. None of the above"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "Which of the following are applications of OPAMPs:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Amplifiers",
+        "B. Differentiator and Integrator circuits",
+        "C. Unity Gain Buffer",
+        "D. All the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "In CMOS circuit design a source follower is basically a:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Common gate amplifier",
+        "B. Common drain amplifier",
+        "C. Common source amplifier",
+        "D. None of the above"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Which of the following techniques are used in CMOS circuit design to implement OPAMPs:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Cascode",
+        "B. Folded Cascode",
+        "C. Telescopic",
+        "D. All the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "In a two stage CMOS OPAMP which of the following circuit components are used to achieve compensation for stability of the OPAMP:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Compensation capacitor",
+        "B. Nulling resistor",
+        "C. Both compensation capacitor and nulling resistor",
+        "D. None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "Which of the following are reliability failure mechanisms in CMOS integrated circuits:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Latchup",
+        "B. ESD",
+        "C. Electromigration",
+        "D. All the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "In CMOS process which of the following methods can be used to implement resistors:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. N+ source drain and P+ source drain resistors",
+        "B. NWELL resistors",
+        "C. Poly resistors",
+        "D. All the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "In CMOS process which of the following methods cand be used to implement capacitors:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. MOS capacitors",
+        "B. Poly1 and Poly2 capacitors",
+        "C. MIMCAPs (Metal Insulator Metal Capacitors)",
+        "D. All the above"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "While doing layout of a CMOS two stage OPAMP which of the following transistors need most precise/critical matching:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Transistors forming the input differential pair",
+        "B. Transistors forming the current source or diode connected loads",
+        "C. Transistors of the bias circuitry",
+        "D. None of the above"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "Which of the following techniques is used for proper matching of MOSFETs:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Common centroid layout",
+        "B. Interdigitization",
+        "C. Both (a) and (b)",
+        "D. None of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    }
+  ]
+}

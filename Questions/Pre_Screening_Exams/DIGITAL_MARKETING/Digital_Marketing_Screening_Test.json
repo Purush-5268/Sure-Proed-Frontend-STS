@@ -1,0 +1,293 @@
+{
+  "title": "Digital Marketing",
+  "clean_title": "Digital_Marketing_Screening_Test",
+  "course_code": "DIGITAL-MARKETING",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Digital Marketing Screening",
+  "timer": 10,
+  "total_questions": 20,
+  "image_questions_count": 0,
+  "source_original_file": "014_Digital_Marketing.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "Analyzing Campaign Performance\nA company ran 3 online ad campaigns with the following ROI (Return on Investment):\n    • Campaign A: 120%\n    • Campaign B: 150%\n    • Campaign C: 90%\nIf the company wants to continue with only 2 campaigns, which ones should they choose based on ROI alone?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Campaign A and B",
+        "Campaign A and C",
+        "Campaign B and C",
+        "Campaign A and any other, since all are above 80%"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Interpreting A/B Test Results\nAn A/B test was conducted to test two landing page versions:\n    • Version A had a 3.2% conversion rate.\n    • Version B had a 4.0% conversion rate.\nAssuming all other conditions were identical, which version should be chosen?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Version A, because it's more familiar",
+        "Version B, due to higher conversions",
+        "Both should be used equally",
+        "The version with lower bounce rate (not provided)"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Coding-Decoding\nIn a certain code language:\n    • APPLE is written as ELPPA.\n    • ORANGE is written as EGNARO.\nHow will MARKET be written?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "KERTAM",
+        "TEKRAM",
+        "TREKAM",
+        "TEKMAR"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Odd One Out\nFind the odd one out:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Circle",
+        "Square",
+        "Triangle",
+        "Sphere"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Case Study - Influencer Marketing for a New Product\nScenario:\nA skincare brand wants to launch a new organic face serum. Their budget is limited.\nQuestion:\nWhich approach would be MOST effective for early digital traction?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Collaborate with micro-influencers in the skincare niche",
+        "Hire a celebrity influencer",
+        "Launch a TV ad campaign",
+        "Invest only in Google Search Ads"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Question 6 – 8: Comprehension Passage\n\n\nThe Rise of Digital Marketing\nOver the last decade, digital marketing has become an essential tool for businesses of all sizes. Unlike traditional marketing methods such as television or newspaper ads, digital marketing allows brands to reach customers directly through online platforms such as social media, email, and search engines.\nOne of the major advantages of digital marketing is its ability to track user behavior. Marketers can now analyze how many people clicked on an ad, how long they stayed on a website, and even which products they viewed before making a purchase. This data helps companies understand their audience and improve their campaigns in real time.\nMoreover, digital marketing is cost-effective. Small businesses with limited budgets can run targeted ads to specific audiences based on age, location, interests, and more, something not easily achievable with traditional marketing.\nAs the world becomes increasingly digital, the demand for skilled digital marketers continues to grow. Companies are actively hiring professionals who understand SEO, content marketing, analytics, and paid advertising strategies.\n\nQuestion:\nAccording to the passage, what is one key benefit of digital marketing over traditional marketing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "It guarantees higher sales",
+        "It allows better tracking and analysis of user behavior",
+        "It uses television to reach users",
+        "It doesn't require internet access"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Why is digital marketing considered cost-effective for small businesses?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "It replaces all business operations",
+        "It is free to use",
+        "It requires expensive tools",
+        "It allows targeted ads based on user demographics"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "What is the reason behind the growing demand for digital marketers?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Traditional marketers are retiring",
+        "More companies are shifting to digital platforms",
+        "Social media is declining",
+        "Email marketing is no longer effective"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Synonym\nChoose the word closest in meaning to “Optimize”:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Minimize",
+        "Improve",
+        "Ignore",
+        "Destroy"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Identify the correct sentence:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "He don’t like running ads on social media.",
+        "He doesn’t likes running ads on social media.",
+        "He doesn’t like running ads on social media.",
+        "He not like running ads on social media."
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Read the sentence:\n“SEO helps increase the visibility of a website on search engines.”\nWhat does “visibility” mean in this context?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The website’s speed",
+        "How easy it is to find the website",
+        "The design of the website",
+        "The price of advertising"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Which company owns the search engine Google?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Microsoft",
+        "Amazon",
+        "Alphabet Inc.",
+        "Facebook"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "Which year was the World Wide Web invented?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "1983",
+        "1989",
+        "1995",
+        "2000"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Who is considered the father of the internet?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Tim Berners-Lee",
+        "Vint Cerf",
+        "Bill Gates",
+        "Steve Jobs"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "Last month, a website had 10,000 visitors. This month, the number of visitors increased to 12,500.\nWhat is the percentage increase in visitors?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "20%",
+        "25%",
+        "30%",
+        "15%"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "An advertiser spends $2,000 on a campaign and earns $2,400 in revenue. What is the profit percentage?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "10%",
+        "15%",
+        "20%",
+        "25%"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "A digital marketing team has 8 SEO specialists and 12 content writers. What is the ratio of SEO specialists to content writers?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "2:3",
+        "3:2",
+        "4:3",
+        "3:4"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "A train travels 60 km in 1.5 hours. What is its average speed?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "30 km/h",
+        "40 km/h",
+        "45 km/h",
+        "50 km/h"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Marketing Case Study\nScenario:\nShopEase is an online fashion retailer that has noticed a significant increase in website traffic over the past 3 months. However, the sales conversion rate remains low, and many users leave the site without making any purchases. The marketing team wants to identify the problem and improve the conversion rate.\nQuestions:\nQ19. What is the most likely reason for high traffic but low conversion rate?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Website has slow loading speed",
+        "Poor quality of products listed",
+        "Ineffective SEO strategy",
+        "Too many payment options"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "Which digital marketing strategy should ShopEase prioritize to increase conversions?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Increase paid social media ads",
+        "Improve website UX/UI and optimize loading speed",
+        "Focus solely on SEO for more traffic",
+        "Launch email marketing campaigns without site improvements"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    }
+  ]
+}

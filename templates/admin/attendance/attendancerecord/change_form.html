@@ -1,0 +1,13 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    {% if original and identity_review_url %}
+    <li>
+        <a href="{{ identity_review_url }}" class="historylink" style="background-color: var(--button-bg); color: var(--button-fg);">
+            {% trans "Historical Identity Review" %}
+        </a>
+    </li>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,713 @@
+{
+  "title": "Cybersecurity and Ethical Hacking (VAPT) Internship - Entrance Test",
+  "clean_title": "CyberSecurity",
+  "course_code": "CYBERSECURITY",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Screening Assessment",
+  "timer": 45,
+  "total_questions": 50,
+  "image_questions_count": 0,
+  "source_original_file": "CyberSecurity.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What is ethical hacking?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Hacking with malicious intent",
+        "Authorized hacking to identify vulnerabilities",
+        "Hacking for personal gain",
+        "Hacking without permission"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "What does VAPT stand for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Vulnerability Assessment and Penetration Testing",
+        "Virtual Application Penetration Testing",
+        "Vulnerability Analysis and Performance Testing",
+        "Virtual Assessment and Penetration Testing"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Which operating system is commonly used for penetration testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Windows",
+        "Kali Linux",
+        "macOS",
+        "Ubuntu"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "What is a virtual machine?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A physical computer",
+        "A software-based simulation of a computer",
+        "A networking device",
+        "A storage device"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Which of the following is a virtualization software?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "VMware",
+        "VirtualBox",
+        "Both VMware and VirtualBox",
+        "Neither VMware nor VirtualBox"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What is the OSI model?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A model for understanding network communication",
+        "A programming language",
+        "A database model",
+        "A security framework"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "How many layers are in the OSI model?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "5",
+        "7",
+        "4",
+        "3"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "Which protocol is used for IP addressing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "TCP",
+        "UDP",
+        "IP",
+        "ARP"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "What is the purpose of a subnet mask?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To divide IP addresses into network and host parts",
+        "To encrypt data",
+        "To route packets",
+        "To secure connections"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "What is a TCP three-way handshake?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The process of establishing a TCP connection",
+        "The process of encrypting data",
+        "The process of routing packets",
+        "The process of closing a connection"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Which port is commonly used for HTTP?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "21",
+        "22",
+        "80",
+        "443"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Which port is commonly used for HTTPS?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "21",
+        "22",
+        "80",
+        "443"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What is footprinting in ethical hacking?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Gathering information about a target",
+        "Exploiting vulnerabilities",
+        "Installing malware",
+        "Clearing logs"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "What is Google Hacking Database?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A database of Google search queries for finding vulnerabilities",
+        "A database of Google employees",
+        "A database of Google products",
+        "A database of Google services"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "What is network scanning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Identifying live hosts and open ports",
+        "Installing software",
+        "Encrypting data",
+        "Clearing logs"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "What is OS fingerprinting?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Identifying the operating system of a target",
+        "Identifying the user of a target",
+        "Identifying the location of a target",
+        "Identifying the password of a target"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "What is a stealth scan?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A scan that avoids detection",
+        "A fast scan",
+        "A detailed scan",
+        "A scan that uses UDP"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "What is enumeration in ethical hacking?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Gathering detailed information about services",
+        "Exploiting vulnerabilities",
+        "Installing malware",
+        "Clearing logs"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Which service runs on port 21?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "FTP",
+        "SSH",
+        "Telnet",
+        "SMTP"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "Which service runs on port 22?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "FTP",
+        "SSH",
+        "Telnet",
+        "SMTP"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "What is the Metasploit Framework?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A tool for developing and executing exploits",
+        "A network scanner",
+        "A password cracker",
+        "A firewall"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "What is a payload in Metasploit?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The code that executes after exploitation",
+        "The vulnerability being exploited",
+        "The target system",
+        "The network scanner"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "What is Meterpreter?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "An advanced payload in Metasploit",
+        "A network scanner",
+        "A password cracker",
+        "A firewall"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "What is privilege escalation?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Gaining higher-level access on a system",
+        "Installing software",
+        "Encrypting data",
+        "Clearing logs"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "What is a hashdump?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Extracting password hashes from a system",
+        "Dumping files",
+        "Clearing logs",
+        "Installing software"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "What is persistence in ethical hacking?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Maintaining access to a compromised system",
+        "Installing software",
+        "Clearing logs",
+        "Encrypting data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "What is ARP poisoning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A technique to redirect network traffic",
+        "A technique to encrypt data",
+        "A technique to scan ports",
+        "A technique to install malware"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "What is a Man-in-the-Middle attack?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Intercepting communication between two parties",
+        "Installing malware",
+        "Scanning networks",
+        "Encrypting data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "What is sniffing in network security?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Capturing network traffic",
+        "Installing software",
+        "Encrypting data",
+        "Clearing logs"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "What is a Trojan?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Malware disguised as legitimate software",
+        "A type of virus",
+        "A worm",
+        "A network scanner"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-31",
+      "text": "What is the difference between a virus and a worm?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A virus attaches to files, a worm spreads independently",
+        "A worm attaches to files, a virus spreads independently",
+        "Both are the same",
+        "Neither is malware"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-32",
+      "text": "What is cryptography?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "The practice of securing communication",
+        "A network scanner",
+        "A password cracker",
+        "A firewall"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-33",
+      "text": "What is steganography?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Hiding data within other data",
+        "Encrypting data",
+        "Decrypting data",
+        "Hashing data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-34",
+      "text": "What is Base64 encoding?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A method to encode binary data as text",
+        "A method to encrypt data",
+        "A method to hash data",
+        "A method to compress data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-35",
+      "text": "What is hashing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Converting data into a fixed-length hash value",
+        "Encrypting data",
+        "Decrypting data",
+        "Compressing data"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-36",
+      "text": "What is Active Directory (AD)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A directory service from Microsoft",
+        "A network scanner",
+        "A password cracker",
+        "A firewall"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-37",
+      "text": "What is BloodHound in AD pentesting?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A tool for mapping Active Directory relationships",
+        "A network scanner",
+        "A password cracker",
+        "A firewall"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-38",
+      "text": "What is Kerberoasting?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "An attack to crack Kerberos service tickets",
+        "A type of malware",
+        "A network scanner",
+        "A firewall"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-39",
+      "text": "What is the OWASP Top 10?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A list of top 10 web application security risks",
+        "A list of top 10 network scanners",
+        "A list of top 10 password crackers",
+        "A list of top 10 firewalls"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-40",
+      "text": "What is SQL injection?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "An attack that injects SQL queries into input fields",
+        "A type of malware",
+        "A network scanner",
+        "A firewall"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-41",
+      "text": "What is XSS (Cross-Site Scripting)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "An attack that injects scripts into web pages",
+        "A type of malware",
+        "A network scanner",
+        "A firewall"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-42",
+      "text": "What is CSRF (Cross-Site Request Forgery)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "An attack that forces users to execute unwanted actions",
+        "A type of malware",
+        "A network scanner",
+        "A firewall"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-43",
+      "text": "What is LFI (Local File Inclusion)?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "An attack that includes local files on a web server",
+        "A type of malware",
+        "A network scanner",
+        "A firewall"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-44",
+      "text": "What is Burp Suite used for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Web application security testing",
+        "Network scanning",
+        "Password cracking",
+        "Firewall configuration"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-45",
+      "text": "What is a CVSS score?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A score for vulnerability severity",
+        "A score for network speed",
+        "A score for password strength",
+        "A score for firewall security"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-46",
+      "text": "What is the purpose of report writing in penetration testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "To document findings and recommendations",
+        "To delete logs",
+        "To install malware",
+        "To crack passwords"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-47",
+      "text": "What is DVWA?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Damn Vulnerable Web Application - a training tool",
+        "A network scanner",
+        "A password cracker",
+        "A firewall"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-48",
+      "text": "What is automation in penetration testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Using tools to automate repetitive tasks",
+        "Manual testing",
+        "Installing software",
+        "Clearing logs"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-49",
+      "text": "What is the difference between vulnerability assessment and penetration testing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Vulnerability assessment identifies vulnerabilities, penetration testing exploits them",
+        "Penetration testing identifies vulnerabilities, vulnerability assessment exploits them",
+        "Both are the same",
+        "Neither is used in security"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-50",
+      "text": "Which of the following best describes a complete penetration testing process?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Footprinting -> Scanning -> Enumeration -> Exploitation -> Post-Exploitation -> Reporting",
+        "Reporting -> Exploitation -> Scanning -> Footprinting -> Enumeration",
+        "Exploitation -> Reporting -> Footprinting -> Scanning -> Enumeration",
+        "Enumeration -> Footprinting -> Scanning -> Exploitation -> Post-Exploitation -> Reporting"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    }
+  ]
+}

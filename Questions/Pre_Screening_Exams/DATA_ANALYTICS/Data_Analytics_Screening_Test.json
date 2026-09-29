@@ -1,0 +1,573 @@
+{
+  "title": "Data Analytics Test",
+  "clean_title": "Data_Analytics_Screening_Test",
+  "course_code": "DATA-ANALYTICS",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Data Analytics & SQL Screening",
+  "timer": 20,
+  "total_questions": 40,
+  "image_questions_count": 0,
+  "source_original_file": "042_Data_Analytics_Test.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "Which of the following best describes structured data?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Free-text reviews",
+        "B. Images and videos",
+        "C. Data in tables with fixed schema",
+        "D. Social media posts"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "Which measure of central tendency is most affected by extreme values?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Mean",
+        "B. Median",
+        "C. Mode",
+        "D. Range"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "What does the COUNT(*) function do in SQL?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Counts non-null values",
+        "B. Counts rows",
+        "C. Counts columns",
+        "D. Counts distinct values"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "Which Excel function is used to find the average of a range?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. SUM",
+        "B. COUNT",
+        "C. AVERAGE",
+        "D. MEAN"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "Which Python data type is immutable?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. List",
+        "B. Dictionary",
+        "C. Set",
+        "D. Tuple"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "What is the primary purpose of data cleaning?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Increase data size",
+        "B. Remove useful data",
+        "C. Improve data quality",
+        "D. Change data format only"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Which chart is best for showing trends over time?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Bar chart",
+        "B. Pie chart",
+        "C. Line chart",
+        "D. Scatter plot"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "What does NULL represent in SQL?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Zero value",
+        "B. Empty string",
+        "C. Missing or unknown value",
+        "D. False value"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which Pandas function is used to view the first few rows of a DataFrame?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. preview()",
+        "B. top()",
+        "C. head()",
+        "D. sample()"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "Which of the following is a categorical variable?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Age",
+        "B. Salary",
+        "C. Temperature",
+        "D. Gender"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "What is the main use of GROUP BY in SQL?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Sorting data",
+        "B. Filtering rows",
+        "C. Aggregating data",
+        "D. Joining tables"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "Which Excel feature is used to summarize large datasets quickly?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Charts",
+        "B. Conditional formatting",
+        "C. Pivot tables",
+        "D. Macros"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "What does EDA stand for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Exploratory Data Analysis",
+        "B. Extended Data Algorithm",
+        "C. External Data Access",
+        "D. Extracted Data Analysis"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "Which visualization is best for comparing proportions?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Line chart",
+        "B. Pie chart",
+        "C. Histogram",
+        "D. Scatter plot"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "What is the output of len([1,2,3,4]) in Python?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. 3",
+        "B. 4",
+        "C. 5",
+        "D. Error"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "Which SQL clause is used to filter aggregated results?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. WHERE",
+        "B. GROUP BY",
+        "C. HAVING",
+        "D. ORDER BY"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "A dataset has many duplicate rows. What is the most appropriate first step?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Create a dashboard",
+        "B. Remove duplicates",
+        "C. Build a model",
+        "D. Add new columns"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "What does standard deviation measure?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Central value",
+        "B. Spread of data",
+        "C. Shape of distribution",
+        "D. Data size"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Which join returns only matching rows from both tables?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. LEFT JOIN",
+        "B. RIGHT JOIN",
+        "C. FULL JOIN",
+        "D. INNER JOIN"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "Which Pandas method is used to remove missing values?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. dropna()",
+        "B. fillna()",
+        "C. isnull()",
+        "D. replace()"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "Which scenario best fits the use of a bar chart?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Trend over time",
+        "B. Distribution shape",
+        "C. Category comparison",
+        "D. Relationship analysis"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "If correlation between two variables is 0, it means",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Strong relationship",
+        "B. No linear relationship",
+        "C. No relationship at all",
+        "D. Perfect negative relationship"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "What does ORDER BY do in SQL?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Filters data",
+        "B. Sorts results",
+        "C. Groups rows",
+        "D. Joins tables"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "Which is a common data quality issue?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Normalization",
+        "B. Outliers",
+        "C. Indexing",
+        "D. Aggregation"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "A dashboard shows too many KPIs. What is the main risk?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Data loss",
+        "B. Poor performance",
+        "C. Decision confusion",
+        "D. Query failure"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "A dataset has extreme outliers affecting the mean. Which measure is more reliable?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Mean",
+        "B. Median",
+        "C. Variance",
+        "D. Range"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "Which SQL query is logically incorrect?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. SELECT * FROM sales",
+        "B. SELECT SUM(price) FROM sales",
+        "C. SELECT region, SUM(price) FROM sales",
+        "D. SELECT region, SUM(price) FROM sales GROUP BY region"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "A pie chart is used to show trends over time. What is the issue?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Data volume",
+        "B. Wrong aggregation",
+        "C. Poor chart choice",
+        "D. Incorrect labels"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "Which situation indicates sampling bias?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Random selection",
+        "B. Large sample size",
+        "C. Surveying only active users",
+        "D. Stratified sampling"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "A model performs well on training data but poorly on test data. This indicates",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Underfitting",
+        "B. Overfitting",
+        "C. Data leakage",
+        "D. High bias"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-31",
+      "text": "Which metric is most appropriate for an imbalanced classification problem?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Accuracy",
+        "B. Precision/Recall",
+        "C. Mean squared error",
+        "D. R²"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-32",
+      "text": "What is the main risk of using AI tools blindly in analytics?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Faster results",
+        "B. Better insights",
+        "C. Incorrect conclusions",
+        "D. Reduced coding effort"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-33",
+      "text": "A dashboard shows rising sales but declining profit. What should be checked first?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Chart colors",
+        "B. Revenue calculation",
+        "C. Cost structure",
+        "D. Data refresh time"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-34",
+      "text": "Which SQL mistake can silently produce wrong results?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Syntax error",
+        "B. Missing semicolon",
+        "C. Incorrect join condition",
+        "D. Typo in column name"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-35",
+      "text": "Which situation best requires a hypothesis test?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Counting customers",
+        "B. Comparing two campaign results",
+        "C. Sorting data",
+        "D. Creating dashboards"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-36",
+      "text": "A correlation is found between ice cream sales and drowning incidents. What is the correct interpretation?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Ice cream causes drowning",
+        "B. Drowning causes sales",
+        "C. Both caused by a third factor",
+        "D. Data is incorrect"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-37",
+      "text": "What is the biggest problem with cherry-picking data?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Larger datasets",
+        "B. Faster analysis",
+        "C. Misleading conclusions",
+        "D. Better insights"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-38",
+      "text": "A KPI changes definition mid-year. What is the impact?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Improved accuracy",
+        "B. Better trends",
+        "C. Broken comparability",
+        "D. Faster reporting"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-39",
+      "text": "Which approach best validates analytical conclusions?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Visual appeal",
+        "B. Larger charts",
+        "C. Cross-checking assumptions",
+        "D. Faster queries"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-40",
+      "text": "A forecast consistently underestimates demand during festivals. What is missing?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "A. Data cleaning",
+        "B. Seasonality",
+        "C. Normalization",
+        "D. Scaling"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    }
+  ]
+}

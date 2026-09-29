@@ -1,0 +1,153 @@
+{
+  "title": "SAP-ABAP",
+  "clean_title": "SAP_ABAP_Screening_Test",
+  "course_code": "SAP-ABAP",
+  "exam_type": "PRESCREENING",
+  "module_topic": "SAP ABAP Screening",
+  "timer": 5,
+  "total_questions": 10,
+  "image_questions_count": 0,
+  "source_original_file": "002_SAP-ABAP.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "The term ABAP stands for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Application Business Advanced Programming",
+        "Advanced Building Application Programming",
+        "Advanced Business Application Program",
+        "Advanced Business Application Programming"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "How many layers there in 3 tier architecture?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "What is the transaction code to open ABAP editor to create or change ABAP program?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "SE80",
+        "SE38",
+        "SE59",
+        "SE48"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "What is the transaction code to open Smartforms to create or change Smartforms?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Smart-form",
+        "Smart_forms",
+        "Smartform",
+        "Smartforms"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "What is the transaction code to start recording BDC?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "SHDB",
+        "HDBC",
+        "BDC",
+        "DBHS"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which of the following table type can't be buffered?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Transparent table",
+        "Pool table",
+        "Cluster Table",
+        "All of the above"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Which of the following can be used to store control data such as screen sequences or program parameters?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Pool tables",
+        "Cluster Table",
+        "Transparent Table",
+        "None"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "What does BAPI stand for?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Business Application Programming Interface",
+        "Batch Application Programming Interface",
+        "Business Application Processing Interface",
+        "Batch Application Processing Interface"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "What is the transaction code to access function module?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "SE80",
+        "SE38",
+        "SE37",
+        "SE48"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "What is the transaction code to Implement enhancement?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "SE18",
+        "SE19",
+        "SE20",
+        "SE21"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    }
+  ]
+}

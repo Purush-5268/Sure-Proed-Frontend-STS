@@ -1,0 +1,433 @@
+{
+  "title": "DATA SCIENCE",
+  "clean_title": "Data_Science_Screening_Test",
+  "course_code": "AI-ML",
+  "exam_type": "PRESCREENING",
+  "module_topic": "Data Science & Math Screening",
+  "timer": 15,
+  "total_questions": 30,
+  "image_questions_count": 0,
+  "source_original_file": "005_DATA_SCIENCE.json",
+  "questions": [
+    {
+      "id": "q-1",
+      "text": "What is the lower quartile (Q1) of the dataset: 14, 25, 31, 36, 37, 41, 51, 52, 55, 79, 112?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "14",
+        "31",
+        "41",
+        "55"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-2",
+      "text": "If Q1 = 31, Q2 = 41, Q3 = 55, and the only outlier is 112, what is the skewness?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Negative",
+        "Symmetric",
+        "Positive",
+        "None"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-3",
+      "text": "Which of the following represents strategic information?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Daily attendance",
+        "Launching a new product",
+        "Monthly report",
+        "Daily sales"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-4",
+      "text": "The standard deviation of the dataset: 22, 14, 11, ..., 30, 15 is approximately:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "10.4",
+        "11.2",
+        "12.1",
+        "13.5"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-5",
+      "text": "The formula for skewness using mean, median, and standard deviation is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "(Mean - Mode)/SD",
+        "(Mean - Median)/SD",
+        "(Median - Mode)/SD",
+        "none"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-6",
+      "text": "Which is a type of Lp distance?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Jaccard",
+        "KL Divergence",
+        "Euclidean",
+        "Edit Distance"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-7",
+      "text": "Cosine similarity is best for which type of data?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Continuous numeric",
+        "Binary",
+        "Sparse vectors",
+        "Strings"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-8",
+      "text": "The expected value of a fair die roll is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "3",
+        "3.5",
+        "4",
+        "4.5"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-9",
+      "text": "Which of the following is used for dimensionality reduction?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "k-NN",
+        "Gradient Descent",
+        "PCA",
+        "SVM"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-10",
+      "text": "The mean of the lactic acid concentration data is approximately:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "172",
+        "180",
+        "241.75",
+        "315.5"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-11",
+      "text": "Operational information is used for:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Strategic decisions",
+        "Government audits",
+        "Daily operations",
+        "Market prediction"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-12",
+      "text": "A histogram helps in visualizing:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Linear equations",
+        "Class intervals and frequencies",
+        "Algorithms",
+        "Graph structures"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-13",
+      "text": "Perceptron algorithm is used in:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Regression",
+        "Classification",
+        "Clustering",
+        "Sampling"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-14",
+      "text": "What is the interquartile range if Q1=22 and Q3=44?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "20",
+        "22",
+        "18",
+        "24"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-15",
+      "text": "What does PAC stand for in learning theory?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Probably Accurate Computation",
+        "Probabilistic and Accurate Classification",
+        "Probably Approximately Correct",
+        "Precise Algorithmic Calculation"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-16",
+      "text": "The Mahalanobis distance is different from Euclidean in that it:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Ignores variance",
+        "Normalizes by covariance",
+        "Is a string metric",
+        "Ignores correlation"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-17",
+      "text": "In a normal distribution, the mean and median are:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Unequal",
+        "Equal",
+        "Always 0",
+        "Always positive"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-18",
+      "text": "A key concept in k-means clustering is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Histogram creation",
+        "Minimizing sum of absolute errors",
+        "Minimizing sum of squared errors",
+        "Regression modeling"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-19",
+      "text": "Which is a characteristic of tactical information?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Used by top managers",
+        "Long term planning",
+        "Day-to-day operations",
+        "Short-range planning"
+      ],
+      "correctOption": 3,
+      "marks": 1
+    },
+    {
+      "id": "q-20",
+      "text": "KL Divergence measures:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Geometric distance",
+        "Vector similarity",
+        "Divergence between probability distributions",
+        "Clustering cost"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-21",
+      "text": "The function of Bayes' rule is to compute:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Marginal probability",
+        "Conditional probability",
+        "Distance metric",
+        "Frequency"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-22",
+      "text": "Cross-validation is used to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Normalize data",
+        "Increase training accuracy",
+        "Avoid overfitting",
+        "Cluster data"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-23",
+      "text": "Eigenvalues and eigenvectors are key to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Regression",
+        "Clustering",
+        "PCA",
+        "Gradient descent"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-24",
+      "text": "Which of the following is used to evaluate classification models?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "R-squared",
+        "MSE",
+        "Confusion Matrix",
+        "SSE"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-25",
+      "text": "What is the effect of increasing variance on data?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Data is more centralized",
+        "Data is more spread out",
+        "No effect",
+        "Median changes"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-26",
+      "text": "Histogram class widths for unequal intervals must be adjusted by:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Frequency",
+        "Relative frequency",
+        "Density",
+        "Class midpoint"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-27",
+      "text": "Which is a standard assumption in simple linear regression?",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Independence of residuals",
+        "Multicollinearity",
+        "High skew",
+        "Large sample"
+      ],
+      "correctOption": 0,
+      "marks": 1
+    },
+    {
+      "id": "q-28",
+      "text": "Information used for compliance reporting is:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Operational",
+        "Strategic",
+        "Statutory",
+        "Tactical"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    },
+    {
+      "id": "q-29",
+      "text": "Regularization in regression helps to:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Increase variance",
+        "Reduce overfitting",
+        "Improve training error",
+        "Cluster data"
+      ],
+      "correctOption": 1,
+      "marks": 1
+    },
+    {
+      "id": "q-30",
+      "text": "A box plot is best used to show:",
+      "image": "",
+      "type": "text",
+      "options": [
+        "Frequencies",
+        "Central tendency",
+        "Distribution and outliers",
+        "Clusters"
+      ],
+      "correctOption": 2,
+      "marks": 1
+    }
+  ]
+}
