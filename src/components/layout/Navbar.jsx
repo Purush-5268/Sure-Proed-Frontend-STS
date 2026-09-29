@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import styles from "./Navbar.module.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
@@ -8,10 +8,12 @@ import { studentService } from "../../services/studentService";
 import NotificationBell from "../common/NotificationBell";
 import NavbarThemeSwitcher from "../common/NavbarThemeSwitcher";
 import { authService } from "../../services/authService";
+import AnnouncementTicker from "../common/AnnouncementTicker";
 
 function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState(null);
@@ -101,13 +103,20 @@ function Navbar() {
 
 
   return (
-    <nav className={styles.navbar}>
+    <>
+      {(!isAuthenticated || location.pathname === '/') && <AnnouncementTicker />}
+      <nav className={styles.navbar}>
       <div className={styles.logo}>
         <Link to="/" onClick={closeMenu} style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: "10px" }}>
           <img src="/sure-logo.jpg" alt="SURE Trust" width="32" height="32" fetchPriority="high" style={{ height: "32px", width: "32px", borderRadius: "4px", objectFit: "cover" }} />
-          <span style={{ fontWeight: "700" }}>
-            SURE ProEd
-          </span>
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <span style={{ fontWeight: "700", lineHeight: "1.1" }}>
+              SURE ProEd
+            </span>
+            <span style={{ fontSize: "0.6rem", fontWeight: "600", color: "var(--text-secondary)", letterSpacing: "0.5px", marginTop: "2px" }}>
+              Next-Gen Platform
+            </span>
+          </div>
         </Link>
       </div>
 
@@ -247,7 +256,8 @@ function Navbar() {
           )}
         </div>
       </div>
-    </nav>
+      </nav>
+    </>
   );
 }
 

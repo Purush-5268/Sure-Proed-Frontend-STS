@@ -156,19 +156,19 @@ function AddCompany() {
                   Verified
                 </label>
               </div>
-            </div>
 
-            <div>
-              <label>Description</label>
-              <textarea name="description" rows="4" value={form.description} onChange={handleChange} />
-            </div>
+              <div style={{ gridColumn: "1 / -1" }}>
+                <label>Description</label>
+                <textarea name="description" rows="4" value={form.description} onChange={handleChange} />
+              </div>
 
-            <div>
-              <label>Company Logo</label>
-              <input type="file" name="logo" accept="image/*" onChange={handleFileChange} />
-              <small style={{ color: "var(--text-secondary)", marginTop: "4px", display: "block" }}>
-                Optional. If uploaded, this image will instantly appear on the public landing page and Partners page.
-              </small>
+              <div style={{ gridColumn: "1 / -1" }}>
+                <label>Company Logo</label>
+                <input type="file" name="logo" accept="image/*" onChange={handleFileChange} />
+                <small style={{ color: "var(--text-secondary)", marginTop: "4px", display: "block" }}>
+                  Optional. If uploaded, this image will instantly appear on the public landing page and Partners page.
+                </small>
+              </div>
             </div>
 
             <div className={styles.buttons}>

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { FiArrowLeft, FiShield, FiCheck } from "react-icons/fi";
+import { FiArrowLeft, FiShield, FiCheck, FiUser, FiActivity } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
 import apiClient, { normalizeListResponse } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
+import ContributionTab from "../trustee/volunteer/ContributionTab";
 
 function TrusteeDetails() {
   const navigate = useNavigate();
@@ -16,6 +18,7 @@ function TrusteeDetails() {
   const [cohorts, setCohorts] = useState([]);
   const [selectedCohorts, setSelectedCohorts] = useState(new Set());
   const [savingCohorts, setSavingCohorts] = useState(false);
+  const [activeTab, setActiveTab] = useState("personal");
 
 
   useEffect(() => {
@@ -163,95 +166,140 @@ function TrusteeDetails() {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
-          <div>
-            <h3 style={{ fontSize: "14px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Contact Info</h3>
-            <div style={{ background: "var(--bg-nested)", padding: "16px", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
-              <p style={{ margin: "0 0 12px 0", color: "var(--text-primary)" }}><strong>Email:</strong> {user.email}</p>
-              <p style={{ margin: 0, color: "var(--text-primary)" }}><strong>Phone:</strong> {user.phone_number || "N/A"}</p>
-            </div>
-          </div>
-
-          <div>
-            <h3 style={{ fontSize: "14px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Organization Details</h3>
-            <div style={{ background: "var(--bg-nested)", padding: "16px", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
-              <p style={{ margin: "0 0 12px 0", color: "var(--text-primary)" }}><strong>Organization:</strong> N/A (Backend update required)</p>
-              <p style={{ margin: 0, color: "var(--text-primary)" }}><strong>Designation:</strong> N/A (Backend update required)</p>
-            </div>
-          </div>
-        </div>
-        
-        <div style={{ marginTop: "32px" }}>
-          <h3 style={{ fontSize: "16px", color: "var(--text-primary)", marginBottom: "16px", borderBottom: "1px solid var(--border-color)", paddingBottom: "12px" }}>Assigned Cohorts</h3>
-          {user?.role === "VOLUNTEER" || user?.role === "TRUSTEE" ? (
-            <>
-              {(() => {
-                const grouped = cohorts.reduce((acc, c) => {
-                  const cat = (c.category || "OTHER").toUpperCase();
-                  if (!acc[cat]) acc[cat] = [];
-                  acc[cat].push(c);
-                  return acc;
-                }, {});
-
-                return Object.entries(grouped).map(([category, catCohorts]) => (
-                  <div key={category} style={{ marginBottom: "24px" }}>
-                    <h4 style={{ fontSize: "14px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "12px" }}>
-                      {category} - COHORTS
-                    </h4>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "12px" }}>
-                      {catCohorts.map(c => (
-                        <label key={c.id} style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "12px", background: "var(--bg-nested)", border: "1px solid var(--border-color)", borderRadius: "8px", cursor: "pointer" }}>
-                          <input 
-                            type="checkbox" 
-                            checked={selectedCohorts.has(c.id)}
-                            onChange={() => handleToggleCohort(c.id)}
-                            style={{ marginTop: "4px" }}
-                          />
-                          <div>
-                            <div style={{ fontWeight: "600", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "8px" }}>
-                              {c.name || c.code}
-                              {selectedCohorts.has(c.id) && (
-                                <span style={{ fontSize: "10px", backgroundColor: "#d1fae5", color: "#059669", padding: "2px 6px", borderRadius: "4px", fontWeight: "bold" }}>
-                                  Assigned
-                                </span>
-                              )}
-                            </div>
-                            <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{c.course_name}</div>
-                            {c.all_assigned_volunteers && c.all_assigned_volunteers.length > 0 && (
-                              <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }}>
-                                <strong>Assigned to:</strong> {c.all_assigned_volunteers.join(", ")}
-                              </div>
-                            )}
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                ));
-              })()}
-              <button 
-                onClick={handleSaveCohorts}
-                disabled={savingCohorts}
-                className="premium-btn premium-btn-primary"
-              >
-                {savingCohorts ? "Saving..." : "Save Cohort Assignments"}
-              </button>
-            </>
-          ) : (
-            <p style={{ color: "var(--text-secondary)" }}>Cohort assignment is only available for Volunteers and Trustees.</p>
+        <div style={{ display: "flex", gap: "12px", borderBottom: "1px solid var(--border-color)", marginBottom: "24px", overflowX: "auto" }}>
+          <button
+            onClick={() => setActiveTab("personal")}
+            style={{
+              padding: "12px 24px",
+              background: "none",
+              border: "none",
+              borderBottom: activeTab === "personal" ? "2px solid var(--primary-color)" : "2px solid transparent",
+              color: activeTab === "personal" ? "var(--primary-color)" : "var(--text-secondary)",
+              fontWeight: activeTab === "personal" ? "600" : "500",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              fontSize: "14px",
+              transition: "all 0.2s"
+            }}
+          >
+            <FiUser /> Personal Details
+          </button>
+          
+          {user?.role === "VOLUNTEER" && (
+            <button
+              onClick={() => setActiveTab("contribution")}
+              style={{
+                padding: "12px 24px",
+                background: "none",
+                border: "none",
+                borderBottom: activeTab === "contribution" ? "2px solid var(--primary-color)" : "2px solid transparent",
+                color: activeTab === "contribution" ? "var(--primary-color)" : "var(--text-secondary)",
+                fontWeight: activeTab === "contribution" ? "600" : "500",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                fontSize: "14px",
+                transition: "all 0.2s"
+              }}
+            >
+              <FiActivity /> Contribution
+            </button>
           )}
         </div>
-        
-        {/* Danger Zone */}
-        {user?.role === "VOLUNTEER" && (
-          <div style={{ marginTop: "40px", padding: "20px", border: "1px solid #ef4444", borderRadius: "12px", background: "rgba(239, 68, 68, 0.05)" }}>
-            <h3 style={{ fontSize: "16px", color: "#ef4444", marginBottom: "8px" }}>Volunteer Access</h3>
-            <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginBottom: "16px" }}>
-              This account currently has Volunteer permissions.
-            </p>
-            <button 
-              onClick={async () => {
-                const confirmed = window.confirm(
+
+        <AnimatePresence mode="wait">
+          {activeTab === "personal" && (
+            <motion.div key="personal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+                <div>
+                  <h3 style={{ fontSize: "14px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Contact Info</h3>
+                  <div style={{ background: "var(--bg-nested)", padding: "16px", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
+                    <p style={{ margin: "0 0 12px 0", color: "var(--text-primary)" }}><strong>Email:</strong> {user.email}</p>
+                    <p style={{ margin: 0, color: "var(--text-primary)" }}><strong>Phone:</strong> {user.phone_number || "N/A"}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 style={{ fontSize: "14px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Organization Details</h3>
+                  <div style={{ background: "var(--bg-nested)", padding: "16px", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
+                    <p style={{ margin: "0 0 12px 0", color: "var(--text-primary)" }}><strong>Organization:</strong> N/A (Backend update required)</p>
+                    <p style={{ margin: 0, color: "var(--text-primary)" }}><strong>Designation:</strong> N/A (Backend update required)</p>
+                  </div>
+                </div>
+              </div>
+              
+              {user?.role === "VOLUNTEER" && (
+                <div style={{ marginTop: "32px" }}>
+                  <h3 style={{ fontSize: "16px", color: "var(--text-primary)", marginBottom: "16px", borderBottom: "1px solid var(--border-color)", paddingBottom: "12px" }}>Assigned Cohorts</h3>
+                  <>
+                    {(() => {
+                      const grouped = cohorts.reduce((acc, c) => {
+                        const cat = (c.category || "OTHER").toUpperCase();
+                        if (!acc[cat]) acc[cat] = [];
+                        acc[cat].push(c);
+                        return acc;
+                      }, {});
+
+                      return Object.entries(grouped).map(([category, catCohorts]) => (
+                        <div key={category} style={{ marginBottom: "24px" }}>
+                          <h4 style={{ fontSize: "14px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "12px" }}>
+                            {category} - COHORTS
+                          </h4>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "12px" }}>
+                            {catCohorts.map(c => (
+                              <label key={c.id} style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "12px", background: "var(--bg-nested)", border: "1px solid var(--border-color)", borderRadius: "8px", cursor: "pointer" }}>
+                                <input 
+                                  type="checkbox" 
+                                  checked={selectedCohorts.has(c.id)}
+                                  onChange={() => handleToggleCohort(c.id)}
+                                  style={{ marginTop: "4px" }}
+                                />
+                                <div>
+                                  <div style={{ fontWeight: "600", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "8px" }}>
+                                    {c.name || c.code}
+                                    {selectedCohorts.has(c.id) && (
+                                      <span style={{ fontSize: "10px", backgroundColor: "#d1fae5", color: "#059669", padding: "2px 6px", borderRadius: "4px", fontWeight: "bold" }}>
+                                        Assigned
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{c.course_name}</div>
+                                  {c.all_assigned_volunteers && c.all_assigned_volunteers.length > 0 && (
+                                    <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }}>
+                                      <strong>Assigned to:</strong> {c.all_assigned_volunteers.join(", ")}
+                                    </div>
+                                  )}
+                                </div>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                    <button 
+                      onClick={handleSaveCohorts}
+                      disabled={savingCohorts}
+                      className="premium-btn premium-btn-primary"
+                    >
+                      {savingCohorts ? "Saving..." : "Save Cohort Assignments"}
+                    </button>
+                  </>
+                </div>
+              )}
+              
+              {/* Danger Zone */}
+              {user?.role === "VOLUNTEER" && (
+                <div style={{ marginTop: "40px", padding: "20px", border: "1px solid #ef4444", borderRadius: "12px", background: "rgba(239, 68, 68, 0.05)" }}>
+                  <h3 style={{ fontSize: "16px", color: "#ef4444", marginBottom: "8px" }}>Volunteer Access</h3>
+                  <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginBottom: "16px" }}>
+                    This account currently has Volunteer permissions.
+                  </p>
+                  <button 
+                    onClick={async () => {
+                      const confirmed = window.confirm(
                   "Are you sure you want to remove Volunteer access?\n\n" +
                   "The Volunteer access will be revoked, but the person's Student account, profiles, and existing historical data are preserved.\n\n" +
                   "They will return to normal Student access."
@@ -271,14 +319,22 @@ function TrusteeDetails() {
             >
               Remove Volunteer Access
             </button>
-          </div>
-        )}
+                </div>
+              )}
+            </motion.div>
+          )}
 
+          {activeTab === "contribution" && user?.role === "VOLUNTEER" && (
+            <motion.div key="contribution" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+              <div style={{ marginTop: "32px" }}>
+                <ContributionTab userId={id} isAdmin={true} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
-
 }
 
 export default TrusteeDetails;
-

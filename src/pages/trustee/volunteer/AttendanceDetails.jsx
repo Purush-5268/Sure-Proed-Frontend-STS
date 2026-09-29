@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
-import apiClient from "../../../services/apiClient";
+import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./AttendanceDetails.module.css";
-import SkeletonLoader from "../../../components/common/SkeletonLoader";
+import SkeletonLoader from "../../components/common/SkeletonLoader";
 
 function AttendanceDetails() {
   const location = useLocation();
@@ -12,7 +13,7 @@ function AttendanceDetails() {
   const [sessionData, setSessionData] = useState(null);
   const [officialData, setOfficialData] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   // 🚨 Whitelist Management State
   const [guestEmailInput, setGuestEmailInput] = useState("");
   const [isWhitelisting, setIsWhitelisting] = useState(false);
@@ -31,6 +32,11 @@ function AttendanceDetails() {
   const [resolveParticipant, setResolveParticipant] = useState(null);
   const [selectedResolveStudentId, setSelectedResolveStudentId] = useState("");
   const [isResolving, setIsResolving] = useState(false);
+
+  // 🚨 Student-first Resolve State
+  const [showResolveStudentModal, setShowResolveStudentModal] = useState(false);
+  const [resolveStudent, setResolveStudent] = useState(null);
+  const [selectedResolveParticipantIdx, setSelectedResolveParticipantIdx] = useState("");
 
   useEffect(() => {
     let interval;
@@ -106,10 +112,23 @@ function AttendanceDetails() {
     }
   };
 
+  const handleRevokePermission = async (studentId, studentName) => {
+    if (!window.confirm(`Are you sure you want to revoke prior permission for ${studentName}?`)) return;
+    try {
+      await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BASE}${sessionId}/revoke-prior-permission/`, {
+        student_id: studentId
+      });
+      alert(`Prior permission revoked successfully for ${studentName}.`);
+      fetchSessionDetails();
+    } catch (error) {
+      alert(error.response?.data?.error || "Failed to revoke prior permission.");
+    }
+  };
+
   const handleResolveSubmit = async (e) => {
     e.preventDefault();
     if (!selectedResolveStudentId || !resolveParticipant) return;
-    
+
     setIsResolving(true);
     try {
       await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BASE}${sessionId}/resolve-identity/`, {
@@ -129,16 +148,29 @@ function AttendanceDetails() {
     }
   };
 
-  const handleRevokePermission = async (studentId, studentName) => {
-    if (!window.confirm(`Are you sure you want to revoke prior permission for ${studentName}?`)) return;
+  const handleResolveStudentSubmit = async (e) => {
+    e.preventDefault();
+    if (!resolveStudent || selectedResolveParticipantIdx === "") return;
+
+    const participant = officialData.unmatched_participants[selectedResolveParticipantIdx];
+    if (!participant) return;
+
+    setIsResolving(true);
     try {
-      await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BASE}${sessionId}/revoke-prior-permission/`, {
-        student_id: studentId
+      await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BASE}${sessionId}/resolve-identity/`, {
+        student_id: resolveStudent.student_id,
+        participant_email: participant.email !== "N/A" ? participant.email : null,
+        participant_name: participant.name
       });
-      alert(`Prior permission revoked successfully for ${studentName}.`);
+      alert(`Identity resolved successfully for ${resolveStudent.name}.`);
+      setShowResolveStudentModal(false);
+      setResolveStudent(null);
+      setSelectedResolveParticipantIdx("");
       fetchSessionDetails();
     } catch (error) {
-      alert(error.response?.data?.error || "Failed to revoke prior permission.");
+      alert(error.response?.data?.error || "Failed to resolve identity.");
+    } finally {
+      setIsResolving(false);
     }
   };
 
@@ -161,6 +193,11 @@ function AttendanceDetails() {
       } else if (officialResponse.data && (officialResponse.data.status === "SYNC_QUEUED" || officialResponse.data.status === "SYNC_IN_PROGRESS")) {
         setSyncToastMessage(officialResponse.data.message || "Identity sync started. You can continue working.");
         setIsSyncing(true);
+        if (baseResponse.data?.google_meet_attendance_data?.status === "DUMMY_ROSTER") {
+          setOfficialData(baseResponse.data.google_meet_attendance_data);
+        }
+      } else if (baseResponse.data?.google_meet_attendance_data?.status === "DUMMY_ROSTER") {
+        setOfficialData(baseResponse.data.google_meet_attendance_data);
       }
     } catch (err) {
       console.error("Failed to load session attendance details:", err);
@@ -192,10 +229,10 @@ function AttendanceDetails() {
 
       // Call the add-attendees endpoint
       const response = await apiClient.post(`${API_ENDPOINTS.ATTENDANCE.BASE}${sessionId}/add-attendees/`, { emails: emailsArray });
-      
+
       alert(response.data.message || "Guests successfully whitelisted!");
       setGuestEmailInput("");
-      
+
       // Reload session to reflect updated whitelist count
       await fetchSessionDetails();
     } catch (error) {
@@ -253,7 +290,7 @@ function AttendanceDetails() {
             <label>Whitelisted Emails</label>
             <p>{sessionData.whitelist_email_count || 0}</p>
           </div>
-          
+
           <div>
             <label>Calendar Invitees (Inc. Staff/Guests)</label>
             <p>{sessionData.total_attendee_count || 0}</p>
@@ -263,7 +300,7 @@ function AttendanceDetails() {
             <label>Total Joined Students</label>
             <p>{joinedCount}</p>
           </div>
-          
+
           <div>
             <label>Meet Start Time</label>
             <p>
@@ -286,16 +323,16 @@ function AttendanceDetails() {
             <label>Status</label>
             <span className={
               sessionData.effective_status === 'CANCELLED' || sessionData.class_status === 'CANCELLED' || sessionData.status === 'CANCELLED' ? styles.absent :
-              sessionData.status === 'ATTENDANCE_PENDING' ? styles.pending :
-              sessionData.status === 'ATTENDANCE_FAILED' ? styles.absent :
-              sessionData.effective_status === 'COMPLETED' || sessionData.class_status === 'COMPLETED' || sessionData.status === 'COMPLETED' ? styles.absent :
-              styles.present
+                sessionData.status === 'ATTENDANCE_PENDING' ? styles.pending :
+                  sessionData.status === 'ATTENDANCE_FAILED' ? styles.absent :
+                    sessionData.effective_status === 'COMPLETED' || sessionData.class_status === 'COMPLETED' || sessionData.status === 'COMPLETED' ? styles.absent :
+                      styles.present
             }>
               {sessionData.effective_status === 'CANCELLED' || sessionData.class_status === 'CANCELLED' || sessionData.status === 'CANCELLED' ? "Class Cancelled" :
-               sessionData.status === 'ATTENDANCE_PENDING' ? "Generating Meet Link..." :
-               sessionData.status === 'ATTENDANCE_FAILED' ? "Generation Failed" :
-               sessionData.effective_status === 'COMPLETED' || sessionData.class_status === 'COMPLETED' || sessionData.status === 'COMPLETED' ? "Completed / Ended" :
-               "Active"}
+                sessionData.status === 'ATTENDANCE_PENDING' ? "Generating Meet Link..." :
+                  sessionData.status === 'ATTENDANCE_FAILED' ? "Generation Failed" :
+                    sessionData.effective_status === 'COMPLETED' || sessionData.class_status === 'COMPLETED' || sessionData.status === 'COMPLETED' ? "Completed / Ended" :
+                      "Active"}
             </span>
           </div>
         </div>
@@ -307,17 +344,17 @@ function AttendanceDetails() {
             Add emails (comma separated) to allow them to bypass the waiting room. Changes will sync to Google Calendar automatically in the background.
           </p>
           <form onSubmit={handleAddGuest} style={{ display: 'flex', gap: '10px' }}>
-            <input 
-              type="text" 
-              placeholder="e.g. guest1@example.com, guest2@example.com" 
+            <input
+              type="text"
+              placeholder="e.g. guest1@example.com, guest2@example.com"
               value={guestEmailInput}
               onChange={(e) => setGuestEmailInput(e.target.value)}
               className="premium-input"
               style={{ flex: 1 }}
             />
-            <button 
-              type="submit" 
-              className="premium-btn premium-btn-secondary" 
+            <button
+              type="submit"
+              className="premium-btn premium-btn-secondary"
               disabled={isWhitelisting || !guestEmailInput.trim()}
             >
               {isWhitelisting ? "Syncing..." : "+ Add Guests"}
@@ -329,7 +366,7 @@ function AttendanceDetails() {
         <div style={{ marginTop: '40px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h2 style={{ fontSize: '18px', margin: 0, color: 'var(--text-primary)' }}>Official Attendance Roster</h2>
-            <button 
+            <button
               onClick={(e) => {
                 const btn = e.currentTarget;
                 if (isSyncing) return;
@@ -345,9 +382,11 @@ function AttendanceDetails() {
               style={{
                 display: 'flex', alignItems: 'center', gap: '6px',
                 background: 'var(--bg-secondary)', border: '1px solid var(--border-color)',
-                color: 'var(--text-primary)', padding: '6px 12px', borderRadius: '4px',
-                fontSize: '13px', cursor: 'pointer', fontWeight: '500', transition: 'all 0.2s'
+                padding: '6px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '500',
+                color: 'var(--text-primary)', cursor: 'pointer', transition: 'all 0.2s'
               }}
+              onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'}
+              onMouseOut={(e) => e.currentTarget.style.background = 'var(--bg-secondary)'}
             >
               ↻ Sync Identities
             </button>
@@ -359,107 +398,130 @@ function AttendanceDetails() {
                   <th>Student</th>
                   <th>Attendance</th>
                   <th>Identity</th>
+                  <th>Class Status</th>
+                  <th>Account Status</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {officialData && officialData.expected_students ? (
-                  Object.values(officialData.expected_students).map((student, idx) => {
-                    const attPercentage = student.attendance_percentage || 0;
-                    const hasPriorPermission = student.prior_permission?.has_permission === true;
-                    const isSuspended = student.status === "BELOW_THRESHOLD";
-                    const isWarning = student.status === "PRESENT" && attPercentage < 95;
-                    const isAbsent = student.status === "ABSENT";
-                    const isReviewReq = student.status === "IDENTITY_REVIEW_REQUIRED";
+                  Object.values(officialData.expected_students)
+                    .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+                    .map((student, idx) => {
+                      const attPercentage = student.attendance_percentage || 0;
+                      const hasPriorPermission = student.prior_permission?.has_permission === true;
+                      const isAbsent = student.status === "ABSENT";
+                      const isPriorPerm = student.status === "PRIOR_PERMISSION";
+                      const isReviewReq = student.status === "IDENTITY_REVIEW_REQUIRED";
 
-                    // Determine visual state based on permission
-                    const rowBg = hasPriorPermission ? "rgba(59, 130, 246, 0.05)" : (isAbsent ? "rgba(239, 68, 68, 0.15)" : (isSuspended ? "rgba(239, 68, 68, 0.05)" : isReviewReq ? "rgba(245, 158, 11, 0.1)" : "transparent"));
-                    
-                    // Map identity badge names
-                    let identityLabel = "—";
-                    if (student.match_method) {
-                      switch (student.match_method) {
-                        case "PORTAL_TIE_BREAK": identityLabel = "Portal Tie-Break"; break;
-                        case "EMAIL": identityLabel = "Email"; break;
-                        case "DIRECTORY": identityLabel = "Directory"; break;
-                        case "NAME": identityLabel = "Name"; break;
-                        default: identityLabel = student.match_method;
+                      // Row background: blue tint for exempt, red tint for absent, transparent otherwise
+                      const rowBg = hasPriorPermission || isPriorPerm
+                        ? "rgba(59, 130, 246, 0.06)"
+                        : isAbsent
+                          ? "rgba(239, 68, 68, 0.06)"
+                          : "transparent";
+
+                      // Map identity match method to readable label
+                      let identityLabel = "—";
+                      if (student.match_method) {
+                        switch (student.match_method) {
+                          case "PORTAL_TIE_BREAK": identityLabel = "Portal Tie-Break"; break;
+                          case "EMAIL": identityLabel = "Email"; break;
+                          case "DIRECTORY": identityLabel = "Directory"; break;
+                          case "NAME": identityLabel = "Name"; break;
+                          case "GOOGLE_IDENTITY": identityLabel = "Google OAuth"; break;
+                          default: identityLabel = student.match_method.replace(/_/g, " ");
+                        }
                       }
-                    }
 
-                    return (
-                      <tr key={student.student_id || idx} style={{ background: rowBg }}>
-                        <td style={{ verticalAlign: "middle" }}>
-                          <div style={{ fontWeight: "500", display: "flex", alignItems: "center", gap: "8px" }}>
-                            {student.name || `Student ID: ${student.student_id}`}
-                            {hasPriorPermission && (
-                              <span style={{ background: "#eff6ff", color: "#2563eb", padding: "2px 6px", borderRadius: "4px", fontSize: "10px", fontWeight: "bold", border: "1px solid #bfdbfe" }}>
-                                🛡️ Exempt
+                      // Map backend Application status to user-friendly account status label
+                      const accountStatus = student.account_status || "";
+                      let accountLabel = accountStatus ? accountStatus.replace(/_/g, " ") : "—";
+                      let accountColor;
+                      const ACTIVE_STATUSES = ["COHORT_ASSIGNED", "IN_PROGRESS", "TRAINING", "INTERNSHIP_ASSIGNED", "SOFT_SKILLS", "PRE_TRAINING", "TRANSFER_COHORT"];
+                      if (accountStatus === "SUSPENDED" || accountStatus === "DROPPED") {
+                        accountColor = "#ef4444";
+                      } else if (ACTIVE_STATUSES.includes(accountStatus)) {
+                        accountColor = "#10b981";
+                      } else if (accountStatus === "COMPLETED" || accountStatus === "ALUMNI") {
+                        accountColor = "#3b82f6";
+                      } else {
+                        accountColor = "var(--text-secondary)";
+                      }
+
+                      // Determine if action buttons should be shown:
+                      // Only show Warning/Permission for absent, below-threshold, or review-required students
+                      const needsAction = isAbsent || isReviewReq || attPercentage < 96;
+
+                      return (
+                        <tr key={student.student_id || idx} style={{ background: rowBg }}>
+                          <td style={{ verticalAlign: "middle" }}>
+                            <div style={{ fontWeight: "500", display: "flex", alignItems: "center", gap: "8px" }}>
+                              {student.name || `Student ID: ${student.student_id}`}
+                              {hasPriorPermission && (
+                                <span style={{ background: "#eff6ff", color: "#2563eb", padding: "2px 6px", borderRadius: "4px", fontSize: "10px", fontWeight: "bold", border: "1px solid #bfdbfe" }}>
+                                  🛡️ Exempt
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{student.email || "Email Hidden"}</div>
+                          </td>
+                          <td style={{ verticalAlign: "middle", color: isAbsent ? "#ef4444" : "inherit", fontWeight: isAbsent ? "bold" : "normal" }}>
+                            {attPercentage}%
+                          </td>
+                          <td style={{ verticalAlign: "middle" }}>
+                            {isAbsent && !student.match_method ? (
+                              "—"
+                            ) : isReviewReq ? (
+                              <span style={{ color: "#d97706", fontSize: "12px", fontWeight: "bold" }}>⚠ Review Required</span>
+                            ) : student.match_method ? (
+                              <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "bold", background: "rgba(16, 185, 129, 0.1)", padding: "2px 6px", borderRadius: "4px" }}>
+                                ✓ {identityLabel}
                               </span>
+                            ) : (
+                              "—"
                             )}
-                          </div>
-                          <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{student.email || "Email Hidden"}</div>
-                        </td>
-                        <td style={{ verticalAlign: "middle", color: (!hasPriorPermission && (isSuspended || isAbsent)) ? "#ef4444" : "inherit", fontWeight: (!hasPriorPermission && (isSuspended || isAbsent)) ? "bold" : "normal" }}>
-                          {attPercentage}%
-                        </td>
-                        <td style={{ verticalAlign: "middle" }}>
-                          {isAbsent ? (
-                            "—"
-                          ) : isReviewReq ? (
-                            <span style={{ color: "#d97706", fontSize: "12px", fontWeight: "bold" }}>⚠ Review Required</span>
-                          ) : (
-                            <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "bold", background: "rgba(16, 185, 129, 0.1)", padding: "2px 6px", borderRadius: "4px" }}>
-                              ✓ {identityLabel}
-                            </span>
-                          )}
-                        </td>
-                        <td style={{ verticalAlign: "middle" }}>
-                          {hasPriorPermission ? (
-                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                               <span style={{ color: "#2563eb", fontSize: "12px", fontWeight: "bold" }}>Prior Permission</span>
-                               <button onClick={() => handleRevokePermission(student.student_id, student.name)} style={{ background: "transparent", color: "#ef4444", border: "1px solid #fca5a5", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer" }}>Revoke</button>
-                            </div>
-                          ) : isReviewReq ? (
-                            <span style={{ color: "#d97706", fontSize: "12px", fontWeight: "bold" }}>Requires Admin Review</span>
-                          ) : isSuspended || isAbsent || isWarning ? (
-                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                              <span style={{ color: isWarning ? "#f59e0b" : "#ef4444", fontSize: "12px", fontWeight: "bold" }}>
-                                {isAbsent ? "⚠️ Absent" : isSuspended ? "⚠️ Below Threshold" : "⚠️ Warning"}
-                              </span>
-                              <button
-                                onClick={() => handleSendWarning(student.student_id, student.name)}
-                                style={{
-                                  background: "#ef4444", color: "white", border: "none",
-                                  padding: "6px 12px", borderRadius: "6px", fontSize: "11px",
-                                  fontWeight: "bold", cursor: "pointer", transition: "all 0.2s ease"
-                                }}
-                                onMouseOver={(e) => e.target.style.background = "#dc2626"}
-                                onMouseOut={(e) => e.target.style.background = "#ef4444"}
-                              >
-                                Send Warning
-                              </button>
-                              <button
-                                onClick={() => handleOpenPermissionModal(student.student_id, student.name)}
-                                style={{
-                                  background: "#3b82f6", color: "white", border: "none",
-                                  padding: "6px 12px", borderRadius: "6px", fontSize: "11px",
-                                  fontWeight: "bold", cursor: "pointer", transition: "all 0.2s ease"
-                                }}
-                              >
-                                + Prior Permission
-                              </button>
-                            </div>
-                          ) : (
-                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          </td>
+                          <td style={{ verticalAlign: "middle" }}>
+                            {isAbsent ? (
+                              <span style={{ color: "#ef4444", fontSize: "12px", fontWeight: "bold" }}>Absent</span>
+                            ) : isPriorPerm ? (
+                              <span style={{ color: "#2563eb", fontSize: "12px", fontWeight: "bold" }}>Prior Permission</span>
+                            ) : isReviewReq ? (
+                              <span style={{ color: "#d97706", fontSize: "12px", fontWeight: "bold" }}>Review Req</span>
+                            ) : (
+                              <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "bold" }}>Present</span>
+                            )}
+                          </td>
+                          <td style={{ verticalAlign: "middle" }}>
+                            <span style={{ color: accountColor, fontSize: "12px", fontWeight: "bold" }}>{accountLabel}</span>
+                          </td>
+                          <td style={{ verticalAlign: "middle" }}>
+                            {hasPriorPermission ? (
+                              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <span style={{ color: "#2563eb", fontSize: "12px", fontWeight: "bold" }}>✓ Exempt</span>
+                                <button onClick={() => handleRevokePermission(student.student_id, student.name)} style={{ background: "transparent", color: "#ef4444", border: "1px solid #fca5a5", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer" }}>Revoke</button>
+                              </div>
+                            ) : needsAction ? (
+                              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <button
+                                  onClick={() => handleSendWarning(student.student_id, student.name)}
+                                  style={{
+                                    background: "transparent", color: "#ef4444", border: "1px solid #fca5a5",
+                                    padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer"
+                                  }}
+                                >
+                                  Warning
+                                </button>
+                                <button onClick={() => handleOpenPermissionModal(student.student_id, student.name)} style={{ background: "transparent", color: "#3b82f6", border: "1px solid #bfdbfe", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer" }}>+ Permission</button>
+                              </div>
+                            ) : (
                               <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "bold" }}>✅ Good</span>
-                              <button onClick={() => handleOpenPermissionModal(student.student_id, student.name)} style={{ background: "transparent", color: "#3b82f6", border: "1px solid #bfdbfe", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer" }}>Grant Exemption</button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
                 ) : (
                   // FALLBACK TO LEGACY DATA IF OFFICIAL ATTENDANCE IS NOT READY
                   (sessionData.attendance_summaries || sessionData.attendees || []).map((student, idx) => {
@@ -470,39 +532,46 @@ function AttendanceDetails() {
 
                     const isJoined = Array.isArray(sessionData.joined_students) && sessionData.joined_students.some(js => js === studentId || (typeof js === 'object' && js.id === studentId));
                     const attPercentage = isObject && student.attendance_percentage !== undefined ? student.attendance_percentage : (isJoined ? 100 : 0);
-                    const isLowAttendance = attPercentage > 0 && attPercentage < 40;
-                    const isAbsent = attPercentage === 0 || (student.status && student.status.toUpperCase() === 'ABSENT');
+                    const isAbsent = student.status && student.status.toUpperCase() === 'ABSENT';
 
                     return (
-                      <tr key={studentId || idx} style={{ background: isAbsent ? "rgba(239, 68, 68, 0.15)" : isLowAttendance ? "rgba(239, 68, 68, 0.05)" : "transparent" }}>
+                      <tr key={studentId || idx} style={{ background: "transparent" }}>
                         <td style={{ verticalAlign: "middle" }}>
                           <div style={{ fontWeight: "500" }}>{studentName}</div>
                           <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{studentEmail}</div>
                         </td>
-                        <td style={{ verticalAlign: "middle", color: isLowAttendance || isAbsent ? "#ef4444" : "inherit", fontWeight: isLowAttendance || isAbsent ? "bold" : "normal" }}>
+                        <td style={{ verticalAlign: "middle" }}>
                           {attPercentage}%
                         </td>
                         <td style={{ verticalAlign: "middle" }}>—</td>
                         <td style={{ verticalAlign: "middle" }}>
-                          {isLowAttendance ? (
-                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                              <span style={{ color: "#ef4444", fontSize: "12px", fontWeight: "bold" }}>⚠️ Below Threshold</span>
-                              <button onClick={() => handleSendWarning(studentId, studentName)} style={{ background: "#ef4444", color: "white", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}>Send Warning</button>
-                            </div>
-                          ) : isAbsent ? (
-                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                              <span style={{ color: "#ef4444", fontSize: "12px", fontWeight: "bold" }}>⚠️ Absent</span>
-                              <button onClick={() => handleSendWarning(studentId, studentName)} style={{ background: "#ef4444", color: "white", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}>Send Warning</button>
-                            </div>
-                          ) : (
-                            <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "bold" }}>✅ Good</span>
-                          )}
+                          <span style={{ color: "var(--text-secondary)", fontSize: "12px", fontWeight: "bold" }}>{student.status || "UNKNOWN"}</span>
+                        </td>
+                        <td style={{ verticalAlign: "middle" }}>
+                          <span style={{ color: "var(--text-secondary)", fontSize: "12px", fontWeight: "bold" }}>—</span>
+                        </td>
+                        <td style={{ verticalAlign: "middle" }}>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <button onClick={() => handleSendWarning(studentId, studentName)} style={{ background: "transparent", color: "#ef4444", border: "1px solid #fca5a5", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer" }}>Warning</button>
+                            <button onClick={() => handleOpenPermissionModal(studentId, studentName)} style={{ background: "transparent", color: "#3b82f6", border: "1px solid #bfdbfe", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer" }}>+ Permission</button>
+                            {needsAction && officialData?.unmatched_participants?.length > 0 && (
+                              <button
+                                onClick={() => {
+                                  setResolveStudent(student);
+                                  setShowResolveStudentModal(true);
+                                }}
+                                style={{ background: "#d97706", color: "#fff", border: "none", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer", fontWeight: "bold" }}
+                              >
+                                Resolve
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
                   })
                 )}
-                
+
                 {(!officialData && !sessionData.attendance_summaries && !sessionData.attendees?.length) && (
                   <tr>
                     <td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>
@@ -532,16 +601,16 @@ function AttendanceDetails() {
                   </tr>
                 </thead>
                 <tbody>
-                  {officialData.unmatched_participants.map((unmatched, idx) => {
+                  {officialData.unmatched_participants.slice().sort((a, b) => (a.name || "").localeCompare(b.name || "")).map((unmatched, idx) => {
                     const isAmbiguous = unmatched.ambiguity_reason && unmatched.ambiguity_reason.toLowerCase().includes("multiple");
-                    
+
                     const formatTime = (isoString) => {
                       if (!isoString) return "N/A";
                       return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     };
 
-                    const timeStr = (unmatched.join_time && unmatched.leave_time) 
-                      ? `${formatTime(unmatched.join_time)} – ${formatTime(unmatched.leave_time)}` 
+                    const timeStr = (unmatched.join_time && unmatched.leave_time)
+                      ? `${formatTime(unmatched.join_time)} – ${formatTime(unmatched.leave_time)}`
                       : "N/A";
 
                     return (
@@ -564,12 +633,12 @@ function AttendanceDetails() {
                               {isAmbiguous ? "⚠ Ambiguous" : "⚠ Unresolved"}
                             </span>
                             <span style={{ color: "var(--text-secondary)", fontSize: "11px" }}>Requires Admin Review</span>
-                            <button 
+                            <button
                               onClick={() => {
                                 setResolveParticipant(unmatched);
                                 setShowResolveModal(true);
                               }}
-                              className="premium-btn" 
+                              className="premium-btn"
                               style={{ background: '#d97706', fontSize: '11px', padding: '4px 8px', marginTop: '4px', width: 'fit-content' }}
                             >
                               {isAmbiguous ? "Resolve Ambiguity" : "Resolve Identity"}
@@ -586,30 +655,31 @@ function AttendanceDetails() {
         )}
 
 
-        {showPermissionModal && (
+
+        {showPermissionModal && createPortal(
           <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999,
+            backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 999999,
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
-            <div className="premium-card" style={{ width: '400px', maxWidth: '90%', padding: '24px' }}>
+            <div className="premium-card" style={{ width: '400px', maxWidth: '90%', padding: '24px', backgroundColor: 'var(--bg-main)' }}>
               <h3 style={{ marginTop: 0, color: 'var(--text-primary)', marginBottom: '16px' }}>Grant Prior Permission</h3>
               <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
                 This excuses the student from disciplinary action for this specific class. Their attendance percentage will not be changed.
               </p>
-              
+
               <form onSubmit={handleGrantPermission}>
                 <div style={{ marginBottom: '12px' }}>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '4px', color: 'var(--text-secondary)' }}>Student Name</label>
                   <input type="text" value={permissionStudentName} readOnly className="premium-input" style={{ width: '100%', background: 'var(--bg-nested)', cursor: 'not-allowed' }} />
                 </div>
-                
+
                 <div style={{ marginBottom: '20px' }}>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '4px', color: 'var(--text-secondary)' }}>Reason *</label>
-                  <select 
-                    value={permissionReason} 
-                    onChange={(e) => setPermissionReason(e.target.value)} 
-                    className="premium-input" 
+                  <select
+                    value={permissionReason}
+                    onChange={(e) => setPermissionReason(e.target.value)}
+                    className="premium-input"
                     style={{ width: '100%' }}
                     required
                   >
@@ -621,7 +691,7 @@ function AttendanceDetails() {
                     <option value="Approved personal reason">Approved personal reason</option>
                   </select>
                 </div>
-                
+
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                   <button type="button" onClick={() => setShowPermissionModal(false)} className="premium-btn premium-btn-secondary">Cancel</button>
                   <button type="submit" disabled={isSubmittingPermission || !permissionReason} className="premium-btn" style={{ background: '#3b82f6' }}>
@@ -630,10 +700,11 @@ function AttendanceDetails() {
                 </div>
               </form>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
-        {showResolveModal && (
+        {showResolveModal && createPortal(
           <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
             backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 999999,
@@ -644,7 +715,7 @@ function AttendanceDetails() {
               <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
                 Map the unmatched Google Meet participant to an expected student in the roster.
               </p>
-              
+
               <div style={{ marginBottom: '16px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '6px' }}>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Google Participant:</div>
                 <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{resolveParticipant?.name || "Unknown"}</div>
@@ -658,7 +729,7 @@ function AttendanceDetails() {
                   <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '6px' }}>
                     Select Student to Map To:
                   </label>
-                  <select 
+                  <select
                     className="premium-input"
                     value={selectedResolveStudentId}
                     onChange={(e) => setSelectedResolveStudentId(e.target.value)}
@@ -666,14 +737,16 @@ function AttendanceDetails() {
                     style={{ width: '100%', padding: '8px 12px' }}
                   >
                     <option value="">-- Select an Expected Student --</option>
-                    {officialData?.expected_students && Object.entries(officialData.expected_students).map(([id, s]) => (
-                      <option key={id} value={id}>
-                        {s.name} ({s.email}) - {s.status}
-                      </option>
-                    ))}
+                    {officialData?.expected_students && Object.entries(officialData.expected_students)
+                      .sort((a, b) => (a[1].name || "").localeCompare(b[1].name || ""))
+                      .map(([id, s]) => (
+                        <option key={id} value={id}>
+                          {s.name} ({s.email}) - {s.status}
+                        </option>
+                      ))}
                   </select>
                 </div>
-                
+
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                   <button type="button" onClick={() => { setShowResolveModal(false); setResolveParticipant(null); setSelectedResolveStudentId(""); }} className="premium-btn premium-btn-secondary">Cancel</button>
                   <button type="submit" disabled={isResolving || !selectedResolveStudentId} className="premium-btn" style={{ background: '#d97706' }}>
@@ -682,30 +755,86 @@ function AttendanceDetails() {
                 </div>
               </form>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
-      {syncToastMessage && (
-        <div style={{
-          position: "fixed", bottom: "24px", right: "24px",
-          backgroundColor: "#1f2937", color: "#f9fafb", padding: "14px 24px",
-          borderRadius: "8px", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
-          zIndex: 9999, fontSize: "14px", fontWeight: "500", display: "flex", alignItems: "center", gap: "12px",
-          border: "1px solid #374151"
-        }}>
-          {isSyncing && (
-            <svg style={{ animation: "spin 1s linear infinite", width: "18px", height: "18px", color: "#60a5fa" }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeOpacity="0.25"></circle>
-              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          )}
-          {!isSyncing && (
-            <svg style={{ width: "18px", height: "18px", color: "#34d399" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-          )}
-          {syncToastMessage}
-        </div>
-      )}
+        {showResolveStudentModal && createPortal(
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 999999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <div className="premium-card" style={{ width: '400px', maxWidth: '90%', padding: '24px', backgroundColor: 'var(--bg-main)' }}>
+              <h3 style={{ marginTop: 0, color: 'var(--text-primary)', marginBottom: '16px' }}>Resolve Identity from Roster</h3>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                Select the Google Meet participant that actually belongs to this student.
+              </p>
 
+              <div style={{ marginBottom: '16px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '6px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Expected Student:</div>
+                <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{resolveStudent?.name}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{resolveStudent?.email}</div>
+              </div>
+
+              <form onSubmit={handleResolveStudentSubmit}>
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                    Select Unmatched Participant:
+                  </label>
+                  <select
+                    className="premium-input"
+                    value={selectedResolveParticipantIdx}
+                    onChange={(e) => setSelectedResolveParticipantIdx(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px 12px' }}
+                  >
+                    <option value="">-- Select Participant --</option>
+                    {officialData?.unmatched_participants && officialData.unmatched_participants.map((p, idx) => {
+                      const timeStr = (p.join_time && p.leave_time)
+                        ? `${new Date(p.join_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – ${new Date(p.leave_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                        : "N/A";
+                      return (
+                        <option key={idx} value={idx}>
+                          {p.name} ({p.email !== "N/A" ? p.email : "No Email"}) - {timeStr}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                  <button type="button" onClick={() => { setShowResolveStudentModal(false); setResolveStudent(null); setSelectedResolveParticipantIdx(""); }} className="premium-btn premium-btn-secondary">Cancel</button>
+                  <button type="submit" disabled={isResolving || selectedResolveParticipantIdx === ""} className="premium-btn" style={{ background: '#d97706' }}>
+                    {isResolving ? 'Resolving...' : 'Confirm Mapping'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
+
+        {syncToastMessage && (
+          <div style={{
+            position: "fixed", bottom: "24px", right: "24px",
+            backgroundColor: "#1f2937", color: "#f9fafb", padding: "14px 24px",
+            borderRadius: "8px", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
+            zIndex: 9999, fontSize: "14px", fontWeight: "500", display: "flex", alignItems: "center", gap: "12px",
+            border: "1px solid #374151"
+          }}>
+            {isSyncing && (
+              <svg style={{ animation: "spin 1s linear infinite", width: "18px", height: "18px", color: "#60a5fa" }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeOpacity="0.25"></circle>
+                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
+            {!isSyncing && (
+              <svg style={{ width: "18px", height: "18px", color: "#34d399" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+            )}
+            {syncToastMessage}
+          </div>
+        )}
       </div>
     </div>
   );

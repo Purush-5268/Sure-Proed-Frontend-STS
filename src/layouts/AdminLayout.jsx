@@ -4,7 +4,7 @@ import {
   FaChartPie, FaUsers, FaChalkboardTeacher, FaBuilding,
   FaBook, FaFileAlt, FaClipboardList, FaLayerGroup,
   FaCalendarAlt, FaUserCheck, FaTasks, FaCertificate,
-  FaBell, FaChartBar, FaCog, FaShieldAlt, FaHeadset, FaComments
+  FaBell, FaChartBar, FaCog, FaShieldAlt, FaHeadset, FaComments, FaHandsHelping
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -27,6 +27,7 @@ const adminLinks = [
   { label: "Certificates", path: "/admin/certificates", icon: <FaCertificate /> },
   { label: "Requests & Support", path: "/admin/requests-support", icon: <FaHeadset /> },
   { label: "Messages", path: "/admin/messages", icon: <FaComments /> },
+  { label: "CSR Requests", path: "/admin/csr-requests", icon: <FaHandsHelping /> },
   { label: "Notifications", path: "/admin/notifications", icon: <FaBell /> },
   { label: "Reports & Analytics", path: "/admin/reports", icon: <FaChartBar /> },
   { label: "Mentors", path: "/admin/mentors", icon: <FaChalkboardTeacher /> },

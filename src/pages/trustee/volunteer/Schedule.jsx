@@ -23,8 +23,6 @@ function ScheduleClass() {
   // 🚨 State for the Live Radar
   const [activeAdminClasses, setActiveAdminClasses] = useState([]);
   
-  // 🚨 State for LST Automation Admin Banner
-  const [lstAutomationConfig, setLstAutomationConfig] = useState(null);
 
   const [request, setRequest] = useState({
     sessionType: "Domain",
@@ -88,18 +86,7 @@ function ScheduleClass() {
       }
     }
     
-    async function loadLstConfig() {
-      try {
-        const res = await apiClient.get('/api/attendance/get-lst-automation/');
-        if (res.data?.configured) {
-          setLstAutomationConfig(res.data);
-        }
-      } catch (err) {
-        // Not admin or no config
-      }
-    }
-    
-    Promise.all([loadCourses(), loadActiveClasses(), loadLstConfig()]);
+    Promise.all([loadCourses(), loadActiveClasses()]);
   }, []);
 
   useEffect(() => {
@@ -437,11 +424,7 @@ function ScheduleClass() {
         </div>
       </div>
 
-      {lstAutomationConfig && new Date().getDay() === 0 && new Date().getHours() === 11 && (
-        <div className="premium-alert-warning" style={{ marginBottom: "1.5rem" }}>
-          ⚠️ <strong>LST Automation Reminder:</strong> Today's automated LST ({lstAutomationConfig.starting_batch}) will generate at 12:00 PM. Verify prior permissions or explicitly select COMBINED if clubbing is required.
-        </div>
-      )}
+
 
       <div className="premium-glass-card premium-card-large">
         {successMessage && <div className="premium-alert-success">✅ {successMessage}</div>}

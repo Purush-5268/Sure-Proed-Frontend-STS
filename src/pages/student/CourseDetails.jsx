@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { courseService } from "../../services/courseService";
 import { applicationService } from "../../services/applicationService";
+import { studentService } from "../../services/studentService";
+import { useAuth } from "../../context/AuthContext";
 import styles from "./CourseDetails.module.css";
 import apiClient from "../../services/apiClient";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
@@ -9,8 +11,10 @@ import SkeletonLoader from "../../components/common/SkeletonLoader";
 function CourseDetails() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { user } = useAuth();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profileCompleted, setProfileCompleted] = useState(false);
   const [hasAppliedToThis, setHasAppliedToThis] = useState(false);
   const [hasOtherApplication, setHasOtherApplication] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
@@ -29,6 +33,15 @@ function CourseDetails() {
       if (!id) {
         if (isMounted) setLoading(false);
         return;
+      }
+
+      try {
+        if (user?.email) {
+          const profileData = await studentService.getProfile(user.email).catch(() => null);
+          if (isMounted) setProfileCompleted(studentService.isProfileComplete(profileData));
+        }
+      } catch (err) {
+        console.warn("Failed to check profile completion");
       }
 
       try {
@@ -255,10 +268,10 @@ function CourseDetails() {
                 setIsApplying(false);
               }
             }}
-            disabled={loading || !course || hasAppliedToThis || hasOtherApplication || isApplying}
-            style={{ flex: '2', ...((hasAppliedToThis || hasOtherApplication) ? { backgroundColor: 'var(--success-color)', cursor: 'not-allowed', opacity: 1 } : {}) }}
+            disabled={loading || !course || hasAppliedToThis || hasOtherApplication || isApplying || !profileCompleted}
+            style={{ flex: '2', ...((hasAppliedToThis || hasOtherApplication) ? { backgroundColor: 'var(--success-color)', cursor: 'not-allowed', opacity: 1 } : (!profileCompleted ? { backgroundColor: 'var(--warning-color)', cursor: 'not-allowed', opacity: 1 } : {})) }}
           >
-            {isApplying ? "Applying..." : hasAppliedToThis ? "✓ Already Applied" : hasOtherApplication ? "Enrollment Restricted" : "Apply for this Course"}
+            {isApplying ? "Applying..." : hasAppliedToThis ? "✓ Already Applied" : hasOtherApplication ? "Enrollment Restricted" : !profileCompleted ? "Complete Profile First" : "Apply for this Course"}
           </button>
         </div>
       </div>

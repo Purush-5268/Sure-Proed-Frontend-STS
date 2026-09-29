@@ -154,13 +154,13 @@ function AddMentor() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Mapped Email (Optional)</label>
+            <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Mapped Email</label>
             <input type="email" name="mapped_email" value={form.mapped_email} onChange={handleChange} placeholder="e.g. personal@gmail.com" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)", color: "var(--text-primary)" }} />
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Phone Number</label>
-            <input type="tel" name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="+91 9876543210" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)", color: "var(--text-primary)" }} />
+            <input type="tel" name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="Phone Number" style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)", color: "var(--text-primary)" }} />
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
@@ -178,10 +178,11 @@ function AddMentor() {
             <input type="date" name="date_of_birth" value={form.date_of_birth} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)", color: "var(--text-primary)" }} />
           </div>
 
+
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "14px" }}>Assigned Course</label>
             <select name="domain" value={form.domain} onChange={handleChange} style={{ padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)", backgroundColor: "var(--bg-surface)" }}>
-              <option value="">-- Select Course (Optional) --</option>
+              <option value="">-- Select Course --</option>
               {courses.slice().sort((a, b) => (a.name || a.title || a.code || "").localeCompare(b.name || b.title || b.code || "")).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
@@ -195,12 +196,16 @@ function AddMentor() {
           <div
             style={{
               gridColumn: "1 / -1",
-              backgroundColor: "var(--bg-nested)",
-              borderRadius: "10px",
-              padding: "20px",
-              border: "1px solid var(--border-color)",
+              backgroundColor: "var(--bg-surface)",
+              borderRadius: "12px",
+              padding: "24px",
+              border: "1px solid var(--primary-color)",
+              boxShadow: "0 4px 12px rgba(37, 99, 235, 0.08)",
+              position: "relative",
+              overflow: "hidden"
             }}
           >
+            <div style={{ position: "absolute", top: 0, left: 0, width: "4px", height: "100%", backgroundColor: "var(--primary-color)" }}></div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px", marginBottom: "12px" }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -232,7 +237,7 @@ function AddMentor() {
                     cursor: "pointer",
                   }}
                 >
-                  Select All
+                  <FiCheck style={{ marginRight: '4px' }} /> Select All
                 </button>
                 <button
                   type="button"
@@ -383,7 +388,7 @@ function AddMentor() {
           </div>
 
           <div style={{ gridColumn: "1 / -1", display: "flex", gap: "1rem", marginTop: "1rem", borderTop: "1px solid var(--border-color)", paddingTop: "1.5rem" }}>
-            <button type="submit" disabled={loading} style={{ padding: "12px 24px", backgroundColor: "#2563eb", color: "white", borderRadius: "8px", border: "none", fontWeight: "bold", cursor: loading ? "not-allowed" : "pointer" }}>
+            <button type="submit" disabled={loading} style={{ padding: "12px 24px", backgroundColor: "var(--primary-color)", color: "white", borderRadius: "8px", border: "none", fontWeight: "bold", cursor: loading ? "not-allowed" : "pointer" }}>
               {loading ? "Saving..." : "Save Mentor"}
             </button>
             <Link to="/admin/mentors" style={{ padding: "12px 24px", backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>Cancel</Link>

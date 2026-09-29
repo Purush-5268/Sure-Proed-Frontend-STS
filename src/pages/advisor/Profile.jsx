@@ -264,7 +264,7 @@ function AdvisorProfile() {
               name="phone" 
               value={formData.phone} 
               onChange={handleChange} 
-              placeholder="+91 9876543210" 
+              placeholder="Phone Number" 
               className="premium-input" 
             />
           </div>

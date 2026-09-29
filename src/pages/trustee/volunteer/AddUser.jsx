@@ -183,7 +183,7 @@ function AddUser() {
 
           <div className="premium-form-group">
             <label className="premium-label">Phone Number</label>
-            <input type="tel" name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="+91 9876543210" className="premium-input" />
+            <input type="tel" name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="Phone Number" className="premium-input" />
           </div>
 
           <div className="premium-form-group">

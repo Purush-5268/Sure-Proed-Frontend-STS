@@ -208,34 +208,46 @@ function Profile() {
   };
 
   const handleLinkedInConnect = async () => {
+    const popup = window.open('about:blank', '_blank');
     try {
       const data = await authService.getLinkedInConnectUrl('/student/profile');
       if (data && data.authorization_url) {
-        window.open(data.authorization_url, '_blank');
+        popup.location.href = data.authorization_url;
+      } else {
+        popup.close();
       }
     } catch (err) {
+      popup.close();
       alert("Could not initiate LinkedIn connection");
     }
   };
 
   const handleGithubConnect = async () => {
+    const popup = window.open('about:blank', '_blank');
     try {
       const data = await authService.getGithubConnectUrl();
       if (data && data.authorization_url) {
-        window.open(data.authorization_url, '_blank');
+        popup.location.href = data.authorization_url;
+      } else {
+        popup.close();
       }
     } catch (err) {
+      popup.close();
       alert("Could not initiate GitHub connection");
     }
   };
 
   const handleGoogleConnect = async () => {
+    const popup = window.open('about:blank', '_blank');
     try {
       const data = await authService.getGoogleConnectUrl();
       if (data && data.authorization_url) {
-        window.open(data.authorization_url, '_blank');
+        popup.location.href = data.authorization_url;
+      } else {
+        popup.close();
       }
     } catch (err) {
+      popup.close();
       alert("Could not initiate Google connection. Please try again.");
     }
   };

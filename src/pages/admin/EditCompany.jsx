@@ -171,22 +171,25 @@ function EditCompany() {
                   Verified
                 </label>
               </div>
-            </div>
 
-            <div>
-              <label>Description</label>
-              <textarea name="description" rows="4" value={form.description} onChange={handleChange} />
-            </div>
+              <div style={{ gridColumn: "1 / -1" }}>
+                <label>Description</label>
+                <textarea name="description" rows="4" value={form.description} onChange={handleChange} />
+              </div>
 
-            <div>
-              <label>Company Logo</label>
-              <input type="file" name="logo" accept="image/*" onChange={handleFileChange} />
-              <small style={{ color: "var(--text-secondary)", marginTop: "4px", display: "block" }}>
-                Optional. Upload a new image to replace the existing logo.
-              </small>
+              <div style={{ gridColumn: "1 / -1" }}>
+                <label>Company Logo</label>
+                <input type="file" name="logo" accept="image/*" onChange={handleFileChange} />
+                <small style={{ color: "var(--text-secondary)", marginTop: "4px", display: "block" }}>
+                  Optional. Upload a new image to replace the existing logo.
+                </small>
+              </div>
             </div>
 
             <div className={styles.buttons}>
+              <button type="button" onClick={() => navigate("/admin/companies")} style={{ backgroundColor: "var(--bg-nested)", color: "var(--text-secondary)", marginRight: "1rem" }}>
+                Cancel
+              </button>
               <button type="submit" disabled={loading}>
                 {loading ? "Saving..." : "Update Company"}
               </button>

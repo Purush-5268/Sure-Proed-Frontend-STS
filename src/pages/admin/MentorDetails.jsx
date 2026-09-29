@@ -4,7 +4,7 @@ import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import styles from "./MentorDetails.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
-import { FiMail, FiPhone, FiAward, FiBriefcase, FiClock, FiLinkedin } from "react-icons/fi";
+import { FiMail, FiPhone, FiAward, FiBriefcase, FiClock, FiLinkedin, FiCheckCircle } from "react-icons/fi";
 
 function MentorDetails() {
   const { id } = useParams();
@@ -153,6 +153,39 @@ function MentorDetails() {
             </h3>
             <p style={{ margin: 0, fontSize: '16px', fontWeight: '500', color: 'var(--text-primary)' }}>
               {Array.isArray(mentor.assigned_cohorts) ? mentor.assigned_cohorts.length : 0} Cohort(s)
+            </p>
+          </div>
+          <div className={styles.item} style={{ background: 'var(--bg-nested)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)', gridColumn: '1 / -1' }}>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FiCheckCircle /> Qualified Courses
+            </h3>
+            {mentor.courses && mentor.courses.length > 0 ? (
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
+                {mentor.courses.map((c, i) => (
+                  <span key={i} style={{ 
+                    padding: '6px 12px', 
+                    background: 'var(--bg-nested)', 
+                    color: 'var(--primary-color)', 
+                    borderRadius: '6px', 
+                    fontSize: '14px', 
+                    fontWeight: '600',
+                    border: '1px solid var(--border-color)' 
+                  }}>
+                    {c.name || c}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p style={{ margin: 0, fontSize: '16px', fontWeight: '500', color: 'var(--text-secondary)' }}>No courses assigned</p>
+            )}
+          </div>
+
+          <div className={styles.item} style={{ background: 'var(--bg-nested)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)', gridColumn: '1 / -1' }}>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>
+              Bio
+            </h3>
+            <p style={{ margin: 0, fontSize: '15px', color: 'var(--text-primary)', lineHeight: '1.6' }}>
+              {mentor.bio || "No biography provided."}
             </p>
           </div>
         </div>

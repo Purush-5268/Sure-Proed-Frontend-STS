@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { 
   FaTachometerAlt, FaExclamationTriangle, FaCalendarAlt, 
   FaUserClock, FaUserShield, FaBullhorn, 
-  FaTrophy, FaBriefcase, FaUser, FaClipboardList, FaDesktop, FaUsers, FaComments
+  FaTrophy, FaBriefcase, FaUser, FaClipboardList, FaDesktop, FaUsers, FaComments, FaHeadset
 } from "react-icons/fa";
 
 import Navbar from "../components/layout/Navbar";
@@ -27,6 +27,7 @@ function TrusteeLayout() {
     { label: "User Moderation", path: "/trustee/volunteer/users", icon: <FaUserShield /> },
     { label: "Assessments", path: "/trustee/volunteer/assessments", icon: <FaClipboardList /> },
     { label: "Proctor Dashboard", path: "/trustee/volunteer/exam-proctoring", icon: <FaDesktop /> },
+    { label: "Requests & Support", path: "/trustee/volunteer/requests-support", icon: <FaHeadset /> },
     { label: "My Profile", path: "/trustee/volunteer/profile", icon: <FaUser /> },
   ];
 

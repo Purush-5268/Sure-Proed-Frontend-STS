@@ -40,8 +40,8 @@ const ALL_RESULT_COLUMNS = [
   { key: "application_number", label: "Application #" },
   { key: "course", label: "Course" },
   { key: "cohort", label: "Cohort" },
-  { key: "marks_obtained", label: "Marks Obtained" },
-  { key: "total_marks", label: "Total Marks" },
+  { key: "marks_obtained", label: "Student Score" },
+  { key: "total_marks", label: "Max Marks" },
   { key: "percentage", label: "Percentage (%)" },
   { key: "status", label: "Result Status" },
   { key: "submitted_at", label: "Submission Time" },
@@ -61,6 +61,16 @@ function Exams() {
   const [actionInProgress, setActionInProgress] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncToast, setSyncToast] = useState("");
+
+
+  // Delete Exam Confirmation Modal State
+  const [examDeleteModal, setExamDeleteModal] = useState({
+    isOpen: false,
+    item: null,
+    input: "",
+  });
+  const [isDeletingExam, setIsDeletingExam] = useState(false);
+
 
   const handleSyncAll = async () => {
     setIsSyncing(true);
@@ -92,6 +102,8 @@ function Exams() {
   const [passPct, setPassPct] = useState(60);
   const [savingConfig, setSavingConfig] = useState(false);
   const [configSuccess, setConfigSuccess] = useState(null);
+
+  
 
   // Helper to extract candidate initials for avatar
   const getInitials = (nameStr) => {
@@ -198,12 +210,11 @@ function Exams() {
   const loadScheduledData = useCallback(async () => {
     setLoadingScheduled(true);
     try {
-      const [preScreeningsRes, moduleTestsRes, cohortsRes, coursesRes, manualExamsRes] = await Promise.all([
+      const [preScreeningsRes, moduleTestsRes, cohortsRes, coursesRes] = await Promise.all([
         apiClient.get("/api/pre-screenings/?page_size=100").catch(() => ({ data: [] })),
         apiClient.get("/api/module-tests/?page_size=50").catch(() => ({ data: [] })),
         apiClient.get("/api/cohorts/?page_size=100").catch(() => ({ data: [] })),
         apiClient.get("/api/courses/?page_size=100").catch(() => ({ data: [] })),
-        apiClient.get("/api/manual-examinations/?page_size=100").catch(() => ({ data: [] })),
       ]);
 
       const parse = (res) => {
@@ -217,7 +228,6 @@ function Exams() {
       const rawMT = parse(moduleTestsRes);
       const rawCohorts = parse(cohortsRes);
       const rawCourses = parse(coursesRes);
-      const rawManual = parse(manualExamsRes);
 
       const cohortsMap = {};
       rawCohorts.forEach((c) => {
@@ -252,7 +262,6 @@ function Exams() {
         }
 
         const cohortMeet = cId ? cohortsMap[cId]?.meeting_link : null;
-        // Unique group key per cohort & schedule window
         const groupKey = cId
           ? `cohort_${cId}_${ps.scheduled_at}`
           : `ps_${courseName || "general"}_${ps.scheduled_at}`;
@@ -305,10 +314,19 @@ function Exams() {
         }
       });
 
-      const mappedPS = Object.values(psGroups).map((item) => ({
-        ...item,
-        candidateCount: item.candidates.length,
-      }));
+      const mappedPS = Object.values(psGroups).map((item) => {
+        const cohortObj = item.cohortId ? cohortsMap[item.cohortId] : null;
+        const totalApps =
+          cohortObj?.applications_count ??
+          cohortObj?.total_applications ??
+          cohortObj?.applicant_count ??
+          item.candidates.length;
+
+        return {
+          ...item,
+          candidateCount: totalApps,
+        };
+      });
 
       const mappedMT = rawMT.map((mt) => {
         const crsId = typeof mt.course === "object" ? mt.course?.id : mt.course;
@@ -337,24 +355,7 @@ function Exams() {
         };
       });
 
-      const mappedManual = rawManual.map((exam) => ({
-        id: exam.id,
-        allIds: [exam.id],
-        type: "MANUAL",
-        typeLabel: "Manual Examination",
-        title: exam.title,
-        courseName: exam.course_name || "Course",
-        cohortName: exam.cohort_name || "Cohort",
-        cohortId: exam.cohort,
-        scheduled_at: exam.examination_date,
-        end_time: exam.status === "COMPLETED" ? `${exam.examination_date}T23:59:59` : null,
-        status: exam.status,
-        total_questions: exam.total_questions,
-        pass_percentage: 0,
-        candidateCount: (exam.results || []).length,
-      }));
-
-      const combined = [...mappedPS, ...mappedMT, ...mappedManual].sort((a, b) => {
+      const combined = [...mappedPS, ...mappedMT].sort((a, b) => {
         const timeA = a.scheduled_at ? new Date(a.scheduled_at).getTime() : 0;
         const timeB = b.scheduled_at ? new Date(b.scheduled_at).getTime() : 0;
         return timeB - timeA;
@@ -402,12 +403,6 @@ function Exams() {
     const upcoming = [];
     const completed = [];
     filteredScheduled.forEach((s) => {
-        if (s.type === "MANUAL") {
-          completed.push(s);
-          return;
-        }
-      // It is completed if end_time has passed or it was manually ended (status !== SCHEDULED && status !== ACTIVE maybe? 
-      // Safest is to check end_time since admin-end updates end_time to now.
       if (s.end_time && new Date(s.end_time) <= now) {
         completed.push(s);
       } else {
@@ -457,13 +452,13 @@ function Exams() {
         prev.map((e) =>
           e.id === examId
             ? {
-                ...e,
-                status: "IN_PROGRESS",
-                cheat_count: 0,
-                percentage: null,
-                marks_obtained: null,
-                qualified: null,
-              }
+              ...e,
+              status: "IN_PROGRESS",
+              cheat_count: 0,
+              percentage: null,
+              marks_obtained: null,
+              qualified: null,
+            }
             : e
         )
       );
@@ -474,63 +469,52 @@ function Exams() {
     }
   };
 
-  const handleDeleteExam = async (examId, appId, candidateName) => {
-    if (
-      !window.confirm(
-        `Delete exam & application record for ${candidateName}? Candidate will be able to apply and give the exam fresh.`
-      )
-    ) {
-      return;
-    }
-    try {
-      if (appId) {
-        await apiClient.delete(`/api/applications/${appId}/`);
-      } else {
-        await apiClient.delete(`/api/exams/${examId}/`);
-      }
-      setExams((prev) => prev.filter((e) => e.id !== examId));
-      alert("Exam record deleted successfully. Student can now re-apply.");
-    } catch (err) {
-      console.error("Failed to delete exam record:", err);
-      alert("Failed to delete exam record. Please try again.");
-    }
+  // 1. Open the delete modal
+  const promptDeleteScheduled = (item) => {
+    setExamDeleteModal({
+      isOpen: true,
+      item,
+      input: "",
+    });
   };
 
-  const handleDeleteScheduled = async (item) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to delete the scheduled assessment "${item.title}"?`
-      )
-    ) {
+  // 2. Execute deletion once the user types DELETE <EXAM_TITLE>
+  const confirmExecuteDeleteScheduled = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const { item, input } = examDeleteModal;
+    if (!item) return;
+
+    const expectedPhrase = `DELETE ${item.title || item.typeLabel || "EXAM"}`.trim();
+    if (input.trim() !== expectedPhrase) {
+      alert("You have not entered the correct confirmation phrase.");
       return;
     }
+
+    setIsDeletingExam(true);
     setActionInProgress(item.id);
     try {
       if (item.type === "SCREENING") {
         const ids = item.allIds?.length ? item.allIds : [item.id];
         await Promise.all(ids.map((id) => apiClient.delete(`/api/pre-screenings/${id}/`).catch(() => null)));
-      } else if (item.type === "MANUAL") {
-        await apiClient.delete(`/api/manual-examinations/${item.id}/`);
       } else {
         await apiClient.delete(`/api/module-tests/${item.id}/`);
       }
-      alert("Scheduled assessment deleted successfully.");
+      alert("Examination deleted successfully.");
+      setExamDeleteModal({ isOpen: false, item: null, input: "" });
       loadScheduledData();
     } catch (err) {
-      console.error("Failed to delete scheduled assessment:", err);
+      console.error("Failed to delete exam:", err);
       alert(
-        err.response?.data?.error || err.response?.data?.detail || "Failed to delete scheduled assessment."
+        err.response?.data?.error || err.response?.data?.detail || "Failed to delete exam."
       );
     } finally {
+      setIsDeletingExam(false);
       setActionInProgress(null);
     }
   };
 
+
   const handleAdminStart = async (item) => {
-    if (item.type === "MANUAL") {
-      alert("Manual examinations are controlled from their results table.");
-      return;
-    }
     if (
       !window.confirm(
         `Start exam now for "${item.title}"? Candidates will be authorized to begin their assessment immediately.`
@@ -557,10 +541,6 @@ function Exams() {
   };
 
   const handleAdminEnd = async (item) => {
-    if (item.type === "MANUAL") {
-      alert("Manual examinations are controlled from their results table.");
-      return;
-    }
     if (
       !window.confirm(
         `End exam early for "${item.title}"? The assessment window will close immediately, preventing further attempts.`
@@ -608,27 +588,13 @@ function Exams() {
 
       let list = [];
 
-      if (item.type === "MANUAL") {
-        const response = await apiClient.get(`/api/manual-examinations/${item.id}/`);
-        list = (response.data?.results || []).map((result) => ({
-          id: result.id,
-          name: result.student_name || result.application_number || "Candidate",
-          email: result.student_email || "",
-          application_number: result.application_number || "",
-          marks_obtained: result.marks_obtained,
-          total_marks: response.data.maximum_marks,
-          percentage: response.data.maximum_marks ? (Number(result.marks_obtained || 0) / Number(response.data.maximum_marks)) * 100 : 0,
-          status: result.qualified ? "PASSED" : "FAILED",
-          isPassed: result.qualified === true,
-          isFailed: result.qualified === false,
-        }));
-      } else if (item.type === "SCREENING") {
+      if (item.type === "SCREENING") {
         const [appsRes, examsRes] = await Promise.all([
           item.cohortId
             ? apiClient.get("/api/applications/", { params: { cohort: item.cohortId, page_size: 500 } }).catch(() => ({ data: [] }))
             : (item.courseId
-                ? apiClient.get("/api/applications/", { params: { course: item.courseId, page_size: 500 } }).catch(() => ({ data: [] }))
-                : Promise.resolve({ data: [] })),
+              ? apiClient.get("/api/applications/", { params: { course: item.courseId, page_size: 500 } }).catch(() => ({ data: [] }))
+              : Promise.resolve({ data: [] })),
           apiClient.get("/api/exams/?page_size=1000").catch(() => ({ data: [] })),
         ]);
 
@@ -646,16 +612,16 @@ function Exams() {
         list = targetApps.map((app) => {
           const appId = typeof app === "object" ? app.id : app;
           const ex = examsByAppId[appId] || (typeof app === "object" ? (app.screening_exam || app.exam) : null) || {};
-          
+
           const stu = typeof app === "object" ? (typeof app.student === "object" ? app.student : null) : null;
           const usr = stu?.user || {};
-          
+
           const name =
             (typeof app === "object" ? (app.student_name || app.candidate_name || app.student_details?.name) : null) ||
             ex.student_name ||
             (stu ? `${stu.first_name || ""} ${stu.last_name || ""}`.trim() || usr.username : "") ||
             "Candidate";
-            
+
           const email =
             (typeof app === "object" ? (app.student_email || app.candidate_email || app.student_details?.email) : null) ||
             ex.student_email ||
@@ -671,11 +637,11 @@ function Exams() {
           const isEnded = item.end_time && nowT > new Date(item.end_time);
           let appStatus = typeof app === "object" ? app.status : "PENDING";
           let statusStr = ex.status || (appStatus === "REJECTED" ? "REJECTED" : (appStatus === "SCREENING_PASSED" ? "PASSED" : (appStatus === "SCREENING_FAILED" ? "FAILED" : "PENDING")));
-          
+
           if (isEnded && (marks == null || statusStr === "PENDING" || statusStr === "SCHEDULED")) {
-              marks = 0;
-              pct = 0;
-              statusStr = "FAILED (Absent)";
+            marks = 0;
+            pct = 0;
+            statusStr = "FAILED (Absent)";
           }
 
           const isPassed = appStatus === "QUALIFIED" || ex.qualified === true || (pct != null && pct >= passMark);
@@ -717,11 +683,11 @@ function Exams() {
           const nowT = new Date();
           const isEnded = item.end_time && nowT > new Date(item.end_time);
           let statusStr = sub.status || "PENDING";
-          
+
           if (isEnded && (marks == null || statusStr === "PENDING" || statusStr === "SCHEDULED")) {
-              marks = 0;
-              pct = 0;
-              statusStr = "MISSED (Absent)";
+            marks = 0;
+            pct = 0;
+            statusStr = "MISSED (Absent)";
           }
 
           const isPassed = sub.passed === true || (pct != null && pct >= passMark);
@@ -786,13 +752,13 @@ function Exams() {
             row.push(item?.cohortName || "—");
             break;
           case "marks_obtained":
-            row.push(r.marks_obtained != null ? r.marks_obtained : "N/A");
+            row.push(r.marks_obtained != null ? r.marks_obtained : "0");
             break;
           case "total_marks":
-            row.push(r.total_marks != null ? r.total_marks : "N/A");
+            row.push(r.total_marks != null ? r.total_marks : (item?.total_questions || 15));
             break;
           case "percentage":
-            row.push(r.percentage != null ? `${r.percentage}%` : "N/A");
+            row.push(r.percentage != null ? `${r.percentage}%` : "0%");
             break;
           case "status":
             row.push(r.status || "PENDING");
@@ -851,7 +817,7 @@ function Exams() {
       const errCount = data.errors?.length || 0;
       alert(
         `Sync complete: ${data.synced || 0} exam(s) re-evaluated successfully.` +
-          (errCount > 0 ? `\n${errCount} error(s) encountered.` : "")
+        (errCount > 0 ? `\n${errCount} error(s) encountered.` : "")
       );
       loadData();
       loadScheduledData();
@@ -859,8 +825,8 @@ function Exams() {
       console.error("Failed to sync results:", err);
       alert(
         err.response?.data?.error ||
-          err.response?.data?.detail ||
-          "Failed to sync results. Please try again."
+        err.response?.data?.detail ||
+        "Failed to sync results. Please try again."
       );
     } finally {
       setActionInProgress(null);
@@ -1225,7 +1191,7 @@ function Exams() {
               <button
                 type="button"
                 onClick={() => {
-                  handleFetchResults(item);
+                  handleOpenResults(item);
                   handleSyncAll();
                 }}
                 disabled={isSyncing}
@@ -1280,8 +1246,8 @@ function Exams() {
                   {selectedColumns.includes("application_number") && <th style={{ padding: "12px 14px", background: "inherit" }}>Application #</th>}
                   {selectedColumns.includes("course") && <th style={{ padding: "12px 14px", background: "inherit" }}>Course</th>}
                   {selectedColumns.includes("cohort") && <th style={{ padding: "12px 14px", background: "inherit" }}>Cohort</th>}
-                  {selectedColumns.includes("marks_obtained") && <th style={{ padding: "12px 14px", background: "inherit" }}>Marks</th>}
-                  {selectedColumns.includes("total_marks") && <th style={{ padding: "12px 14px", background: "inherit" }}>Total</th>}
+                  {selectedColumns.includes("marks_obtained") && <th style={{ padding: "12px 14px", background: "inherit" }}>Student Score</th>}
+                  {selectedColumns.includes("total_marks") && <th style={{ padding: "12px 14px", background: "inherit" }}>Max Marks</th>}
                   {selectedColumns.includes("percentage") && <th style={{ padding: "12px 14px", background: "inherit" }}>Percentage</th>}
                   {selectedColumns.includes("status") && <th style={{ padding: "12px 14px", background: "inherit" }}>Result Status</th>}
                   {selectedColumns.includes("submitted_at") && <th style={{ padding: "12px 14px", background: "inherit" }}>Submitted At</th>}
@@ -1345,20 +1311,19 @@ function Exams() {
                             backgroundColor: res.isPassed
                               ? "rgba(22, 163, 74, 0.12)"
                               : res.isFailed
-                              ? "rgba(220, 38, 38, 0.12)"
-                              : "var(--bg-nested)",
+                                ? "rgba(220, 38, 38, 0.12)"
+                                : "var(--bg-nested)",
                             color: res.isPassed
                               ? "#16a34a"
                               : res.isFailed
-                              ? "#dc2626"
-                              : "var(--text-secondary)",
-                            border: `1px solid ${
-                              res.isPassed
-                                ? "rgba(22, 163, 74, 0.3)"
-                                : res.isFailed
+                                ? "#dc2626"
+                                : "var(--text-secondary)",
+                            border: `1px solid ${res.isPassed
+                              ? "rgba(22, 163, 74, 0.3)"
+                              : res.isFailed
                                 ? "rgba(220, 38, 38, 0.3)"
                                 : "var(--border-color)"
-                            }`,
+                              }`,
                             display: "inline-flex",
                             alignItems: "center",
                             gap: "4px",
@@ -1610,7 +1575,7 @@ function Exams() {
                               Cohort: {item.cohortName}
                               {item.candidateCount > 0 && (
                                 <span style={{ marginLeft: "8px", background: "rgba(99, 102, 241, 0.12)", color: "#6366f1", padding: "1px 6px", borderRadius: "10px", fontWeight: 700, fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                                  <FiUsers style={{ fontSize: "11px" }} /> {item.candidateCount} Candidate{item.candidateCount > 1 ? "s" : ""}
+                                  <FiUsers style={{ fontSize: "11px" }} /> {item.candidateCount} application{item.candidateCount > 1 ? "s" : ""} received
                                 </span>
                               )}
                             </span>
@@ -1757,7 +1722,7 @@ function Exams() {
                               const isItemScheduled = !isItemEnded && !isItemActive && !meetingStarted;
                               const canStartFromMeeting = !isItemEnded && !isItemActive && meetingStarted;
 
-                              if ((isItemScheduled || canStartFromMeeting) && item.type !== "MANUAL") {
+                              if (isItemScheduled || canStartFromMeeting) {
                                 return (
                                   <button
                                     type="button"
@@ -1782,7 +1747,7 @@ function Exams() {
                                   </button>
                                 );
                               }
-                              if (isItemActive && item.type !== "MANUAL") {
+                              if (isItemActive) {
                                 return (
                                   <button
                                     type="button"
@@ -1820,35 +1785,35 @@ function Exams() {
                                   (item.scheduled_at && nowT >= new Date(item.scheduled_at)));
                               return !ended && !active;
                             })()) && (
-                              <button
-                                type="button"
-                                onClick={() => handleOpenResults(item)}
-                                style={{
-                                  padding: "6px 12px",
-                                  backgroundColor: isExpanded ? "#059669" : "rgba(16, 185, 129, 0.1)",
-                                  color: isExpanded ? "#ffffff" : "#059669",
-                                  border: "1px solid rgba(16, 185, 129, 0.3)",
-                                  borderRadius: "6px",
-                                  fontSize: "12px",
-                                  fontWeight: 600,
-                                  cursor: "pointer",
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: "4px",
-                                }}
-                                title={isExpanded ? "Hide candidate results" : "Show candidate results and download Excel"}
-                              >
-                                <FiBarChart2 style={{ fontSize: "13px" }} />
-                                <span>{isExpanded ? "Hide Results" : "Show Results"}</span>
-                                {isExpanded ? <FiChevronUp style={{ fontSize: "13px" }} /> : <FiChevronDown style={{ fontSize: "13px" }} />}
-                              </button>
-                            )}
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenResults(item)}
+                                  style={{
+                                    padding: "6px 12px",
+                                    backgroundColor: isExpanded ? "#059669" : "rgba(16, 185, 129, 0.1)",
+                                    color: isExpanded ? "#ffffff" : "#059669",
+                                    border: "1px solid rgba(16, 185, 129, 0.3)",
+                                    borderRadius: "6px",
+                                    fontSize: "12px",
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                  }}
+                                  title={isExpanded ? "Hide candidate results" : "Show candidate results and download Excel"}
+                                >
+                                  <FiBarChart2 style={{ fontSize: "13px" }} />
+                                  <span>{isExpanded ? "Hide Results" : "Show Results"}</span>
+                                  {isExpanded ? <FiChevronUp style={{ fontSize: "13px" }} /> : <FiChevronDown style={{ fontSize: "13px" }} />}
+                                </button>
+                              )}
 
 
 
                             <button
                               type="button"
-                              onClick={() => handleDeleteScheduled(item)}
+                              onClick={() => promptDeleteScheduled(item)}
                               disabled={actionInProgress === item.id}
                               style={{
                                 padding: "5px 10px",
@@ -1917,9 +1882,9 @@ function Exams() {
                   );
                 })}
               </tbody>
-                </table>
-              </div>
-            )}
+            </table>
+          </div>
+        )}
 
         {/* ================= SECTION: COMPLETED EXAMS ================= */}
         <h3 style={{ margin: "36px 0 16px", fontSize: "1.25rem", color: "var(--text-primary)", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
@@ -2016,7 +1981,7 @@ function Exams() {
                             </div>
                             {item.candidateCount > 0 && (
                               <div style={{ fontSize: "11.5px", color: "var(--text-secondary)", marginTop: "2px" }}>
-                                {item.candidateCount} candidate{item.candidateCount > 1 ? "s" : ""} evaluated
+                                {item.candidateCount} application{item.candidateCount > 1 ? "s" : ""} received
                               </div>
                             )}
                           </div>
@@ -2053,7 +2018,6 @@ function Exams() {
                             <FiLock style={{ fontSize: "11px" }} /> Concluded
                           </span>
                         </td>
-
                         <td style={{ textAlign: "right" }}>
                           <div style={{ display: "inline-flex", gap: "8px", alignItems: "center", justifyContent: "flex-end" }}>
                             <button
@@ -2079,6 +2043,30 @@ function Exams() {
                               <span>{isExpanded ? "Hide Results" : "Show Results"}</span>
                               {isExpanded ? <FiChevronUp style={{ fontSize: "14px" }} /> : <FiChevronDown style={{ fontSize: "14px" }} />}
                             </button>
+
+                            {/* Delete button for completed*/}
+                            <button
+                              type="button"
+                              onClick={() => promptDeleteScheduled(item)}
+                              disabled={actionInProgress === item.id}
+                              style={{
+                                padding: "7px 12px",
+                                backgroundColor: "rgba(220, 38, 38, 0.1)",
+                                color: "#dc2626",
+                                border: "1px solid rgba(220, 38, 38, 0.25)",
+                                borderRadius: "6px",
+                                fontSize: "12.5px",
+                                fontWeight: 600,
+                                cursor: actionInProgress === item.id ? "not-allowed" : "pointer",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                              }}
+                              title="Delete this examination record"
+                            >
+                              <FiTrash2 style={{ fontSize: "13px" }} />
+                              <span>Delete</span>
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -2097,6 +2085,135 @@ function Exams() {
           </div>
         )}
       </div>
+      {/* Delete Exam Confirmation Modal */}
+      {examDeleteModal.isOpen && examDeleteModal.item && (() => {
+        const item = examDeleteModal.item;
+        const expectedPhrase = `DELETE ${item.title || item.typeLabel || "EXAM"}`.trim();
+        const isMatch = examDeleteModal.input.trim() === expectedPhrase;
+
+        return (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              backgroundColor: "rgba(0, 0, 0, 0.6)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 999999,
+              padding: "20px",
+              boxSizing: "border-box",
+            }}
+          >
+            <div
+              className="premium-card"
+              style={{
+                maxWidth: "480px",
+                width: "100%",
+                padding: "24px",
+                borderRadius: "12px",
+                backgroundColor: "var(--bg-surface, #ffffff)",
+                border: "1px solid var(--border-color)",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+              }}
+            >
+              <div
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "50%",
+                  backgroundColor: "#fee2e2",
+                  color: "#dc2626",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "20px",
+                  fontWeight: 700,
+                  marginBottom: "12px",
+                }}
+              >
+                !
+              </div>
+
+              <h3 style={{ margin: "0 0 6px 0", color: "var(--text-primary)", fontSize: "18px" }}>
+                Delete Examination
+              </h3>
+
+              <p style={{ margin: "0 0 16px 0", color: "var(--text-secondary)", fontSize: "13.5px", lineHeight: "1.5" }}>
+                You are about to delete <strong>{item.title}</strong> for cohort <strong>{item.cohortName}</strong>.
+                This only removes the exam record; registered candidate applications remain safe.
+              </p>
+
+              <form onSubmit={confirmExecuteDeleteScheduled}>
+                <div style={{ marginBottom: "16px" }}>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "6px" }}>
+                    To confirm, type <strong style={{ color: "#dc2626" }}>{expectedPhrase}</strong> below:
+                  </label>
+                  <input
+                    type="text"
+                    value={examDeleteModal.input}
+                    onChange={(e) => setExamDeleteModal((prev) => ({ ...prev, input: e.target.value }))}
+                    placeholder={expectedPhrase}
+                    style={{
+                      width: "100%",
+                      padding: "9px 12px",
+                      borderRadius: "6px",
+                      border: "1px solid var(--border-color)",
+                      backgroundColor: "var(--bg-card)",
+                      color: "var(--text-primary)",
+                      fontFamily: "monospace",
+                      fontSize: "13px",
+                      boxSizing: "border-box",
+                      outline: "none",
+                    }}
+                    autoComplete="off"
+                    autoFocus
+                  />
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+                  <button
+                    type="button"
+                    onClick={() => setExamDeleteModal({ isOpen: false, item: null, input: "" })}
+                    disabled={isDeletingExam}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: "6px",
+                      border: "1px solid var(--border-color)",
+                      backgroundColor: "transparent",
+                      color: "var(--text-primary)",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!isMatch || isDeletingExam}
+                    style={{
+                      padding: "8px 18px",
+                      borderRadius: "6px",
+                      border: "none",
+                      backgroundColor: isMatch ? "#dc2626" : "#cbd5e1",
+                      color: isMatch ? "#ffffff" : "#64748b",
+                      fontWeight: 600,
+                      fontSize: "13px",
+                      cursor: isMatch && !isDeletingExam ? "pointer" : "not-allowed",
+                    }}
+                  >
+                    {isDeletingExam ? "Deleting..." : "Confirm Delete"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        );
+      })()}
+
     </div>
   );
 }

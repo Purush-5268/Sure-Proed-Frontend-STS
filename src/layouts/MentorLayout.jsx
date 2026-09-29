@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {
   FaChalkboardTeacher, FaUsers, FaCalendarAlt,
   FaVideo, FaUserGraduate, FaUserCheck,
-  FaTasks, FaUserCircle, FaCog, FaFileSignature, FaListAlt
+  FaTasks, FaUserCircle, FaCog, FaFileSignature, FaListAlt, FaComments
 } from "react-icons/fa";
 
 import Navbar from "../components/layout/Navbar";
@@ -17,6 +17,7 @@ import styles from "./MentorLayout.module.css";
 const mentorLinks = [
   { label: "Dashboard", path: "/mentor/dashboard", icon: <FaChalkboardTeacher /> },
   { label: "My Cohorts", path: "/mentor/cohorts", icon: <FaUsers /> },
+  { label: "Cohort Chat", path: "/mentor/cohort-chat", icon: <FaComments /> },
   { label: "Class Schedule", path: "/mentor/class-schedule", icon: <FaCalendarAlt /> },
   // Meeting Links removed as requested
   { label: "Applications", path: "/mentor/applications", icon: <FaFileSignature /> },

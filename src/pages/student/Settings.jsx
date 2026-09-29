@@ -38,7 +38,7 @@ function Settings() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const response = await apiClient.get('/api/students/profile/');
+                const response = await apiClient.get('/api/students/me/');
                 setProfile(response.data);
             } catch (err) {
                 console.error("Failed to load profile", err);

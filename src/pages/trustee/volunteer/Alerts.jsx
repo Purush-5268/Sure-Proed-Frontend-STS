@@ -25,8 +25,8 @@ function VolunteerAlerts() {
 
   const handleSendWarning = async (student) => {
     // Attempt to resolve IDs from the alert payload
-    const studentId = student.student_id || student.id;
-    const sessionId = student.session_id || student.session;
+    const studentId = student.student;
+    const sessionId = student.session;
 
     if (!studentId) return alert("Student ID not found in alert data.");
 
@@ -120,7 +120,7 @@ function VolunteerAlerts() {
                     <button 
                       className="btn" 
                       style={{ backgroundColor: "#3b82f6", color: "white", padding: "6px 12px", fontSize: "11px", border: "none", cursor: "pointer", borderRadius: "4px" }}
-                      onClick={() => navigate('/trustee/volunteer/users')}
+                      onClick={() => navigate(`/trustee/volunteer/student-details/${student.student}`)}
                     >
                       Manage User
                     </button>

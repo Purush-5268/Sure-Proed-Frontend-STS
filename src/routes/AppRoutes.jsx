@@ -36,7 +36,7 @@ function ThemeEnforcer() {
   const { theme } = useTheme();
 
   useEffect(() => {
-    const publicPaths = ['/', '/partners', '/login', '/signup', '/setup-password', '/forgot-password', '/reset-password', '/email-verification', '/open-cohorts', '/privacy-policy', '/terms-of-service'];
+    const publicPaths = ['/', '/partners', '/csr-partnerships', '/login', '/signup', '/setup-password', '/forgot-password', '/reset-password', '/email-verification', '/open-cohorts', '/privacy-policy', '/terms-of-service'];
     const isPublic = publicPaths.includes(location.pathname) || location.pathname.startsWith('/verify-offer-letter') || location.pathname.startsWith('/certificate/verify') || location.pathname.startsWith('/cohort-info');
 
     const applyTheme = () => {
@@ -84,6 +84,9 @@ const Updates = lazy(() => import("../pages/trustee/main/Updates"));
 
 /* Role Communications */
 const Messages = lazy(() => import("../pages/communications/Messages"));
+
+/* CSR */
+const CSRPartnerships = lazy(() => import("../pages/landing/CSRPartnerships"));
 
 /* Advisor */
 import AdvisorLayout from "../layouts/AdvisorLayout";
@@ -212,8 +215,13 @@ const ProfileSettings = lazy(() => import("../pages/admin/ProfileSettings"));
 const SecuritySettings = lazy(() => import("../pages/admin/SecuritySettings"));
 const SystemSettings = lazy(() => import("../pages/admin/SystemSettings"));
 
+/* CSR Partnerships */
+const CSRRequests = lazy(() => import("../pages/admin/CSRRequests"));
+const CSRRequestDetails = lazy(() => import("../pages/admin/CSRRequestDetails"));
+
 /* Mentor */
 const MentorDashboard = lazy(() => import("../pages/mentor/MentorDashboard"));
+const MentorCohortChatRedirect = lazy(() => import("../pages/mentor/MentorCohortChatRedirect"));
 const MyCohorts = lazy(() => import("../pages/mentor/MyCohorts"));
 const MentorCohortDetails = lazy(() => import("../pages/mentor/CohortDetails"));
 const MentorClassSchedule = lazy(() => import("../pages/mentor/ClassSchedule"));
@@ -262,6 +270,7 @@ function AppRoutes() {
           <Route element={<PublicLayout />}>
             <Route path="/" element={<Landing />} />
             <Route path="/partners" element={<Partners />} />
+            <Route path="/csr-partnerships" element={<CSRPartnerships />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -436,6 +445,10 @@ function AppRoutes() {
 
               {/* Role Communications (Admin) */}
               <Route path="messages" element={<Messages />} />
+              
+              {/* CSR Partnerships (Admin) */}
+              <Route path="csr-requests" element={<CSRRequests />} />
+              <Route path="csr-requests/:id" element={<CSRRequestDetails />} />
 
               {/* Settings */}
               <Route path="settings" element={<Settings />} />
@@ -456,6 +469,8 @@ function AppRoutes() {
               <Route path="cohorts" element={<MyCohorts />} />
               <Route path="cohort-details" element={<MentorCohortDetails />} />
               <Route path="cohort-details/:id" element={<MentorCohortDetails />} />
+              <Route path="cohort-chat" element={<MentorCohortChatRedirect />} />
+              <Route path="cohort-chat/:cohortId" element={<CohortChat />} />
               <Route path="class-schedule" element={<MentorClassSchedule />} />
               <Route path="meeting-links" element={<MeetingLinks />} />
               <Route path="edit-meeting-link" element={<EditMeetingLink />} />

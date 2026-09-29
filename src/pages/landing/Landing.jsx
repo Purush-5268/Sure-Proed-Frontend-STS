@@ -9,12 +9,13 @@ import LazySection from "../../components/common/LazySection";
 const WhySureProed = lazy(() => import("../../components/landing/WhySureProed"));
 const LearningPrograms = lazy(() => import("../../components/landing/LearningPrograms"));
 const Statistics = lazy(() => import("../../components/landing/Statistics"));
+const CSRPartnershipSection = lazy(() => import("../../components/landing/CSRPartnershipSection"));
 const FinalCTA = lazy(() => import("../../components/landing/FinalCTA"));
 import ScrollReveal from "../../components/common/ScrollReveal";
 
 function Landing() {
   const location = useLocation();
-  const { cohorts, courses, loading } = useLandingData();
+  const { cohorts, courses, stats, companies, loading } = useLandingData();
   const hasOpenCohorts = cohorts && cohorts.some(c => c.status === 'OPEN');
 
   useEffect(() => {
@@ -56,7 +57,15 @@ function Landing() {
       <LazySection id="statistics" fallback={<div style={{ minHeight: '400px' }}></div>}>
         <Suspense fallback={<div style={{ minHeight: '400px' }}></div>}>
           <ScrollReveal>
-            <Statistics />
+            <Statistics stats={stats} companies={companies} loading={loading} />
+          </ScrollReveal>
+        </Suspense>
+      </LazySection>
+
+      <LazySection id="csr-partnerships" fallback={<div style={{ minHeight: '400px' }}></div>}>
+        <Suspense fallback={<div style={{ minHeight: '400px' }}></div>}>
+          <ScrollReveal>
+            <CSRPartnershipSection stats={stats} loading={loading} />
           </ScrollReveal>
         </Suspense>
       </LazySection>

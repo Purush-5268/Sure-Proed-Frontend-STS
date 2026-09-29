@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import apiClient from "../../services/apiClient";
@@ -144,11 +145,11 @@ function MyApplications() {
   const handleJoinWhatsApp = async (appId, link) => {
     try {
       await apiClient.post(`${API_ENDPOINTS.APPLICATIONS.BASE}${appId}/confirm-whatsapp-join/`);
-      setActiveApplications(prev => prev.map(app => 
+      setActiveApplications(prev => prev.map(app =>
         app.id === appId ? { ...app, whatsapp_joined: true } : app
       ));
       const localApps = JSON.parse(localStorage.getItem("sure_student_applications") || "[]");
-      const updatedLocalApps = localApps.map(app => 
+      const updatedLocalApps = localApps.map(app =>
         app.id === appId ? { ...app, whatsapp_joined: true } : app
       );
       localStorage.setItem("sure_student_applications", JSON.stringify(updatedLocalApps));
@@ -251,8 +252,39 @@ function MyApplications() {
               const formattedScoreStr = scoreVal != null ? `${scoreVal}% Marks` : "EVALUATED";
 
               return (
-                <div key={activeApp.id} className={styles.applicationCard} style={{ borderLeft: isQualified ? "4px solid var(--primary-color)" : "4px solid var(--primary-color)" }}>
-                  
+                <div key={activeApp.id} className={styles.applicationCard} style={{ borderLeft: isQualified ? "4px solid var(--primary-color)" : "4px solid var(--primary-color)", position: 'relative' }}>
+                  {(() => {
+                    const isScheduled = Boolean(activeApp.pre_screening?.scheduled_at || activeApp.scheduled_at || activeApp.status === "SCREENING_SCHEDULED");
+                    if (!isScheduled && !isExamTaken && !isQualified) {
+                      return (
+                        <button
+                          onClick={() => handleDeleteApplication(activeApp.id, activeApp.course?.id || activeApp.course_id)}
+                          disabled={deletingId === activeApp.id}
+                          title="Cancel Application"
+                          style={{
+                            position: 'absolute',
+                            top: '16px',
+                            right: '16px',
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#ef4444',
+                            cursor: 'pointer',
+                            padding: '8px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'background 0.2s',
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'}
+                          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        </button>
+                      );
+                    }
+                    return null;
+                  })()}
                   <div className={styles.infoGrid}>
                     <div className={styles.infoBox}>
                       <strong>Application Number</strong>
@@ -281,10 +313,10 @@ function MyApplications() {
                           {isQualified
                             ? `🏆 ENROLLED (${formattedScoreStr})`
                             : isExamTaken
-                            ? `EXAM GIVEN (${formattedScoreStr})`
-                            : (activeApp.status === "APPLIED" && !activeApp.pre_screening?.scheduled_at)
-                            ? "📝 APPLIED"
-                            : "📋 PRE-SCREENING"}
+                              ? `EXAM GIVEN (${formattedScoreStr})`
+                              : (activeApp.status === "APPLIED" && !activeApp.pre_screening?.scheduled_at)
+                                ? "📝 APPLIED"
+                                : "📋 PRE-SCREENING"}
                         </span>
                       </div>
                     </div>
@@ -326,7 +358,7 @@ function MyApplications() {
                       {activeApp.offer_letter_issued && activeApp.offer_letter_file ? (
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <span style={{ color: "var(--primary-color)", fontWeight: "bold" }}>✅ Offer Letter Issued</span>
-                          <button 
+                          <button
                             onClick={() => applicationService.downloadPrivateFile(activeApp.offer_letter_file, `Offer_Letter_${activeApp.application_number || activeApp.id}.pdf`)}
                             className={`${styles.premiumBtn} ${styles.btnPrimary}`}
                             style={{ flex: "none", padding: "8px 16px", fontSize: "13px" }}
@@ -335,24 +367,55 @@ function MyApplications() {
                           </button>
                         </div>
                       ) : activeApp.offer_letter_request_status === "PENDING" ? (
-                        <span style={{ color: "var(--status-pending-text, #d97706)", fontWeight: "bold", display: "block" }}>⏳ Offer Letter Request Pending<br/><small style={{color: "var(--text-muted)", fontWeight: "normal"}}>Your request has been submitted to the administration.</small></span>
+                        <span style={{ color: "var(--status-pending-text, #d97706)", fontWeight: "bold", display: "block" }}>⏳ Offer Letter Request Pending<br /><small style={{ color: "var(--text-muted)", fontWeight: "normal" }}>Your request has been submitted to the administration.</small></span>
                       ) : activeApp.offer_letter_request_status === "IN_PROGRESS" ? (
                         <span style={{ color: "var(--primary-color)", fontWeight: "bold" }}>🔄 Request Being Processed</span>
                       ) : activeApp.offer_letter_request_status === "RESOLVED" ? (
-                        <span style={{ color: "var(--primary-color)", fontWeight: "bold", display: "block" }}>✓ Request Approved<br/><small style={{color: "var(--text-muted)", fontWeight: "normal"}}>Your offer letter is being prepared.</small></span>
+                        <span style={{ color: "var(--primary-color)", fontWeight: "bold", display: "block" }}>✓ Request Approved<br /><small style={{ color: "var(--text-muted)", fontWeight: "normal" }}>Your offer letter is being prepared.</small></span>
                       ) : (
                         <div>
-                          <p style={{ margin: "0 0 12px 0", fontSize: "13px", color: "var(--text-secondary)" }}>
-                            Your Offer Letter will be automatically issued after one calendar month.
-                          </p>
-                          <button
-                            onClick={() => handleRequestOfferLetter(activeApp.id)}
-                            disabled={requestingOfferLetterId === activeApp.id}
-                            className={`${styles.premiumBtn} ${styles.btnDisabled}`}
-                            style={{ flex: "none", padding: "8px 16px", fontSize: "13px", cursor: requestingOfferLetterId === activeApp.id ? "not-allowed" : "pointer", opacity: requestingOfferLetterId === activeApp.id ? 0.7 : 1 }}
-                          >
-                            {requestingOfferLetterId === activeApp.id ? "Requesting..." : "Request Offer Letter Manually"}
-                          </button>
+                          <div style={{ margin: "0 0 16px 0", padding: "12px", backgroundColor: "var(--bg-secondary)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+                            <p style={{ margin: "0 0 8px 0", fontSize: "13px", color: "var(--text-primary)", fontWeight: "500" }}>
+                              ℹ️ Important Note:
+                            </p>
+                            <p style={{ margin: "0", fontSize: "13px", color: "var(--text-secondary)", lineHeight: "1.5" }}>
+                              Your offer letter will be <strong>automatically issued</strong> after <strong>1 month</strong> of your internship start date.
+                              <br /><br />
+                              If it has been over a month and you haven't received it, you may request it manually below.
+                            </p>
+                          </div>
+                          {(() => {
+                            const startDate = activeApp.assigned_cohort?.start_date || activeApp.cohort?.start_date;
+                            if (!startDate) {
+                              return (
+                                <div style={{ padding: "8px 12px", backgroundColor: "#f3f4f6", color: "#4b5563", borderRadius: "6px", fontSize: "13px", border: "1px solid #e5e7eb", display: "inline-block" }}>
+                                  Cohort has not started yet.
+                                </div>
+                              );
+                            }
+                            
+                            const oneMonthLater = new Date(startDate);
+                            oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+                            const now = new Date();
+                            if (now < oneMonthLater) {
+                              return (
+                                <div style={{ padding: "8px 12px", backgroundColor: "#fef2f2", color: "#dc2626", borderRadius: "6px", fontSize: "13px", border: "1px solid #fca5a5", display: "inline-block" }}>
+                                  Button unlocks on <strong>{oneMonthLater.toLocaleDateString()}</strong> (1 month after start date).
+                                </div>
+                              );
+                            }
+                            
+                            return (
+                              <button
+                                onClick={() => handleRequestOfferLetter(activeApp.id)}
+                                disabled={requestingOfferLetterId === activeApp.id}
+                                className={`${styles.premiumBtn} ${styles.btnDisabled}`}
+                                style={{ flex: "none", padding: "8px 16px", fontSize: "13px", cursor: requestingOfferLetterId === activeApp.id ? "not-allowed" : "pointer", opacity: requestingOfferLetterId === activeApp.id ? 0.7 : 1 }}
+                              >
+                                {requestingOfferLetterId === activeApp.id ? "Requesting..." : "Request Offer Letter Manually"}
+                              </button>
+                            );
+                          })()}
                         </div>
                       )}
                     </div>
@@ -446,7 +509,7 @@ function MyApplications() {
 
               return (
                 <div key={app.id} className={styles.applicationCard} style={{ borderLeft: isRejected ? "4px solid var(--status-inactive-text, #ef4444)" : "4px solid var(--text-muted, #64748b)", opacity: 0.9 }}>
-                  
+
                   <div className={styles.infoGrid}>
                     <div className={styles.infoBox}>
                       <strong>Application Number</strong>

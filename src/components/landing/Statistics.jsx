@@ -88,13 +88,13 @@ const InteractivePeopleCard = ({ icon: Icon, label, value, onClick }) => (
   </motion.div>
 );
 
-function Statistics() {
-  const [loading, setLoading] = useState(true);
+function Statistics({ stats: propStats, companies: propCompanies, loading: propLoading }) {
+  const [loading, setLoading] = useState(propLoading !== undefined ? propLoading : true);
   const [error, setError] = useState(false);
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(propStats || null);
   const [activeModal, setActiveModal] = useState(null);
 
-  const [companies, setCompanies] = useState([]);
+  const [companies, setCompanies] = useState(propCompanies || []);
   const [chartsRef, chartsInView] = useInViewOnce({ rootMargin: '400px' });
 
   const fetchStats = async () => {
@@ -119,10 +119,16 @@ function Statistics() {
   };
 
   useEffect(() => {
-    fetchStats();
-  }, []);
+    if (propStats !== undefined) {
+      setData(propStats);
+      setCompanies(propCompanies || []);
+      setLoading(propLoading);
+    } else {
+      fetchStats();
+    }
+  }, [propStats, propCompanies, propLoading]);
 
-  if (error) {
+  if (error && !propStats) {
     return (
       <section className={styles.statistics}>
         <div className={styles.starsOverlay}></div>

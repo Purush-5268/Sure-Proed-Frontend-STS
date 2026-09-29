@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import apiClient, { normalizeListResponse, fetchAllPages } from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
@@ -18,6 +18,9 @@ import {
   FiLayers,
   FiCheckCircle,
   FiExternalLink,
+  FiEye,
+  FiEdit,
+  FiTrash2,
 } from "react-icons/fi";
 
 /**
@@ -30,6 +33,7 @@ import {
  * 4. "All Mentors Directory" view with course qualifications, assigned cohorts, and search
  */
 function Mentors() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [courses, setCourses] = useState([]);
   const [allMentors, setAllMentors] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -43,7 +47,13 @@ function Mentors() {
   const [feedbackMsg, setFeedbackMsg] = useState(null); // { type: 'success'|'error', text: '' }
 
   // Tabs: "assign" (Course & Cohort Assignment Tool) | "directory" (All Mentors Directory)
-  const [activeTab, setActiveTab] = useState("assign");
+  const activeTab = searchParams.get("tab") || "assign";
+  const setActiveTab = (tab) => {
+    setSearchParams(prev => {
+      prev.set("tab", tab);
+      return prev;
+    }, { replace: true });
+  };
   const [directorySearch, setDirectorySearch] = useState("");
   const [directoryCourseFilter, setDirectoryCourseFilter] = useState("ALL");
 
@@ -267,22 +277,22 @@ function Mentors() {
     }
   };
 
-  // Handle toggling Primary/Current mentor status
-  const handleToggleCurrentMentor = async (mentorId, isCurrentlyPrimary) => {
+  // Handle toggling Current/Current mentor status
+  const handleToggleCurrentMentor = async (mentorId, isCurrentlyCurrent) => {
     if (!selectedCohort) return;
     setActionInProgress(mentorId);
     setFeedbackMsg(null);
     try {
-      if (isCurrentlyPrimary) {
+      if (isCurrentlyCurrent) {
         await apiClient.post(API_ENDPOINTS.COHORTS.REVOKE_CURRENT_MENTOR(selectedCohort.id), {
           mentor_id: mentorId,
         });
-        setFeedbackMsg({ type: "success", text: "Primary mentor designation revoked." });
+        setFeedbackMsg({ type: "success", text: "Current mentor designation revoked." });
       } else {
         await apiClient.post(API_ENDPOINTS.COHORTS.SET_CURRENT_MENTOR(selectedCohort.id), {
           mentor_id: mentorId,
         });
-        setFeedbackMsg({ type: "success", text: "Designated as Primary Current Mentor for this cohort." });
+        setFeedbackMsg({ type: "success", text: "Designated as Current Current Mentor for this cohort." });
       }
       await refreshCohort(selectedCohort.id);
     } catch (err) {
@@ -326,7 +336,7 @@ function Mentors() {
       {/* Top Header Bar */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", gap: "12px" }}>
         <div>
-          <h1 style={{ margin: 0, color: "var(--text-primary)", fontSize: "1.85rem", fontWeight: 700 }}>
+          <h1 style={{ margin: 0, color: "var(--text-current)", fontSize: "1.85rem", fontWeight: 700 }}>
             Mentor & Cohort Assignment Center
           </h1>
           <p style={{ color: "var(--text-secondary)", margin: "4px 0 0 0", fontSize: "0.95rem" }}>
@@ -347,7 +357,7 @@ function Mentors() {
                 border: "none",
                 cursor: "pointer",
                 backgroundColor: activeTab === "assign" ? "var(--bg-surface)" : "transparent",
-                color: activeTab === "assign" ? "var(--primary-color)" : "var(--text-secondary)",
+                color: activeTab === "assign" ? "var(--current-color)" : "var(--text-secondary)",
                 boxShadow: activeTab === "assign" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
                 display: "inline-flex",
                 alignItems: "center",
@@ -368,7 +378,7 @@ function Mentors() {
                 border: "none",
                 cursor: "pointer",
                 backgroundColor: activeTab === "directory" ? "var(--bg-surface)" : "transparent",
-                color: activeTab === "directory" ? "var(--primary-color)" : "var(--text-secondary)",
+                color: activeTab === "directory" ? "var(--current-color)" : "var(--text-secondary)",
                 boxShadow: activeTab === "directory" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
                 display: "inline-flex",
                 alignItems: "center",
@@ -384,7 +394,7 @@ function Mentors() {
             to="/admin/add-mentor"
             style={{
               padding: "10px 18px",
-              backgroundColor: "#2563eb",
+              backgroundColor: "var(--primary-color)",
               color: "#ffffff",
               borderRadius: "8px",
               textDecoration: "none",
@@ -443,8 +453,8 @@ function Mentors() {
           >
             {/* Course Selector */}
             <div>
-              <label style={{ display: "flex", alignItems: "center", gap: "6px", fontWeight: 700, color: "var(--text-primary)", fontSize: "14px", marginBottom: "8px" }}>
-                <span style={{ width: "22px", height: "22px", borderRadius: "50%", background: "#2563eb", color: "white", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "11px" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", fontWeight: 700, color: "var(--text-current)", fontSize: "14px", marginBottom: "8px" }}>
+                <span style={{ width: "22px", height: "22px", borderRadius: "50%", background: "var(--primary-color)", color: "white", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "11px" }}>
                   1
                 </span>
                 <span>Select Course Domain</span>
@@ -464,7 +474,7 @@ function Mentors() {
                     borderRadius: "8px",
                     border: "1px solid var(--border-color)",
                     backgroundColor: "var(--bg-nested)",
-                    color: "var(--text-primary)",
+                    color: "var(--text-current)",
                     fontSize: "14px",
                     fontWeight: 600,
                   }}
@@ -481,8 +491,8 @@ function Mentors() {
 
             {/* Cohort Selector */}
             <div>
-              <label style={{ display: "flex", alignItems: "center", gap: "6px", fontWeight: 700, color: "var(--text-primary)", fontSize: "14px", marginBottom: "8px" }}>
-                <span style={{ width: "22px", height: "22px", borderRadius: "50%", background: selectedCourse ? "#2563eb" : "#94a3b8", color: "white", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "11px" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", fontWeight: 700, color: "var(--text-current)", fontSize: "14px", marginBottom: "8px" }}>
+                <span style={{ width: "22px", height: "22px", borderRadius: "50%", background: selectedCourse ? "var(--primary-color)" : "#94a3b8", color: "white", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "11px" }}>
                   2
                 </span>
                 <span>Select Cohort</span>
@@ -508,9 +518,9 @@ function Mentors() {
                     width: "100%",
                     padding: "10px 14px",
                     borderRadius: "8px",
-                    border: "1.5px solid var(--primary-color)",
+                    border: "1.5px solid var(--current-color)",
                     backgroundColor: "var(--bg-nested)",
-                    color: "var(--text-primary)",
+                    color: "var(--text-current)",
                     fontSize: "14px",
                     fontWeight: 600,
                   }}
@@ -552,10 +562,10 @@ function Mentors() {
                   }}
                 >
                   <div>
-                    <h3 style={{ margin: 0, fontSize: "16px", color: "var(--text-primary)", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
-                      <FiUsers style={{ color: "#2563eb", fontSize: "18px" }} />
+                    <h3 style={{ margin: 0, fontSize: "16px", color: "var(--text-current)", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
+                      <FiUsers style={{ color: "var(--primary-color)", fontSize: "18px" }} />
                       <span>Current Mentors for Cohort:</span>
-                      <span style={{ color: "#2563eb" }}>{selectedCohort.code}</span>
+                      <span style={{ color: "var(--primary-color)" }}>{selectedCohort.code}</span>
                     </h3>
                     <p style={{ margin: "2px 0 0 0", fontSize: "12.5px", color: "var(--text-secondary)" }}>
                       A cohort can have multiple mentors. Below are the mentors currently assigned to teach this cohort.
@@ -568,7 +578,7 @@ function Mentors() {
                       fontSize: "12px",
                       fontWeight: 700,
                       backgroundColor: currentCohortMentors.length > 0 ? "rgba(37, 99, 235, 0.12)" : "rgba(100, 116, 139, 0.12)",
-                      color: currentCohortMentors.length > 0 ? "#2563eb" : "var(--text-secondary)",
+                      color: currentCohortMentors.length > 0 ? "var(--primary-color)" : "var(--text-secondary)",
                       border: "1px solid var(--border-color)",
                     }}
                   >
@@ -579,7 +589,7 @@ function Mentors() {
                 {currentCohortMentors.length === 0 ? (
                   <div style={{ padding: "36px 20px", textAlign: "center", color: "var(--text-secondary)" }}>
                     <FiAlertCircle style={{ fontSize: "2rem", color: "#f59e0b", marginBottom: "8px" }} />
-                    <h4 style={{ margin: "0 0 4px 0", color: "var(--text-primary)", fontSize: "15px" }}>No Mentors Assigned Yet</h4>
+                    <h4 style={{ margin: "0 0 4px 0", color: "var(--text-current)", fontSize: "15px" }}>No Mentors Assigned Yet</h4>
                     <p style={{ margin: 0, fontSize: "13px" }}>
                       Choose from the available course mentors below to assign teaching staff to this cohort.
                     </p>
@@ -587,7 +597,7 @@ function Mentors() {
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column" }}>
                     {currentCohortMentors.map((mentor, idx) => {
-                      const isPrimary = selectedCohort.current_mentors_details?.some(
+                      const isCurrent = selectedCohort.current_mentors_details?.some(
                         (cm) => String(cm.id) === String(mentor.id)
                       );
                       const name = `${mentor.first_name || ""} ${mentor.last_name || ""}`.trim() || mentor.email;
@@ -613,7 +623,7 @@ function Mentors() {
                                 height: "42px",
                                 borderRadius: "50%",
                                 backgroundColor: "rgba(37, 99, 235, 0.12)",
-                                color: "#2563eb",
+                                color: "var(--primary-color)",
                                 fontWeight: 700,
                                 fontSize: "15px",
                                 display: "flex",
@@ -627,10 +637,10 @@ function Mentors() {
                             </div>
                             <div>
                               <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                                <strong style={{ fontSize: "14.5px", color: "var(--text-primary)" }}>{name}</strong>
-                                {isPrimary && (
+                                <strong style={{ fontSize: "14.5px", color: "var(--text-current)" }}>{name}</strong>
+                                {isCurrent && (
                                   <span style={{ fontSize: "10.5px", background: "rgba(245, 158, 11, 0.12)", color: "#b45309", border: "1px solid rgba(245, 158, 11, 0.3)", padding: "1px 7px", borderRadius: "10px", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "3px" }}>
-                                    <FiStar style={{ fontSize: "10px" }} /> Primary Mentor
+                                    <FiStar style={{ fontSize: "10px" }} /> Current Mentor
                                   </span>
                                 )}
                                 <span style={{ fontSize: "11px", background: "rgba(22, 163, 74, 0.1)", color: "#166534", padding: "1px 7px", borderRadius: "10px", fontWeight: 600 }}>
@@ -644,7 +654,7 @@ function Mentors() {
                                 <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginTop: "6px" }}>
                                   <span style={{ fontSize: "11px", color: "var(--text-secondary)", fontWeight: 600 }}>Qualified:</span>
                                   {mentor.courses.map((mc) => (
-                                    <span key={mc.id} style={{ fontSize: "11px", background: "var(--bg-nested)", padding: "1px 6px", borderRadius: "4px", border: "1px solid var(--border-color)", color: "var(--text-primary)" }}>
+                                    <span key={mc.id} style={{ fontSize: "11px", background: "var(--bg-nested)", padding: "1px 6px", borderRadius: "4px", border: "1px solid var(--border-color)", color: "var(--text-current)" }}>
                                       {mc.name}
                                     </span>
                                   ))}
@@ -656,21 +666,21 @@ function Mentors() {
                           <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                             <button
                               type="button"
-                              onClick={() => handleToggleCurrentMentor(mentor.id, isPrimary)}
+                              onClick={() => handleToggleCurrentMentor(mentor.id, isCurrent)}
                               disabled={actionInProgress === mentor.id}
                               style={{
                                 padding: "6px 12px",
                                 borderRadius: "6px",
-                                border: isPrimary ? "1px solid #f59e0b" : "1px solid var(--border-color)",
-                                backgroundColor: isPrimary ? "rgba(245, 158, 11, 0.1)" : "var(--bg-surface)",
-                                color: isPrimary ? "#b45309" : "var(--text-secondary)",
+                                border: isCurrent ? "1px solid #f59e0b" : "1px solid var(--border-color)",
+                                backgroundColor: isCurrent ? "rgba(245, 158, 11, 0.1)" : "var(--bg-surface)",
+                                color: isCurrent ? "#b45309" : "var(--text-secondary)",
                                 fontSize: "12px",
                                 fontWeight: 600,
                                 cursor: "pointer",
                               }}
-                              title={isPrimary ? "Revoke primary mentor tag" : "Designate as primary/current mentor"}
+                              title={isCurrent ? "Revoke current mentor tag" : "Designate as current/current mentor"}
                             >
-                              {isPrimary ? "Revoke Primary" : "Set as Primary"}
+                              {isCurrent ? "Revoke Current" : "Set as Current"}
                             </button>
 
                             <button
@@ -726,10 +736,10 @@ function Mentors() {
                   }}
                 >
                   <div>
-                    <h3 style={{ margin: 0, fontSize: "16px", color: "var(--text-primary)", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
+                    <h3 style={{ margin: 0, fontSize: "16px", color: "var(--text-current)", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
                       <FiUserPlus style={{ color: "#059669", fontSize: "18px" }} />
                       <span>Available Mentors for Course:</span>
-                      <span style={{ color: "var(--primary-color)" }}>{selectedCourse.name}</span>
+                      <span style={{ color: "var(--current-color)" }}>{selectedCourse.name}</span>
                     </h3>
                     <p style={{ margin: "2px 0 0 0", fontSize: "12.5px", color: "var(--text-secondary)" }}>
                       These mentors are qualified to teach this course and can be added to cohort <strong>{selectedCohort.code}</strong>.
@@ -753,7 +763,7 @@ function Mentors() {
                 {availableCourseMentors.length === 0 ? (
                   <div style={{ padding: "36px 20px", textAlign: "center", color: "var(--text-secondary)" }}>
                     <FiCheckCircle style={{ fontSize: "2rem", color: "#10b981", marginBottom: "8px" }} />
-                    <h4 style={{ margin: "0 0 4px 0", color: "var(--text-primary)", fontSize: "15px" }}>All Available Mentors Are Assigned</h4>
+                    <h4 style={{ margin: "0 0 4px 0", color: "var(--text-current)", fontSize: "15px" }}>All Available Mentors Are Assigned</h4>
                     <p style={{ margin: 0, fontSize: "13px" }}>
                       All mentors qualified for "{selectedCourse.name}" are currently assigned to this cohort. To add new mentors, use "Add Mentor" above.
                     </p>
@@ -798,7 +808,7 @@ function Mentors() {
                             </div>
                             <div>
                               <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                                <strong style={{ fontSize: "14.5px", color: "var(--text-primary)" }}>{name}</strong>
+                                <strong style={{ fontSize: "14.5px", color: "var(--text-current)" }}>{name}</strong>
                                 {mentor.expertise && (
                                   <span style={{ fontSize: "11px", background: "rgba(124, 58, 237, 0.1)", color: "#7c3aed", padding: "1px 7px", borderRadius: "10px", fontWeight: 600 }}>
                                     {mentor.expertise}
@@ -900,7 +910,7 @@ function Mentors() {
                     borderRadius: "6px",
                     border: "1px solid var(--border-color)",
                     backgroundColor: "var(--bg-surface)",
-                    color: "var(--text-primary)",
+                    color: "var(--text-current)",
                     fontSize: "13px",
                   }}
                 />
@@ -914,7 +924,7 @@ function Mentors() {
                   borderRadius: "6px",
                   border: "1px solid var(--border-color)",
                   backgroundColor: "var(--bg-surface)",
-                  color: "var(--text-primary)",
+                  color: "var(--text-current)",
                   fontSize: "13px",
                   minWidth: "180px",
                 }}
@@ -975,7 +985,7 @@ function Mentors() {
                                 height: "34px",
                                 borderRadius: "50%",
                                 backgroundColor: "rgba(37, 99, 235, 0.12)",
-                                color: "#2563eb",
+                                color: "var(--primary-color)",
                                 fontWeight: 700,
                                 fontSize: "13px",
                                 display: "flex",
@@ -987,7 +997,7 @@ function Mentors() {
                               {(m.first_name || "M").charAt(0).toUpperCase()}
                             </div>
                             <div>
-                              <strong style={{ color: "var(--text-primary)", display: "block" }}>{name}</strong>
+                              <strong style={{ color: "var(--text-current)", display: "block" }}>{name}</strong>
                               <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
                                 Active Mentor
                               </span>
@@ -1001,12 +1011,14 @@ function Mentors() {
                         </td>
 
                         <td style={{ padding: "12px 18px" }}>
-                          <div style={{ fontWeight: 600, color: "var(--text-primary)" }}>
+                          <div style={{ fontWeight: 600, color: "var(--text-current)" }}>
                             {m.designation || "Mentor"}
                           </div>
-                          <div style={{ fontSize: "11.5px", color: "var(--text-secondary)" }}>
-                            {m.company_name || m.organization || "Independent"}
-                          </div>
+                          {(m.company_name || m.organization) && (
+                            <div style={{ fontSize: "11.5px", color: "var(--text-secondary)" }}>
+                              {m.company_name || m.organization}
+                            </div>
+                          )}
                         </td>
 
                         <td style={{ padding: "12px 18px" }}>
@@ -1052,7 +1064,7 @@ function Mentors() {
                                     fontWeight: 600,
                                   }}
                                 >
-                                  {ch.code}
+                                  {ch.name || ch.code}
                                 </span>
                               ))}
                             </div>
@@ -1063,30 +1075,110 @@ function Mentors() {
                           )}
                         </td>
 
-                        <td style={{ padding: "12px 18px", textAlign: "right" }}>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              // If mentor has courses, pick their first course to jump into assign tab
-                              if (m.courses && m.courses.length > 0) {
-                                const targetCourse = courses.find((c) => String(c.id) === String(m.courses[0].id));
-                                if (targetCourse) setSelectedCourse(targetCourse);
-                              }
-                              setActiveTab("assign");
-                            }}
-                            style={{
-                              padding: "6px 12px",
-                              backgroundColor: "var(--bg-nested)",
-                              color: "var(--primary-color)",
-                              border: "1px solid var(--border-color)",
-                              borderRadius: "6px",
-                              fontSize: "12px",
-                              fontWeight: 600,
-                              cursor: "pointer",
-                            }}
-                          >
-                            Assign to Cohort
-                          </button>
+                        <td style={{ padding: "12px 18px", textAlign: "right", whiteSpace: "nowrap" }}>
+                          <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end" }}>
+                            <Link
+                              to={`/admin/mentor-details/${m.id}`}
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                padding: "6px 12px",
+                                backgroundColor: "rgba(37, 99, 235, 0.08)",
+                                color: "var(--primary-color)",
+                                border: "1px solid rgba(37, 99, 235, 0.2)",
+                                borderRadius: "6px",
+                                fontSize: "12px",
+                                fontWeight: 600,
+                                textDecoration: "none",
+                              }}
+                            >
+                              <FiEye style={{ fontSize: "14px" }} />
+                              View
+                            </Link>
+
+                            <Link
+                              to={`/admin/edit-mentor/${m.id}`}
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                padding: "6px 12px",
+                                backgroundColor: "rgba(245, 158, 11, 0.08)",
+                                color: "#d97706",
+                                border: "1px solid rgba(245, 158, 11, 0.2)",
+                                borderRadius: "6px",
+                                fontSize: "12px",
+                                fontWeight: 600,
+                                textDecoration: "none",
+                              }}
+                            >
+                              <FiEdit style={{ fontSize: "14px" }} />
+                              Edit
+                            </Link>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                // If mentor has courses, pick their first course to jump into assign tab
+                                if (m.courses && m.courses.length > 0) {
+                                  const targetCourse = courses.find((c) => String(c.id) === String(m.courses[0].id));
+                                  if (targetCourse) setSelectedCourse(targetCourse);
+                                }
+                                setActiveTab("assign");
+                                window.scrollTo(0, 0);
+                              }}
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                padding: "6px 12px",
+                                backgroundColor: "var(--bg-nested)",
+                                color: "var(--text-primary)",
+                                border: "1px solid var(--border-color)",
+                                borderRadius: "6px",
+                                fontSize: "12px",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                              }}
+                            >
+                              <FiExternalLink style={{ fontSize: "14px" }} />
+                              Assign
+                            </button>
+                            
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if(window.confirm(`Are you sure you want to revoke mentor access for ${m.first_name || m.email}? They will be demoted to a Student account.`)) {
+                                  // Call API to delete mentor
+                                  apiClient.delete(API_ENDPOINTS.USERS.BY_ID(m.id))
+                                    .then(() => {
+                                      setAllMentors(prev => prev.filter(mentor => mentor.id !== m.id));
+                                      alert("Mentor access revoked successfully.");
+                                    })
+                                    .catch(err => {
+                                      alert("Failed to revoke mentor access: " + (err.response?.data?.error || err.message));
+                                    });
+                                }
+                              }}
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                padding: "6px 12px",
+                                backgroundColor: "rgba(220, 38, 38, 0.08)",
+                                color: "#dc2626",
+                                border: "1px solid rgba(220, 38, 38, 0.2)",
+                                borderRadius: "6px",
+                                fontSize: "12px",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                              }}
+                            >
+                              <FiTrash2 style={{ fontSize: "14px", color: "#dc2626" }} />
+                              Remove
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );

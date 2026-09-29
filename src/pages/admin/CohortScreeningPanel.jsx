@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import apiClient from "../../services/apiClient";
 import { API_ENDPOINTS } from "../../constants/apiEndpoints";
 import { applicationService } from "../../services/applicationService";
@@ -6,6 +6,10 @@ import { examService } from "../../services/examService";
 import { cohortService } from "../../services/cohortService";
 import { Link, useLocation } from "react-router-dom";
 import styles from "./CohortDetails.module.css";
+
+import * as XLSX from "xlsx";
+
+
 import {
   FiClock,
   FiVideo,
@@ -13,6 +17,7 @@ import {
   FiSquare,
   FiCheckCircle,
   FiRefreshCw,
+  FiUpload,
   FiDownload,
   FiCopy,
   FiCheck,
@@ -23,17 +28,23 @@ import {
   FiChevronUp,
 } from "react-icons/fi";
 
-const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal, onResultsSaved }) => {
+const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal, onResultsSaved, onEnrollAll, enrollingEligible, onToggleManageResults }) => {
   const location = useLocation();
   const [questionBanks, setQuestionBanks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [saveProgress, setSaveProgress] = useState("");
 
   // Existing screening state if already scheduled
   const existingScreening = cohort?.pre_screening || cohort?.screening_schedule || cohort?.screening || null;
   const [screening, setScreening] = useState(existingScreening);
+
+  const [unmatchedCandidates, setUnmatchedCandidates] = useState([]);
+  const [showUnmatchedModal, setShowUnmatchedModal] = useState(false);
+
+
 
   // Sync / fetch screening state whenever cohort or cohortId changes
   useEffect(() => {
@@ -59,7 +70,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
   const defaultStartTime = new Date();
   defaultStartTime.setDate(defaultStartTime.getDate() + 1);
   const defaultStartTimeISO = defaultStartTime.toISOString().slice(0, 16);
-  
+
   const defaultEndTime = new Date(defaultStartTime);
   defaultEndTime.setHours(defaultEndTime.getHours() + 1);
   const defaultEndTimeISO = defaultEndTime.toISOString().slice(0, 16);
@@ -93,10 +104,26 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
   const [applications, setApplications] = useState([]);
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState("");
+  const [candidateSearch, setCandidateSearch] = useState("");
   const [editMeetingLink, setEditMeetingLink] = useState(false);
   const [meetingLinkInput, setMeetingLinkInput] = useState("");
   const [savingMeetingLink, setSavingMeetingLink] = useState(false);
 
+
+
+  // Sorting state: field ('name', 'email', 'app_num', 'marks') and direction ('asc' | 'desc')
+  const [sortField, setSortField] = useState("name");
+  const [sortDirection, setSortDirection] = useState("asc");
+
+  const handleSortToggle = (field) => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      // When sorting marks, start high-to-low (desc); for name, start A-Z (asc)
+      setSortDirection(field === "marks" ? "desc" : "asc");
+    }
+  };
   // Derive authoritative live status
   const now = new Date();
   const meetingStarted = Boolean(
@@ -175,7 +202,10 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
   };
 
   const handleStartEditSchedule = async () => {
-    if (isStarted || isEnded) return;
+    if (isActive) {
+      alert("Exam is currently LIVE in progress. End the exam before rescheduling.");
+      return;
+    }
     const toLocalISO = (dStr) => {
       if (!dStr) return "";
       const d = new Date(dStr);
@@ -206,35 +236,35 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
 
     // Look for previous values from screening, existing candidate exams in applications, or cohort
     const firstExam = applications.find((a) => a.screening_exam || a.exam)?.screening_exam ||
-                      applications.find((a) => a.screening_exam || a.exam)?.exam || null;
+      applications.find((a) => a.screening_exam || a.exam)?.exam || null;
 
     const prevDuration = src?.duration_minutes ??
-                         firstExam?.duration_minutes ??
-                         cohort?.pre_screening?.duration_minutes ??
-                         form.duration_minutes ?? 10;
+      firstExam?.duration_minutes ??
+      cohort?.pre_screening?.duration_minutes ??
+      form.duration_minutes ?? 10;
 
     const prevPassPct = src?.pass_percentage ??
-                        firstExam?.pass_percentage ??
-                        cohort?.pre_screening?.pass_percentage ??
-                        form.pass_percentage ?? 40;
+      firstExam?.pass_percentage ??
+      cohort?.pre_screening?.pass_percentage ??
+      form.pass_percentage ?? 40;
 
     const prevQbId = src?.question_bank_id ||
-                     src?.question_bank ||
-                     cohort?.pre_screening?.question_bank_id ||
-                     cohort?.pre_screening?.question_bank ||
-                     form.question_bank_id || "";
+      src?.question_bank ||
+      cohort?.pre_screening?.question_bank_id ||
+      cohort?.pre_screening?.question_bank ||
+      form.question_bank_id || "";
 
     const qbObj = questionBanks.find((b) => String(b.id) === String(prevQbId));
 
     const prevQuestions = src?.total_questions ??
-                          firstExam?.total_questions ??
-                          cohort?.pre_screening?.total_questions ??
-                          qbObj?.total_questions_per_set ??
-                          form.total_questions ?? "";
+      firstExam?.total_questions ??
+      cohort?.pre_screening?.total_questions ??
+      qbObj?.total_questions_per_set ??
+      form.total_questions ?? "";
 
     const prevMeet = src?.meeting_link ||
-                     cohort?.pre_screening?.meeting_link ||
-                     cohort?.meeting_link || "";
+      cohort?.pre_screening?.meeting_link ||
+      cohort?.meeting_link || "";
 
     setEditForm({
       scheduled_at: toLocalISO(src?.scheduled_at || cohort?.pre_screening?.scheduled_at),
@@ -383,7 +413,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
   const loadApplications = async () => {
     if (!cohortId) return;
     try {
-      const data = await applicationService.getApplications({ cohort: cohortId });
+      const data = await applicationService.getApplications({ cohort: cohortId, page_size: 200 });
       let list = Array.isArray(data) ? data : (data?.results || []);
       // If no cohort-assigned applications found yet, fallback to pre-screenings for this cohort
       if (list.length === 0) {
@@ -443,20 +473,34 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
     }
   };
 
+
   const saveScreeningResult = async (app, marksValue = resultMarks[app.id]) => {
-    const exam = app.screening_exam || app.exam || {};
-    if (!exam.id) return;
     const marks = Number(marksValue);
-    const totalMarks = Number(exam.total_marks || screening?.total_questions || 10);
+    const totalMarks = Number(
+      app.screening_exam?.total_marks ||
+      app.exam?.total_marks ||
+      screening?.total_questions ||
+      10
+    );
+
     if (!Number.isFinite(marks) || marks < 0 || marks > totalMarks) {
-      alert(`Enter marks between 0 and ${totalMarks}.`);
-      return;
+      throw new Error(`Marks for ${getCandidateName(app)} must be between 0 and ${totalMarks}.`);
     }
+
     const percentage = totalMarks ? Number(((marks / totalMarks) * 100).toFixed(2)) : 0;
-    const passPercentage = Number(exam.pass_percentage ?? screening?.pass_percentage ?? 40);
+    const passPercentage = Number(
+      app.screening_exam?.pass_percentage ??
+      app.exam?.pass_percentage ??
+      screening?.pass_percentage ??
+      40
+    );
     const expectedQualified = percentage >= passPercentage;
-    setUpdatingAppId(app.id);
-    try {
+    const targetStatus = expectedQualified ? "QUALIFIED" : "REJECTED";
+
+    const exam = app.screening_exam || app.exam;
+
+    // 1. Update or create exam entity
+    if (exam?.id) {
       await apiClient.patch(`/api/exams/${exam.id}/`, {
         marks_obtained: marks,
         total_marks: totalMarks,
@@ -464,39 +508,313 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
         qualified: expectedQualified,
         status: "EVALUATED",
         submitted_at: new Date().toISOString(),
-      });
-      await apiClient.post(API_ENDPOINTS.APPLICATIONS.REPAIR_STATE(app.id), {
-        status: expectedQualified ? "QUALIFIED" : "REJECTED",
-        reason: "Administrator corrected the screening examination result.",
-      });
-      await loadApplications();
-      setSuccessMessage("Screening result updated successfully.");
-    } catch (err) {
-      alert(err.response?.data?.detail || err.response?.data?.error || "Failed to update screening result.");
-    } finally {
-      setUpdatingAppId(null);
+      }).catch((err) => console.warn(`Could not patch exam ${exam.id}:`, err));
+    } else {
+      await apiClient.post(`/api/exams/`, {
+        application: app.id,
+        cohort: cohortId,
+        marks_obtained: marks,
+        total_marks: totalMarks,
+        percentage,
+        qualified: expectedQualified,
+        status: "EVALUATED",
+        submitted_at: new Date().toISOString(),
+      }).catch((err) => console.warn("Direct exam creation not accepted:", err));
     }
+
+    // 2. Persist application status
+    let patched = false;
+    try {
+      const repairUrl = API_ENDPOINTS.APPLICATIONS?.REPAIR_STATE
+        ? API_ENDPOINTS.APPLICATIONS.REPAIR_STATE(app.id)
+        : `/api/applications/${app.id}/repair-state/`;
+
+      await apiClient.post(repairUrl, {
+        status: targetStatus,
+        qualification_score: percentage,
+        marks_obtained: marks,
+        total_marks: totalMarks,
+        qualified: expectedQualified,
+        reason: "Screening examination evaluated by administrator.",
+      });
+      patched = true;
+    } catch (e) {
+      console.warn("repair-state failed, attempting direct application patch:", e);
+    }
+
+    if (!patched) {
+      await apiClient.patch(`/api/applications/${app.id}/`, {
+        status: targetStatus,
+        qualification_score: percentage,
+        marks_obtained: marks,
+        qualified: expectedQualified,
+      });
+    }
+
+    return { id: app.id, status: targetStatus, score: marks, percentage, qualified: expectedQualified };
   };
 
-  const saveAllScreeningResults = async () => {
+  const saveAllScreeningResults = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+
+    // Dirty-check: only process students whose new marks differ from their recorded marks
     const entries = applications
-      .map((app) => ({ app, exam: app.screening_exam || app.exam || {}, marks: resultMarks[app.id] }))
-      .filter(({ exam, marks }) => exam.id && marks !== undefined && marks !== "");
-    if (!entries.length) {
-      alert("Enter marks for at least one candidate before saving.");
+      .map((app) => {
+        const exam = app.screening_exam || app.exam || {};
+        const existingMark = exam.marks_obtained != null ? Number(exam.marks_obtained) : null;
+        const inputMark = resultMarks[app.id] !== undefined && resultMarks[app.id] !== ""
+          ? Number(resultMarks[app.id])
+          : null;
+
+        const isChanged = inputMark !== null && inputMark !== existingMark;
+        return { app, marks: inputMark, isChanged };
+      })
+      .filter(({ isChanged }) => isChanged);
+
+    if (entries.length === 0) {
+      alert("No score changes detected. Everything is already up to date.");
       return;
     }
+
     setUpdatingAppId("all");
-    try {
-      for (const { app, marks } of entries) {
-        await saveScreeningResult(app, marks);
-      }
-      setSuccessMessage("Screening results saved and qualification statuses updated automatically.");
-      onResultsSaved?.();
-    } finally {
-      setUpdatingAppId(null);
+    setSaveProgress(`Saving 0 / ${entries.length}...`);
+
+    let saved = 0;
+    let qualifiedCount = 0;
+    let rejectedCount = 0;
+    const failedErrors = [];
+    const successfulUpdates = new Map();
+
+    const BATCH_SIZE = 5;
+    for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+      const currentBatch = entries.slice(i, i + BATCH_SIZE);
+
+      await Promise.all(
+        currentBatch.map(async ({ app, marks }) => {
+          try {
+            const result = await saveScreeningResult(app, marks);
+            saved++;
+            if (result.qualified) {
+              qualifiedCount++;
+            } else {
+              rejectedCount++;
+            }
+            successfulUpdates.set(app.id, result);
+          } catch (err) {
+            failedErrors.push(`${getCandidateName(app)}: ${err.response?.data?.detail || err.message}`);
+          }
+        })
+      );
+
+      setSaveProgress(`Saving ${saved} / ${entries.length}...`);
     }
+
+    // Update local state for modified entries
+    setApplications((prevApps) =>
+      prevApps.map((app) => {
+        const update = successfulUpdates.get(app.id);
+        if (!update) return app;
+        return {
+          ...app,
+          status: update.status,
+          qualification_score: update.percentage,
+          screening_exam: {
+            ...(app.screening_exam || {}),
+            marks_obtained: update.score,
+            percentage: update.percentage,
+            qualified: update.qualified,
+            status: "EVALUATED",
+          },
+        };
+      })
+    );
+
+    setUpdatingAppId(null);
+    setSaveProgress("");
+
+    alert(
+      `Saved ${saved} changed record(s):\n- Qualified: ${qualifiedCount}`
+    );
+
+    if (typeof onSync === "function") onSync();
+    onResultsSaved?.();
   };
+
+
+
+
+  const fileInputRef = useRef(null);
+
+
+  const handleCopyUnmatched = () => {
+    if (!unmatchedCandidates.length) return;
+    const textToCopy = [
+      "Name\tEmail\tScore",
+      ...unmatchedCandidates.map((c) => `${c.name}\t${c.email}\t${c.marks}`)
+    ].join("\n");
+
+    navigator.clipboard.writeText(textToCopy);
+    alert("Copied unmatched candidates to clipboard!");
+  };
+
+  const handleDownloadUnmatchedExcel = () => {
+    if (!unmatchedCandidates.length) return;
+    const ws = XLSX.utils.json_to_sheet(
+      unmatchedCandidates.map((c) => ({
+        Name: c.name,
+        Email: c.email,
+        "Score in File": c.marks,
+      }))
+    );
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Unmatched Candidates");
+    XLSX.writeFile(wb, `Unmatched_Candidates_${cohort?.code || cohortId || "Cohort"}.xlsx`);
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+        if (!jsonData || jsonData.length === 0) {
+          alert("The uploaded spreadsheet appears to be empty.");
+          return;
+        }
+
+        // Collect all possible candidate email variants
+        const cohortEmailSet = new Set();
+        applications.forEach((app) => {
+          const stu = typeof app.student === "object" ? app.student : null;
+          const user = stu?.user || {};
+
+          [
+            app.candidate_email,
+            app.student_email,
+            app.student_details?.email,
+            stu?.email,
+            user.email,
+            getCandidateEmail(app),
+          ].forEach((email) => {
+            if (email && email !== "—") {
+              cohortEmailSet.add(String(email).trim().toLowerCase());
+            }
+          });
+        });
+
+        const emailScoreMap = {};
+        const missingInCohort = [];
+
+        jsonData.forEach((row) => {
+          const keys = Object.keys(row);
+
+          // 1. Email Header (matches "Email", "student_email", etc.)
+          const emailKey = keys.find((k) =>
+            /^(email|student_email|candidate_email|mail)$/i.test(k.trim())
+          ) || keys.find((k) => /email/i.test(k.trim()));
+
+          // 2. Name Header (matches "Name", "Student Name", etc.)
+          const nameKey = keys.find((k) =>
+            /^(name|student_name|candidate_name|full_name)$/i.test(k.trim())
+          ) || keys.find((k) => /name/i.test(k.trim()) && !/course|cohort/i.test(k.trim()));
+
+          // 3. TARGET: "Student Score" or "Score" (EXCLUDE "Max Score", "Total", "Percentage")
+          let marksKey = keys.find((k) =>
+            /^(student\s*score|score\s*obtained|marks\s*obtained|obtained\s*marks|marks)$/i.test(k.trim())
+          );
+
+          // Fallback if not titled exactly "Student Score"
+          if (!marksKey) {
+            marksKey = keys.find((k) =>
+              /score|mark/i.test(k.trim()) &&
+              !/max|total|out_of|out of|percentage|remark|q1|q2|question/i.test(k.trim())
+            );
+          }
+
+          if (emailKey && row[emailKey] !== "") {
+            const rawEmail = String(row[emailKey]).trim();
+            const email = rawEmail.toLowerCase();
+            const rawMarks = marksKey ? String(row[marksKey]).trim() : "";
+
+            // Clean up formats if formatted as "14/15" or "14.0"
+            const parsedMarks = rawMarks.includes("/") ? rawMarks.split("/")[0].trim() : rawMarks;
+            const candidateName = nameKey && row[nameKey] ? String(row[nameKey]).trim() : "Unknown";
+
+            if (cohortEmailSet.has(email)) {
+              if (parsedMarks !== "" && !isNaN(Number(parsedMarks))) {
+                emailScoreMap[email] = Number(parsedMarks);
+              }
+            } else {
+              // Add to unmatched list with their correct Student Score
+              missingInCohort.push({
+                name: candidateName,
+                email: rawEmail,
+                marks: parsedMarks !== "" && !isNaN(Number(parsedMarks)) ? Number(parsedMarks) : (parsedMarks || "—"),
+              });
+            }
+          }
+        });
+
+        // Autofill matching candidates into the input state
+        let matchCount = 0;
+        const updatedMarks = { ...resultMarks };
+
+        applications.forEach((app) => {
+          const stu = typeof app.student === "object" ? app.student : null;
+          const user = stu?.user || {};
+          const possibleEmails = [
+            getCandidateEmail(app),
+            app.candidate_email,
+            app.student_email,
+            app.student_details?.email,
+            stu?.email,
+            user.email,
+          ]
+            .filter(Boolean)
+            .map((e) => String(e).trim().toLowerCase());
+
+          const matchedEmail = possibleEmails.find((e) => emailScoreMap[e] !== undefined);
+          if (matchedEmail) {
+            updatedMarks[app.id] = emailScoreMap[matchedEmail];
+            matchCount++;
+          }
+        });
+
+        setResultMarks(updatedMarks);
+
+        // Feedback messages
+        if (matchCount > 0) {
+          setSuccessMessage(`Auto-filled marks for ${matchCount} matching candidate(s). Review and click "Save Results".`);
+          setTimeout(() => setSuccessMessage(""), 5000);
+        } else if (missingInCohort.length === 0) {
+          alert("No valid matching email records found in this file.");
+        }
+
+        // Show modal for entries not found in this cohort
+        if (missingInCohort.length > 0) {
+          setUnmatchedCandidates(missingInCohort);
+          setShowUnmatchedModal(true);
+        }
+      } catch (err) {
+        console.error("Failed to parse file:", err);
+        alert("Failed to parse the file. Please ensure it is a valid .xlsx or .csv file.");
+      } finally {
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
+
+
+
 
   const [exportFilter, setExportFilter] = useState("ALL");
 
@@ -551,7 +869,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
       return;
     }
     const cohortName = cohort?.name || cohort?.code || cohortId;
-    const headers = ["Student Name", "Email", "Application ID", "Course", "Cohort", "Status", "Score", "Percentage"];
+    const headers = ["Student Name", "Email", "Application ID", "Course", "Cohort", "Status", "Student Score", "Max Marks", "Percentage"];
     const rows = filteredApps.map((app) => {
       const name = getCandidateName(app);
       const email = getCandidateEmail(app);
@@ -568,13 +886,14 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
       );
       const isAbsentOrUnsubmitted = isEnded && !hasSubmitted;
 
+      const totalMarks = exam.total_marks || screening?.total_questions || 15;
       let finalStatus = app.status || "PENDING";
-      let score = exam.marks_obtained != null ? exam.marks_obtained : (app.qualification_score != null ? app.qualification_score : "");
+      let studentScore = exam.marks_obtained != null ? exam.marks_obtained : (app.qualification_score != null ? app.qualification_score : "");
       let pct = exam.percentage != null ? `${exam.percentage}%` : (app.qualification_score != null ? `${app.qualification_score}%` : "");
 
       if (isAbsentOrUnsubmitted) {
         finalStatus = "REJECTED";
-        score = 0;
+        studentScore = 0;
         pct = "0%";
       } else if (isEnrolled) {
         finalStatus = "ENROLLED";
@@ -591,7 +910,8 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
         `"${app.course_name || app.course_title || ""}"`,
         `"${cohortName}"`,
         `"${finalStatus}"`,
-        `"${score}"`,
+        `"${studentScore}"`,
+        `"${totalMarks}"`,
         `"${pct}"`,
       ];
     });
@@ -643,7 +963,7 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
     if (bankTotalQuestions && form.total_questions && Number(form.total_questions) > bankTotalQuestions) {
       return alert(`Total questions cannot exceed the selected bank total of ${bankTotalQuestions}.`);
     }
-    
+
     const start = new Date(form.scheduled_at);
     const end = new Date(form.end_time);
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
@@ -689,9 +1009,9 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
 
       setError(
         err.response?.data?.detail ||
-          err.response?.data?.error ||
-          err.message ||
-          "Failed to schedule screening exam."
+        err.response?.data?.error ||
+        err.message ||
+        "Failed to schedule screening exam."
       );
     } finally {
       setBusy(false);
@@ -776,6 +1096,9 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
     );
   }
 
+
+
+
   if (isCohortStarted) {
     return (
       <div
@@ -854,6 +1177,71 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
       </div>
     );
   }
+
+
+
+  // Filter on-screen candidates based on the dropdown selection
+  // Filter on-screen candidates by dropdown status and search term
+  // Filter on-screen candidates by dropdown status and search term, then sort
+  const displayedApplications = applications
+    .filter((app) => {
+      // 1. Text Search Filter (name, email, application number)
+      if (candidateSearch && candidateSearch.trim()) {
+        const q = candidateSearch.toLowerCase().trim();
+        const name = (getCandidateName(app) || "").toLowerCase();
+        const email = (getCandidateEmail(app) || "").toLowerCase();
+        const appNum = String(app.application_number || app.id || "").toLowerCase();
+
+        if (!name.includes(q) && !email.includes(q) && !appNum.includes(q)) {
+          return false;
+        }
+      }
+
+      // 2. Dropdown Status Filter (ALL / PASSED / FAILED)
+      if (exportFilter === "ALL") return true;
+
+      const exam = app.screening_exam || app.exam || {};
+      const isEnrolled = ["COHORT_ASSIGNED", "IN_PROGRESS", "TRAINING", "INTERNSHIP_ASSIGNED", "SOFT_SKILLS", "COMPLETED"].includes(app.status);
+      const isQual = isEnrolled || app.status === "QUALIFIED" || exam.qualified === true;
+
+      const hasSubmitted = Boolean(
+        exam.submitted_at ||
+        exam.status === "EVALUATED" ||
+        exam.status === "SUBMITTED" ||
+        isQual ||
+        app.status === "NOT_QUALIFIED" ||
+        app.status === "REJECTED" ||
+        exam.qualified === false ||
+        app.qualification_score != null ||
+        exam.marks_obtained != null
+      );
+
+      const isAbsentOrUnsubmitted = isEnded && !hasSubmitted;
+      const isNotQual =
+        app.status === "NOT_QUALIFIED" ||
+        app.status === "REJECTED" ||
+        exam.qualified === false ||
+        isAbsentOrUnsubmitted;
+
+      if (exportFilter === "PASSED") return isQual;
+      if (exportFilter === "FAILED") return isNotQual;
+      return true;
+    })
+
+    .sort((a, b) => {
+      if (sortField === "marks") {
+        const markA = Number(resultMarks[a.id] ?? a.screening_exam?.marks_obtained ?? a.exam?.marks_obtained ?? a.qualification_score ?? -1);
+        const markB = Number(resultMarks[b.id] ?? b.screening_exam?.marks_obtained ?? b.exam?.marks_obtained ?? b.qualification_score ?? -1);
+        return sortDirection === "asc" ? markA - markB : markB - markA;
+      }
+
+      // Default sorting: Candidate Name
+      const nameA = (getCandidateName(a) || "").toLowerCase();
+      const nameB = (getCandidateName(b) || "").toLowerCase();
+      if (nameA < nameB) return sortDirection === "asc" ? -1 : 1;
+      if (nameA > nameB) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
 
   return (
     <div
@@ -1031,8 +1419,8 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
                 onChange={(e) => {
                   const val = e.target.value;
                   const selectedBank = questionBanks.find(b => String(b.id) === String(val));
-                  setForm({ 
-                    ...form, 
+                  setForm({
+                    ...form,
                     question_bank_id: val,
                     total_questions: selectedBank ? (selectedBank.total_questions_per_set || selectedBank.total_questions || selectedBank.questions_count || selectedBank.questions?.length || form.total_questions) : form.total_questions
                   });
@@ -1742,18 +2130,47 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
                   value={exportFilter}
                   onChange={(e) => setExportFilter(e.target.value)}
                   style={{
-                    padding: "10px 12px",
+                    padding: "9px 14px",
                     borderRadius: "8px",
-                    border: "1px solid var(--border-color)",
-                    backgroundColor: "var(--bg-input)",
-                    color: "var(--text-primary)",
-                    fontSize: "14px",
+                    border: "1.5px solid var(--border-color)",
+                    backgroundColor: "var(--bg-card, var(--bg-surface, #1e293b))",
+                    color: "var(--text-primary, #f8fafc)",
+                    fontSize: "13px",
+                    fontWeight: 600,
                     outline: "none",
+                    cursor: "pointer",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
                   }}
                 >
-                  <option value="ALL">All Candidates</option>
-                  <option value="PASSED">Passed Only</option>
-                  <option value="FAILED">Failed Only</option>
+                  <option
+                    value="ALL"
+                    style={{
+                      backgroundColor: "var(--bg-card, var(--bg-surface, #1e293b))",
+                      color: "var(--text-primary, #f8fafc)",
+                    }}
+                  >
+                    All Candidates
+                  </option>
+                  <option
+                    value="PASSED"
+                    style={{
+                      backgroundColor: "var(--bg-card, var(--bg-surface, #1e293b))",
+                      color: "#4ade80",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Passed Only
+                  </option>
+                  <option
+                    value="FAILED"
+                    style={{
+                      backgroundColor: "var(--bg-card, var(--bg-surface, #1e293b))",
+                      color: "#f87171",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Failed Only
+                  </option>
                 </select>
                 <button
                   type="button"
@@ -1984,6 +2401,15 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
             {/* Candidate Results Table */}
             {applications.length > 0 && (
               <div style={{ marginTop: "10px" }}>
+                {/* Hidden file input for Excel upload */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  accept=".xlsx, .xls, .csv"
+                  style={{ display: "none" }}
+                />
+
                 <div
                   style={{
                     display: "flex",
@@ -1991,161 +2417,554 @@ const CohortScreeningPanel = ({ cohortId, cohort, onSync, manageResultsExternal,
                     alignItems: "center",
                     marginBottom: "12px",
                     flexWrap: "wrap",
-                    gap: "10px",
+                    gap: "12px",
                   }}
                 >
+                  {/* Left: Accordion Toggle */}
                   <button
                     type="button"
                     onClick={() => setShowResults((value) => !value)}
-                    style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: 0, background: "none", color: "var(--text-primary)", fontWeight: 700, cursor: "pointer", padding: 0 }}
-                  >
-                    {showResults ? <FiChevronUp /> : <FiChevronDown />} Candidates ({applications.length})
-                  </button>
-                </div>
-                {showResults && <div
-                  style={{
-                    overflowX: "auto",
-                    WebkitOverflowScrolling: "touch",
-                    border: "1px solid var(--border-color)",
-                    borderRadius: "8px",
-                    width: "100%",
-                  }}
-                >
-                  {manageResults && <div style={{ padding: "14px 15px", borderBottom: "1px solid var(--border-color)", background: "var(--bg-surface)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" }}><strong>Edit Results</strong><button type="button" onClick={saveAllScreeningResults} disabled={updatingAppId === "all"} style={{ background: "var(--primary-color)", color: "#fff", border: 0, borderRadius: "6px", padding: "8px 13px", fontWeight: 700, cursor: "pointer" }}>{updatingAppId === "all" ? "Saving..." : "Save Results"}</button></div>}
-                  <table
                     style={{
-                      width: "100%",
-                      minWidth: "780px",
-                      borderCollapse: "collapse",
-                      fontSize: "14px",
-                      textAlign: "left",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      border: 0,
+                      background: "none",
+                      color: "var(--text-primary)",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      padding: 0,
+                      fontSize: "15px",
                     }}
                   >
-                    <thead>
-                      <tr
+                    {showResults ? <FiChevronUp /> : <FiChevronDown />} Candidates ({displayedApplications.length}
+                    {displayedApplications.length !== applications.length ? ` / ${applications.length}` : ""})
+                  </button>
+
+                  {/* Right side controls: Search Bar FIRST -> Edit Results -> Enroll All at RIGHT CORNER */}
+                  {showResults && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                      {/* 1. Search Bar First */}
+                      <div style={{ position: "relative", minWidth: "260px" }}>
+                        <input
+                          type="text"
+                          placeholder="Search candidate name, email, app #..."
+                          value={candidateSearch}
+                          onChange={(e) => setCandidateSearch(e.target.value)}
+                          style={{
+                            width: "100%",
+                            padding: "8px 30px 8px 12px",
+                            borderRadius: "6px",
+                            border: "1px solid var(--border-color)",
+                            backgroundColor: "var(--bg-card, var(--bg-surface))",
+                            color: "var(--text-primary)",
+                            fontSize: "13px",
+                            outline: "none",
+                            boxSizing: "border-box",
+                          }}
+                        />
+                        {candidateSearch && (
+                          <button
+                            type="button"
+                            onClick={() => setCandidateSearch("")}
+                            style={{
+                              position: "absolute",
+                              right: "8px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              background: "none",
+                              border: "none",
+                              color: "var(--text-muted)",
+                              cursor: "pointer",
+                              fontSize: "13px",
+                              padding: "2px",
+                            }}
+                            title="Clear search"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+
+                      {/* 2. Edit Results Button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (typeof onToggleManageResults === "function") {
+                            onToggleManageResults();
+                          }
+                        }}
                         style={{
-                          backgroundColor: "var(--bg-surface)",
-                          borderBottom: "1px solid var(--border-color)",
+                          padding: "8px 14px",
+                          borderRadius: "6px",
+                          border: "none",
+                          backgroundColor: manageResults ? "var(--bg-nested, #475569)" : "var(--primary-color, #2563eb)",
+                          color: "#ffffff",
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
                         }}
                       >
-                        <th style={{ padding: "10px 15px" }}>Candidate</th>
-                        <th style={{ padding: "10px 15px" }}>Email</th>
-                        <th style={{ padding: "10px 15px" }}>Application #</th>
-                        <th style={{ padding: "10px 15px" }}>Result / Status</th>
-                        {manageResults && <th style={{ padding: "10px 15px", textAlign: "right" }}>Marks</th>}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {applications.map((app) => {
-                        const name = getCandidateName(app);
-                        const email = getCandidateEmail(app);
-                        const exam = app.screening_exam || app.exam || {};
-                        const isEnrolled = ["COHORT_ASSIGNED", "IN_PROGRESS", "TRAINING", "INTERNSHIP_ASSIGNED", "SOFT_SKILLS", "COMPLETED"].includes(app.status);
-                        const isQual = !isEnrolled && (app.status === "QUALIFIED" || exam.qualified === true);
-                        const hasSubmitted = Boolean(
-                          exam.submitted_at ||
-                          exam.status === "EVALUATED" ||
-                          exam.status === "SUBMITTED" ||
-                          isQual ||
-                          app.status === "NOT_QUALIFIED" ||
-                          app.status === "REJECTED" ||
-                          exam.qualified === false ||
-                          app.qualification_score != null ||
-                          exam.marks_obtained != null
-                        );
-                        const isAbsentOrUnsubmitted = isEnded && !hasSubmitted;
-                        const isNotQual =
-                          app.status === "NOT_QUALIFIED" ||
-                          app.status === "REJECTED" ||
-                          exam.qualified === false ||
-                          isAbsentOrUnsubmitted;
-                        const isExamTaken = hasSubmitted;
-                        const scoreDisplay = isAbsentOrUnsubmitted
-                          ? `0/${exam.total_marks || screening?.total_questions || 10} (0%)`
-                          : exam.marks_obtained != null
-                          ? `${exam.marks_obtained}/${exam.total_marks || 10} (${exam.percentage ?? ""}%${exam.percentage ? "" : ""})`
-                          : app.qualification_score != null
-                          ? `${app.qualification_score}%`
-                          : null;
+                        {manageResults ? "Close Edit Results" : "Edit Results"}
+                      </button>
 
-                        return (
-                          <tr
-                            key={app.id}
-                            style={{ borderBottom: "1px solid var(--border-color)" }}
+                      {/* 3. Enroll All Candidates Button (Far Right Corner) */}
+                      {onEnrollAll && (
+                        <button
+                          type="button"
+                          onClick={onEnrollAll}
+                          disabled={enrollingEligible}
+                          style={{
+                            padding: "8px 16px",
+                            borderRadius: "6px",
+                            border: "1.5px solid #16a34a",
+                            backgroundColor: "rgba(22, 163, 74, 0.12)",
+                            color: "#16a34a",
+                            fontSize: "13px",
+                            fontWeight: 700,
+                            cursor: enrollingEligible ? "wait" : "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                          }}
+                        >
+                          <FiCheckCircle size={15} />
+                          {enrollingEligible ? "Enrolling..." : "Enroll All Eligible"}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Candidate Table Container */}
+                {showResults && (
+                  <div
+                    style={{
+                      overflowX: "auto",
+                      WebkitOverflowScrolling: "touch",
+                      border: "1px solid var(--border-color)",
+                      borderRadius: "8px",
+                      width: "100%",
+                    }}
+                  >
+                    {/* Edit Results Toolbar with Upload Excel right before Save Results */}
+                    {manageResults && (
+                      <div
+                        style={{
+                          padding: "12px 16px",
+                          borderBottom: "1px solid var(--border-color)",
+                          background: "var(--bg-surface)",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          gap: "12px",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                          Enter marks directly in the <strong>Marks</strong> column below, or upload an Excel sheet.
+                        </span>
+
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          {/* Upload Marks Excel Button (Immediately before Save Results) */}
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            style={{
+                              background: "var(--bg-nested)",
+                              color: "var(--text-primary)",
+                              border: "1px solid var(--border-color)",
+                              borderRadius: "6px",
+                              padding: "8px 14px",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              fontSize: "13px",
+                            }}
+                            title="Upload candidate exam scores spreadsheet (.xlsx, .csv)"
                           >
-                            <td style={{ padding: "10px 15px", fontWeight: "600", color: "var(--text-primary)" }}>{name}</td>
-                            <td
+                            <FiUpload size={14} /> Upload Marks Excel
+                          </button>
+
+                          {/* Save Results Button */}
+                          <button
+                            type="button"
+                            onClick={saveAllScreeningResults}
+                            disabled={updatingAppId === "all"}
+                            style={{
+                              background: "#9333ea",
+                              color: "#fff",
+                              border: 0,
+                              borderRadius: "6px",
+                              padding: "8px 18px",
+                              fontWeight: 700,
+                              cursor: updatingAppId === "all" ? "not-allowed" : "pointer",
+                              fontSize: "13px",
+                              boxShadow: "0 2px 4px rgba(147, 51, 234, 0.25)",
+                            }}
+                          >
+                            {updatingAppId === "all" ? (saveProgress || "Saving...") : "Save Results"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <table
+                      style={{
+                        width: "100%",
+                        minWidth: "780px",
+                        borderCollapse: "collapse",
+                        fontSize: "14px",
+                        textAlign: "left",
+                      }}
+                    >
+                      <thead>
+                        <tr
+                          style={{
+                            backgroundColor: "var(--bg-surface)",
+                            borderBottom: "1px solid var(--border-color)",
+                            userSelect: "none",
+                          }}
+                        >
+                          {/* Sortable Candidate Name Header */}
+                          <th
+                            onClick={() => handleSortToggle("name")}
+                            style={{
+                              padding: "10px 15px",
+                              cursor: "pointer",
+                              color: sortField === "name" ? "var(--primary-color)" : "inherit",
+                              fontWeight: sortField === "name" ? 700 : 600,
+                            }}
+                            title="Sort by Candidate Name"
+                          >
+                            Candidate {sortField === "name" ? (sortDirection === "asc" ? "▲" : "▼") : "↕"}
+                          </th>
+
+                          {/* Plain Email Header */}
+                          <th style={{ padding: "10px 15px" }}>Email</th>
+
+                          {/* Plain Application # Header */}
+                          <th style={{ padding: "10px 15px" }}>Application #</th>
+
+                          {/* Sortable Result / Status Header */}
+                          <th
+                            onClick={() => handleSortToggle("marks")}
+                            style={{
+                              padding: "10px 15px",
+                              cursor: "pointer",
+                              color: sortField === "marks" ? "var(--primary-color)" : "inherit",
+                              fontWeight: sortField === "marks" ? 700 : 600,
+                            }}
+                            title="Sort by Result / Score"
+                          >
+                            Result / Status {sortField === "marks" ? (sortDirection === "asc" ? "▲" : "▼") : "↕"}
+                          </th>
+
+                          {/* Sortable Marks Column Header */}
+                          {manageResults && (
+                            <th
+                              onClick={() => handleSortToggle("marks")}
                               style={{
                                 padding: "10px 15px",
+                                textAlign: "right",
+                                cursor: "pointer",
+                                color: sortField === "marks" ? "var(--primary-color)" : "inherit",
+                                fontWeight: sortField === "marks" ? 700 : 600,
+                              }}
+                              title="Sort by Marks"
+                            >
+                              Marks {sortField === "marks" ? (sortDirection === "asc" ? "▲" : "▼") : "↕"}
+                            </th>
+                          )}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {displayedApplications.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={manageResults ? 5 : 4}
+                              style={{
+                                padding: "30px",
+                                textAlign: "center",
                                 color: "var(--text-secondary)",
+                                fontSize: "14px",
                               }}
                             >
-                              {email}
+                              No candidates found matching "<strong>{candidateSearch}</strong>".
                             </td>
-                            <td
-                              style={{
-                                padding: "10px 15px",
-                                fontFamily: "monospace",
-                              }}
-                            >
-                              {app.application_number || app.id.slice(0, 8)}
-                            </td>
-                            <td style={{ padding: "10px 15px" }}>
-                              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                                <div>
-                                  <span
-                                    style={{
-                                      padding: "4px 10px",
-                                      borderRadius: "12px",
-                                      fontSize: "12px",
-                                      fontWeight: "700",
-                                      backgroundColor: isQual
-                                        ? "#dcfce7"
-                                        : isNotQual
-                                        ? "#fee2e2"
-                                        : isExamTaken
-                                        ? "#fef3c7"
-                                        : "var(--bg-surface)",
-                                      color: isQual
-                                        ? "#166534"
-                                        : isNotQual
-                                        ? "#991b1b"
-                                        : isExamTaken
-                                        ? "#92400e"
-                                        : "var(--text-muted)",
-                                      border: `1px solid ${
-                                        isQual
-                                          ? "#bbf7d0"
-                                          : isNotQual
-                                          ? "#fecaca"
-                                          : isExamTaken
-                                          ? "#fde68a"
-                                          : "var(--border-color)"
-                                      }`,
-                                    }}
-                                  >
-                                    {isEnrolled ? "ENROLLED" : isQual ? "QUALIFIED" : isAbsentOrUnsubmitted || isNotQual ? "REJECTED" : (app.status || "EXAM_PENDING")}
-                                  </span>
-                                </div>
-                                {scoreDisplay && (
-                                  <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 500 }}>
-                                    Score: <strong style={{ color: "var(--text-primary)" }}>{scoreDisplay}</strong>
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            {manageResults && <td style={{ padding: "10px 15px", textAlign: "right" }}><input type="number" min="0" max={exam.total_marks || screening?.total_questions || 10} value={resultMarks[app.id] ?? exam.marks_obtained ?? ""} onChange={(e) => setResultMarks((current) => ({ ...current, [app.id]: e.target.value }))} aria-label={`Marks for ${name}`} style={{ width: "86px", padding: "7px 8px", border: "1px solid var(--border-color)", borderRadius: "6px" }} /></td>}
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>}
+                        ) : (
+                          displayedApplications.map((app) => {
+                            const name = getCandidateName(app);
+                            const email = getCandidateEmail(app);
+                            const exam = app.screening_exam || app.exam || {};
+                            const isEnrolled = ["COHORT_ASSIGNED", "IN_PROGRESS", "TRAINING", "INTERNSHIP_ASSIGNED", "SOFT_SKILLS", "COMPLETED"].includes(app.status);
+                            const isQual = !isEnrolled && (app.status === "QUALIFIED" || exam.qualified === true);
+                            const hasSubmitted = Boolean(
+                              exam.submitted_at ||
+                              exam.status === "EVALUATED" ||
+                              exam.status === "SUBMITTED" ||
+                              isQual ||
+                              app.status === "NOT_QUALIFIED" ||
+                              app.status === "REJECTED" ||
+                              exam.qualified === false ||
+                              app.qualification_score != null ||
+                              exam.marks_obtained != null
+                            );
+                            const isAbsentOrUnsubmitted = isEnded && !hasSubmitted;
+                            const isNotQual =
+                              app.status === "NOT_QUALIFIED" ||
+                              app.status === "REJECTED" ||
+                              exam.qualified === false ||
+                              isAbsentOrUnsubmitted;
+                            const isExamTaken = hasSubmitted;
+                            const scoreDisplay = isAbsentOrUnsubmitted
+                              ? `0/${exam.total_marks || screening?.total_questions || 10} (0%)`
+                              : exam.marks_obtained != null
+                                ? `${exam.marks_obtained}/${exam.total_marks || 10} (${exam.percentage ?? ""}%${exam.percentage ? "" : ""})`
+                                : app.qualification_score != null
+                                  ? `${app.qualification_score}%`
+                                  : null;
+
+                            return (
+                              <tr
+                                key={app.id}
+                                style={{ borderBottom: "1px solid var(--border-color)" }}
+                              >
+                                <td style={{ padding: "10px 15px", fontWeight: "600", color: "var(--text-primary)" }}>{name}</td>
+                                <td
+                                  style={{
+                                    padding: "10px 15px",
+                                    color: "var(--text-secondary)",
+                                  }}
+                                >
+                                  {email}
+                                </td>
+                                <td
+                                  style={{
+                                    padding: "10px 15px",
+                                    fontFamily: "monospace",
+                                  }}
+                                >
+                                  {app.application_number || app.id.slice(0, 8)}
+                                </td>
+                                <td style={{ padding: "10px 15px" }}>
+                                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                                    <div>
+                                      <span
+                                        style={{
+                                          padding: "4px 10px",
+                                          borderRadius: "12px",
+                                          fontSize: "12px",
+                                          fontWeight: "700",
+                                          backgroundColor: isQual
+                                            ? "#dcfce7"
+                                            : isNotQual
+                                              ? "#fee2e2"
+                                              : isExamTaken
+                                                ? "#fef3c7"
+                                                : "var(--bg-surface)",
+                                          color: isQual
+                                            ? "#166534"
+                                            : isNotQual
+                                              ? "#991b1b"
+                                              : isExamTaken
+                                                ? "#92400e"
+                                                : "var(--text-muted)",
+                                          border: `1px solid ${isQual
+                                            ? "#bbf7d0"
+                                            : isNotQual
+                                              ? "#fecaca"
+                                              : isExamTaken
+                                                ? "#fde68a"
+                                                : "var(--border-color)"
+                                            }`,
+                                        }}
+                                      >
+                                        {isEnrolled ? "ENROLLED" : isQual ? "QUALIFIED" : isAbsentOrUnsubmitted || isNotQual ? "REJECTED" : (app.status || "EXAM_PENDING")}
+                                      </span>
+                                    </div>
+                                    {scoreDisplay && (
+                                      <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 500 }}>
+                                        Score: <strong style={{ color: "var(--text-primary)" }}>{scoreDisplay}</strong>
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                                {manageResults && (
+                                  <td style={{ padding: "10px 15px", textAlign: "right" }}>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      max={exam.total_marks || screening?.total_questions || 10}
+                                      value={resultMarks[app.id] ?? exam.marks_obtained ?? ""}
+                                      onChange={(e) => setResultMarks((current) => ({ ...current, [app.id]: e.target.value }))}
+                                      aria-label={`Marks for ${name}`}
+                                      style={{ width: "86px", padding: "7px 8px", border: "1px solid var(--border-color)", borderRadius: "6px" }}
+                                    />
+                                  </td>
+                                )}
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
           </div>
         )}
       </div>
+
+      {/* Unmatched Candidates Modal */}
+      {showUnmatchedModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+            padding: "20px",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "var(--bg-card, #ffffff)",
+              borderRadius: "12px",
+              padding: "24px",
+              maxWidth: "680px",
+              width: "100%",
+              maxHeight: "85vh",
+              display: "flex",
+              flexDirection: "column",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+              border: "1px solid var(--border-color)",
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <h3 style={{ margin: 0, color: "#dc2626", display: "flex", alignItems: "center", gap: "8px" }}>
+                <FiAlertCircle /> Unmatched Candidates ({unmatchedCandidates.length})
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowUnmatchedModal(false)}
+                style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "var(--text-secondary)" }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <p style={{ margin: "0 0 16px", fontSize: "14px", color: "var(--text-secondary)" }}>
+              The following entries from your file were <strong>not found</strong> in this cohort's candidate list:
+            </p>
+
+            {/* Table */}
+            <div
+              style={{
+                overflowY: "auto",
+                border: "1px solid var(--border-color)",
+                borderRadius: "8px",
+                flex: 1,
+                minHeight: "180px",
+              }}
+            >
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", textAlign: "left" }}>
+                <thead>
+                  <tr style={{ backgroundColor: "var(--bg-surface)", borderBottom: "1px solid var(--border-color)" }}>
+                    <th style={{ padding: "10px 14px" }}>Name</th>
+                    <th style={{ padding: "10px 14px" }}>Email</th>
+                    <th style={{ padding: "10px 14px", textAlign: "right" }}>Score in File</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {unmatchedCandidates.map((c, i) => (
+                    <tr key={i} style={{ borderBottom: "1px solid var(--border-color)" }}>
+                      <td style={{ padding: "10px 14px", fontWeight: "600", color: "var(--text-primary)" }}>{c.name}</td>
+                      <td style={{ padding: "10px 14px", color: "var(--text-secondary)" }}>{c.email}</td>
+                      <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: "600" }}>{c.marks}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Action Buttons: Copy, Download Excel, Close */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "16px", gap: "10px", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  type="button"
+                  onClick={handleCopyUnmatched}
+                  style={{
+                    padding: "8px 14px",
+                    backgroundColor: "var(--bg-nested)",
+                    color: "var(--text-primary)",
+                    border: "1px solid var(--border-color)",
+                    borderRadius: "6px",
+                    fontWeight: "600",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <FiCopy size={14} /> Copy List
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadUnmatchedExcel}
+                  style={{
+                    padding: "8px 14px",
+                    backgroundColor: "#059669",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontWeight: "600",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <FiDownload size={14} /> Download Excel
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowUnmatchedModal(false)}
+                style={{
+                  padding: "8px 20px",
+                  backgroundColor: "var(--primary-color)",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

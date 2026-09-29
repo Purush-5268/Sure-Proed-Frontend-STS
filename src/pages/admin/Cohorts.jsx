@@ -221,26 +221,45 @@ function Cohorts() {
                   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)"
                 }}
               >
-                {cohort.pre_screening?.scheduled_at && !["CANCELLED", "FAILED"].includes(String(cohort.pre_screening.status || "").toUpperCase()) && (
-                  <span
-                    style={{
-                      alignSelf: "flex-start",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      padding: "5px 10px",
-                      borderRadius: "999px",
-                      backgroundColor: "#dcfce7",
-                      color: "#166534",
-                      border: "1px solid #86efac",
-                      fontSize: "12px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    <span aria-hidden="true" style={{ width: "7px", height: "7px", borderRadius: "50%", backgroundColor: "#16a34a" }} />
-                    Screening Scheduled
-                  </span>
-                )}
+                {(() => {
+  const ps = cohort.pre_screening;
+  if (!ps?.scheduled_at) return null;
+  
+  const statusStr = String(ps.status || "").toUpperCase();
+  if (["CANCELLED", "FAILED"].includes(statusStr)) return null;
+
+  const now = new Date();
+  const isMeetingEnded = ps.end_time && now >= new Date(ps.end_time);
+
+  if (isMeetingEnded) {
+    return null;
+  }
+
+  return (
+    <span
+      style={{
+        alignSelf: "flex-start",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "6px",
+        padding: "5px 10px",
+        borderRadius: "999px",
+        backgroundColor: "#dcfce7",
+        color: "#166534",
+        border: "1px solid #86efac",
+        fontSize: "12px",
+        fontWeight: 700,
+      }}
+    >
+      <span aria-hidden="true" style={{ width: "7px", height: "7px", borderRadius: "50%", backgroundColor: "#16a34a" }} />
+      Screening Scheduled
+    </span>
+  );
+})()}
+
+
+
+
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
                   <div>
                     <h3 style={{ margin: "0", fontSize: "16px", color: "var(--text-primary)", fontWeight: "700" }}>
@@ -303,7 +322,7 @@ function Cohorts() {
                         )}
                       </div>
                     )}
-                    {(cohort.status === "OPEN" || cohort.application_end_date) && (
+                    {cohort.status === "OPEN" && (
                       <button onClick={() => handleStop(cohort.id)} className={styles.stopBtn} style={{ flex: "1 1 100%" }}>Stop Applications</button>
                     )}
                   </div>

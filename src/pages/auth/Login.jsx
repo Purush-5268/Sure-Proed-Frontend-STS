@@ -257,7 +257,7 @@ function Login() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2>Welcome back to SURE ProEd</h2>
+            <h2>Hearty Welcome to SURE ProEd</h2>
             <p>Access your dashboard to manage your learning journey, internships, and schedules.</p>
             <div style={{ position: "relative", width: "100%", maxWidth: "420px", margin: "0 auto" }}>
               <motion.div animate={{ y: [0, -10, 0], x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }} style={{ position: "absolute", top: "5%", left: "-3%", color: "var(--accent-color)", fontSize: "2rem", opacity: 0.6, zIndex: 0 }}>

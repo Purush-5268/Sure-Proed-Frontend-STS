@@ -310,5 +310,8 @@ export const API_ENDPOINTS = {
     MARK_READ: (groupType) => `/api/communications/conversations/${groupType}/read/`,
     UNREAD_SUMMARY: "/api/communications/unread-summary/",
     ATTACHMENT_DOWNLOAD: (id) => `/api/communications/attachments/${id}/download/`,
+    CSR_REQUESTS: "/api/communications/csr-requests/",
+    ADMIN_CSR_REQUESTS: "/api/communications/admin/csr-requests/",
+    ADMIN_CSR_REQUEST_BY_ID: (id) => `/api/communications/admin/csr-requests/${id}/`,
   },
 };

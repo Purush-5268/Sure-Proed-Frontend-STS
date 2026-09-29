@@ -37,7 +37,7 @@ function ProfileSettings() {
             <label>Phone Number</label>
             <input
               type="tel"
-              defaultValue="+91 9876543210"
+              defaultValue=""
             />
           </div>
 

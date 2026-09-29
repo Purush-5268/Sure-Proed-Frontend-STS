@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import styles from "./Footer.module.css";
-import { FaLinkedin, FaEnvelope, FaPhoneAlt } from "react-icons/fa";
+import { FaLinkedin, FaEnvelope, FaGithub } from "react-icons/fa";
 
 function Footer() {
   return (
@@ -19,27 +19,24 @@ function Footer() {
             />
             SURE ProEd
           </div>
-          <p className={styles.tagline}>
-            Next-Gen Learning Platform. Learn, Build, and Get Career-Ready.
-          </p>
         </div>
 
         <div className={styles.socialSection}>
           <h3>Connect with us</h3>
           <div className={styles.socialLinks}>
             {/* UPDATE EMAIL LINK BELOW */}
-            <a href="mailto:support@sureproed.com" aria-label="Email Us" className={styles.socialLink}>
+            <a href="mailto:suretrust2020@gmail.com" aria-label="Email Us" className={styles.socialLink}>
               <FaEnvelope />
             </a>
             
-            {/* UPDATE PHONE LINK BELOW */}
-            <a href="tel:+919876543210" aria-label="Call Us" className={styles.socialLink}>
-              <FaPhoneAlt />
+            {/* UPDATE LINKEDIN URL BELOW */}
+            <a href="https://www.linkedin.com/company/sure-trust-official" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer" className={styles.socialLink}>
+              <FaLinkedin />
             </a>
 
-            {/* UPDATE LINKEDIN URL BELOW */}
-            <a href="https://linkedin.com/company/sure-proed" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer" className={styles.socialLink}>
-              <FaLinkedin />
+            {/* GITHUB LINK BELOW */}
+            <a href="https://github.com/sure-trust" aria-label="GitHub" target="_blank" rel="noopener noreferrer" className={styles.socialLink}>
+              <FaGithub />
             </a>
           </div>
         </div>

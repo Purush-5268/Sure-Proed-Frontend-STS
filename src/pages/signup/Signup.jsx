@@ -396,7 +396,7 @@ function Signup() {
           {/* Phone */}
           <div className={styles.inputGroup}>
             <label>Phone Number *</label>
-            <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required placeholder="9876543210" />
+            <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required placeholder="Phone Number" />
           </div>
 
           {/* Gender + DOB */}

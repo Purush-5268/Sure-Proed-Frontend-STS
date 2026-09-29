@@ -6,7 +6,7 @@ import styles from "./ContributionTab.module.css";
 import { FaClock, FaChalkboardTeacher, FaUserGraduate, FaChartLine } from "react-icons/fa";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-export default function ContributionTab() {
+export default function ContributionTab({ userId, isAdmin = false }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,7 +15,10 @@ export default function ContributionTab() {
     let isMounted = true;
     const loadContributions = async () => {
       try {
-        const res = await apiClient.get('/api/volunteers/me/contributions/');
+        const endpoint = userId 
+          ? `/api/volunteers/${userId}/contributions/` 
+          : '/api/volunteers/me/contributions/';
+        const res = await apiClient.get(endpoint);
         if (isMounted) setData(res.data);
       } catch (err) {
         if (isMounted) setError(err.response?.data?.detail || "Failed to load contributions.");
@@ -25,7 +28,7 @@ export default function ContributionTab() {
     };
     loadContributions();
     return () => { isMounted = false; };
-  }, []);
+  }, [userId]);
 
   if (loading) {
     return (
@@ -112,7 +115,7 @@ export default function ContributionTab() {
             {data.cohorts.length > 0 ? (
               <div className={styles.cohortList}>
                 {data.cohorts.slice().sort((a,b) => (a.name || a.code || a.title || "").localeCompare(b.name || b.code || b.title || "")).map(c => (
-                  <Link to={`/trustee/volunteer/cohorts/${c.id}`} key={c.id} className={styles.cohortItem}>
+                  <Link to={isAdmin ? `/admin/cohort-details/${c.id}` : `/trustee/volunteer/cohorts/${c.id}`} key={c.id} className={styles.cohortItem}>
                     <div className={styles.cohortMain}>
                        <span className={styles.cohortCode}>{c.code}</span>
                        <span className={styles.cohortName}>{c.name}</span>

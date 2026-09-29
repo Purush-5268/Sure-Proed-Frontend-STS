@@ -98,7 +98,6 @@ import { cohortChatService } from "../../services/cohortChatService";
 import styles from "./CohortDetails.module.css";
 import SkeletonLoader from "../../components/common/SkeletonLoader";
 import CohortScreeningPanel from "./CohortScreeningPanel";
-import ManualExaminationForm from "./ManualExaminationForm";
 import { FiMessageCircle, FiEdit2, FiArrowLeft, FiUser, FiCalendar, FiUsers, FiVideo, FiCheckCircle, FiXCircle, FiTrash2, FiDownload } from "react-icons/fi";
 
 function CohortDetails() {
@@ -117,7 +116,6 @@ function CohortDetails() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [bulkGenStatus, setBulkGenStatus] = useState("");
   const [manageScreeningResults, setManageScreeningResults] = useState(false);
-  const [screeningMode, setScreeningMode] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [deletingCohort, setDeletingCohort] = useState(false);
@@ -146,46 +144,70 @@ function CohortDetails() {
     }
   };
 
+
   const handleEnrollAllEligible = async () => {
-    if (!window.confirm("Enroll all qualified eligible students in this cohort?")) return;
+    if (!window.confirm("Enroll all qualified students in this cohort?")) return;
     setEnrollingEligible(true);
+
     try {
       const data = await applicationService.getApplications({ cohort: id, page_size: 200 });
       const applications = Array.isArray(data) ? data : data?.results || [];
-      const eligible = applications.filter((app) =>
-        (app.qualified === true || ["QUALIFIED", "WAITLISTED"].includes(app.status)) &&
-        !["COHORT_ASSIGNED", "IN_PROGRESS", "TRAINING", "INTERNSHIP_ASSIGNED", "SOFT_SKILLS", "COMPLETED"].includes(app.status)
-      );
+
+      // Exclude any student already enrolled or past enrollment
+      const enrolledStatuses = [
+        "COHORT_ASSIGNED",
+        "IN_PROGRESS",
+        "TRAINING",
+        "INTERNSHIP_ASSIGNED",
+        "SOFT_SKILLS",
+        "COMPLETED",
+      ];
+
+      // Target strictly qualified candidates needing assignment
+      const eligible = applications.filter((app) => {
+        const isQualified = app.status === "QUALIFIED" || (app.qualified === true && app.status !== "REJECTED");
+        return isQualified && !enrolledStatuses.includes(app.status);
+      });
+
       if (!eligible.length) {
-        alert("No qualified eligible students are available to enroll.");
+        alert("No newly qualified students are waiting to be enrolled.");
         return;
       }
-      const outcomes = await Promise.allSettled(
-        eligible.map(async (app) => {
-          try {
-            return await apiClient.post(`/api/applications/${app.id}/assign-cohort/`, { cohort_id: id });
-          } catch (error) {
-            const code = error.response?.data?.code;
-            if (!["QUALIFICATION_REQUIRED", "INTERVIEW_REQUIRED", "ROLE_VERIFICATION_REQUIRED"].includes(code)) {
-              throw error;
+
+      // Process in controlled batches to avoid overwhelming the server
+      const BATCH_SIZE = 5;
+      let enrolled = 0;
+      let blocked = 0;
+
+      for (let i = 0; i < eligible.length; i += BATCH_SIZE) {
+        const batch = eligible.slice(i, i + BATCH_SIZE);
+
+        await Promise.all(
+          batch.map(async (app) => {
+            try {
+              // Direct state repair avoids the 409 assign-cohort collision completely
+              await apiClient.post(`/api/applications/${app.id}/repair-state/`, {
+                status: "COHORT_ASSIGNED",
+                reason: "Administrator enrolled student after screening qualification.",
+              });
+              enrolled++;
+            } catch (err) {
+              console.error(`Failed enrolling student ${app.id}:`, err);
+              blocked++;
             }
-            return apiClient.post(`/api/applications/${app.id}/repair-state/`, {
-              status: "COHORT_ASSIGNED",
-              reason: "Administrator enrolled the student after the qualified screening result.",
-            });
-          }
-        })
-      );
-      const enrolled = outcomes.filter((outcome) => outcome.status === "fulfilled" && outcome.value?.status === 200).length;
-      const blocked = outcomes.length - enrolled;
+          })
+        );
+      }
+
       await loadCohortData();
-      alert(`${enrolled} student${enrolled === 1 ? "" : "s"} enrolled.${blocked ? ` ${blocked} could not be enrolled because eligibility requirements are incomplete.` : ""}`);
+      alert(`Enrolled ${enrolled} student(s).${blocked ? ` (${blocked} could not be updated)` : ""}`);
     } catch (err) {
       alert(err.response?.data?.error || "Failed to enroll eligible students.");
     } finally {
       setEnrollingEligible(false);
     }
   };
+
 
   const handleBulkGenerateOfferLetters = async () => {
     if (!window.confirm("Generate Offer Letters for all eligible students in this cohort?")) return;
@@ -439,120 +461,19 @@ function CohortDetails() {
         );
       })()}
 
-      {/* Cohort Screening Panel - Hidden once cohort start time has arrived */}
-      {isCohortStarted ? (
-        <div style={{
-          margin: "24px 0",
-          padding: "20px 24px",
-          borderRadius: "16px",
-          background: "var(--bg-card)",
-          border: "1px solid var(--border-color)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: "16px",
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)"
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-            <div style={{
-              width: "44px",
-              height: "44px",
-              borderRadius: "12px",
-              background: "rgba(16, 185, 129, 0.12)",
-              color: "#10b981",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "22px"
-            }}>
-              <FiCheckCircle />
-            </div>
-            <div>
-              <h4 style={{ margin: "0 0 4px 0", fontSize: "16px", fontWeight: "700", color: "var(--text-primary)" }}>
-                Cohort Training Phase is Active
-              </h4>
-              <p style={{ margin: 0, fontSize: "13px", color: "var(--text-secondary)", maxWidth: "600px" }}>
-                The cohort start date has arrived. The pre-screening schedule and candidate results table are archived from this cohort view. You can review and download the screening results anytime from the Exams section.
-              </p>
-            </div>
-          </div>
-          <Link
-            to="/admin/exams"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "10px 18px",
-              backgroundColor: "var(--primary-color)",
-              color: "#ffffff",
-              borderRadius: "8px",
-              fontWeight: "600",
-              fontSize: "13px",
-              textDecoration: "none",
-            }}
-          >
-            <FiDownload /> Download Screening Results in Exams
-          </Link>
-        </div>
-      ) : cohort.pre_screening ? (
-        <CohortScreeningPanel
-          cohortId={id}
-          cohort={cohort}
-          onSync={loadCohortData}
-          manageResultsExternal={manageScreeningResults}
-          onResultsSaved={() => setManageScreeningResults(false)}
-        />
-      ) : screeningMode === "AUTOMATED" ? (
-        <CohortScreeningPanel cohortId={id} cohort={cohort} onSync={loadCohortData} />
-      ) : screeningMode === "MANUAL" ? (
-        <ManualExaminationForm
-          onSuccess={loadCohortData}
-          initialCohortId={id}
-          initialCourseId={typeof cohort.course === "object" ? cohort.course?.id : cohort.course}
-          onEnrollAllCandidates={handleEnrollAllEligible}
-          autoOpen
-          hideTrigger
-        />
-      ) : (
-        <div style={{ marginTop: "24px", padding: "24px", border: "1px solid var(--border-color)", borderRadius: "12px", background: "var(--bg-nested)" }}>
-          <h3 style={{ margin: "0 0 6px", color: "var(--text-primary)" }}>Screening Examination</h3>
-          <p style={{ margin: "0 0 18px", color: "var(--text-secondary)" }}>Choose how this cohort's screening examination will be recorded.</p>
-          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-            <button type="button" disabled={eligibleApplicants === 0} onClick={() => setScreeningMode("AUTOMATED")} style={{ padding: "11px 16px", border: 0, borderRadius: "8px", background: eligibleApplicants === 0 ? "#cbd5e1" : "var(--primary-color)", color: eligibleApplicants === 0 ? "#64748b" : "var(--button-primary-text)", fontWeight: 700, cursor: eligibleApplicants === 0 ? "not-allowed" : "pointer" }}>Schedule Automated Screening</button>
-            <button type="button" disabled={eligibleApplicants === 0} onClick={() => setScreeningMode("MANUAL")} style={{ padding: "11px 16px", border: "1px solid #16a34a", borderRadius: "8px", background: eligibleApplicants === 0 ? "#e2e8f0" : "#dcfce7", color: eligibleApplicants === 0 ? "#64748b" : "#166534", fontWeight: 700, cursor: eligibleApplicants === 0 ? "not-allowed" : "pointer" }}>Manual Screening</button>
-          </div>
-          {eligibleApplicants === 0 && <p style={{ margin: "14px 0 0", color: "#b91c1c", fontSize: "13px" }}>Add at least one applied or eligible student to this cohort before scheduling an examination.</p>}
-        </div>
-      )}
 
-      {cohort.pre_screening && (
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", margin: "16px 0 24px" }}>
-          <button
-            type="button"
-            onClick={() => setManageScreeningResults((value) => !value)}
-            style={{ padding: "11px 18px", border: 0, borderRadius: "8px", background: "var(--primary-color)", color: "#fff", fontWeight: 700, cursor: "pointer" }}
-          >
-            {manageScreeningResults ? "Close Edit Results" : "Edit Results"}
-          </button>
-          <button
-            type="button"
-            onClick={handleEnrollAllEligible}
-            disabled={enrollingEligible}
-            style={{ padding: "11px 18px", border: "1px solid #16a34a", borderRadius: "8px", background: "#dcfce7", color: "#166534", fontWeight: 700, cursor: enrollingEligible ? "wait" : "pointer" }}
-          >
-            {enrollingEligible ? "Enrolling..." : "Enroll All Eligible Students"}
-          </button>
-        </div>
-      )}
+      {/* Screening Panel */}
+      <CohortScreeningPanel
+        cohortId={id}
+        cohort={cohort}
+        onSync={loadCohortData}
+        manageResultsExternal={manageScreeningResults}
+        onResultsSaved={() => setManageScreeningResults(false)}
+        onEnrollAll={handleEnrollAllEligible}
+        enrollingEligible={enrollingEligible}
+        onToggleManageResults={() => setManageScreeningResults((prev) => !prev)}
+      />
 
-      {!cohort.pre_screening && screeningMode === null && false && (
-        <ManualExaminationForm
-          onSuccess={loadCohortData}
-          initialCohortId={id}
-          initialCourseId={typeof cohort.course === "object" ? cohort.course?.id : cohort.course}
-        />
-      )}
 
       {/* Dynamic Timeline */}
       {cohort.start_date && (
